@@ -156,12 +156,12 @@ public class CvIngestionService {
               "email": "string or null",
               "location": "string or null",
               "yearsOfExperience": number or null,
-              "skills": ["string"],
-              "experiences": [{"company":"string","role":"string","startDate":"string","endDate":"string or null","description":"string","technologies":["string"]}],
+              "skills": [{"id":"string (slug)","name":"string","level":number (1-5)}],
+              "experiences": [{"id":"string (slug)","jobTitle":"string","company":"string","startDate":"string","endDate":"string or null","current":boolean,"description":"string","achievements":["string"]}],
               "preferredRoles": ["string"],
-              "languages": ["string"],
-              "education": ["string"],
-              "certifications": ["string"]
+              "languages": [{"id":"string (slug)","name":"string","level":"string"}],
+              "education": [{"id":"string (slug)","degree":"string","school":"string","startDate":"string","endDate":"string or null","description":"string"}],
+              "certifications": [{"id":"string (slug)","name":"string","issuer":"string","date":"string"}]
             }
 
             CV content:
@@ -173,7 +173,7 @@ public class CvIngestionService {
         try {
             return objectMapper.readValue(json, CandidateProfileDto.class);
         } catch (JsonProcessingException e) {
-            log.error("Failed to parse profile extraction: {}", e.getMessage());
+            log.error("Failed to parse profile extraction: {}. JSON was: {}", e.getMessage(), json);
             return new CandidateProfileDto(null, null, null, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
         }
     }

@@ -25,6 +25,7 @@ export class DashboardComponent implements OnInit {
   loading = signal(true);
 
   ngOnInit(): void {
+    console.log("init")
     this.service.getProfile().subscribe({
       next: p => {
         this.profile.set(p);
