@@ -107,7 +107,24 @@ public class JobCopilotSearchResource {
     private void appendJsonList(StringBuilder sb, String json, String prefix) {
         if (json == null || json.isBlank()) return;
         try {
-            List<String> list = objectMapper.readValue(json, new TypeReference<>() {});
+            List<String> list;
+            if (json.trim().startsWith("[{\"")) {
+                // New structured format (SkillDto, etc.)
+                if (prefix.toLowerCase().contains("skills")) {
+                    List<nc.opt.aiassistant.service.jobcopilot.dto.SkillDto> skillList = objectMapper.readValue(
+                        json,
+                        new com.fasterxml.jackson.core.type.TypeReference<>() {}
+                    );
+                    list = skillList.stream().map(nc.opt.aiassistant.service.jobcopilot.dto.SkillDto::name).toList();
+                } else {
+                    // Fallback or handle other objects if needed
+                    list = List.of();
+                }
+            } else {
+                // Old simple string list
+                list = objectMapper.readValue(json, new TypeReference<>() {});
+            }
+
             if (!list.isEmpty()) {
                 sb.append(prefix).append(String.join(", ", list)).append(". ");
             }

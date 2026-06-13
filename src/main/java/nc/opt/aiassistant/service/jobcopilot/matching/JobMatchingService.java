@@ -14,6 +14,7 @@ import nc.opt.aiassistant.domain.UserPreference;
 import nc.opt.aiassistant.repository.jobcopilot.UserPreferenceRepository;
 import nc.opt.aiassistant.service.jobcopilot.dto.JobOfferDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.SkillDto;
 import nc.opt.aiassistant.service.reranker.RerankerService;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -130,9 +131,20 @@ public class JobMatchingService {
     private Set<String> parseSkills(String json) {
         if (json == null || json.isBlank()) return Set.of();
         try {
-            List<String> list = objectMapper.readValue(json, new TypeReference<>() {});
-            return list.stream().map(String::toLowerCase).collect(Collectors.toSet());
+            // Check if it's the new structured format or the old string list
+            if (json.trim().startsWith("[{\"")) {
+                List<SkillDto> list = objectMapper.readValue(json, new TypeReference<>() {});
+                return list.stream()
+                    .map(SkillDto::name)
+                    .filter(java.util.Objects::nonNull)
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+            } else {
+                List<String> list = objectMapper.readValue(json, new TypeReference<>() {});
+                return list.stream().map(String::toLowerCase).collect(Collectors.toSet());
+            }
         } catch (Exception e) {
+            log.warn("Failed to parse skills JSON: {}", json);
             return Set.of();
         }
     }
