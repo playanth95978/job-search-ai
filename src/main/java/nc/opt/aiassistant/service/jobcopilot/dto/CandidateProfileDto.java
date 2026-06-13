@@ -1,16 +1,24 @@
 package nc.opt.aiassistant.service.jobcopilot.dto;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public record CandidateProfileDto(
+    UUID id,
+    String userId,
     String fullName,
     String email,
     String location,
     Integer yearsOfExperience,
-    List<String> skills,
+    List<SkillDto> skills,
     List<ExperienceDto> experiences,
     List<String> preferredRoles,
-    List<String> languages,
-    List<String> education,
-    List<String> certifications
+    List<LanguageDto> languages,
+    List<EducationDto> education,
+    List<CertificationDto> certifications,
+    String rawMarkdown,
+    String cvFilename,
+    Instant createdAt,
+    Instant updatedAt
 ) {}

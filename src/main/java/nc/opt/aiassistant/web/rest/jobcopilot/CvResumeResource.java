@@ -3,9 +3,16 @@ package nc.opt.aiassistant.web.rest.jobcopilot;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import nc.opt.aiassistant.domain.CandidateProfile;
+import nc.opt.aiassistant.domain.JobOffer;
+import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
+import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.jobcopilot.CvResumeService;
+import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.ResumeDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.ResumeVersionDto;
+import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 public class CvResumeResource {
 
     private final CvResumeService cvResumeService;
+    private final CandidateProfileRepository candidateProfileRepository;
+    private final CandidateProfileMapper candidateProfileMapper;
 
     @GetMapping("/resume")
     public ResponseEntity<ResumeDto> getResume() {
@@ -55,4 +64,15 @@ public class CvResumeResource {
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/resume/candidate-profile")
+    public ResponseEntity<CandidateProfileDto> getCandidateProfile() {
+        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return candidateProfileRepository
+            .findByUserId(userId)
+            .map(candidateProfileMapper::toDto)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
 }

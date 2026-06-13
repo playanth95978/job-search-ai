@@ -61,6 +61,13 @@ export class CvBuilderComponent {
       }
     });
 
+    effect(() => {
+      const profile = this.profile.value();
+      if(profile!== undefined){
+        //this.store.load(profile.resume);
+      }
+    });
+
     // Debounced backend auto-save on any change (after initial load).
     effect(onCleanup => {
       const resume = this.store.resume();

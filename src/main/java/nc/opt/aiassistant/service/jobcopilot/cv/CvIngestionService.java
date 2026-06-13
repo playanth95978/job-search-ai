@@ -13,6 +13,7 @@ import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
 import nc.opt.aiassistant.service.pdf.MistralOCRProcessService;
 import nc.opt.aiassistant.service.pdf.VectorPDFService;
+import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
@@ -33,19 +34,22 @@ public class CvIngestionService {
     private final CandidateProfileRepository profileRepository;
     private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
+    private final CandidateProfileMapper candidateProfileMapper;
 
     public CvIngestionService(
         MistralOCRProcessService ocrService,
         VectorPDFService vectorPDFService,
         CandidateProfileRepository profileRepository,
         @Qualifier("mistralAiChatModel") ChatModel chatModel,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        CandidateProfileMapper candidateProfileMapper
     ) {
         this.ocrService = ocrService;
         this.vectorPDFService = vectorPDFService;
         this.profileRepository = profileRepository;
         this.chatClient = ChatClient.builder(chatModel).build();
         this.objectMapper = objectMapper;
+        this.candidateProfileMapper = candidateProfileMapper;
     }
 
     /** Ingests a CV file: OCR → markdown → chunks → embeddings → profile extraction. */
@@ -170,7 +174,7 @@ public class CvIngestionService {
             return objectMapper.readValue(json, CandidateProfileDto.class);
         } catch (JsonProcessingException e) {
             log.error("Failed to parse profile extraction: {}", e.getMessage());
-            return new CandidateProfileDto(null, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+            return new CandidateProfileDto(null, null, null, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
         }
     }
 
@@ -184,25 +188,10 @@ public class CvIngestionService {
     }
 
     CandidateProfile saveProfile(CandidateProfileDto dto, String markdown, String filename, String userId) {
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(new CandidateProfile());
+        CandidateProfile profile = candidateProfileMapper.toEntity(dto);
         profile.setUserId(userId);
-        profile.setFullName(dto.fullName());
-        profile.setEmail(dto.email());
-        profile.setLocation(dto.location());
-        profile.setYearsOfExperience(dto.yearsOfExperience());
         profile.setRawMarkdown(markdown);
         profile.setCvFilename(filename);
-
-        try {
-            profile.setSkills(objectMapper.writeValueAsString(dto.skills()));
-            profile.setExperiences(objectMapper.writeValueAsString(dto.experiences()));
-            profile.setPreferredRoles(objectMapper.writeValueAsString(dto.preferredRoles()));
-            profile.setLanguages(objectMapper.writeValueAsString(dto.languages()));
-            profile.setEducation(objectMapper.writeValueAsString(dto.education()));
-            profile.setCertifications(objectMapper.writeValueAsString(dto.certifications()));
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize profile fields: {}", e.getMessage());
-        }
 
         return profileRepository.save(profile);
     }
