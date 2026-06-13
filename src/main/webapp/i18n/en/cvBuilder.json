@@ -1,0 +1,75 @@
+{
+  "cvBuilder": {
+    "title": "CV Builder",
+    "saved": "Saved",
+    "sections": {
+      "personal": "Personal information",
+      "summary": "Professional summary",
+      "experiences": "Experience",
+      "education": "Education",
+      "skills": "Skills",
+      "languages": "Languages",
+      "projects": "Projects",
+      "certifications": "Certifications"
+    },
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "headline": "Headline / target role",
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "website": "Website",
+      "summaryPlaceholder": "Describe your profile and goals in a few sentences…",
+      "jobTitle": "Job title",
+      "company": "Company",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "current": "Current position",
+      "description": "Description",
+      "achievements": "Achievements (one per line)",
+      "degree": "Degree",
+      "school": "School",
+      "skill": "Skill",
+      "language": "Language",
+      "level": "Level",
+      "projectName": "Project name",
+      "url": "Link",
+      "technologies": "Technologies (comma separated)",
+      "certName": "Certification",
+      "issuer": "Issuer",
+      "date": "Date"
+    },
+    "actions": {
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "toggle": "Show / hide",
+      "undo": "Undo",
+      "redo": "Redo",
+      "addExperience": "Add experience",
+      "addEducation": "Add education",
+      "addSkill": "Add skill",
+      "addLanguage": "Add language",
+      "addProject": "Add project",
+      "addCertification": "Add certification"
+    },
+    "templates": {
+      "modern": "Modern",
+      "professional": "Professional",
+      "minimalist": "Minimalist"
+    },
+    "theme": {
+      "primary": "Primary color",
+      "secondary": "Secondary color",
+      "font": "Font",
+      "fontSize": "Font size"
+    },
+    "export": {
+      "pdf": "Export / print to PDF",
+      "json": "Export as JSON",
+      "import": "Import JSON"
+    }
+  }
+}

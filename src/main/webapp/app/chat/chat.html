@@ -1,0 +1,27 @@
+<div class="chat-page">
+  <aside class="chat-sidebar">
+    <jhi-chat-history />
+  </aside>
+
+  <section class="chat-main">
+    @if (hasSelection()) {
+      <div class="chat-placeholder">
+        <div class="chat-placeholder-icon">
+          <fa-icon icon="comments" size="2x" />
+        </div>
+        <h2 jhiTranslate="chat.conversation.title">Conversation</h2>
+        <p class="text-secondary" jhiTranslate="chat.conversation.placeholder">Cette conversation sera bientôt disponible.</p>
+      </div>
+    } @else {
+      <div class="chat-placeholder">
+        <div class="chat-placeholder-icon">
+          <fa-icon icon="comments" size="2x" />
+        </div>
+        <h2 jhiTranslate="chat.empty.title">Démarrez une nouvelle conversation</h2>
+        <p class="text-secondary" jhiTranslate="chat.empty.subtitle">
+          Sélectionnez une conversation dans l'historique ou posez votre première question.
+        </p>
+      </div>
+    }
+  </section>
+</div>

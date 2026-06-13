@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Added the entity Conversation.
+    -->
+    <changeSet id="20260328083915-1" author="jhipster">
+        <createTable tableName="conversation">
+            <column name="id" type="${uuidType}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="created_at" type="${datetimeType}">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_message_at" type="${datetimeType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="summary" type="${clobType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="metadata" type="${clobType}">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+        <dropDefaultValue tableName="conversation" columnName="created_at" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="conversation" columnName="last_message_at" columnDataType="${datetimeType}"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,153 @@
+package nc.opt.aiassistant;
+
+import jakarta.annotation.PostConstruct;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import nc.opt.aiassistant.config.ApplicationProperties;
+import nc.opt.aiassistant.config.CRLFLogConverter;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.model.ollama.autoconfigure.OllamaEmbeddingAutoConfiguration;
+import org.springframework.ai.vectorstore.pgvector.autoconfigure.PgVectorStoreAutoConfiguration;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;
+import org.springframework.core.env.Environment;
+import tech.jhipster.config.DefaultProfileUtil;
+import tech.jhipster.config.JHipsterConstants;
+
+@SpringBootApplication(exclude = { OllamaEmbeddingAutoConfiguration.class, PgVectorStoreAutoConfiguration.class })
+@EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class })
+public class JobSearchAiApp {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JobSearchAiApp.class);
+
+    private final Environment env;
+
+    public JobSearchAiApp(Environment env) {
+        this.env = env;
+    }
+
+    /**
+     * Initializes job-search-ai.
+     * <p>
+     * Spring profiles can be configured with a program argument --spring.profiles.active=your-active-profile
+     * <p>
+     * You can find more information on how profiles work with JHipster on <a href="https://www.jhipster.tech/profiles/">https://www.jhipster.tech/profiles/</a>.
+     */
+    @PostConstruct
+    public void initApplication() {
+        Collection<String> activeProfiles = List.of(env.getActiveProfiles());
+        if (
+            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
+            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
+        ) {
+            LOG.error(
+                "You have misconfigured your application! It should not run " + "with both the 'dev' and 'prod' profiles at the same time."
+            );
+        }
+        if (
+            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
+            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_CLOUD)
+        ) {
+            LOG.error(
+                "You have misconfigured your application! It should not " + "run with both the 'dev' and 'cloud' profiles at the same time."
+            );
+        }
+        downloadOnnxModelIfAbsent();
+    }
+
+    private void downloadOnnxModelIfAbsent() {
+        Path modelDir = Path.of("scripts/onnxmodel");
+        Path modelFile = modelDir.resolve("model.onnx");
+        if (Files.exists(modelFile)) {
+            LOG.info("ONNX model already present, skipping download.");
+            return;
+        }
+        try {
+            Files.createDirectories(modelDir);
+            String repo = "onnx-community/bge-reranker-v2-m3-ONNX";
+            String baseUrl = "https://huggingface.co/" + repo + "/resolve/main";
+
+            // Download model
+            downloadFile(baseUrl + "/onnx/model_int8.onnx?download=true", modelFile);
+
+            // Download tokenizer and config files
+            String[] files = { "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "config.json" };
+            for (String file : files) {
+                downloadFile(baseUrl + "/" + file + "?download=true", modelDir.resolve(file));
+            }
+
+            LOG.info("ONNX model and configuration files downloaded successfully.");
+        } catch (Exception e) {
+            LOG.error("Failed to download ONNX model", e);
+        }
+    }
+
+    private void downloadFile(String url, Path targetPath) throws Exception {
+        LOG.info("Downloading from {} to {}...", url, targetPath);
+        try (InputStream in = URI.create(url).toURL().openStream(); FileOutputStream out = new FileOutputStream(targetPath.toFile())) {
+            in.transferTo(out);
+        }
+    }
+
+    /**
+     * Main method, used to run the application.
+     *
+     * @param args the command line arguments.
+     */
+    public static void main(String[] args) {
+        var app = new SpringApplication(JobSearchAiApp.class);
+        DefaultProfileUtil.addDefaultProfile(app);
+        Environment env = app.run(args).getEnvironment();
+        logApplicationStartup(env);
+    }
+
+    private static void logApplicationStartup(Environment env) {
+        String protocol = Optional.ofNullable(env.getProperty("server.ssl.key-store"))
+            .map(key -> "https")
+            .orElse("http");
+        String applicationName = env.getProperty("spring.application.name");
+        String serverPort = env.getProperty("server.port");
+        String contextPath = Optional.ofNullable(env.getProperty("server.servlet.context-path"))
+            .filter(StringUtils::isNotBlank)
+            .orElse("/");
+        var hostAddress = "localhost";
+        try {
+            hostAddress = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            LOG.warn("The host name could not be determined, using `localhost` as fallback");
+        }
+        LOG.info(
+            CRLFLogConverter.CRLF_SAFE_MARKER,
+            """
+
+            ----------------------------------------------------------
+            \tApplication '{}' is running! Access URLs:
+            \tLocal: \t\t{}://localhost:{}{}
+            \tExternal: \t{}://{}:{}{}
+            \tProfile(s): \t{}
+            ----------------------------------------------------------""",
+            applicationName,
+            protocol,
+            serverPort,
+            contextPath,
+            protocol,
+            hostAddress,
+            serverPort,
+            contextPath,
+            env.getActiveProfiles().length == 0 ? env.getDefaultProfiles() : env.getActiveProfiles()
+        );
+    }
+}

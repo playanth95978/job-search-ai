@@ -1,0 +1,308 @@
+@let r = store.resume();
+
+<!-- Personal information (fixed, top) -->
+<section class="cv-section">
+  <header class="cv-section-head">
+    <button type="button" class="cv-collapse" (click)="toggleCollapse('personal')">
+      <fa-icon [icon]="isCollapsed('personal') ? 'chevron-right' : 'chevron-left'" />
+    </button>
+    <h3 jhiTranslate="cvBuilder.sections.personal">Informations personnelles</h3>
+  </header>
+  @if (!isCollapsed('personal')) {
+    <div class="cv-section-body">
+      <div class="cv-grid-2">
+        <label>
+          <span jhiTranslate="cvBuilder.fields.firstName">Prénom</span>
+          <input [ngModel]="r.personal.firstName" (ngModelChange)="store.patchPersonal({ firstName: $event })" />
+        </label>
+        <label>
+          <span jhiTranslate="cvBuilder.fields.lastName">Nom</span>
+          <input [ngModel]="r.personal.lastName" (ngModelChange)="store.patchPersonal({ lastName: $event })" />
+        </label>
+      </div>
+      <label>
+        <span jhiTranslate="cvBuilder.fields.headline">Titre / poste visé</span>
+        <input [ngModel]="r.personal.title" (ngModelChange)="store.patchPersonal({ title: $event })" />
+      </label>
+      <div class="cv-grid-2">
+        <label>
+          <span jhiTranslate="cvBuilder.fields.email">Email</span>
+          <input type="email" [ngModel]="r.personal.email" (ngModelChange)="store.patchPersonal({ email: $event })" />
+        </label>
+        <label>
+          <span jhiTranslate="cvBuilder.fields.phone">Téléphone</span>
+          <input [ngModel]="r.personal.phone" (ngModelChange)="store.patchPersonal({ phone: $event })" />
+        </label>
+      </div>
+      <label>
+        <span jhiTranslate="cvBuilder.fields.location">Localisation</span>
+        <input [ngModel]="r.personal.location" (ngModelChange)="store.patchPersonal({ location: $event })" />
+      </label>
+      <div class="cv-grid-2">
+        <label>
+          <span jhiTranslate="cvBuilder.fields.linkedin">LinkedIn</span>
+          <input [ngModel]="r.personal.linkedin" (ngModelChange)="store.patchPersonal({ linkedin: $event })" />
+        </label>
+        <label>
+          <span jhiTranslate="cvBuilder.fields.github">GitHub</span>
+          <input [ngModel]="r.personal.github" (ngModelChange)="store.patchPersonal({ github: $event })" />
+        </label>
+      </div>
+      <label>
+        <span jhiTranslate="cvBuilder.fields.website">Site web</span>
+        <input [ngModel]="r.personal.website" (ngModelChange)="store.patchPersonal({ website: $event })" />
+      </label>
+    </div>
+  }
+</section>
+
+<!-- Body sections, rendered in the user-defined order -->
+@for (section of sectionOrder(); track section; let first = $first; let last = $last) {
+  <section class="cv-section" [class.cv-hidden]="isHidden(section)">
+    <header class="cv-section-head">
+      <button type="button" class="cv-collapse" (click)="toggleCollapse(section)">
+        <fa-icon [icon]="isCollapsed(section) ? 'chevron-right' : 'chevron-left'" />
+      </button>
+      <h3 [jhiTranslate]="'cvBuilder.sections.' + section">{{ section }}</h3>
+      <div class="cv-section-actions">
+        <button type="button" [disabled]="first" (click)="store.moveSection(section, -1)" [title]="'cvBuilder.actions.moveUp' | translate">
+          <fa-icon icon="arrow-up" />
+        </button>
+        <button type="button" [disabled]="last" (click)="store.moveSection(section, 1)" [title]="'cvBuilder.actions.moveDown' | translate">
+          <fa-icon icon="arrow-down" />
+        </button>
+        <button type="button" (click)="store.toggleSection(section)" [title]="'cvBuilder.actions.toggle' | translate">
+          <fa-icon [icon]="isHidden(section) ? 'eye-slash' : 'eye'" />
+        </button>
+      </div>
+    </header>
+
+    @if (!isCollapsed(section)) {
+      <div class="cv-section-body">
+        @switch (section) {
+          @case ('summary') {
+            <textarea
+              rows="4"
+              [ngModel]="r.summary"
+              (ngModelChange)="store.setSummary($event)"
+              [placeholder]="'cvBuilder.fields.summaryPlaceholder' | translate"
+            ></textarea>
+          }
+
+          @case ('experiences') {
+            @for (e of r.experiences; track e.id; let i = $index) {
+              <div class="cv-item">
+                <div class="cv-item-bar">
+                  <span class="cv-item-title">{{ e.jobTitle || ('cvBuilder.sections.experiences' | translate) }}</span>
+                  <span class="cv-item-tools">
+                    <button type="button" [disabled]="i === 0" (click)="store.moveExperience(e.id, -1)"><fa-icon icon="arrow-up" /></button>
+                    <button type="button" [disabled]="i === r.experiences.length - 1" (click)="store.moveExperience(e.id, 1)">
+                      <fa-icon icon="arrow-down" />
+                    </button>
+                    <button type="button" class="cv-del" (click)="store.removeExperience(e.id)"><fa-icon icon="trash-alt" /></button>
+                  </span>
+                </div>
+                <div class="cv-grid-2">
+                  <input
+                    [ngModel]="e.jobTitle"
+                    (ngModelChange)="store.patchExperience(e.id, { jobTitle: $event })"
+                    [placeholder]="'cvBuilder.fields.jobTitle' | translate"
+                  />
+                  <input
+                    [ngModel]="e.company"
+                    (ngModelChange)="store.patchExperience(e.id, { company: $event })"
+                    [placeholder]="'cvBuilder.fields.company' | translate"
+                  />
+                </div>
+                <div class="cv-grid-2">
+                  <input
+                    [ngModel]="e.startDate"
+                    (ngModelChange)="store.patchExperience(e.id, { startDate: $event })"
+                    [placeholder]="'cvBuilder.fields.startDate' | translate"
+                  />
+                  <input
+                    [ngModel]="e.endDate"
+                    (ngModelChange)="store.patchExperience(e.id, { endDate: $event })"
+                    [disabled]="e.current"
+                    [placeholder]="'cvBuilder.fields.endDate' | translate"
+                  />
+                </div>
+                <label class="cv-check">
+                  <input type="checkbox" [ngModel]="e.current" (ngModelChange)="store.patchExperience(e.id, { current: $event })" />
+                  <span jhiTranslate="cvBuilder.fields.current">Poste actuel</span>
+                </label>
+                <textarea
+                  rows="2"
+                  [ngModel]="e.description"
+                  (ngModelChange)="store.patchExperience(e.id, { description: $event })"
+                  [placeholder]="'cvBuilder.fields.description' | translate"
+                ></textarea>
+                <label>
+                  <span jhiTranslate="cvBuilder.fields.achievements">Réalisations (une par ligne)</span>
+                  <textarea rows="3" [ngModel]="achievementsText(e)" (ngModelChange)="setAchievements(e.id, $event)"></textarea>
+                </label>
+              </div>
+            }
+            <button type="button" class="cv-add" (click)="store.addExperience()">
+              <fa-icon icon="plus" /> <span jhiTranslate="cvBuilder.actions.addExperience">Ajouter une expérience</span>
+            </button>
+          }
+
+          @case ('education') {
+            @for (ed of r.education; track ed.id; let i = $index) {
+              <div class="cv-item">
+                <div class="cv-item-bar">
+                  <span class="cv-item-title">{{ ed.degree || ('cvBuilder.sections.education' | translate) }}</span>
+                  <span class="cv-item-tools">
+                    <button type="button" [disabled]="i === 0" (click)="store.moveEducation(ed.id, -1)"><fa-icon icon="arrow-up" /></button>
+                    <button type="button" [disabled]="i === r.education.length - 1" (click)="store.moveEducation(ed.id, 1)">
+                      <fa-icon icon="arrow-down" />
+                    </button>
+                    <button type="button" class="cv-del" (click)="store.removeEducation(ed.id)"><fa-icon icon="trash-alt" /></button>
+                  </span>
+                </div>
+                <div class="cv-grid-2">
+                  <input
+                    [ngModel]="ed.degree"
+                    (ngModelChange)="store.patchEducation(ed.id, { degree: $event })"
+                    [placeholder]="'cvBuilder.fields.degree' | translate"
+                  />
+                  <input
+                    [ngModel]="ed.school"
+                    (ngModelChange)="store.patchEducation(ed.id, { school: $event })"
+                    [placeholder]="'cvBuilder.fields.school' | translate"
+                  />
+                </div>
+                <div class="cv-grid-2">
+                  <input
+                    [ngModel]="ed.startDate"
+                    (ngModelChange)="store.patchEducation(ed.id, { startDate: $event })"
+                    [placeholder]="'cvBuilder.fields.startDate' | translate"
+                  />
+                  <input
+                    [ngModel]="ed.endDate"
+                    (ngModelChange)="store.patchEducation(ed.id, { endDate: $event })"
+                    [placeholder]="'cvBuilder.fields.endDate' | translate"
+                  />
+                </div>
+                <textarea
+                  rows="2"
+                  [ngModel]="ed.description"
+                  (ngModelChange)="store.patchEducation(ed.id, { description: $event })"
+                  [placeholder]="'cvBuilder.fields.description' | translate"
+                ></textarea>
+              </div>
+            }
+            <button type="button" class="cv-add" (click)="store.addEducation()">
+              <fa-icon icon="plus" /> <span jhiTranslate="cvBuilder.actions.addEducation">Ajouter une formation</span>
+            </button>
+          }
+
+          @case ('skills') {
+            @for (sk of r.skills; track sk.id) {
+              <div class="cv-inline">
+                <input
+                  [ngModel]="sk.name"
+                  (ngModelChange)="store.patchSkill(sk.id, { name: $event })"
+                  [placeholder]="'cvBuilder.fields.skill' | translate"
+                />
+                <input type="range" min="1" max="5" [ngModel]="sk.level" (ngModelChange)="store.patchSkill(sk.id, { level: +$event })" />
+                <button type="button" class="cv-del" (click)="store.removeSkill(sk.id)"><fa-icon icon="trash-alt" /></button>
+              </div>
+            }
+            <button type="button" class="cv-add" (click)="store.addSkill()">
+              <fa-icon icon="plus" /> <span jhiTranslate="cvBuilder.actions.addSkill">Ajouter une compétence</span>
+            </button>
+          }
+
+          @case ('languages') {
+            @for (l of r.languages; track l.id) {
+              <div class="cv-inline">
+                <input
+                  [ngModel]="l.name"
+                  (ngModelChange)="store.patchLanguage(l.id, { name: $event })"
+                  [placeholder]="'cvBuilder.fields.language' | translate"
+                />
+                <input
+                  [ngModel]="l.level"
+                  (ngModelChange)="store.patchLanguage(l.id, { level: $event })"
+                  [placeholder]="'cvBuilder.fields.level' | translate"
+                />
+                <button type="button" class="cv-del" (click)="store.removeLanguage(l.id)"><fa-icon icon="trash-alt" /></button>
+              </div>
+            }
+            <button type="button" class="cv-add" (click)="store.addLanguage()">
+              <fa-icon icon="plus" /> <span jhiTranslate="cvBuilder.actions.addLanguage">Ajouter une langue</span>
+            </button>
+          }
+
+          @case ('projects') {
+            @for (p of r.projects; track p.id) {
+              <div class="cv-item">
+                <div class="cv-item-bar">
+                  <span class="cv-item-title">{{ p.name || ('cvBuilder.sections.projects' | translate) }}</span>
+                  <button type="button" class="cv-del" (click)="store.removeProject(p.id)"><fa-icon icon="trash-alt" /></button>
+                </div>
+                <input
+                  [ngModel]="p.name"
+                  (ngModelChange)="store.patchProject(p.id, { name: $event })"
+                  [placeholder]="'cvBuilder.fields.projectName' | translate"
+                />
+                <input
+                  [ngModel]="p.url"
+                  (ngModelChange)="store.patchProject(p.id, { url: $event })"
+                  [placeholder]="'cvBuilder.fields.url' | translate"
+                />
+                <textarea
+                  rows="2"
+                  [ngModel]="p.description"
+                  (ngModelChange)="store.patchProject(p.id, { description: $event })"
+                  [placeholder]="'cvBuilder.fields.description' | translate"
+                ></textarea>
+                <input
+                  [ngModel]="techText(p)"
+                  (ngModelChange)="setTech(p.id, $event)"
+                  [placeholder]="'cvBuilder.fields.technologies' | translate"
+                />
+              </div>
+            }
+            <button type="button" class="cv-add" (click)="store.addProject()">
+              <fa-icon icon="plus" /> <span jhiTranslate="cvBuilder.actions.addProject">Ajouter un projet</span>
+            </button>
+          }
+
+          @case ('certifications') {
+            @for (c of r.certifications; track c.id) {
+              <div class="cv-item">
+                <div class="cv-item-bar">
+                  <span class="cv-item-title">{{ c.name || ('cvBuilder.sections.certifications' | translate) }}</span>
+                  <button type="button" class="cv-del" (click)="store.removeCertification(c.id)"><fa-icon icon="trash-alt" /></button>
+                </div>
+                <div class="cv-grid-2">
+                  <input
+                    [ngModel]="c.name"
+                    (ngModelChange)="store.patchCertification(c.id, { name: $event })"
+                    [placeholder]="'cvBuilder.fields.certName' | translate"
+                  />
+                  <input
+                    [ngModel]="c.issuer"
+                    (ngModelChange)="store.patchCertification(c.id, { issuer: $event })"
+                    [placeholder]="'cvBuilder.fields.issuer' | translate"
+                  />
+                </div>
+                <input
+                  [ngModel]="c.date"
+                  (ngModelChange)="store.patchCertification(c.id, { date: $event })"
+                  [placeholder]="'cvBuilder.fields.date' | translate"
+                />
+              </div>
+            }
+            <button type="button" class="cv-add" (click)="store.addCertification()">
+              <fa-icon icon="plus" /> <span jhiTranslate="cvBuilder.actions.addCertification">Ajouter une certification</span>
+            </button>
+          }
+        }
+      </div>
+    }
+  </section>
+}

@@ -1,0 +1,133 @@
+@import '../../../content/scss/job-theme';
+
+.jc-dashboard {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.jc-header {
+  background: $jc-gradient;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 2rem;
+  color: white;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .jc-subtitle {
+    margin: 0.25rem 0 0;
+    opacity: 0.85;
+    font-size: 0.95rem;
+  }
+}
+
+.jc-loading {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--bs-secondary-color);
+}
+
+.jc-empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+
+  .jc-empty-icon {
+    color: #667eea;
+    margin-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--bs-secondary-color);
+    margin-bottom: 2rem;
+  }
+}
+
+.jc-profile-card {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.jc-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}
+
+.jc-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: $jc-gradient;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.jc-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.jc-profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+}
+
+.jc-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.jc-profile-footer {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.jc-cv-filename {
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}

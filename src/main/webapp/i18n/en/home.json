@@ -1,0 +1,61 @@
+{
+  "home": {
+    "title": "Job Search AI",
+    "hero": {
+      "badge": "AI-powered career copilot",
+      "title": "Land your next job faster, with AI on your side",
+      "subtitle": "Upload your CV, get matched with relevant offers, generate tailored cover letters and rehearse interviews — all in one place.",
+      "ctaPrimary": "Open Job Copilot",
+      "ctaSecondary": "Search for jobs"
+    },
+    "logged": {
+      "message": "You are logged in as user \"{{username}}\"."
+    },
+    "guest": {
+      "title": "Welcome to Job Search AI",
+      "subtitle": "Sign in to access your personalized dashboard, your applications and your AI career copilot."
+    },
+    "quickAccess": {
+      "title": "Quick access",
+      "onboarding": {
+        "title": "My profile",
+        "subtitle": "Upload or update your CV"
+      },
+      "cvBuilder": {
+        "title": "CV Builder",
+        "subtitle": "Design and customize your resume in real time"
+      },
+      "search": {
+        "title": "Search jobs",
+        "subtitle": "Find opportunities across multiple sources"
+      },
+      "applications": {
+        "title": "Applications",
+        "subtitle": "Track and manage your applications"
+      },
+      "interview": {
+        "title": "Interview practice",
+        "subtitle": "Train with an AI recruiter"
+      },
+      "settings": {
+        "title": "Preferences",
+        "subtitle": "Configure your job search criteria"
+      },
+      "chat": {
+        "title": "AI assistant",
+        "subtitle": "Chat with your AI copilot"
+      }
+    },
+    "stats": {
+      "title": "Your application overview"
+    },
+    "history": {
+      "title": "History",
+      "noHistory": "No conversation found",
+      "untitled": "New conversation"
+    },
+    "landing": {
+      "newChat": "New chat"
+    }
+  }
+}

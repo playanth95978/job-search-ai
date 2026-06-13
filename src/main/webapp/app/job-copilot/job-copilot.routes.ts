@@ -1,0 +1,41 @@
+import { Routes } from '@angular/router';
+
+const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
+    title: 'Job Copilot',
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('./onboarding/onboarding.component').then(m => m.OnboardingComponent),
+    title: 'Upload CV',
+  },
+  {
+    path: 'cv-builder',
+    loadComponent: () => import('./cv-builder/cv-builder.component').then(m => m.CvBuilderComponent),
+    title: 'cvBuilder.title',
+  },
+  {
+    path: 'search',
+    loadComponent: () => import('./job-search/job-search.component').then(m => m.JobSearchComponent),
+    title: 'Job Search',
+  },
+  {
+    path: 'applications',
+    loadComponent: () => import('./applications/applications.component').then(m => m.ApplicationsComponent),
+    title: 'Applications',
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent),
+    title: 'Preferences',
+  },
+  {
+    path: 'interview',
+    loadComponent: () => import('./interview/interview.component').then(m => m.InterviewComponent),
+    title: 'Interview Roleplay',
+  },
+];
+
+export default routes;

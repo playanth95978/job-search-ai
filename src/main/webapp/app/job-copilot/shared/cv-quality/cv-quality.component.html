@@ -1,0 +1,95 @@
+CV QUALITY {{ filename() }}
+<div class="jc-cv-quality">
+  <div class="jc-cv-top">
+    @if (filename(); as name) {
+      <div class="jc-cv-file">
+        <fa-icon icon="file-pdf"></fa-icon>
+        <div class="jc-cv-file-text">
+          <span class="jc-cv-file-label" jhiTranslate="jobCopilot.cvQuality.selectedResume">Selected Resume</span>
+          <strong class="jc-cv-file-name">{{ name }}</strong>
+        </div>
+      </div>
+    }
+
+    <div class="jc-cv-score" [class]="'rating-' + scoreRating()">
+      <span class="jc-cv-score-value">{{ score() }}</span>
+      <span class="jc-cv-score-max">/100</span>
+      <span class="jc-cv-score-label" [jhiTranslate]="'jobCopilot.cvQuality.ratings.' + scoreRating()">{{
+        ratingLabel(scoreRating())
+      }}</span>
+    </div>
+  </div>
+
+  <div class="jc-cv-metrics">
+    @for (m of metrics(); track m.key) {
+      <div class="jc-cv-metric" [class]="'rating-' + m.rating" [title]="m.detail">
+        <span class="jc-cv-metric-label" [jhiTranslate]="'jobCopilot.cvQuality.metrics.' + m.key">{{ m.label }}</span>
+        <span class="jc-cv-metric-rating">
+          <fa-icon [icon]="iconFor(m.rating)"></fa-icon>
+          {{ 'jobCopilot.cvQuality.ratings.' + m.rating | translate }}
+        </span>
+        <span class="jc-cv-metric-detail">{{ m.detail }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- AI review (LLM) -->
+  <div class="jc-cv-ai">
+    @if (!review() && !reviewing()) {
+      <button class="jc-btn jc-btn-primary jc-btn-sm" (click)="runAiReview()">
+        <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.cvQuality.aiReview.button">AI Review</span>
+      </button>
+    }
+
+    @if (reviewing()) {
+      <div class="jc-cv-ai-loading">
+        <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+        <span jhiTranslate="jobCopilot.cvQuality.aiReview.loading">Analyzing your CV with AI…</span>
+      </div>
+    }
+
+    @if (reviewError(); as err) {
+      <div class="jc-cv-ai-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ err }}</div>
+    }
+
+    @if (review(); as r) {
+      <div class="jc-cv-ai-result" [class]="'rating-' + scoreRating()">
+        <div class="jc-cv-ai-header">
+          <div class="jc-cv-ai-score">
+            <fa-icon icon="wand-magic-sparkles"></fa-icon>
+            <span>{{ r.score }}/100</span>
+          </div>
+          <p class="jc-cv-ai-summary">{{ r.summary }}</p>
+          <button class="jc-cv-ai-refresh" (click)="runAiReview()" [title]="'jobCopilot.cvQuality.aiReview.refresh' | translate">
+            <fa-icon icon="rotate"></fa-icon>
+          </button>
+        </div>
+
+        @if (r.strengths.length) {
+          <div class="jc-cv-ai-block">
+            <h5><fa-icon icon="circle-check"></fa-icon> <span jhiTranslate="jobCopilot.cvQuality.aiReview.strengths">Strengths</span></h5>
+            <ul>
+              @for (s of r.strengths; track s) {
+                <li>{{ s }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (r.improvements.length) {
+          <div class="jc-cv-ai-block">
+            <h5>
+              <fa-icon icon="triangle-exclamation"></fa-icon>
+              <span jhiTranslate="jobCopilot.cvQuality.aiReview.improvements">Improvements</span>
+            </h5>
+            <ul>
+              @for (i of r.improvements; track i) {
+                <li>{{ i }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

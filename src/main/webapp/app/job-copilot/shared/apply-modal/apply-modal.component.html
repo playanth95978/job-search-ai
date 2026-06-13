@@ -1,0 +1,120 @@
+<div (click)="close()" class="jc-modal-backdrop">
+  <div (click)="$event.stopPropagation()" class="jc-modal">
+    <div class="jc-modal-header">
+      <h2><fa-icon icon="paper-plane"></fa-icon> Postuler</h2>
+      <button (click)="close()" aria-label="Fermer" class="jc-modal-close">
+        <fa-icon icon="xmark"></fa-icon>
+      </button>
+    </div>
+
+    @if (offer(); as o) {
+      <div class="jc-modal-offer">
+        <div class="jc-modal-offer-title">
+          <strong>{{ o.title }}</strong>
+          @if (o.source) {
+            <span [style.background]="sourceColor()" class="jc-source-badge">{{ sourceLabel() }}</span>
+          }
+        </div>
+        <div class="jc-modal-offer-company">
+          <fa-icon icon="building"></fa-icon> {{ o.company || 'Unknown' }}
+          @if (o.location) {
+            <span class="jc-separator">&middot;</span>
+            <fa-icon icon="location-dot"></fa-icon> {{ o.location }}
+          }
+        </div>
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="jc-modal-loading">
+        <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> Génération de la lettre de motivation...
+      </div>
+    } @else {
+      @if (resultMessage()) {
+        <div class="jc-modal-success"><fa-icon icon="circle-check"></fa-icon> {{ resultMessage() }}</div>
+      } @else if (application()) {
+        <div class="jc-modal-body">
+          <div class="jc-modal-label-row">
+            <label class="jc-modal-label" for="apply-cover-letter">Lettre de motivation</label>
+            <div class="jc-modal-label-actions">
+              <select
+                (ngModelChange)="language.set($event)"
+                [ngModel]="language()"
+                aria-label="Langue de la lettre de motivation"
+                class="jc-modal-lang-select"
+              >
+                @for (lang of languages; track lang.value) {
+                  <option [value]="lang.value">{{ lang.label }}</option>
+                }
+              </select>
+              <button (click)="regenerateCoverLetter()" [disabled]="regenerating()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
+                @if (regenerating()) {
+                  <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                } @else {
+                  <fa-icon icon="sync"></fa-icon>
+                }
+                Régénérer
+              </button>
+              <button (click)="togglePreview()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
+                @if (previewMode()) {
+                  <fa-icon icon="pencil-alt"></fa-icon> Modifier
+                } @else {
+                  <fa-icon icon="eye"></fa-icon> Aperçu
+                }
+              </button>
+            </div>
+          </div>
+          @if (previewMode()) {
+            <div [innerHTML]="coverLetterHtml()" class="jc-modal-preview"></div>
+          } @else {
+            <textarea
+              (ngModelChange)="coverLetter.set($event)"
+              [ngModel]="coverLetter()"
+              class="jc-modal-textarea"
+              id="apply-cover-letter"
+              rows="12"
+            ></textarea>
+          }
+        </div>
+      }
+
+      @if (error()) {
+        <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
+      }
+
+      <div class="jc-modal-actions">
+        @if (resultMessage()) {
+          <button (click)="close()" class="jc-btn jc-btn-primary"><fa-icon icon="check"></fa-icon> Fermer</button>
+        } @else if (application()) {
+          <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost">
+            <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon> {{ copied() ? 'Copié !' : 'Copier' }}
+          </button>
+
+          @if (applyUrl()) {
+            <a [href]="applyUrl()" class="jc-btn jc-btn-ghost" rel="noopener" target="_blank">
+              <fa-icon icon="external-link-alt"></fa-icon> Ouvrir l'offre
+            </a>
+          }
+
+          @if (autoApplySupported()) {
+            <button (click)="submitAuto()" [disabled]="submitting()" class="jc-btn jc-btn-accent">
+              @if (submitting()) {
+                <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> Envoi...
+              } @else {
+                <fa-icon icon="paper-plane"></fa-icon> Soumettre via {{ sourceLabel() }}
+              }
+            </button>
+          }
+
+          <button (click)="markAsApplied()" [disabled]="submitting()" class="jc-btn jc-btn-primary">
+            @if (submitting()) {
+              <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> ...
+            } @else {
+              <fa-icon icon="check"></fa-icon> J'ai postulé
+            }
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>

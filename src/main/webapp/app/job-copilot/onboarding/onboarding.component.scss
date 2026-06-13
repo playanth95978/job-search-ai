@@ -1,0 +1,262 @@
+.jc-onboarding {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.jc-header {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #667eea;
+  }
+
+  .jc-subtitle {
+    color: var(--bs-secondary-color);
+    margin-top: 0.25rem;
+  }
+}
+
+.jc-dropzone {
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 20px;
+  padding: 4rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: var(--bs-body-bg);
+
+  &:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.02);
+  }
+}
+
+.jc-dropzone-active {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  transform: scale(1.01);
+}
+
+.jc-dropzone-icon {
+  color: #667eea;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+}
+
+.jc-dropzone-content {
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--bs-secondary-color);
+    margin-bottom: 1rem;
+  }
+}
+
+.jc-dropzone-hint {
+  font-size: 0.85rem;
+  margin-top: 1.5rem !important;
+  opacity: 0.6;
+}
+
+.jc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.jc-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.jc-btn-lg {
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+}
+
+.jc-processing {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 20px;
+
+  h3 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--bs-secondary-color);
+  }
+}
+
+.jc-processing-animation {
+  margin-bottom: 1.5rem;
+}
+
+.jc-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.jc-step {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+  background: var(--bs-tertiary-bg);
+
+  &.active {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+  }
+}
+
+.jc-step-divider {
+  width: 24px;
+  height: 2px;
+  background: var(--bs-border-color);
+}
+
+.jc-success {
+  text-align: center;
+
+  h2 {
+    font-weight: 700;
+    margin-bottom: 2rem;
+  }
+}
+
+.jc-success-icon {
+  color: #10b981;
+  margin-bottom: 1rem;
+}
+
+.jc-extracted-profile {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.jc-ep-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}
+
+.jc-ep-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.jc-ep-meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+}
+
+.jc-ep-section {
+  margin-bottom: 1rem;
+
+  h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}
+
+.jc-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.jc-skill-tag {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.jc-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin-top: 1.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 12px;
+  font-weight: 500;
+}

@@ -1,0 +1,598 @@
+@import 'bootstrap-variables';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'job-theme';
+
+/* ==============================================================
+Bootstrap tweaks
+===============================================================*/
+
+body,
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 300;
+}
+
+/* Increase contrast of links to get 100% on Lighthouse Accessibility Audit. Override this color if you want to change the link color, or use a Bootswatch theme */
+a {
+  color: #533f03;
+  font-weight: bold;
+}
+
+/* override hover color for dropdown-item forced by bootstrap to all a:not([href]):not([tabindex]) elements in _reboot.scss */
+a:not([href]):not([tabindex]):hover.dropdown-item {
+  color: $dropdown-link-hover-color;
+}
+
+/* override .dropdown-item.active background-color on hover */
+.dropdown-item.active:hover {
+  background-color: mix($dropdown-link-hover-bg, $dropdown-link-active-bg, 50%);
+}
+
+a:hover {
+  color: #533f03;
+  /* make sure browsers use the pointer cursor for anchors, even with no href */
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  color: $dropdown-link-hover-color;
+}
+
+/* ==========================================================================
+Browser Upgrade Prompt
+========================================================================== */
+.browserupgrade {
+  margin: 0.2em 0;
+  background: #ccc;
+  color: #000;
+  padding: 0.2em 0;
+}
+
+/* ==========================================================================
+Generic styles
+========================================================================== */
+
+/* Error highlight on input fields */
+.ng-valid[required],
+.ng-valid.required {
+  border-left: 5px solid green;
+}
+
+.ng-invalid:not(form) {
+  border-left: 5px solid red;
+}
+
+/* other generic styles */
+
+.jh-card {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.error {
+  color: white;
+  background-color: red;
+}
+
+.pad {
+  padding: 10px;
+}
+
+.w-40 {
+  width: 40% !important;
+}
+
+.w-60 {
+  width: 60% !important;
+}
+
+.break {
+  white-space: normal;
+  word-break: break-all;
+}
+
+.form-control {
+  background-color: #fff;
+}
+
+.readonly {
+  background-color: #eee;
+  opacity: 1;
+}
+
+.footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.hand,
+[jhisortby] {
+  cursor: pointer;
+}
+
+/* ==========================================================================
+Custom alerts for notification
+========================================================================== */
+.alerts {
+  .alert {
+    text-overflow: ellipsis;
+    pre {
+      background: none;
+      border: none;
+      font: inherit;
+      color: inherit;
+      padding: 0;
+      margin: 0;
+    }
+    .popover pre {
+      font-size: 10px;
+    }
+  }
+  .jhi-toast {
+    position: fixed;
+    width: 100%;
+    &.left {
+      left: 5px;
+    }
+    &.right {
+      right: 5px;
+    }
+    &.top {
+      top: 55px;
+    }
+    &.bottom {
+      bottom: 55px;
+    }
+  }
+}
+
+@media screen and (min-width: 480px) {
+  .alerts .jhi-toast {
+    width: 50%;
+  }
+}
+
+/* ==========================================================================
+entity list page css
+========================================================================== */
+
+.table-entities thead th .d-flex > * {
+  margin: auto 0;
+}
+
+/* ==========================================================================
+entity detail page css
+========================================================================== */
+.row-md.jh-entity-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  line-height: 1.5;
+}
+
+@media screen and (min-width: 768px) {
+  .row-md.jh-entity-details > {
+    dt {
+      float: left;
+      overflow: hidden;
+      clear: left;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0.5em 0;
+    }
+    dd {
+      border-bottom: 1px solid #eee;
+      padding: 0.5em 0;
+      margin-left: 0;
+    }
+  }
+}
+
+/* ==========================================================================
+ui bootstrap tweaks
+========================================================================== */
+.nav,
+.pagination,
+.carousel,
+.panel-title a {
+  cursor: pointer;
+}
+
+.thread-dump-modal-lock {
+  max-width: 450px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-menu {
+  padding-left: 0;
+}
+
+/* ==========================================================================
+angular-cli removes postcss-rtl processed inline css, processed rules must be added here instead
+========================================================================== */
+/* page-ribbon.scss */
+.ribbon {
+  left: -3.5em;
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+/* navbar.scss */
+.navbar {
+  ul.navbar-nav {
+    .nav-item {
+      margin-left: 0.5em;
+    }
+  }
+}
+
+/* ==========================================================================
+Layout
+========================================================================== */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base font-size reduction for smaller screens */
+html {
+  font-size: 100%; /* Default for large screens (>= 1200px) */
+
+  @media (max-width: 1199.98px) {
+    font-size: 95%; /* Desktops / Laptops */
+  }
+
+  @media (max-width: 991.98px) {
+    font-size: 90%; /* Tablets (landscape) */
+  }
+
+  @media (max-width: 767.98px) {
+    font-size: 85%; /* Tablets (portrait) */
+  }
+
+  @media (max-width: 575.98px) {
+    font-size: 80%; /* Phones */
+  }
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.navbar-wrapper {
+  flex-shrink: 0;
+  z-index: 1030;
+}
+
+.content-wrapper {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  padding-top: $jc-navbar-height;
+}
+
+.main-content {
+  flex-grow: 1;
+}
+
+/* ==========================================================================
+Chat UI Feature Styles (Sources, Thinking Steps, Suggestions, Feedback, Export)
+========================================================================== */
+
+/* ===== Thinking Steps ===== */
+.thinking-steps {
+  padding: 16px 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .thinking-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: #6c757d;
+    animation: chatFadeIn 0.4s ease-out;
+
+    .step-icon {
+      font-size: 0.9rem;
+      width: 18px;
+      text-align: center;
+    }
+    .step-done {
+      color: #28a745;
+    }
+    .step-active {
+      color: #0d6efd;
+    }
+    &.done {
+      color: #495057;
+    }
+    &.active {
+      color: #0d6efd;
+      font-weight: 500;
+    }
+    &:nth-child(1) {
+      animation-delay: 0s;
+    }
+    &:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+    &:nth-child(4) {
+      animation-delay: 0.45s;
+    }
+  }
+}
+
+/* ===== Sources Section ===== */
+.sources-section {
+  margin-top: 10px;
+  animation: chatFadeIn 0.3s ease-out;
+
+  .sources-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f4ff;
+    border: 1px solid #d0dbf0;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    color: #3b5998;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    &:hover {
+      background: #e0e8ff;
+      border-color: #b0c4f0;
+    }
+    .toggle-icon {
+      font-size: 0.7rem;
+      margin-left: 2px;
+    }
+  }
+
+  .sources-panel {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: chatExpandDown 0.3s ease-out;
+
+    .source-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #fafbfd;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      transition: all 0.2s;
+      &:hover {
+        background: #f0f4ff;
+        border-color: #d0dbf0;
+        transform: translateX(4px);
+      }
+
+      .source-icon-wrapper {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: #e7f1ff;
+        .source-type-icon {
+          font-size: 0.9rem;
+          &.confluence {
+            color: #0052cc;
+          }
+          &.jira {
+            color: #0065ff;
+          }
+          &.code {
+            color: #6f42c1;
+          }
+          &.default {
+            color: #6c757d;
+          }
+        }
+      }
+
+      .source-info {
+        flex: 1;
+        min-width: 0;
+        .source-title {
+          display: block;
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: #212529;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .source-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 2px;
+          .source-type-badge {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            background: #e9ecef;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+          }
+          .source-score {
+            font-size: 0.72rem;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .source-link {
+        color: #6c757d;
+        font-size: 0.85rem;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        &:hover {
+          color: #0d6efd;
+          background: #e7f1ff;
+        }
+      }
+    }
+  }
+}
+
+/* ===== Feedback Buttons ===== */
+.feedback-btn {
+  transition: all 0.2s !important;
+  &.active {
+    &[title='Bonne reponse'] {
+      color: #28a745 !important;
+      background: rgba(40, 167, 69, 0.1) !important;
+    }
+    &[title='Mauvaise reponse'] {
+      color: #dc3545 !important;
+      background: rgba(220, 53, 69, 0.1) !important;
+    }
+  }
+}
+
+/* ===== Suggestions Bar ===== */
+.suggestions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 24px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafbfc;
+  animation: chatFadeIn 0.4s ease-out;
+
+  .suggestion-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid #e0e4e8;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 0.83rem;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.25s;
+    white-space: nowrap;
+    fa-icon {
+      color: #ffc107;
+      font-size: 0.85rem;
+    }
+    &:hover {
+      background: #0d6efd;
+      color: white;
+      border-color: #0d6efd;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+      fa-icon {
+        color: white;
+      }
+    }
+  }
+}
+
+/* ===== Export Button (header) ===== */
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    color: #212529;
+  }
+}
+
+/* ===== Chat Feature Animations ===== */
+@keyframes chatFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes chatExpandDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+@keyframes chatSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes chatSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* jhipster-needle-scss-add-main JHipster will add new css style */

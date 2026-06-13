@@ -1,0 +1,100 @@
+@let r = store.resume();
+
+<div class="cv-builder">
+  <!-- Toolbar -->
+  <header class="cv-toolbar">
+    <div class="cv-toolbar-left">
+      <input
+        class="cv-title"
+        [ngModel]="r.title"
+        (ngModelChange)="store.setTitle($event)"
+        [attr.aria-label]="'cvBuilder.title' | translate"
+      />
+      @if (store.savedAt(); as saved) {
+        <span class="cv-saved"
+          ><fa-icon icon="circle-check" /> <span jhiTranslate="cvBuilder.saved">Enregistré</span> {{ saved | date: 'HH:mm:ss' }}</span
+        >
+      }
+    </div>
+
+    <div class="cv-toolbar-right">
+      <!-- Undo / Redo -->
+      <button
+        type="button"
+        class="cv-tool"
+        [disabled]="!store.canUndo()"
+        (click)="store.undo()"
+        [title]="'cvBuilder.actions.undo' | translate"
+      >
+        <fa-icon icon="rotate-left" />
+      </button>
+      <button
+        type="button"
+        class="cv-tool"
+        [disabled]="!store.canRedo()"
+        (click)="store.redo()"
+        [title]="'cvBuilder.actions.redo' | translate"
+      >
+        <fa-icon icon="rotate-right" />
+      </button>
+
+      <span class="cv-divider"></span>
+
+      <!-- Export -->
+      <button type="button" class="cv-tool" (click)="print()" [title]="'cvBuilder.export.pdf' | translate">
+        <fa-icon icon="file-pdf" />
+      </button>
+      <button type="button" class="cv-tool" (click)="exportJson()" [title]="'cvBuilder.export.json' | translate">
+        <fa-icon icon="download" />
+      </button>
+      <label class="cv-tool" [title]="'cvBuilder.export.import' | translate">
+        <fa-icon icon="file-arrow-up" />
+        <input type="file" accept="application/json" hidden (change)="importJson($event)" />
+      </label>
+    </div>
+  </header>
+
+  <!-- Customization bar -->
+  <div class="cv-custombar">
+    <div class="cv-templates">
+      @for (t of templates; track t.id) {
+        <button type="button" class="cv-tmpl" [class.active]="r.template === t.id" (click)="store.setTemplate(t.id)">
+          <span [jhiTranslate]="t.labelKey">{{ t.id }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="cv-theme">
+      <label [title]="'cvBuilder.theme.primary' | translate">
+        <fa-icon icon="palette" />
+        <input type="color" [ngModel]="r.theme.primaryColor" (ngModelChange)="store.patchTheme({ primaryColor: $event })" />
+      </label>
+      <label [title]="'cvBuilder.theme.secondary' | translate">
+        <input type="color" [ngModel]="r.theme.secondaryColor" (ngModelChange)="store.patchTheme({ secondaryColor: $event })" />
+      </label>
+      <select
+        [ngModel]="r.theme.fontFamily"
+        (ngModelChange)="store.patchTheme({ fontFamily: $event })"
+        [title]="'cvBuilder.theme.font' | translate"
+      >
+        @for (f of fonts; track f.value) {
+          <option [value]="f.value">{{ f.label }}</option>
+        }
+      </select>
+      <label class="cv-size" [title]="'cvBuilder.theme.fontSize' | translate">
+        <fa-icon icon="text-height" />
+        <input type="range" min="11" max="18" [ngModel]="r.theme.fontSize" (ngModelChange)="store.patchTheme({ fontSize: +$event })" />
+      </label>
+    </div>
+  </div>
+
+  <!-- Split screen -->
+  <div class="cv-split">
+    <section class="cv-editor-pane">
+      <jhi-cv-editor />
+    </section>
+    <section class="cv-preview-pane">
+      <jhi-cv-preview [resume]="r" />
+    </section>
+  </div>
+</div>

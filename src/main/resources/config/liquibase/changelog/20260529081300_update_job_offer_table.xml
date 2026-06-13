@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="20260529081300-1" author="junie">
+    <addColumn tableName="job_offer">
+      <column name="country" type="varchar(255)"/>
+      <column name="search_text" type="text"/>
+      <column name="metadata" type="jsonb"/>
+      <column name="raw_payload" type="jsonb"/>
+      <column name="content_hash" type="varchar(64)"/>
+      <column name="salary_currency" type="varchar(10)"/>
+      <column name="experience_level" type="varchar(100)"/>
+      <column name="published_at" type="timestamp"/>
+      <column name="indexed_at" type="timestamp"/>
+      <column name="updated_at" type="timestamp"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="20260529081300-2" author="junie">
+    <sql>
+      ALTER TABLE job_offer
+        ADD COLUMN embedding vector(768);
+      CREATE INDEX IF NOT EXISTS job_offer_embedding_idx
+        ON job_offer
+        USING HNSW (embedding vector_cosine_ops);
+
+      CREATE INDEX IF NOT EXISTS job_offer_bm25_idx
+        ON job_offer
+        USING bm25 (id, search_text, metadata)
+        WITH (key_field = 'id');
+
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

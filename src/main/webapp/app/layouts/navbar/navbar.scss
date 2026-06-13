@@ -1,0 +1,141 @@
+@import '../../../content/scss/job-theme';
+
+/* ==========================================================================
+Horizontal Navbar (Job Search AI - 2026 style)
+========================================================================== */
+
+.jc-navbar {
+  min-height: $jc-navbar-height;
+  background: rgba(33, 37, 41, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+
+  .navbar-toggler {
+    color: rgba(255, 255, 255, 0.85);
+    border-color: rgba(255, 255, 255, 0.25);
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.4);
+    }
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-weight: 500;
+    font-size: 0.92rem;
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &.active {
+      color: #fff !important;
+      background: $jc-gradient;
+    }
+  }
+
+  .dropdown-toggle::after {
+    margin-left: 0.4rem;
+  }
+
+  .dropdown-menu {
+    background-color: #2b3035;
+    border-color: rgba(255, 255, 255, 0.1);
+    margin-top: 0.5rem;
+    z-index: 1031;
+
+    .dropdown-item {
+      color: rgba(255, 255, 255, 0.85);
+
+      &:hover,
+      &:focus {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #fff;
+      }
+
+      &.active {
+        background: $jc-gradient;
+        color: #fff;
+      }
+    }
+
+    .dropdown-divider {
+      border-top-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.jc-navbar-brand {
+  text-decoration: none;
+  gap: 0.25rem;
+
+  .navbar-title {
+    background: $jc-gradient;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .navbar-version {
+    color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.jc-navbar-actions {
+  flex-shrink: 0;
+}
+
+.account-toggle {
+  &::after {
+    display: none;
+  }
+
+  .profile-image {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+  }
+}
+
+.profile-image {
+  height: 24px;
+  width: 24px;
+}
+
+.logo-img {
+  height: 32px;
+  width: 32px;
+  display: inline-block;
+  vertical-align: middle;
+  background: url('/content/images/logo-jhipster.png') no-repeat center center;
+  background-size: contain;
+}
+
+@media (max-width: 991.98px) {
+  .jc-navbar {
+    .navbar-collapse {
+      padding: 0.75rem 0 1rem;
+    }
+
+    .navbar-nav {
+      gap: 0.25rem;
+    }
+
+    .jc-navbar-actions {
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+  }
+}

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20260525180000-1" author="devin">
+        <createTable tableName="candidate_profile">
+            <column name="id" type="${uuidType}" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="full_name" type="varchar(255)"/>
+            <column name="email" type="varchar(255)"/>
+            <column name="location" type="varchar(255)"/>
+            <column name="years_of_experience" type="integer"/>
+            <column name="skills" type="jsonb"/>
+            <column name="experiences" type="jsonb"/>
+            <column name="preferred_roles" type="jsonb"/>
+            <column name="languages" type="jsonb"/>
+            <column name="education" type="jsonb"/>
+            <column name="certifications" type="jsonb"/>
+            <column name="raw_markdown" type="text"/>
+            <column name="cv_filename" type="varchar(512)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        <createIndex tableName="candidate_profile" indexName="idx_candidate_profile_user_id">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20260525180000-2" author="devin">
+        <createTable tableName="job_offer">
+            <column name="id" type="${uuidType}" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company" type="varchar(255)"/>
+            <column name="location" type="varchar(255)"/>
+            <column name="remote" type="boolean"/>
+            <column name="description" type="text"/>
+            <column name="skills" type="jsonb"/>
+            <column name="source" type="varchar(50)"/>
+            <column name="source_id" type="varchar(255)"/>
+            <column name="apply_url" type="varchar(2048)"/>
+            <column name="salary_min" type="integer"/>
+            <column name="salary_max" type="integer"/>
+            <column name="contract_type" type="varchar(100)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="timestamp"/>
+        </createTable>
+        <createIndex tableName="job_offer" indexName="idx_job_offer_source">
+            <column name="source"/>
+            <column name="source_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20260525180000-3" author="devin">
+        <createTable tableName="job_application">
+            <column name="id" type="${uuidType}" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_offer_id" type="${uuidType}"/>
+            <column name="candidate_profile_id" type="${uuidType}"/>
+            <column name="status" type="varchar(50)"/>
+            <column name="cover_letter" type="text"/>
+            <column name="notes" type="text"/>
+            <column name="match_score" type="double"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp"/>
+            <column name="applied_at" type="timestamp"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="job_application" baseColumnNames="job_offer_id"
+                                 referencedTableName="job_offer" referencedColumnNames="id"
+                                 constraintName="fk_job_application_offer"/>
+        <addForeignKeyConstraint baseTableName="job_application" baseColumnNames="candidate_profile_id"
+                                 referencedTableName="candidate_profile" referencedColumnNames="id"
+                                 constraintName="fk_job_application_profile"/>
+        <createIndex tableName="job_application" indexName="idx_job_application_user">
+            <column name="user_id"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20260525180000-4" author="devin">
+        <createTable tableName="user_preference">
+            <column name="id" type="${uuidType}" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="remote_only" type="boolean"/>
+            <column name="contract_type" type="varchar(100)"/>
+            <column name="salary_min" type="integer"/>
+            <column name="salary_max" type="integer"/>
+            <column name="preferred_roles" type="jsonb"/>
+            <column name="excluded_technologies" type="jsonb"/>
+            <column name="preferred_locations" type="jsonb"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

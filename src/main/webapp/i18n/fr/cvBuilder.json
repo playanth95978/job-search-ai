@@ -1,0 +1,75 @@
+{
+  "cvBuilder": {
+    "title": "Créateur de CV",
+    "saved": "Enregistré",
+    "sections": {
+      "personal": "Informations personnelles",
+      "summary": "Résumé professionnel",
+      "experiences": "Expériences",
+      "education": "Formation",
+      "skills": "Compétences",
+      "languages": "Langues",
+      "projects": "Projets",
+      "certifications": "Certifications"
+    },
+    "fields": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "headline": "Titre / poste visé",
+      "email": "Email",
+      "phone": "Téléphone",
+      "location": "Localisation",
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "website": "Site web",
+      "summaryPlaceholder": "Décrivez en quelques phrases votre profil et vos objectifs…",
+      "jobTitle": "Intitulé du poste",
+      "company": "Entreprise",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "current": "Poste actuel",
+      "description": "Description",
+      "achievements": "Réalisations (une par ligne)",
+      "degree": "Diplôme",
+      "school": "Établissement",
+      "skill": "Compétence",
+      "language": "Langue",
+      "level": "Niveau",
+      "projectName": "Nom du projet",
+      "url": "Lien",
+      "technologies": "Technologies (séparées par des virgules)",
+      "certName": "Certification",
+      "issuer": "Organisme",
+      "date": "Date"
+    },
+    "actions": {
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "toggle": "Afficher / masquer",
+      "undo": "Annuler",
+      "redo": "Rétablir",
+      "addExperience": "Ajouter une expérience",
+      "addEducation": "Ajouter une formation",
+      "addSkill": "Ajouter une compétence",
+      "addLanguage": "Ajouter une langue",
+      "addProject": "Ajouter un projet",
+      "addCertification": "Ajouter une certification"
+    },
+    "templates": {
+      "modern": "Moderne",
+      "professional": "Professionnel",
+      "minimalist": "Minimaliste"
+    },
+    "theme": {
+      "primary": "Couleur principale",
+      "secondary": "Couleur secondaire",
+      "font": "Police",
+      "fontSize": "Taille de police"
+    },
+    "export": {
+      "pdf": "Exporter / Imprimer en PDF",
+      "json": "Exporter en JSON",
+      "import": "Importer un JSON"
+    }
+  }
+}

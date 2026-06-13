@@ -1,0 +1,234 @@
+/* ==========================================================================
+Shared "Job Copilot" design tokens & components
+Reused by the home page and the Job Copilot dashboard so the job-search
+look & feel stays consistent without duplicating styles.
+========================================================================== */
+
+$jc-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$jc-accent: #667eea;
+$jc-navbar-height: 64px;
+
+.jc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.jc-btn-primary {
+  background: $jc-gradient;
+  color: white;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+}
+
+.jc-btn-outline {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: white;
+  }
+}
+
+.jc-btn-lg {
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+}
+
+.jc-btn-sm {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  border-radius: 999px;
+}
+
+.jc-btn-ghost {
+  background: transparent;
+  color: var(--bs-secondary-color);
+  padding: 0.5rem;
+  border-radius: 8px;
+
+  &:hover {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+  }
+}
+
+/* Feature pills (used in empty states) */
+.jc-features {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.jc-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+
+  fa-icon {
+    color: $jc-accent;
+  }
+}
+
+/* Skill tags */
+.jc-skill-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: $jc-accent;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.jc-skill-more {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.8rem;
+}
+
+/* Stat cards */
+.jc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.jc-stat-card {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-left: 4px solid;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.jc-stat-icon {
+  font-size: 1.25rem;
+}
+
+.jc-stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.jc-stat-label {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+  text-transform: capitalize;
+}
+
+/* Action / navigation cards */
+.jc-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jc-action-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--bs-body-color);
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: $jc-accent;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    color: var(--bs-body-color);
+  }
+
+  > fa-icon:first-child {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  div {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-weight: 600;
+    }
+
+    span {
+      font-size: 0.85rem;
+      color: var(--bs-secondary-color);
+    }
+  }
+
+  .jc-action-arrow {
+    color: var(--bs-secondary-color);
+    transition: transform 0.2s;
+  }
+
+  &:hover .jc-action-arrow {
+    transform: translateX(4px);
+    color: $jc-accent;
+  }
+}
+
+.jc-action-search > fa-icon:first-child {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.jc-action-apps > fa-icon:first-child {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.jc-action-settings > fa-icon:first-child {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.jc-action-interview > fa-icon:first-child {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.jc-action-chat > fa-icon:first-child {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.jc-action-onboarding > fa-icon:first-child {
+  background: rgba(102, 126, 234, 0.1);
+  color: $jc-accent;
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+  <property name="now" value="current_timestamp" dbms="postgresql"/>
+  <property name="floatType" value="float4" dbms="postgresql"/>
+  <property name="clobType" value="clob" dbms="postgresql"/>
+  <property name="blobType" value="blob" dbms="postgresql"/>
+  <property name="uuidType" value="uuid" dbms="postgresql"/>
+  <property name="datetimeType" value="datetime" dbms="postgresql"/>
+  <property name="timeType" value="time(6)" dbms="postgresql"/>
+
+  <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260313110000_added_multi_vector_stores.xml"
+           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260328085766_add_column_user_id_chat_history.xml"
+           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260328083915_added_entity_Conversation.xml"
+           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260330085766_add_table_semantic_cache.xml"
+           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260331090000_add_version_to_conversation.xml"
+           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/202604091090000_add_vector_pdf_table.xml"
+           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260423180000_add_github_token_to_user.xml"
+           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260525180000_add_job_copilot_tables.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260529081300_update_job_offer_table.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260529090000_add_embedding_status_to_job_offer.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/202606131090000_column_type_chat_conversation.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260614090000_add_resume_tables.xml" relativeToChangelogFile="false"/>
+</databaseChangeLog>

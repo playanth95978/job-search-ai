@@ -1,0 +1,97 @@
+.robot-container {
+  margin-bottom: 2rem;
+  position: relative;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .ai-robot {
+    width: 150px;
+    height: 150px;
+    filter: drop-shadow(0 0 15px rgba(66, 153, 225, 0.4));
+    animation: float 4s ease-in-out infinite;
+
+    .head {
+      animation: headMovement 6s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    .eye {
+      fill: #4299e1;
+      animation: blink 4s infinite;
+    }
+
+    .antenna-light {
+      fill: #4299e1;
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes headMovement {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes blink {
+  0%,
+  45%,
+  55%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.5;
+    filter: brightness(1.5);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

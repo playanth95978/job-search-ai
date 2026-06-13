@@ -1,0 +1,24 @@
+<div class="error-page-container">
+  <div class="error-card">
+    <jhi-robot-container></jhi-robot-container>
+    <div class="error-content">
+      <h1 jhiTranslate="error.title">Oups ! Quelque chose s'est mal passé</h1>
+
+      <p>
+        On dirait que notre assistant IA a rencontré un petit bug. Pas de panique, nos ingénieurs sont déjà sur le coup pour rétablir la
+        connexion.
+      </p>
+
+      @if (errorMessage(); as errMessage) {
+        <div class="error-message-box">
+          <strong>Détails de l'erreur :</strong><br />
+          {{ errMessage }}
+        </div>
+      }
+
+      <div class="action-buttons">
+        <a class="btn-home" routerLink="/"> <fa-icon [icon]="'home'" class="me-2"> </fa-icon> Retour à l'accueil </a>
+      </div>
+    </div>
+  </div>
+</div>

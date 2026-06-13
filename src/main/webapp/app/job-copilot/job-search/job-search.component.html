@@ -1,0 +1,217 @@
+<div class="jc-search">
+  <div class="jc-search-header">
+    <h1><fa-icon icon="magnifying-glass"></fa-icon> Job Search</h1>
+    <p>Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail</p>
+  </div>
+
+  <div class="jc-search-tabs">
+    <button class="jc-tab" [class.active]="activeTab() === 'search'" (click)="activeTab.set('search')">
+      <fa-icon icon="search"></fa-icon> Keyword Search
+    </button>
+    <button class="jc-tab" [class.active]="activeTab() === 'ats'" (click)="activeTab.set('ats')">
+      <fa-icon icon="globe"></fa-icon> ATS / Board URL
+    </button>
+  </div>
+
+  @if (activeTab() === 'search') {
+    <div class="jc-search-form">
+      <div class="jc-input-group">
+        <div class="jc-input-wrapper">
+          <fa-icon icon="search" class="jc-input-icon"></fa-icon>
+          <input
+            type="text"
+            class="jc-input"
+            placeholder="Keywords (e.g. Java Spring Boot)"
+            [(ngModel)]="keywords"
+            (keyup.enter)="search()"
+          />
+        </div>
+        <div class="jc-input-wrapper">
+          <fa-icon icon="location-dot" class="jc-input-icon"></fa-icon>
+          <input type="text" class="jc-input" placeholder="Location" [(ngModel)]="location" (keyup.enter)="search()" />
+        </div>
+        <div class="jc-input-wrapper">
+          <fa-icon icon="filter" class="jc-input-icon"></fa-icon>
+          <select class="jc-input jc-select" [(ngModel)]="source" aria-label="Source">
+            <option value="">Toutes les sources</option>
+            @for (s of sources; track s.value) {
+              <option [value]="s.value">{{ s.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="jc-search-actions">
+        <button class="jc-btn jc-btn-primary" (click)="search()" [disabled]="searching()">
+          @if (searching()) {
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Searching...
+          } @else {
+            <fa-icon icon="search"></fa-icon> Search
+          }
+        </button>
+        <button class="jc-btn jc-btn-secondary" (click)="matchAll()" [disabled]="matching()">
+          @if (matching()) {
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Matching...
+          } @else {
+            <fa-icon icon="wand-magic-sparkles"></fa-icon> Match My Profile
+          }
+        </button>
+        <button class="jc-btn jc-btn-accent" (click)="matchAdvanced()" [disabled]="matchingAdvanced()">
+          @if (matchingAdvanced()) {
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Advanced...
+          } @else {
+            <fa-icon icon="chart-line"></fa-icon> Match Advanced
+          }
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="jc-search-form">
+      <div class="jc-input-group jc-input-single">
+        <div class="jc-input-wrapper jc-input-full">
+          <fa-icon icon="globe" class="jc-input-icon"></fa-icon>
+          <input
+            type="text"
+            class="jc-input"
+            placeholder="Paste ATS board URL (Greenhouse, Lever...)"
+            [(ngModel)]="atsUrl"
+            (keyup.enter)="fetchUrl()"
+          />
+        </div>
+      </div>
+      <div class="jc-search-actions">
+        <button class="jc-btn jc-btn-primary" (click)="fetchUrl()" [disabled]="fetching()">
+          @if (fetching()) {
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Fetching...
+          } @else {
+            <fa-icon icon="download"></fa-icon> Fetch Jobs
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
+  }
+
+  @if (matchResults().length > 0) {
+    <div class="jc-results-header">
+      <h2><fa-icon icon="wand-magic-sparkles"></fa-icon> Match Results</h2>
+      <span class="jc-results-count">{{ matchResults().length }} matches</span>
+    </div>
+    <div class="jc-results">
+      @for (match of matchResults(); track match.jobOffer.id) {
+        <div class="jc-match-card">
+          <div class="jc-match-score" [class]="'score-' + getScoreClass(match.score)">
+            <span class="jc-score-value">{{ match.score * 100 | number: '1.0-0' }}</span>
+            <span class="jc-score-label">%</span>
+          </div>
+          <div class="jc-match-info">
+            <div class="jc-match-title">
+              <strong>{{ match.jobOffer.title }}</strong>
+              @if (match.jobOffer.source) {
+                <span class="jc-source-badge" [style.background]="getSourceColor(match.jobOffer.source)">
+                  {{ getSourceLabel(match.jobOffer.source) }}
+                </span>
+              }
+            </div>
+            <div class="jc-match-company">
+              <fa-icon icon="building"></fa-icon> {{ match.jobOffer.company || 'Unknown' }}
+              @if (match.jobOffer.location) {
+                <span class="jc-separator">&middot;</span>
+                <fa-icon icon="location-dot"></fa-icon> {{ match.jobOffer.location }}
+              }
+              @if (match.jobOffer.remote) {
+                <span class="jc-remote-badge">Remote</span>
+              }
+            </div>
+            <div class="jc-match-tags">
+              @for (s of match.strengths; track s) {
+                <span class="jc-tag jc-tag-success"><fa-icon icon="check"></fa-icon> {{ s }}</span>
+              }
+              @for (w of match.weaknesses; track w) {
+                <span class="jc-tag jc-tag-warning"><fa-icon icon="triangle-exclamation"></fa-icon> {{ w }}</span>
+              }
+            </div>
+            <div class="jc-match-actions">
+              @if (match.jobOffer.applyUrl) {
+                <a [href]="match.jobOffer.applyUrl" target="_blank" class="jc-btn jc-btn-ghost">
+                  <fa-icon icon="external-link-alt"></fa-icon> View
+                </a>
+              }
+              <button (click)="openApplyModal(match.jobOffer)" class="jc-btn jc-btn-primary jc-btn-sm">
+                <fa-icon icon="paper-plane"></fa-icon> Postuler
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (offers().length > 0 && matchResults().length === 0) {
+    <div class="jc-results-header">
+      <h2><fa-icon icon="briefcase"></fa-icon> Jobs Found</h2>
+      <span class="jc-results-count">{{ offers().length }} results</span>
+    </div>
+    <div class="jc-results">
+      @for (offer of offers(); track offer.id) {
+        <div class="jc-job-card">
+          <div class="jc-job-info">
+            <div class="jc-job-title">
+              <strong>{{ offer.title }}</strong>
+              @if (offer.source) {
+                <span class="jc-source-badge" [style.background]="getSourceColor(offer.source)">
+                  {{ getSourceLabel(offer.source) }}
+                </span>
+              }
+            </div>
+            <div class="jc-job-company">
+              <fa-icon icon="building"></fa-icon> {{ offer.company || 'Unknown' }}
+              @if (offer.location) {
+                <span class="jc-separator">&middot;</span>
+                <fa-icon icon="location-dot"></fa-icon> {{ offer.location }}
+              }
+              @if (offer.remote) {
+                <span class="jc-remote-badge">Remote</span>
+              }
+              @if (offer.contractType) {
+                <span class="jc-contract-badge">{{ offer.contractType }}</span>
+              }
+            </div>
+            @if (offer.salaryMin || offer.salaryMax) {
+              <div class="jc-job-salary">
+                @if (offer.salaryMin && offer.salaryMax) {
+                  {{ offer.salaryMin | number }} — {{ offer.salaryMax | number }} €
+                } @else if (offer.salaryMin) {
+                  From {{ offer.salaryMin | number }} €
+                } @else {
+                  Up to {{ offer.salaryMax | number }} €
+                }
+              </div>
+            }
+          </div>
+          <div class="jc-job-actions">
+            @if (offer.applyUrl) {
+              <a [href]="offer.applyUrl" target="_blank" class="jc-btn jc-btn-ghost jc-btn-sm">
+                <fa-icon icon="external-link-alt"></fa-icon> View
+              </a>
+            }
+            <button (click)="openApplyModal(offer)" class="jc-btn jc-btn-primary jc-btn-sm">
+              <fa-icon icon="paper-plane"></fa-icon> Postuler
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (selectedOfferId(); as offerId) {
+    <jhi-apply-modal
+      (applied)="closeApplyModal()"
+      (closed)="closeApplyModal()"
+      [jobOfferId]="offerId"
+      [jobOffer]="selectedOffer() ?? undefined"
+    />
+  }
+</div>

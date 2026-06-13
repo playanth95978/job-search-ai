@@ -1,0 +1,176 @@
+<nav class="navbar navbar-expand-lg navbar-dark jc-navbar fixed-top">
+  <div class="container-fluid px-3 px-lg-4">
+    <a (click)="collapseNavbar()" class="navbar-brand jc-navbar-brand d-flex align-items-center" routerLink="/">
+      <span class="logo-img me-2"></span>
+      <span class="navbar-title fw-bold" jhiTranslate="global.title">Aiassistant</span>
+      @if (version) {
+        <span class="navbar-version small ms-2 d-none d-md-inline">{{ version }}</span>
+      }
+    </a>
+
+    <button (click)="toggleNavbar()" aria-label="Toggle navigation" class="navbar-toggler" type="button">
+      <fa-icon icon="bars" />
+    </button>
+
+    <div [class.show]="!isNavbarCollapsed()" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-1">
+        <!-- Accueil -->
+        <li class="nav-item">
+          <a
+            (click)="collapseNavbar()"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-link"
+            routerLink="/"
+            routerLinkActive="active"
+          >
+            <fa-icon [fixedWidth]="true" class="me-1" icon="home" />
+            <span jhiTranslate="global.menu.home">Accueil</span>
+          </a>
+        </li>
+
+        <!-- Job Copilot -->
+        <li class="nav-item">
+          <a (click)="collapseNavbar()" class="nav-link" routerLink="/job-copilot" routerLinkActive="active">
+            <fa-icon [fixedWidth]="true" class="me-1" icon="briefcase" />
+            <span>Job Copilot</span>
+          </a>
+        </li>
+
+        <!-- Chat / Historique -->
+        <li class="nav-item">
+          <a (click)="collapseNavbar()" class="nav-link" routerLink="/chat" routerLinkActive="active">
+            <fa-icon [fixedWidth]="true" class="me-1" icon="comments" />
+            <span jhiTranslate="home.history.title">Historique</span>
+          </a>
+        </li>
+
+        <!-- Administration Dropdown -->
+        <li *jhiHasAnyAuthority="'ROLE_ADMIN'" class="nav-item" ngbDropdown>
+          <button class="nav-link dropdown-toggle" data-cy="adminMenu" id="admin-menu" ngbDropdownToggle>
+            <fa-icon [fixedWidth]="true" class="me-1" icon="users-cog" />
+            <span jhiTranslate="global.menu.admin.main">Administration</span>
+          </button>
+          <div aria-labelledby="admin-menu" class="dropdown-menu shadow" ngbDropdownMenu>
+            <a
+              (click)="collapseNavbar()"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="dropdown-item"
+              routerLink="/authority"
+              routerLinkActive="active"
+            >
+              <fa-icon [fixedWidth]="true" class="me-2" icon="asterisk" />
+              <span jhiTranslate="global.menu.entities.adminAuthority">Authority</span>
+            </a>
+            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/user-management" routerLinkActive="active">
+              <fa-icon [fixedWidth]="true" class="me-2" icon="users" />
+              <span jhiTranslate="global.menu.admin.userManagement">Gestion des utilisateurs</span>
+            </a>
+            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/metrics" routerLinkActive="active">
+              <fa-icon [fixedWidth]="true" class="me-2" icon="tachometer-alt" />
+              <span jhiTranslate="global.menu.admin.metrics">Métriques</span>
+            </a>
+            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/health" routerLinkActive="active">
+              <fa-icon [fixedWidth]="true" class="me-2" icon="heart" />
+              <span jhiTranslate="global.menu.admin.health">Diagnostics</span>
+            </a>
+            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/configuration" routerLinkActive="active">
+              <fa-icon [fixedWidth]="true" class="me-2" icon="cogs" />
+              <span jhiTranslate="global.menu.admin.configuration">Configuration</span>
+            </a>
+            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/logs" routerLinkActive="active">
+              <fa-icon [fixedWidth]="true" class="me-2" icon="tasks" />
+              <span jhiTranslate="global.menu.admin.logs">Logs</span>
+            </a>
+            @if (openAPIEnabled()) {
+              <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/docs" routerLinkActive="active">
+                <fa-icon [fixedWidth]="true" class="me-2" icon="book" />
+                <span jhiTranslate="global.menu.admin.apidocs">API</span>
+              </a>
+            }
+          </div>
+        </li>
+
+        <!-- Langue -->
+        @if (languages && languages.length > 1) {
+          <li class="nav-item" ngbDropdown>
+            <button class="nav-link dropdown-toggle" id="languagesnavBarDropdown" ngbDropdownToggle>
+              <fa-icon [fixedWidth]="true" class="me-1" icon="flag" />
+              <span jhiTranslate="global.menu.language">Langue</span>
+            </button>
+            <div aria-labelledby="languagesnavBarDropdown" class="dropdown-menu shadow" ngbDropdownMenu>
+              @for (language of languages; track $index) {
+                <a (click)="changeLanguage(language); collapseNavbar()" [jhiActiveMenu]="language" class="dropdown-item">
+                  {{ language | findLanguageFromKey }}
+                </a>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+
+      <div class="d-flex align-items-center gap-2 jc-navbar-actions">
+        <!-- New Chat -->
+        <a (click)="collapseNavbar()" class="jc-btn jc-btn-primary jc-btn-sm" routerLink="/chat">
+          <fa-icon [fixedWidth]="true" icon="plus" />
+          <span jhiTranslate="home.landing.newChat">Nouveau Chat</span>
+        </a>
+
+        <!-- Account -->
+        <div class="d-inline-block" ngbDropdown>
+          @let accountRef = account;
+          <button class="nav-link dropdown-toggle account-toggle" data-cy="accountMenu" id="account-menu" ngbDropdownToggle>
+            @if (!accountRef?.imageUrl) {
+              <fa-icon [fixedWidth]="true" icon="user" />
+            } @else {
+              <img [src]="accountRef!.imageUrl" alt="Avatar" class="profile-image rounded-circle" />
+            }
+          </button>
+          <div aria-labelledby="account-menu" class="dropdown-menu dropdown-menu-end shadow" ngbDropdownMenu>
+            @if (accountRef !== null) {
+              <a
+                (click)="collapseNavbar()"
+                class="dropdown-item"
+                data-cy="settings"
+                routerLink="/account/settings"
+                routerLinkActive="active"
+              >
+                <fa-icon [fixedWidth]="true" class="me-2" icon="wrench" />
+                <span jhiTranslate="global.menu.account.settings">Profil</span>
+              </a>
+              <a
+                (click)="collapseNavbar()"
+                class="dropdown-item"
+                data-cy="passwordItem"
+                routerLink="/account/password"
+                routerLinkActive="active"
+              >
+                <fa-icon [fixedWidth]="true" class="me-2" icon="lock" />
+                <span jhiTranslate="global.menu.account.password">Mot de passe</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a (click)="logout()" class="dropdown-item text-danger" data-cy="logout" id="logout">
+                <fa-icon [fixedWidth]="true" class="me-2" icon="sign-out-alt" />
+                <span jhiTranslate="global.menu.account.logout">Déconnexion</span>
+              </a>
+            } @else {
+              <a (click)="login()" class="dropdown-item" data-cy="login" id="login">
+                <fa-icon [fixedWidth]="true" class="me-2" icon="sign-in-alt" />
+                <span jhiTranslate="global.menu.account.login">S&apos;authentifier</span>
+              </a>
+              <a
+                (click)="collapseNavbar()"
+                class="dropdown-item"
+                data-cy="register"
+                routerLink="/account/register"
+                routerLinkActive="active"
+              >
+                <fa-icon [fixedWidth]="true" class="me-2" icon="user-plus" />
+                <span jhiTranslate="global.menu.account.register">Créer un compte</span>
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

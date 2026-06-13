@@ -1,0 +1,135 @@
+<div class="jc-interview">
+  <div class="jc-header">
+    <div class="jc-header-content">
+      <h1><fa-icon icon="user-tie"></fa-icon> <span jhiTranslate="jobCopilot.interview.title">Entretien d'entraînement</span></h1>
+      <p class="jc-subtitle" jhiTranslate="jobCopilot.interview.subtitle">
+        Entraînez-vous aux questions d'entretien avec un recruteur virtuel et recevez des retours personnalisés.
+      </p>
+    </div>
+  </div>
+
+  <div class="container-fluid py-4">
+    <div class="row">
+      <div class="col-lg-8">
+        @if (jobOffers().length === 0) {
+          <div class="jc-empty-state">
+            <fa-icon icon="briefcase" size="2x"></fa-icon>
+            <p jhiTranslate="jobCopilot.interview.noOffers">
+              Vous n'avez pas encore de candidature. Postulez à une offre pour pouvoir vous entraîner à l'entretien correspondant.
+            </p>
+          </div>
+        } @else {
+          <div class="jc-interview-setup mb-4">
+            <label class="jc-label" for="interview-offer" jhiTranslate="jobCopilot.interview.selectOffer">Offre d'emploi</label>
+            <div class="jc-setup-row">
+              <select [disabled]="conversationId() !== null" [(ngModel)]="selectedJobOfferId" class="jc-select" id="interview-offer">
+                @for (offer of jobOffers(); track offer.id) {
+                  <option [value]="offer.id">
+                    {{ offer.title }}
+                    @if (offer.company) {
+                      — {{ offer.company }}
+                    }
+                  </option>
+                }
+              </select>
+              <select
+                (ngModelChange)="language.set($event)"
+                [ngModel]="language()"
+                aria-label="Langue de la lettre de motivation"
+                class="jc-select"
+              >
+                @for (lang of languages; track lang.value) {
+                  <option [value]="lang.value">{{ lang.label }}</option>
+                }
+              </select>
+
+              @if (conversationId() === null) {
+                <button (click)="start()" [disabled]="loading()" class="jc-btn jc-btn-primary" type="button">
+                  @if (loading()) {
+                    <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                  } @else {
+                    <fa-icon icon="play"></fa-icon>
+                  }
+                  <span jhiTranslate="jobCopilot.interview.start">Démarrer l'entretien</span>
+                </button>
+              } @else {
+                <button (click)="reset()" class="jc-btn jc-btn-ghost" type="button">
+                  <fa-icon icon="rotate"></fa-icon>
+                  <span jhiTranslate="jobCopilot.interview.reset">Recommencer</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (error()) {
+            <div class="alert alert-danger jc-error">{{ error() }}</div>
+          }
+
+          @if (messages().length > 0) {
+            <div class="jc-chat">
+              <div class="jc-chat-thread">
+                @for (msg of messages(); track trackByIndex($index)) {
+                  <div
+                    class="jc-chat-message"
+                    [class.jc-chat-recruiter]="msg.role === 'recruiter'"
+                    [class.jc-chat-candidate]="msg.role === 'candidate'"
+                  >
+                    <div class="jc-chat-avatar">
+                      @if (msg.role === 'recruiter') {
+                        <fa-icon icon="user-tie"></fa-icon>
+                      } @else {
+                        <fa-icon icon="user"></fa-icon>
+                      }
+                    </div>
+                    <div class="jc-chat-bubble">{{ msg.text }}</div>
+                  </div>
+                }
+                @if (sending()) {
+                  <div class="jc-chat-message jc-chat-recruiter">
+                    <div class="jc-chat-avatar"><fa-icon icon="user-tie"></fa-icon></div>
+                    <div class="jc-chat-bubble jc-chat-typing">
+                      <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="jc-chat-input">
+                <textarea
+                  (keydown.enter)="$event.preventDefault(); send()"
+                  [(ngModel)]="answer"
+                  [disabled]="sending()"
+                  [placeholder]="'jobCopilot.interview.answerPlaceholder' | translate"
+                  class="jc-textarea"
+                  rows="3"
+                ></textarea>
+                <button (click)="send()" [disabled]="sending() || !answer().trim()" class="jc-btn jc-btn-primary" type="button">
+                  <fa-icon icon="paper-plane"></fa-icon>
+                  <span jhiTranslate="jobCopilot.interview.send">Envoyer</span>
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="col-lg-4">
+        <aside class="jc-history-panel">
+          <div class="jc-history-header">
+            <fa-icon icon="comments"></fa-icon>
+            <span jhiTranslate="home.history.title">Historique</span>
+          </div>
+          <div class="jc-history-body">
+            <jhi-conversation
+              [typeChat]="'INTERVIEW'"
+              [selectable]="true"
+              [theme]="'light'"
+              [activeId]="conversationId()"
+              (conversationSelected)="openConversation($event)"
+            ></jhi-conversation>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>

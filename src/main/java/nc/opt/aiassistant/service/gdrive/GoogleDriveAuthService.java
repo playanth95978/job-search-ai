@@ -1,0 +1,127 @@
+package nc.opt.aiassistant.service.gdrive;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import nc.opt.aiassistant.config.ApplicationProperties;
+import nc.opt.aiassistant.domain.Authority;
+import nc.opt.aiassistant.domain.User;
+import nc.opt.aiassistant.repository.AuthorityRepository;
+import nc.opt.aiassistant.repository.UserRepository;
+import nc.opt.aiassistant.security.AuthoritiesConstants;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+@Service
+@Slf4j
+public class GoogleDriveAuthService {
+
+    private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+    private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
+    private static final String USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
+    private static final String SCOPES =
+        "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
+
+    private final ApplicationProperties.GoogleDrive config;
+    private final WebClient webClient;
+    private final UserRepository userRepository;
+    private final AuthorityRepository authorityRepository;
+
+    public GoogleDriveAuthService(
+        ApplicationProperties applicationProperties,
+        WebClient.Builder webClientBuilder,
+        UserRepository userRepository,
+        AuthorityRepository authorityRepository
+    ) {
+        this.config = applicationProperties.getGoogleDrive();
+        this.webClient = webClientBuilder.build();
+        this.userRepository = userRepository;
+        this.authorityRepository = authorityRepository;
+    }
+
+    public String buildAuthorizationUrl() {
+        return (
+            AUTH_URL +
+            "?client_id=" +
+            encode(config.getClientId()) +
+            "&redirect_uri=" +
+            encode(config.getRedirectUri()) +
+            "&response_type=code" +
+            "&scope=" +
+            encode(SCOPES) +
+            "&access_type=offline" +
+            "&prompt=consent"
+        );
+    }
+
+    public Mono<Map<String, Object>> exchangeCodeForTokens(String code) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("code", code);
+        form.add("client_id", config.getClientId());
+        form.add("client_secret", config.getClientSecret());
+        form.add("redirect_uri", config.getRedirectUri());
+        form.add("grant_type", "authorization_code");
+
+        return webClient
+            .post()
+            .uri(TOKEN_URL)
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(BodyInserters.fromFormData(form))
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {});
+    }
+
+    public Mono<GoogleUser> getUserInfo(String accessToken) {
+        return webClient
+            .get()
+            .uri(USERINFO_URL)
+            .headers(h -> h.setBearerAuth(accessToken))
+            .retrieve()
+            .bodyToMono(GoogleUser.class);
+    }
+
+    public User getOrCreateUser(GoogleUser googleUser) {
+        String login = googleUser.email().toLowerCase();
+
+        return userRepository.findOneWithAuthoritiesByLogin(login).orElseGet(() -> {
+            log.info("Creating new Google user: {}", login);
+            User newUser = new User();
+            newUser.setLogin(login);
+            newUser.setPassword(""); // Not used for Google users
+            newUser.setFirstName(googleUser.given_name());
+            newUser.setLastName(googleUser.family_name());
+            newUser.setEmail(login);
+            newUser.setActivated(true);
+            newUser.setLangKey("fr");
+
+            authorityRepository
+                .findById(AuthoritiesConstants.USER)
+                .ifPresent(authority -> newUser.setAuthorities(Collections.singleton(authority)));
+
+            return userRepository.save(newUser);
+        });
+    }
+
+    private static String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    public record GoogleUser(
+        String id,
+        String email,
+        boolean verified_email,
+        String name,
+        String given_name,
+        String family_name,
+        String picture,
+        String locale
+    ) {}
+}

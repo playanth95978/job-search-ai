@@ -1,0 +1,38 @@
+{
+  "jobCopilot": {
+    "cvQuality": {
+      "title": "CV Quality",
+      "selectedResume": "Selected Resume",
+      "score": "Score",
+      "aiReview": {
+        "button": "AI Review",
+        "loading": "Analyzing your CV with AI...",
+        "strengths": "Strengths",
+        "improvements": "Improvements",
+        "refresh": "Re-run AI review"
+      },
+      "metrics": {
+        "length": "Length",
+        "content": "Content",
+        "ats": "ATS-friendly",
+        "completeness": "Profile completeness"
+      },
+      "ratings": {
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor"
+      }
+    },
+    "interview": {
+      "title": "Interview Roleplay",
+      "subtitle": "Practice job interview questions with a virtual recruiter and get personalized feedback.",
+      "cardSubtitle": "Practice your interview with a virtual recruiter",
+      "selectOffer": "Job offer",
+      "noOffers": "You don't have any applications yet. Apply to a job offer to practice the matching interview.",
+      "start": "Start the interview",
+      "reset": "Restart",
+      "send": "Send",
+      "answerPlaceholder": "Type your answer..."
+    }
+  }
+}

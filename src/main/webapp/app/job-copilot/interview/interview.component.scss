@@ -1,0 +1,230 @@
+.jc-interview {
+  padding: 1.5rem;
+}
+
+.jc-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 2rem;
+  color: white;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .jc-subtitle {
+    margin: 0.25rem 0 0;
+    opacity: 0.85;
+    font-size: 0.95rem;
+  }
+}
+
+.jc-empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  color: var(--bs-secondary-color);
+
+  fa-icon {
+    color: #667eea;
+    margin-bottom: 1rem;
+  }
+}
+
+.jc-interview-setup {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.jc-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.jc-setup-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.jc-select {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+  font-size: 0.9rem;
+}
+
+.jc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.jc-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.jc-btn-ghost {
+  background: transparent;
+  color: var(--bs-secondary-color);
+  border: 1px solid var(--bs-border-color);
+
+  &:hover:not(:disabled) {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+  }
+}
+
+.jc-error {
+  margin-bottom: 1rem;
+}
+
+.jc-chat {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+}
+
+.jc-chat-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.jc-chat-message {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+
+  &.jc-chat-candidate {
+    flex-direction: row-reverse;
+
+    .jc-chat-bubble {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+  }
+}
+
+.jc-chat-avatar {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bs-tertiary-bg);
+  color: #667eea;
+}
+
+.jc-chat-bubble {
+  background: var(--bs-tertiary-bg);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-width: 80%;
+}
+
+.jc-chat-typing {
+  display: flex;
+  align-items: center;
+}
+
+.jc-chat-input {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.jc-textarea {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+  font-size: 0.9rem;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+}
+
+/* Conversation history panel (right column) — matches the interview light theme */
+.jc-history-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 500px;
+  max-height: calc(100vh - 220px);
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.jc-history-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  font-weight: 600;
+  font-size: 0.95rem;
+
+  fa-icon {
+    color: #667eea;
+  }
+}
+
+.jc-history-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.5rem 0.25rem;
+}

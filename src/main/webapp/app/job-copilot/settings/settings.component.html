@@ -1,0 +1,75 @@
+<div class="jc-settings">
+  <div class="jc-settings-header">
+    <h1><fa-icon icon="gear"></fa-icon> Job Preferences</h1>
+    <p>Configure your job search criteria to get better matches</p>
+  </div>
+
+  <form (ngSubmit)="save()" class="jc-form">
+    <div class="jc-form-section">
+      <h3><fa-icon icon="briefcase"></fa-icon> Work Type</h3>
+      <div class="jc-form-row">
+        <label class="jc-toggle">
+          <input type="checkbox" [(ngModel)]="prefs.remoteOnly" name="remoteOnly" />
+          <span class="jc-toggle-slider"></span>
+          <span class="jc-toggle-label">Remote only</span>
+        </label>
+      </div>
+      <div class="jc-form-row">
+        <label class="jc-label">Contract Type</label>
+        <select class="jc-select" [(ngModel)]="prefs.contractType" name="contractType">
+          <option value="">Any</option>
+          <option value="CDI">CDI</option>
+          <option value="CDD">CDD</option>
+          <option value="Freelance">Freelance</option>
+          <option value="Internship">Internship</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="jc-form-section">
+      <h3><fa-icon icon="chart-line"></fa-icon> Salary Range</h3>
+      <div class="jc-form-grid">
+        <div>
+          <label class="jc-label">Minimum (€/year)</label>
+          <input type="number" class="jc-input" [(ngModel)]="prefs.salaryMin" name="salaryMin" placeholder="e.g. 40000" />
+        </div>
+        <div>
+          <label class="jc-label">Maximum (€/year)</label>
+          <input type="number" class="jc-input" [(ngModel)]="prefs.salaryMax" name="salaryMax" placeholder="e.g. 80000" />
+        </div>
+      </div>
+    </div>
+
+    <div class="jc-form-section">
+      <h3><fa-icon icon="star"></fa-icon> Preferences</h3>
+      <div class="jc-form-row">
+        <label class="jc-label">Preferred Roles</label>
+        <input type="text" class="jc-input" [(ngModel)]="rolesInput" name="roles" placeholder="e.g. Backend Developer, Full Stack" />
+        <span class="jc-hint">Comma separated</span>
+      </div>
+      <div class="jc-form-row">
+        <label class="jc-label">Excluded Technologies</label>
+        <input type="text" class="jc-input" [(ngModel)]="excludedInput" name="excluded" placeholder="e.g. PHP, Ruby" />
+        <span class="jc-hint">Technologies you want to avoid</span>
+      </div>
+      <div class="jc-form-row">
+        <label class="jc-label">Preferred Locations</label>
+        <input type="text" class="jc-input" [(ngModel)]="locationsInput" name="locations" placeholder="e.g. Paris, Lyon, Remote" />
+        <span class="jc-hint">Comma separated</span>
+      </div>
+    </div>
+
+    <div class="jc-form-actions">
+      <button type="submit" class="jc-btn jc-btn-primary" [disabled]="saving()">
+        @if (saving()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Saving...
+        } @else {
+          <fa-icon icon="save"></fa-icon> Save Preferences
+        }
+      </button>
+      @if (saved()) {
+        <span class="jc-saved"><fa-icon icon="circle-check"></fa-icon> Saved!</span>
+      }
+    </div>
+  </form>
+</div>

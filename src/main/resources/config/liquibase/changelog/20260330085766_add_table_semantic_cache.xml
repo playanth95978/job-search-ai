@@ -1,0 +1,43 @@
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+  <changeSet id="create-semantic-cache-table" author="anthony">
+    <!-- 2. Table -->
+    <createTable tableName="semantic_cache">
+
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+
+      <column name="content" type="TEXT"/>
+
+      <column name="embedding" type="vector(768)"/>
+
+      <column name="metadata" type="JSONB"/>
+
+      <column name="created_at" type="TIMESTAMP"
+              defaultValueComputed="now()"/>
+      <column name="expires_at" type="TIMESTAMP"/>
+
+    </createTable>
+
+    <!-- 3. Index vector (ivfflat cosine) -->
+    <sql>
+      CREATE INDEX semantic_cache_embedding_idx
+        ON semantic_cache
+        USING ivfflat (embedding vector_cosine_ops)
+        WITH (lists = 1000);
+    </sql>
+
+<!--    sinon perf dégradée au début -->
+    <sql>
+      ANALYZE semantic_cache;
+    </sql>
+
+  </changeSet>
+
+</databaseChangeLog>

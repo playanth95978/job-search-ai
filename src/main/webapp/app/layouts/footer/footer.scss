@@ -1,0 +1,42 @@
+.footer {
+  background-color: #f8f9fa;
+  color: #6c757d;
+
+  .text-primary {
+    color: #0d6efd !important;
+  }
+
+  .nav-link {
+    transition: color 0.2s ease-in-out;
+    &:hover {
+      color: #0d6efd !important;
+      text-decoration: underline;
+    }
+  }
+
+  .social-links {
+    .btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      line-height: 32px;
+      text-align: center;
+      background-color: #e9ecef;
+      color: #495057;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #0d6efd;
+        color: white;
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  h5,
+  h6 {
+    color: #212529;
+  }
+
+  border-top: 1px solid #dee2e6;
+}

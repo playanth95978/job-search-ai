@@ -1,0 +1,121 @@
+# ===================================================================
+# Production stack for job-search-ai (Hostinger VPS).
+#
+#   cd deploy
+#   cp .env.example .env   # then fill every value
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# The app image is built with Jib from the project root:
+#   ./mvnw -Pprod clean verify jib:dockerBuild   # produces image "job-search-ai"
+# ===================================================================
+
+name: job-search-ai
+
+services:
+  postgresql:
+    image: paradedb/paradedb:latest
+    container_name: jsa-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: jsa-ollama
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ['CMD-SHELL', 'ollama list >/dev/null 2>&1 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # One-shot: pulls the embedding models the app needs, then exits.
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: jsa-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ['/bin/sh', '-c', 'ollama pull nomic-embed-text && ollama pull mxbai-embed-large']
+    restart: 'no'
+
+  # One-shot: makes the ONNX volume writable by the app's non-root user (uid 1000).
+  onnx-init:
+    image: busybox
+    container_name: jsa-onnx-init
+    command: ['sh', '-c', 'mkdir -p /scripts/onnxmodel && chown -R 1000:1000 /scripts/onnxmodel']
+    volumes:
+      - onnx-model:/scripts/onnxmodel
+    restart: 'no'
+
+  app:
+    image: job-search-ai:latest
+    container_name: jsa-app
+    working_dir: /
+    env_file:
+      - .env
+    environment:
+      _JAVA_OPTIONS: ${JAVA_OPTS:--Xmx2g -Xms512m}
+      SPRING_PROFILES_ACTIVE: prod
+      OLLAMA_BASE_URL: http://ollama:11434
+      SPRING_LIQUIBASE_URL: ${SPRING_DATASOURCE_URL}
+    volumes:
+      # Persist the ~570 MB ONNX reranker model (downloaded on first boot).
+      - onnx-model:/scripts/onnxmodel
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \"GET /management/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3; grep -q \"\\\"status\\\":\\\"UP\\\"\" <&3'"
+      interval: 10s
+      timeout: 5s
+      retries: 40
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      onnx-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: jsa-nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/job-search-ai.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certbot/www:/var/www/certbot:ro
+      - ./nginx/certbot/conf:/etc/letsencrypt:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # Renews certificates; run the initial issuance manually (see deploy/README.md).
+  certbot:
+    image: certbot/certbot:latest
+    container_name: jsa-certbot
+    volumes:
+      - ./nginx/certbot/www:/var/www/certbot
+      - ./nginx/certbot/conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'"
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  ollama-models:
+  onnx-model:

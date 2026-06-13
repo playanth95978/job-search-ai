@@ -1,0 +1,150 @@
+/**
+ * JHipster JDL model for Job Search AI Assistant
+ */
+
+entity JobOffer {
+    id UUID,
+    title String required,
+    company String,
+    location String,
+    country String,
+    remote Boolean,
+    description TextBlob,
+    searchText TextBlob,
+    skills TextBlob,
+    metadata TextBlob,
+    rawPayload TextBlob,
+    contentHash String maxlength(64),
+    embeddingStatus EmbeddingStatus,
+    embeddingModel String,
+    reindexVersion Integer,
+    retryCount Integer,
+    indexingError String,
+    source JobSource,
+    sourceId String,
+    applyUrl String,
+    salaryMin Integer,
+    salaryMax Integer,
+    salaryCurrency String,
+    contractType String,
+    experienceLevel String,
+    publishedAt Instant,
+    createdAt Instant required,
+    indexedAt Instant,
+    updatedAt Instant,
+    expiresAt Instant
+}
+
+entity CandidateProfile {
+    id UUID,
+    userId String required,
+    fullName String,
+    email String,
+    location String,
+    yearsOfExperience Integer,
+    skills TextBlob,
+    experiences TextBlob,
+    preferredRoles TextBlob,
+    languages TextBlob,
+    education TextBlob,
+    certifications TextBlob,
+    rawMarkdown TextBlob,
+    cvFilename String,
+    createdAt Instant required,
+    updatedAt Instant
+}
+
+entity JobApplication {
+    id UUID,
+    userId String required,
+    status ApplicationStatus,
+    coverLetter TextBlob,
+    notes TextBlob,
+    matchScore Double,
+    createdAt Instant required,
+    updatedAt Instant,
+    appliedAt Instant
+}
+
+entity Conversation {
+    id UUID required,
+    userId String required,
+    title String,
+    createdAt Instant required,
+    lastMessageAt Instant,
+    summary TextBlob,
+    metadata TextBlob
+}
+
+entity UserPreference {
+    id UUID,
+    userId String required unique,
+    remoteOnly Boolean,
+    contractType String,
+    salaryMin Integer,
+    salaryMax Integer,
+    preferredRoles TextBlob,
+    excludedTechnologies TextBlob,
+    preferredLocations TextBlob
+}
+
+enum ApplicationStatus {
+    DRAFT,
+    APPLIED,
+    INTERVIEW,
+    REJECTED,
+    GHOSTED,
+    OFFER,
+    WITHDRAWN
+}
+
+enum ChunkType {
+    EXPERIENCE,
+    SKILLS,
+    EDUCATION,
+    PROJECT,
+    SUMMARY,
+    CERTIFICATION,
+    LANGUAGE,
+    OTHER
+}
+
+enum EmbeddingStatus {
+    PENDING,
+    PROCESSING,
+    COMPLETED,
+    FAILED
+}
+
+enum JobSource {
+    GREENHOUSE,
+    LEVER,
+    ASHBY,
+    WORKABLE,
+    REMOTEOK,
+    WEWORKREMOTELY,
+    FRANCE_TRAVAIL,
+    EMPLOI_NC,
+    HELLOWORK,
+    SEEK,
+    MANUAL,
+    LINKEDIN,
+    WELCOME_TO_THE_JUNGLE
+}
+
+enum MessageRole {
+    USER,
+    ASSISTANT,
+    SYSTEM
+}
+
+relationship ManyToOne {
+    JobApplication{jobOffer} to JobOffer,
+    JobApplication{candidateProfile} to CandidateProfile
+}
+
+// Options
+dto * with mapstruct
+service * with serviceClass
+paginate JobOffer with pagination
+filter *

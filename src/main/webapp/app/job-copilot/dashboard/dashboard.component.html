@@ -1,0 +1,137 @@
+<div class="jc-dashboard">
+  <div class="jc-header">
+    <div class="jc-header-content">
+      <h1><fa-icon icon="briefcase"></fa-icon> Job Copilot</h1>
+      <p class="jc-subtitle">Your AI-powered career assistant</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="jc-loading">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p>Loading your profile...</p>
+    </div>
+  } @else if (!profile()) {
+    <div class="jc-empty-state">
+      <div class="jc-empty-icon">
+        <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
+      </div>
+      <h2>Welcome to Job Copilot</h2>
+      <p>Upload your CV and let AI find your perfect job match</p>
+      <div class="jc-features">
+        <div class="jc-feature">
+          <fa-icon icon="robot"></fa-icon>
+          <span>AI Profile Extraction</span>
+        </div>
+        <div class="jc-feature">
+          <fa-icon icon="magnifying-glass"></fa-icon>
+          <span>Smart Job Search</span>
+        </div>
+        <div class="jc-feature">
+          <fa-icon icon="chart-line"></fa-icon>
+          <span>Semantic Matching</span>
+        </div>
+        <div class="jc-feature">
+          <fa-icon icon="paper-plane"></fa-icon>
+          <span>Application Tracking</span>
+        </div>
+      </div>
+      <a routerLink="/job-copilot/onboarding" class="jc-btn jc-btn-primary jc-btn-lg">
+        <fa-icon icon="cloud-arrow-up"></fa-icon> Upload your CV
+      </a>
+    </div>
+  } @else {
+    <div class="jc-content">
+      <div class="jc-profile-card">
+        <div class="jc-profile-header">
+          <div class="jc-avatar">
+            <fa-icon icon="user-circle" size="2x"></fa-icon>
+          </div>
+          <div class="jc-profile-info">
+            <h2>{{ profile()?.fullName || 'Your Profile' }}</h2>
+            <div class="jc-profile-meta">
+              @if (profile()?.location) {
+                <span><fa-icon icon="location-dot"></fa-icon> {{ profile()?.location }}</span>
+              }
+              @if (profile()?.yearsOfExperience) {
+                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()?.yearsOfExperience }} years exp.</span>
+              }
+              @if (profile()?.email) {
+                <span><fa-icon icon="envelope"></fa-icon> {{ profile()?.email }}</span>
+              }
+            </div>
+          </div>
+          <a routerLink="/job-copilot/onboarding" class="jc-btn jc-btn-ghost" title="Update CV">
+            <fa-icon icon="arrows-rotate"></fa-icon>
+          </a>
+        </div>
+
+        @if (profile()?.skills) {
+          <div class="jc-skills">
+            @for (skill of parseSkills(profile()?.skills).slice(0, 10); track skill) {
+              <span class="jc-skill-tag">{{ skill }}</span>
+            }
+            @if (parseSkills(profile()?.skills).length > 10) {
+              <span class="jc-skill-more">+{{ parseSkills(profile()?.skills).length - 10 }} more</span>
+            }
+          </div>
+        }
+
+        <div class="jc-profile-footer">
+          <jhi-cv-quality [profile]="profile()!" />
+        </div>
+      </div>
+
+      @if (statsEntries().length > 0) {
+        <div class="jc-stats-grid">
+          @for (entry of statsEntries(); track entry[0]) {
+            <div class="jc-stat-card" [style.border-left-color]="getStatusColor(entry[0])">
+              <div class="jc-stat-icon" [style.color]="getStatusColor(entry[0])">
+                <fa-icon [icon]="getStatusIcon(entry[0])"></fa-icon>
+              </div>
+              <div class="jc-stat-info">
+                <span class="jc-stat-value">{{ entry[1] }}</span>
+                <span class="jc-stat-label">{{ entry[0] | lowercase }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="jc-actions">
+        <a routerLink="/job-copilot/search" class="jc-action-card jc-action-search">
+          <fa-icon icon="magnifying-glass" size="lg"></fa-icon>
+          <div>
+            <strong>Search Jobs</strong>
+            <span>Find opportunities across multiple sources</span>
+          </div>
+          <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
+        </a>
+        <a routerLink="/job-copilot/applications" class="jc-action-card jc-action-apps">
+          <fa-icon icon="list-check" size="lg"></fa-icon>
+          <div>
+            <strong>Applications</strong>
+            <span>Track and manage your applications</span>
+          </div>
+          <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
+        </a>
+        <a routerLink="/job-copilot/settings" class="jc-action-card jc-action-settings">
+          <fa-icon icon="gear" size="lg"></fa-icon>
+          <div>
+            <strong>Preferences</strong>
+            <span>Configure your job search criteria</span>
+          </div>
+          <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
+        </a>
+        <a routerLink="/job-copilot/interview" class="jc-action-card jc-action-interview">
+          <fa-icon icon="user-tie" size="lg"></fa-icon>
+          <div>
+            <strong jhiTranslate="jobCopilot.interview.title">Entretien d'entraînement</strong>
+            <span jhiTranslate="jobCopilot.interview.cardSubtitle">Entraînez-vous à l'entretien avec un recruteur virtuel</span>
+          </div>
+          <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
+        </a>
+      </div>
+    </div>
+  }
+</div>

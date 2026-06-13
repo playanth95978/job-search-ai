@@ -1,0 +1,38 @@
+{
+  "jobCopilot": {
+    "cvQuality": {
+      "title": "Qualité du CV",
+      "selectedResume": "CV sélectionné",
+      "score": "Score",
+      "aiReview": {
+        "button": "Analyse IA",
+        "loading": "Analyse de votre CV par l'IA en cours...",
+        "strengths": "Points forts",
+        "improvements": "Pistes d'amélioration",
+        "refresh": "Relancer l'analyse IA"
+      },
+      "metrics": {
+        "length": "Longueur",
+        "content": "Contenu",
+        "ats": "Compatible ATS",
+        "completeness": "Complétude du profil"
+      },
+      "ratings": {
+        "good": "Bon",
+        "fair": "Moyen",
+        "poor": "Faible"
+      }
+    },
+    "interview": {
+      "title": "Entretien d'entraînement",
+      "subtitle": "Entraînez-vous aux questions d'entretien avec un recruteur virtuel et recevez des retours personnalisés.",
+      "cardSubtitle": "Entraînez-vous à l'entretien avec un recruteur virtuel",
+      "selectOffer": "Offre d'emploi",
+      "noOffers": "Vous n'avez pas encore de candidature. Postulez à une offre pour pouvoir vous entraîner à l'entretien correspondant.",
+      "start": "Démarrer l'entretien",
+      "reset": "Recommencer",
+      "send": "Envoyer",
+      "answerPlaceholder": "Tapez votre réponse..."
+    }
+  }
+}

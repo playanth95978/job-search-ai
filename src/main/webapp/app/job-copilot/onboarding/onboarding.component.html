@@ -1,0 +1,115 @@
+<div class="jc-onboarding">
+  <div class="jc-header">
+    <h1><fa-icon icon="cloud-arrow-up"></fa-icon> Upload your CV</h1>
+    <p class="jc-subtitle">PDF or DOCX — AI will extract your profile automatically</p>
+  </div>
+
+  @if (uploading()) {
+    <div class="jc-processing">
+      <div class="jc-processing-animation">
+        <div class="spinner-grow text-primary" role="status"></div>
+      </div>
+      <h3>AI is analyzing your CV...</h3>
+      <p>Extracting skills, experience, and qualifications</p>
+      <div class="jc-steps">
+        <div class="jc-step active">
+          <fa-icon icon="file-pdf"></fa-icon>
+          <span>Reading document</span>
+        </div>
+        <div class="jc-step-divider"></div>
+        <div class="jc-step active">
+          <fa-icon icon="robot"></fa-icon>
+          <span>AI extraction</span>
+        </div>
+        <div class="jc-step-divider"></div>
+        <div class="jc-step">
+          <fa-icon icon="database"></fa-icon>
+          <span>Indexing</span>
+        </div>
+      </div>
+    </div>
+  } @else if (profile()) {
+    <div class="jc-success">
+      <div class="jc-success-icon">
+        <fa-icon icon="circle-check" size="3x"></fa-icon>
+      </div>
+      <h2>Profile extracted successfully!</h2>
+
+      <jhi-cv-quality [profile]="profile()!" />
+
+      <div class="jc-extracted-profile">
+        <div class="jc-ep-header">
+          <div class="jc-ep-avatar">
+            <fa-icon icon="user-circle" size="2x"></fa-icon>
+          </div>
+          <div>
+            <h3>{{ profile()!.fullName }}</h3>
+            <div class="jc-ep-meta">
+              @if (profile()!.location) {
+                <span><fa-icon icon="location-dot"></fa-icon> {{ profile()!.location }}</span>
+              }
+              @if (profile()!.yearsOfExperience) {
+                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()!.yearsOfExperience }} years</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (profile()!.skills) {
+          <div class="jc-ep-section">
+            <h4><fa-icon icon="code"></fa-icon> Skills</h4>
+            <div class="jc-skill-tags">
+              @for (skill of parseSkills(profile()!.skills); track skill) {
+                <span class="jc-skill-tag">{{ skill }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        @if (profile()!.education) {
+          <div class="jc-ep-section">
+            <h4><fa-icon icon="graduation-cap"></fa-icon> Education</h4>
+            <p>{{ profile()!.education }}</p>
+          </div>
+        }
+
+        @if (profile()!.certifications) {
+          <div class="jc-ep-section">
+            <h4><fa-icon icon="certificate"></fa-icon> Certifications</h4>
+            <p>{{ profile()!.certifications }}</p>
+          </div>
+        }
+      </div>
+
+      <button class="jc-btn jc-btn-primary jc-btn-lg" (click)="goToDashboard()">
+        <fa-icon icon="arrow-right"></fa-icon> Go to Dashboard
+      </button>
+    </div>
+  } @else {
+    <div
+      class="jc-dropzone"
+      [class.jc-dropzone-active]="isDragOver()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="isDragOver.set(false)"
+      (drop)="onDrop($event)"
+    >
+      <div class="jc-dropzone-content">
+        <div class="jc-dropzone-icon">
+          <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
+        </div>
+        <h3>Drag & drop your CV here</h3>
+        <p>or</p>
+        <input type="file" #fileInput accept=".pdf,.docx" (change)="onFileSelected($event)" hidden />
+        <button class="jc-btn jc-btn-primary" (click)="fileInput.click()"><fa-icon icon="folder-open"></fa-icon> Browse files</button>
+        <p class="jc-dropzone-hint">Supports PDF and DOCX formats</p>
+      </div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="jc-error">
+      <fa-icon icon="circle-exclamation"></fa-icon>
+      {{ error() }}
+    </div>
+  }
+</div>

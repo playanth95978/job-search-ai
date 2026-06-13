@@ -1,0 +1,61 @@
+{
+  "home": {
+    "title": "Job Search AI",
+    "hero": {
+      "badge": "Copilote de carrière propulsé par l'IA",
+      "title": "Décrochez votre prochain job plus vite, avec l'IA à vos côtés",
+      "subtitle": "Importez votre CV, recevez des offres pertinentes, générez des lettres de motivation sur-mesure et entraînez-vous aux entretiens — le tout au même endroit.",
+      "ctaPrimary": "Ouvrir Job Copilot",
+      "ctaSecondary": "Rechercher des offres"
+    },
+    "logged": {
+      "message": "Vous êtes connecté en tant que \"{{username}}\"."
+    },
+    "guest": {
+      "title": "Bienvenue sur Job Search AI",
+      "subtitle": "Connectez-vous pour accéder à votre tableau de bord personnalisé, vos candidatures et votre copilote de carrière IA."
+    },
+    "quickAccess": {
+      "title": "Accès rapide",
+      "onboarding": {
+        "title": "Mon profil",
+        "subtitle": "Importez ou mettez à jour votre CV"
+      },
+      "cvBuilder": {
+        "title": "Créateur de CV",
+        "subtitle": "Concevez et personnalisez votre CV en temps réel"
+      },
+      "search": {
+        "title": "Rechercher des offres",
+        "subtitle": "Trouvez des opportunités sur plusieurs sources"
+      },
+      "applications": {
+        "title": "Candidatures",
+        "subtitle": "Suivez et gérez vos candidatures"
+      },
+      "interview": {
+        "title": "Entraînement entretien",
+        "subtitle": "Entraînez-vous avec un recruteur virtuel"
+      },
+      "settings": {
+        "title": "Préférences",
+        "subtitle": "Configurez vos critères de recherche"
+      },
+      "chat": {
+        "title": "Assistant IA",
+        "subtitle": "Discutez avec votre copilote IA"
+      }
+    },
+    "stats": {
+      "title": "Aperçu de vos candidatures"
+    },
+    "history": {
+      "title": "Historique",
+      "noHistory": "Aucune conversation trouvée",
+      "untitled": "Nouvelle conversation"
+    },
+    "landing": {
+      "newChat": "Nouveau Chat"
+    }
+  }
+}

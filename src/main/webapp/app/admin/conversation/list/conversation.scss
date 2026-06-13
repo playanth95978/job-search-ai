@@ -1,0 +1,128 @@
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+
+  form {
+    display: contents;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+}
+
+.date-separator {
+  letter-spacing: 0.05rem;
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.history-item {
+  color: #ececec;
+  background: transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border: 1px solid transparent;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+
+    .dropdown-trigger {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .conversation-icon {
+      opacity: 1 !important;
+    }
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-weight: 500;
+
+    .conversation-icon {
+      opacity: 1 !important;
+      color: #0d6efd;
+    }
+  }
+}
+
+.dropdown-trigger {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+
+  .btn-icon {
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    border-radius: 6px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+// Pour éviter que le bouton de dropdown ne soit masqué si le dropdown est ouvert
+.dropdown-trigger.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.transition-all {
+  transition: all 0.2s ease;
+}
+
+.last-message {
+  line-height: 1.2;
+}
+
+/* Light theme (embedded in a light panel, e.g. the interview page) */
+:host(.theme-light) {
+  .history-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .history-item {
+    color: var(--bs-body-color);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--bs-tertiary-bg);
+      color: var(--bs-body-color);
+    }
+
+    &.active {
+      background: rgba(102, 126, 234, 0.12);
+      color: var(--bs-body-color);
+
+      .conversation-icon {
+        color: #667eea;
+      }
+    }
+  }
+
+  .dropdown-trigger .btn-icon {
+    color: var(--bs-secondary-color);
+
+    &:hover {
+      background: var(--bs-tertiary-bg);
+      color: var(--bs-body-color);
+    }
+  }
+}

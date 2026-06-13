@@ -1,0 +1,66 @@
+<div class="jc-applications">
+  <div class="jc-apps-header">
+    <h1><fa-icon icon="list-check"></fa-icon> My Applications</h1>
+    <span class="jc-apps-count" *ngIf="applications().length > 0">{{ applications().length }} total</span>
+  </div>
+
+  @if (applications().length === 0) {
+    <div class="jc-empty">
+      <fa-icon icon="paper-plane" size="2x" class="jc-empty-icon"></fa-icon>
+      <h3>No applications yet</h3>
+      <p>Search for jobs and generate applications to get started.</p>
+    </div>
+  }
+
+  @for (app of applications(); track app.id) {
+    <div class="jc-app-card" [style.border-left-color]="getStatusColor(app.status)">
+      <div class="jc-app-header">
+        <div class="jc-app-status-icon" [style.color]="getStatusColor(app.status)">
+          <fa-icon [icon]="getStatusIcon(app.status)"></fa-icon>
+        </div>
+        <div class="jc-app-info">
+          <strong>{{ app.jobOffer?.title || 'Unknown Position' }}</strong>
+          <div class="jc-app-company"><fa-icon icon="building"></fa-icon> {{ app.jobOffer?.company || 'Unknown' }}</div>
+        </div>
+        <div class="jc-app-controls">
+          @if (app.matchScore) {
+            <span class="jc-match-badge">{{ app.matchScore * 100 | number: '1.0-0' }}% match</span>
+          }
+          @if (app.status === 'DRAFT') {
+            <button (click)="openApplyModal(app)" class="jc-btn jc-btn-primary jc-btn-sm">
+              <fa-icon icon="paper-plane"></fa-icon> Postuler
+            </button>
+          }
+          <select
+            class="jc-status-select"
+            [style.border-color]="getStatusColor(app.status)"
+            [ngModel]="app.status"
+            (ngModelChange)="updateStatus(app.id!, $event)"
+          >
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (app.coverLetter) {
+        <details class="jc-cover-letter">
+          <summary><fa-icon icon="file-alt"></fa-icon> View Cover Letter</summary>
+          <div class="jc-cover-content">{{ app.coverLetter }}</div>
+        </details>
+      }
+
+      <div class="jc-app-footer">
+        <span><fa-icon icon="calendar-alt"></fa-icon> Created {{ app.createdAt | date: 'mediumDate' }}</span>
+        @if (app.appliedAt) {
+          <span>&middot; Applied {{ app.appliedAt | date: 'mediumDate' }}</span>
+        }
+      </div>
+    </div>
+  }
+
+  @if (selectedApplication(); as app) {
+    <jhi-apply-modal (applied)="onApplied()" (closed)="closeApplyModal()" [existingApplication]="app" />
+  }
+</div>

@@ -1,0 +1,12 @@
+{
+  "chat": {
+    "empty": {
+      "title": "Start a new conversation",
+      "subtitle": "Pick a conversation from the history or ask your first question."
+    },
+    "conversation": {
+      "title": "Conversation",
+      "placeholder": "This conversation will be available soon."
+    }
+  }
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Stores the GitHub OAuth access token (encrypted at rest with
+        Spring Security's TextEncryptor) so the agent can later list and
+        clone the user's repositories without prompting for credentials
+        on every interaction. The column is nullable because non-GitHub
+        users (local accounts) never receive a token.
+    -->
+    <changeSet id="20260423180000-1" author="aattia">
+        <addColumn tableName="jhi_user">
+            <column name="github_access_token" type="varchar(2048)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

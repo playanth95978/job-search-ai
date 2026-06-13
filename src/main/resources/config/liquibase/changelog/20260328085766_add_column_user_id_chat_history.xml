@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+  <changeSet id="20260328110000-1" author="codex">
+    <sql>
+    ALTER TABLE spring_ai_chat_memory ADD COLUMN user_id VARCHAR(255);
+
+    CREATE INDEX idx_chat_memory_user_conv
+      ON spring_ai_chat_memory(user_id, conversation_id);
+
+    CREATE INDEX idx_chat_memory_timestamp
+      ON spring_ai_chat_memory(timestamp DESC);</sql>
+  </changeSet>
+</databaseChangeLog>

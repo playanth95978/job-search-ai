@@ -1,0 +1,194 @@
+package nc.opt.aiassistant.service.jobcopilot.ats;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import nc.opt.aiassistant.domain.JobOffer;
+import nc.opt.aiassistant.domain.enumeration.JobSource;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class SeekConnector implements AtsConnector {
+
+    private static final String SEEK_BASE = "https://www.seek.com.au";
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public boolean supports(String url) {
+        return url != null && url.contains("seek.com.au");
+    }
+
+    @Override
+    public JobSource getSource() {
+        return JobSource.SEEK;
+    }
+
+    @Override
+    public List<JobOffer> fetchJobs(String keywords, String location) {
+        List<JobOffer> results = new ArrayList<>();
+        try {
+            results = fetchViaHtmlScraping(keywords, location);
+        } catch (Exception e) {
+            log.error("Seek fetch failed: {}", e.getMessage());
+        }
+        return results;
+    }
+
+    private List<JobOffer> fetchViaHtmlScraping(String keywords, String location) throws Exception {
+        List<JobOffer> results = new ArrayList<>();
+        String searchSlug = buildSearchSlug(keywords);
+        String url = SEEK_BASE + "/" + searchSlug;
+        if (location != null && !location.isBlank()) {
+            url += "-in-" + encode(location).toLowerCase().replace("+", "-");
+        }
+
+        Document doc = Jsoup.connect(url)
+            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36")
+            .timeout(15_000)
+            .get();
+
+        Elements scripts = doc.select("script[type='application/ld+json']");
+        for (Element script : scripts) {
+            try {
+                JsonNode json = objectMapper.readTree(script.html());
+                if (json.has("@type") && "JobPosting".equals(json.path("@type").asText())) {
+                    results.add(parseJobPosting(json));
+                } else if (json.isArray()) {
+                    for (JsonNode item : json) {
+                        if ("JobPosting".equals(item.path("@type").asText())) {
+                            results.add(parseJobPosting(item));
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        if (results.isEmpty()) {
+            results = parseFromHtml(doc);
+        }
+
+        return results;
+    }
+
+    private List<JobOffer> parseFromHtml(Document doc) {
+        List<JobOffer> results = new ArrayList<>();
+        Elements articles = doc.select("article[data-testid], article[data-card-type], [data-testid*='job-card']");
+        if (articles.isEmpty()) {
+            articles = doc.select("article, div[data-job-id]");
+        }
+
+        for (Element article : articles) {
+            try {
+                JobOffer offer = new JobOffer();
+                String title = extractText(article, "a[data-testid*='title'], h3 a, a[href*='/job/']");
+                if (title.isBlank()) continue;
+                offer.setTitle(title);
+
+                offer.setCompany(extractText(article, "[data-testid*='company'], span[data-testid*='company']"));
+                offer.setLocation(extractText(article, "[data-testid*='location'], span[data-testid*='location']"));
+                offer.setSource(JobSource.SEEK);
+                offer.setRemote(isRemote(offer.getLocation(), offer.getTitle()));
+
+                Element link = article.selectFirst("a[href*='/job/']");
+                if (link != null) {
+                    String href = link.absUrl("href");
+                    offer.setApplyUrl(href);
+                    offer.setSourceId(extractJobId(href));
+                }
+
+                String salary = extractText(article, "[data-testid*='salary'], span[data-testid*='salary']");
+                if (!salary.isBlank()) parseSalary(salary, offer);
+
+                results.add(offer);
+                if (results.size() >= 50) break;
+            } catch (Exception e) {
+                log.debug("Failed to parse Seek card: {}", e.getMessage());
+            }
+        }
+        return results;
+    }
+
+    private JobOffer parseJobPosting(JsonNode json) {
+        JobOffer offer = new JobOffer();
+        offer.setTitle(json.path("title").asText(""));
+        offer.setDescription(json.path("description").asText(""));
+        offer.setSource(JobSource.SEEK);
+        offer.setApplyUrl(json.path("url").asText(null));
+
+        JsonNode org = json.path("hiringOrganization");
+        if (!org.isMissingNode()) {
+            offer.setCompany(org.path("name").asText(null));
+        }
+
+        JsonNode loc = json.path("jobLocation");
+        if (loc.isArray() && !loc.isEmpty()) {
+            offer.setLocation(loc.get(0).path("address").path("addressLocality").asText(null));
+        } else if (!loc.isMissingNode()) {
+            offer.setLocation(loc.path("address").path("addressLocality").asText(null));
+        }
+
+        offer.setRemote(isRemote(offer.getLocation(), offer.getTitle()));
+
+        JsonNode salary = json.path("baseSalary");
+        if (!salary.isMissingNode()) {
+            JsonNode value = salary.path("value");
+            if (value.has("minValue")) offer.setSalaryMin((int) value.path("minValue").asDouble());
+            if (value.has("maxValue")) offer.setSalaryMax((int) value.path("maxValue").asDouble());
+        }
+
+        if (offer.getApplyUrl() != null) {
+            offer.setSourceId(extractJobId(offer.getApplyUrl()));
+        }
+
+        return offer;
+    }
+
+    private String extractText(Element parent, String cssSelector) {
+        Element el = parent.selectFirst(cssSelector);
+        return el != null ? el.text().trim() : "";
+    }
+
+    private String extractJobId(String url) {
+        if (url == null) return null;
+        int idx = url.lastIndexOf('/');
+        if (idx >= 0 && idx < url.length() - 1) {
+            String id = url.substring(idx + 1).replaceAll("[^0-9]", "");
+            return id.isEmpty() ? String.valueOf(url.hashCode()) : id;
+        }
+        return String.valueOf(url.hashCode());
+    }
+
+    private String buildSearchSlug(String keywords) {
+        if (keywords == null || keywords.isBlank()) return "jobs";
+        return keywords.toLowerCase().trim().replaceAll("\\s+", "-") + "-jobs";
+    }
+
+    private boolean isRemote(String location, String title) {
+        String combined = ((location != null ? location : "") + " " + title).toLowerCase();
+        return combined.contains("remote") || combined.contains("work from home");
+    }
+
+    private void parseSalary(String text, JobOffer offer) {
+        try {
+            String cleaned = text.replaceAll("[^0-9\\-]", " ").trim();
+            String[] parts = cleaned.split("\\s+");
+            if (parts.length >= 1 && !parts[0].isEmpty()) offer.setSalaryMin(Integer.parseInt(parts[0]));
+            if (parts.length >= 2 && !parts[1].isEmpty()) offer.setSalaryMax(Integer.parseInt(parts[1]));
+        } catch (NumberFormatException ignored) {}
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+}
