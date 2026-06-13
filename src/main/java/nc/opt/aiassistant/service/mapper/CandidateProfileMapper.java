@@ -35,6 +35,15 @@ public abstract class CandidateProfileMapper implements EntityMapper<CandidatePr
     @Mapping(target = "certifications", source = "certifications", qualifiedByName = "certificationsToJson")
     public abstract CandidateProfile toEntity(CandidateProfileDto dto);
 
+    @Override
+    @Mapping(target = "skills", source = "skills", qualifiedByName = "skillsToJson")
+    @Mapping(target = "experiences", source = "experiences", qualifiedByName = "experiencesToJson")
+    @Mapping(target = "preferredRoles", source = "preferredRoles", qualifiedByName = "objectToJson")
+    @Mapping(target = "languages", source = "languages", qualifiedByName = "languagesToJson")
+    @Mapping(target = "education", source = "education", qualifiedByName = "educationToJson")
+    @Mapping(target = "certifications", source = "certifications", qualifiedByName = "certificationsToJson")
+    public abstract void partialUpdate(@org.mapstruct.MappingTarget CandidateProfile entity, CandidateProfileDto dto);
+
     @Named("jsonToSkills")
     protected List<SkillDto> jsonToSkills(String json) {
         return jsonToList(json, new TypeReference<List<SkillDto>>() {});
