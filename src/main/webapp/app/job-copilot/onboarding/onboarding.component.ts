@@ -55,15 +55,39 @@ export class OnboardingComponent {
     });
   }
 
-  parseSkills(skills?: string): string[] {
-    if (!skills) return [];
+  parseSkills(skillsJson?: string): any[] {
+    if (!skillsJson) return [];
     try {
-      return JSON.parse(skills);
+      const skills = JSON.parse(skillsJson);
+      if (Array.isArray(skills) && skills.length > 0 && typeof skills[0] === 'object') {
+        return skills;
+      }
+      return skills.map((s: any) => (typeof s === 'string' ? { name: s } : s));
     } catch {
-      return skills
+      return skillsJson
         .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
+        .map(s => ({ name: s.trim() }))
+        .filter(s => s.name.length > 0);
+    }
+  }
+
+  parseEducation(eduJson?: string): any[] {
+    if (!eduJson) return [];
+    try {
+      const edu = JSON.parse(eduJson);
+      return Array.isArray(edu) ? edu : [];
+    } catch {
+      return [];
+    }
+  }
+
+  parseCertifications(certJson?: string): any[] {
+    if (!certJson) return [];
+    try {
+      const certs = JSON.parse(certJson);
+      return Array.isArray(certs) ? certs : [];
+    } catch {
+      return [];
     }
   }
 

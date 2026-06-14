@@ -231,6 +231,25 @@
     margin: 0;
     font-size: 0.9rem;
   }
+
+  .jc-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .jc-item {
+    font-size: 0.9rem;
+
+    strong {
+      color: var(--bs-body-color);
+    }
+
+    span {
+      color: var(--bs-secondary-color);
+      margin-left: 0.25rem;
+    }
+  }
 }
 
 .jc-skill-tags {

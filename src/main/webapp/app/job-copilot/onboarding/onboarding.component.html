@@ -59,8 +59,8 @@
           <div class="jc-ep-section">
             <h4><fa-icon icon="code"></fa-icon> Skills</h4>
             <div class="jc-skill-tags">
-              @for (skill of parseSkills(profile()!.skills); track skill) {
-                <span class="jc-skill-tag">{{ skill }}</span>
+              @for (skill of parseSkills(profile()!.skills); track skill.name) {
+                <span class="jc-skill-tag">{{ skill.name }}</span>
               }
             </div>
           </div>
@@ -69,14 +69,34 @@
         @if (profile()!.education) {
           <div class="jc-ep-section">
             <h4><fa-icon icon="graduation-cap"></fa-icon> Education</h4>
-            <p>{{ profile()!.education }}</p>
+            <div class="jc-items-list">
+              @for (edu of parseEducation(profile()!.education); track edu.id) {
+                <div class="jc-item">
+                  <strong>{{ edu.degree }}</strong> @if (edu.school) {
+                    <span>at {{ edu.school }}</span>
+                  }
+                </div>
+              } @empty {
+                <p>{{ profile()!.education }}</p>
+              }
+            </div>
           </div>
         }
 
         @if (profile()!.certifications) {
           <div class="jc-ep-section">
             <h4><fa-icon icon="certificate"></fa-icon> Certifications</h4>
-            <p>{{ profile()!.certifications }}</p>
+            <div class="jc-items-list">
+              @for (cert of parseCertifications(profile()!.certifications); track cert.id) {
+                <div class="jc-item">
+                  <strong>{{ cert.name }}</strong> @if (cert.issuer) {
+                    <span>from {{ cert.issuer }}</span>
+                  }
+                </div>
+              } @empty {
+                <p>{{ profile()!.certifications }}</p>
+              }
+            </div>
           </div>
         }
       </div>
