@@ -7,6 +7,7 @@ export interface IUserManagement {
   activated?: boolean;
   langKey?: string;
   authorities?: string[];
+  password?: string | null;
   createdBy?: string;
   createdDate?: Date;
   lastModifiedBy?: string;
@@ -23,6 +24,7 @@ export class User implements IUserManagement {
     public activated?: boolean,
     public langKey?: string,
     public authorities?: string[],
+    public password?: string,
     public createdBy?: string,
     public createdDate?: Date,
     public lastModifiedBy?: string,

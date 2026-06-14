@@ -61,7 +61,7 @@
               <fa-icon [fixedWidth]="true" class="me-2" icon="asterisk" />
               <span jhiTranslate="global.menu.entities.adminAuthority">Authority</span>
             </a>
-            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/user-management" routerLinkActive="active">
+            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/user-management" routerLinkActive="active">
               <fa-icon [fixedWidth]="true" class="me-2" icon="users" />
               <span jhiTranslate="global.menu.admin.userManagement">Gestion des utilisateurs</span>
             </a>
@@ -109,11 +109,7 @@
       </ul>
 
       <div class="d-flex align-items-center gap-2 jc-navbar-actions">
-        <!-- New Chat -->
-        <a (click)="collapseNavbar()" class="jc-btn jc-btn-primary jc-btn-sm" routerLink="/chat">
-          <fa-icon [fixedWidth]="true" icon="plus" />
-          <span jhiTranslate="home.landing.newChat">Nouveau Chat</span>
-        </a>
+
 
         <!-- Account -->
         <div class="d-inline-block" ngbDropdown>

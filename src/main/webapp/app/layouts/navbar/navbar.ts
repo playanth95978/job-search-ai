@@ -16,6 +16,7 @@ import { TranslateDirective } from 'app/shared/language';
 import FindLanguageFromKeyPipe from 'app/shared/language/find-language-from-key.pipe';
 
 import ActiveMenuDirective from './active-menu.directive';
+import { JsonPipe } from "@angular/common";
 
 @Component({
   selector: 'jhi-navbar',
@@ -32,6 +33,7 @@ import ActiveMenuDirective from './active-menu.directive';
     FindLanguageFromKeyPipe,
     TranslateDirective,
     TranslateModule,
+    JsonPipe,
   ],
 })
 export default class Navbar implements OnInit {
