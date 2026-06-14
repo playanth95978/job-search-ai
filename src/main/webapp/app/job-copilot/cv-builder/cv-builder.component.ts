@@ -11,7 +11,7 @@ import { CvEditorComponent } from './editor/cv-editor.component';
 import { CvPreviewComponent } from './preview/cv-preview.component';
 import { FONT_FAMILIES, Resume, ResumeTemplateId } from './resume.model';
 import { CvResumeApiService } from './cv-resume-api.service';
-import { JobCopilotService } from '../shared/job-copilot.service';
+import { candidateProfileToResume } from './candidate-profile.mapper';
 
 @Component({
   selector: 'jhi-cv-builder',
@@ -26,15 +26,11 @@ export class CvBuilderComponent {
   private readonly api = inject(CvResumeApiService);
   readonly r = this.store.resume;
   readonly fonts = FONT_FAMILIES;
-  private jobCopilotService = inject(JobCopilotService);
 
   private readonly resumeResource = rxResource({
     stream: () => this.api.getResume(),
   });
 
-  private readonly profile = rxResource({
-    stream: () => this.jobCopilotService.getProfile(),
-  });
 
   readonly templates: { id: ResumeTemplateId; labelKey: string }[] = [
     { id: 'modern', labelKey: 'cvBuilder.templates.modern' },
@@ -61,14 +57,6 @@ export class CvBuilderComponent {
       }
     });
 
-    effect(() => {
-      const profile = this.profile.value();
-      if(profile!== undefined){
-        //this.store.load(profile.resume);
-      }
-    });
-
-    // Debounced backend auto-save on any change (after initial load).
     effect(onCleanup => {
       const resume = this.store.resume();
       if (!this.loaded()) return;
@@ -110,6 +98,15 @@ export class CvBuilderComponent {
     window.print();
   }
 
+  /** Prefills the editor from the user's extracted candidate profile, keeping the chosen template/theme. */
+  loadProfile(): void {
+    this.api.getCandidateProfile().subscribe(dto => {
+      if (!dto) return;
+      const current = this.store.resume();
+      const mapped = candidateProfileToResume(dto);
+      this.store.load({ ...mapped, template: current.template, theme: current.theme });
+    });
+  }
   private safeName(): string {
     const p = this.r().personal;
     const base = `${p.firstName}-${p.lastName}`.trim() || this.r().title || 'cv';

@@ -41,6 +41,9 @@
       <span class="cv-divider"></span>
 
       <!-- Export -->
+      <button type="button" class="cv-tool" (click)="loadProfile()" [title]="'cvBuilder.export.import-profile' | translate">
+        <fa-icon icon="sync" />
+      </button>
       <button type="button" class="cv-tool" (click)="print()" [title]="'cvBuilder.export.pdf' | translate">
         <fa-icon icon="file-pdf" />
       </button>

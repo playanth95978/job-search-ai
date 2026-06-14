@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+import { CandidateProfileDto } from './candidate-profile.mapper';
 
 /** Stored resume envelope (server side). `data` is the full Resume JSON, stringified. */
 export interface ResumeApiDto {
@@ -50,5 +51,12 @@ export class CvResumeApiService {
 
   restoreVersion(id: string): Observable<ResumeApiDto> {
     return this.http.post<ResumeApiDto>(`${this.url}/resume/versions/${id}/restore`, {});
+  }
+
+  /** The user's extracted candidate profile, or null when none exists yet (HTTP 204). */
+  getCandidateProfile(): Observable<CandidateProfileDto | null> {
+    return this.http
+      .get<CandidateProfileDto>(`${this.url}/resume/candidate-profile`, { observe: 'response' })
+      .pipe(map(res => (res.status === 204 ? null : res.body)));
   }
 }

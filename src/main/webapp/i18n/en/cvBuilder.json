@@ -69,7 +69,8 @@
     "export": {
       "pdf": "Export / print to PDF",
       "json": "Export as JSON",
-      "import": "Import JSON"
+      "import": "Import JSON",
+      "import-profile": "load your cv"
     }
   }
 }

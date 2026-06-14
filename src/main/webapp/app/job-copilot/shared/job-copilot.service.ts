@@ -16,6 +16,7 @@ import {
   UserPreferenceDto,
 } from './job-copilot.model';
 import { createRequestOption } from '../../core/request/request-util';
+import { Resume } from "../cv-builder/resume.model";
 
 @Injectable({ providedIn: 'root' })
 export class JobCopilotService {
@@ -32,6 +33,10 @@ export class JobCopilotService {
 
   getProfile(): Observable<CandidateProfile> {
     return this.http.get<CandidateProfile>(`${this.baseUrl}/cv/profile`);
+  }
+
+  geResumeProfile(): Observable<Resume> {
+    return this.http.get<Resume>(`${this.baseUrl}/cv/profile`);
   }
 
   reviewCv(): Observable<CvReview> {
