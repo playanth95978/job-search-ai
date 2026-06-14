@@ -124,12 +124,13 @@ export class ResumeStore {
     this.mutate(r => ({ ...r, theme: { ...r.theme, ...patch } }));
   }
 
-  load(resume: Resume): void {
+  load(resume: Partial<Resume> | null | undefined): void {
+    const safe = normalizeResume(resume);
     this.past = [];
     this.future = [];
     this.syncFlags();
-    this._resume.set(resume);
-    this.persist(resume);
+    this._resume.set(safe);
+    this.persist(safe);
   }
 
   reset(): void {
@@ -287,11 +288,38 @@ export class ResumeStore {
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (raw) {
-        return { ...createEmptyResume(), ...(JSON.parse(raw) as Resume) };
+        return normalizeResume(JSON.parse(raw) as Partial<Resume>);
       }
     } catch {
       // ignore corrupt draft
     }
     return createEmptyResume();
   }
+}
+
+/**
+ * Guarantees every nested structure exists (theme, personal, lists), so a resume loaded from the
+ * server / an old draft / an import can never crash the preview with `undefined` reads.
+ */
+function normalizeResume(input: Partial<Resume> | null | undefined): Resume {
+  const base = createEmptyResume();
+  if (!input) {
+    return base;
+  }
+  return {
+    ...base,
+    ...input,
+    personal: { ...base.personal, ...(input.personal ?? {}) },
+    theme: { ...base.theme, ...(input.theme ?? {}) },
+    experiences: input.experiences ?? [],
+    education: input.education ?? [],
+    projects: input.projects ?? [],
+    certifications: input.certifications ?? [],
+    skills: input.skills ?? [],
+    languages: input.languages ?? [],
+    sectionOrder: input.sectionOrder?.length ? input.sectionOrder : base.sectionOrder,
+    hiddenSections: input.hiddenSections ?? [],
+    template: input.template ?? base.template,
+    title: input.title ?? base.title,
+  };
 }

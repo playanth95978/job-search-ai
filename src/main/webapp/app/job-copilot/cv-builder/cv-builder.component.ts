@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { debounceTime, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -27,11 +28,6 @@ export class CvBuilderComponent {
   readonly r = this.store.resume;
   readonly fonts = FONT_FAMILIES;
 
-  private readonly resumeResource = rxResource({
-    stream: () => this.api.getResume(),
-  });
-
-
   readonly templates: { id: ResumeTemplateId; labelKey: string }[] = [
     { id: 'modern', labelKey: 'cvBuilder.templates.modern' },
     { id: 'professional', labelKey: 'cvBuilder.templates.professional' },
@@ -42,33 +38,34 @@ export class CvBuilderComponent {
   private readonly loaded = signal(false);
 
   constructor() {
-    // Overwrite local draft with server copy when it arrives
-    effect(() => {
-      const res = this.resumeResource.value();
-      if (res !== undefined) {
-        if (res?.data) {
-          try {
-            this.store.load(JSON.parse(res.data) as Resume);
-          } catch {
-            /* ignore parse error, keep local draft */
+    // 1. Load the server copy once (overrides the local draft), then enable auto-save.
+    this.api
+      .getResume()
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: dto => {
+          if (dto?.data) {
+            try {
+              this.store.load(JSON.parse(dto.data) as Resume);
+            } catch {
+              /* keep local draft on parse error */
+            }
           }
-        }
-        this.loaded.set(true);
-      }
-    });
+          this.loaded.set(true);
+        },
+        error: () => this.loaded.set(true),
+      });
 
-    effect(onCleanup => {
-      const resume = this.store.resume();
-      if (!this.loaded()) return;
-
-      const timer = setTimeout(() => {
-        untracked(() => {
-          this.api.saveResume({ title: resume.title, template: resume.template, data: JSON.stringify(resume) }).subscribe();
-        });
-      }, 1500);
-
-      onCleanup(() => clearTimeout(timer));
-    });
+    // 2. Debounced backend auto-save: a single RxJS subscription instead of a per-change effect.
+    toObservable(this.store.resume)
+      .pipe(
+        filter(() => this.loaded()),
+        debounceTime(1500),
+        takeUntilDestroyed(),
+      )
+      .subscribe(resume => {
+        this.api.saveResume({ title: resume.title, template: resume.template, data: JSON.stringify(resume) }).subscribe();
+      });
   }
 
   exportJson(): void {
