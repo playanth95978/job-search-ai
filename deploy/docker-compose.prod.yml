@@ -1,12 +1,17 @@
 # ===================================================================
-# Production stack for job-search-ai (Hostinger VPS).
+# Production stack for job-search-ai (Hostinger VPS, behind an existing Traefik).
 #
 #   cd deploy
-#   cp .env.example .env   # then fill every value
+#   cp .env.example .env          # fill every value (incl. DOMAIN=...duckdns.org)
 #   docker compose -f docker-compose.prod.yml up -d
 #
 # The app image is built with Jib from the project root:
-#   ./mvnw -Pprod clean verify jib:dockerBuild   # produces image "job-search-ai"
+#   npm run java:docker           # ./mvnw -Pprod ... jib:dockerBuild -> image "job-search-ai:latest"
+#
+# Reverse proxy / TLS is handled by your existing Traefik (host network, certresolver
+# "letsencrypt", entrypoints web/websecure). The app is exposed to Traefik via the labels
+# below — no public port is published, and Traefik reaches it on the project's default
+# bridge network "job-search-ai_default".
 # ===================================================================
 
 name: job-search-ai
@@ -90,32 +95,15 @@ services:
       onnx-init:
         condition: service_completed_successfully
     restart: unless-stopped
-    ports:
-      - '8080:8080'
-
-  nginx:
-    image: nginx:alpine
-    container_name: jsa-nginx
-    ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - ./nginx/job-search-ai.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/certbot/www:/var/www/certbot:ro
-      - ./nginx/certbot/conf:/etc/letsencrypt:ro
-    depends_on:
-      - app
-    restart: unless-stopped
-
-  # Renews certificates; run the initial issuance manually (see deploy/README.md).
-  certbot:
-    image: certbot/certbot:latest
-    container_name: jsa-certbot
-    volumes:
-      - ./nginx/certbot/www:/var/www/certbot
-      - ./nginx/certbot/conf:/etc/letsencrypt
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'"
-    restart: unless-stopped
+    # Exposed through the existing Traefik (no public port). Traefik runs in host network
+    # mode, so it reaches this container on the project's default bridge network.
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=job-search-ai_default'
+      - 'traefik.http.routers.jsa.rule=Host(`${DOMAIN}`)'
+      - 'traefik.http.routers.jsa.entrypoints=websecure'
+      - 'traefik.http.routers.jsa.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.jsa.loadbalancer.server.port=8080'
 
 volumes:
   postgres-data:
