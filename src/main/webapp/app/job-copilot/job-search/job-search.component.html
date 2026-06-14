@@ -1,14 +1,14 @@
 <div class="jc-search">
   <div class="jc-search-header">
-    <h1><fa-icon icon="magnifying-glass"></fa-icon> Job Search</h1>
-    <p>Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail</p>
+    <h1 jhiTranslate="jobCopilot.search.title">Job Search</h1>
+    <p jhiTranslate="jobCopilot.search.subtitle">Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail</p>
   </div>
 
   <div class="jc-search-tabs">
-    <button class="jc-tab" [class.active]="activeTab() === 'search'" (click)="activeTab.set('search')">
+    <button class="jc-tab" [class.active]="activeTab() === 'search'" (click)="activeTab.set('search')" jhiTranslate="jobCopilot.search.tabs.keyword">
       <fa-icon icon="search"></fa-icon> Keyword Search
     </button>
-    <button class="jc-tab" [class.active]="activeTab() === 'ats'" (click)="activeTab.set('ats')">
+    <button class="jc-tab" [class.active]="activeTab() === 'ats'" (click)="activeTab.set('ats')" jhiTranslate="jobCopilot.search.tabs.ats">
       <fa-icon icon="globe"></fa-icon> ATS / Board URL
     </button>
   </div>
@@ -21,19 +21,25 @@
           <input
             type="text"
             class="jc-input"
-            placeholder="Keywords (e.g. Java Spring Boot)"
+            [placeholder]="'jobCopilot.search.form.keywordsPlaceholder' | translate"
             [(ngModel)]="keywords"
             (keyup.enter)="search()"
           />
         </div>
         <div class="jc-input-wrapper">
           <fa-icon icon="location-dot" class="jc-input-icon"></fa-icon>
-          <input type="text" class="jc-input" placeholder="Location" [(ngModel)]="location" (keyup.enter)="search()" />
+          <input
+            type="text"
+            class="jc-input"
+            [placeholder]="'jobCopilot.search.form.locationPlaceholder' | translate"
+            [(ngModel)]="location"
+            (keyup.enter)="search()"
+          />
         </div>
         <div class="jc-input-wrapper">
           <fa-icon icon="filter" class="jc-input-icon"></fa-icon>
           <select class="jc-input jc-select" [(ngModel)]="source" aria-label="Source">
-            <option value="">Toutes les sources</option>
+            <option value="" jhiTranslate="jobCopilot.search.form.allSources">Toutes les sources</option>
             @for (s of sources; track s.value) {
               <option [value]="s.value">{{ s.label }}</option>
             }
@@ -43,23 +49,23 @@
       <div class="jc-search-actions">
         <button class="jc-btn jc-btn-primary" (click)="search()" [disabled]="searching()">
           @if (searching()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Searching...
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.searching">Searching...</span>
           } @else {
-            <fa-icon icon="search"></fa-icon> Search
+            <fa-icon icon="search"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.search">Search</span>
           }
         </button>
         <button class="jc-btn jc-btn-secondary" (click)="matchAll()" [disabled]="matching()">
           @if (matching()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Matching...
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matching">Matching...</span>
           } @else {
-            <fa-icon icon="wand-magic-sparkles"></fa-icon> Match My Profile
+            <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</span>
           }
         </button>
         <button class="jc-btn jc-btn-accent" (click)="matchAdvanced()" [disabled]="matchingAdvanced()">
           @if (matchingAdvanced()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Advanced...
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.advanced">Advanced...</span>
           } @else {
-            <fa-icon icon="chart-line"></fa-icon> Match Advanced
+            <fa-icon icon="chart-line"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matchAdvanced">Match Advanced</span>
           }
         </button>
       </div>
@@ -72,7 +78,7 @@
           <input
             type="text"
             class="jc-input"
-            placeholder="Paste ATS board URL (Greenhouse, Lever...)"
+            [placeholder]="'jobCopilot.search.form.atsPlaceholder' | translate"
             [(ngModel)]="atsUrl"
             (keyup.enter)="fetchUrl()"
           />
@@ -81,9 +87,9 @@
       <div class="jc-search-actions">
         <button class="jc-btn jc-btn-primary" (click)="fetchUrl()" [disabled]="fetching()">
           @if (fetching()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> Fetching...
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.fetching">Fetching...</span>
           } @else {
-            <fa-icon icon="download"></fa-icon> Fetch Jobs
+            <fa-icon icon="download"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.fetchJobs">Fetch Jobs</span>
           }
         </button>
       </div>
@@ -96,8 +102,8 @@
 
   @if (matchResults().length > 0) {
     <div class="jc-results-header">
-      <h2><fa-icon icon="wand-magic-sparkles"></fa-icon> Match Results</h2>
-      <span class="jc-results-count">{{ matchResults().length }} matches</span>
+      <h2 jhiTranslate="jobCopilot.search.results.matchTitle">Match Results</h2>
+      <span class="jc-results-count">{{ matchResults().length }} <span jhiTranslate="jobCopilot.search.results.matches">matches</span></span>
     </div>
     <div class="jc-results">
       @for (match of matchResults(); track match.jobOffer.id) {
@@ -116,13 +122,13 @@
               }
             </div>
             <div class="jc-match-company">
-              <fa-icon icon="building"></fa-icon> {{ match.jobOffer.company || 'Unknown' }}
+              <fa-icon icon="building"></fa-icon> {{ match.jobOffer.company || ('jobCopilot.search.results.unknown' | translate) }}
               @if (match.jobOffer.location) {
                 <span class="jc-separator">&middot;</span>
                 <fa-icon icon="location-dot"></fa-icon> {{ match.jobOffer.location }}
               }
               @if (match.jobOffer.remote) {
-                <span class="jc-remote-badge">Remote</span>
+                <span class="jc-remote-badge" jhiTranslate="jobCopilot.search.results.remote">Remote</span>
               }
             </div>
             <div class="jc-match-tags">
@@ -136,11 +142,11 @@
             <div class="jc-match-actions">
               @if (match.jobOffer.applyUrl) {
                 <a [href]="match.jobOffer.applyUrl" target="_blank" class="jc-btn jc-btn-ghost">
-                  <fa-icon icon="external-link-alt"></fa-icon> View
+                  <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.search.results.view">View</span>
                 </a>
               }
               <button (click)="openApplyModal(match.jobOffer)" class="jc-btn jc-btn-primary jc-btn-sm">
-                <fa-icon icon="paper-plane"></fa-icon> Postuler
+                <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
               </button>
             </div>
           </div>
@@ -151,8 +157,8 @@
 
   @if (offers().length > 0 && matchResults().length === 0) {
     <div class="jc-results-header">
-      <h2><fa-icon icon="briefcase"></fa-icon> Jobs Found</h2>
-      <span class="jc-results-count">{{ offers().length }} results</span>
+      <h2 jhiTranslate="jobCopilot.search.results.foundTitle">Jobs Found</h2>
+      <span class="jc-results-count">{{ offers().length }} <span jhiTranslate="jobCopilot.search.results.results">results</span></span>
     </div>
     <div class="jc-results">
       @for (offer of offers(); track offer.id) {
@@ -167,13 +173,13 @@
               }
             </div>
             <div class="jc-job-company">
-              <fa-icon icon="building"></fa-icon> {{ offer.company || 'Unknown' }}
+              <fa-icon icon="building"></fa-icon> {{ offer.company || ('jobCopilot.search.results.unknown' | translate) }}
               @if (offer.location) {
                 <span class="jc-separator">&middot;</span>
                 <fa-icon icon="location-dot"></fa-icon> {{ offer.location }}
               }
               @if (offer.remote) {
-                <span class="jc-remote-badge">Remote</span>
+                <span class="jc-remote-badge" jhiTranslate="jobCopilot.search.results.remote">Remote</span>
               }
               @if (offer.contractType) {
                 <span class="jc-contract-badge">{{ offer.contractType }}</span>
@@ -184,9 +190,9 @@
                 @if (offer.salaryMin && offer.salaryMax) {
                   {{ offer.salaryMin | number }} — {{ offer.salaryMax | number }} €
                 } @else if (offer.salaryMin) {
-                  From {{ offer.salaryMin | number }} €
+                  <span jhiTranslate="jobCopilot.search.results.salaryFrom">From</span> {{ offer.salaryMin | number }} €
                 } @else {
-                  Up to {{ offer.salaryMax | number }} €
+                  <span jhiTranslate="jobCopilot.search.results.salaryUpTo">Up to</span> {{ offer.salaryMax | number }} €
                 }
               </div>
             }
@@ -194,11 +200,11 @@
           <div class="jc-job-actions">
             @if (offer.applyUrl) {
               <a [href]="offer.applyUrl" target="_blank" class="jc-btn jc-btn-ghost jc-btn-sm">
-                <fa-icon icon="external-link-alt"></fa-icon> View
+                <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.search.results.view">View</span>
               </a>
             }
             <button (click)="openApplyModal(offer)" class="jc-btn jc-btn-primary jc-btn-sm">
-              <fa-icon icon="paper-plane"></fa-icon> Postuler
+              <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
             </button>
           </div>
         </div>

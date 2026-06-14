@@ -33,6 +33,171 @@
       "reset": "Recommencer",
       "send": "Envoyer",
       "answerPlaceholder": "Tapez votre réponse..."
+    },
+    "search": {
+      "title": "Recherche d'emploi",
+      "subtitle": "Recherchez parmi plusieurs sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail",
+      "tabs": {
+        "keyword": "Recherche par mots-clés",
+        "ats": "URL ATS / Board"
+      },
+      "form": {
+        "keywordsPlaceholder": "Mots-clés (ex: Java Spring Boot)",
+        "locationPlaceholder": "Localisation",
+        "allSources": "Toutes les sources",
+        "atsPlaceholder": "Coller l'URL du board ATS (Greenhouse, Lever...)"
+      },
+      "actions": {
+        "searching": "Recherche en cours...",
+        "search": "Rechercher",
+        "matching": "Matching en cours...",
+        "matchProfile": "Matcher mon profil",
+        "advanced": "Avancé...",
+        "matchAdvanced": "Match Avancé",
+        "fetching": "Récupération...",
+        "fetchJobs": "Récupérer les offres"
+      },
+      "results": {
+        "matchTitle": "Résultats du Match",
+        "foundTitle": "Offres trouvées",
+        "matches": "matchs",
+        "results": "résultats",
+        "unknown": "Inconnu",
+        "remote": "Télétravail",
+        "view": "Voir",
+        "apply": "Postuler",
+        "salaryFrom": "À partir de",
+        "salaryUpTo": "Jusqu'à"
+      }
+    },
+    "dashboard": {
+      "subtitle": "Votre assistant de carrière propulsé par l'IA",
+      "loading": "Chargement de votre profil...",
+      "welcome": {
+        "title": "Bienvenue sur Job Copilot",
+        "subtitle": "Téléchargez votre CV et laissez l'IA trouver votre job idéal",
+        "features": {
+          "extraction": "Extraction de profil par l'IA",
+          "search": "Recherche d'emploi intelligente",
+          "matching": "Matching sémantique",
+          "tracking": "Suivi des candidatures"
+        },
+        "action": "Téléchargez votre CV"
+      },
+      "profile": {
+        "fallback": "Votre Profil",
+        "yearsExp": "ans d'exp.",
+        "updateCv": "Mettre à jour le CV",
+        "moreSkills": "+{{ count }} de plus"
+      },
+      "actions": {
+        "search": {
+          "title": "Rechercher des jobs",
+          "description": "Trouvez des opportunités sur plusieurs sources"
+        },
+        "apps": {
+          "title": "Candidatures",
+          "description": "Suivez et gérez vos candidatures"
+        },
+        "prefs": {
+          "title": "Préférences",
+          "description": "Configurez vos critères de recherche"
+        }
+      }
+    },
+    "applications": {
+      "title": "Mes Candidatures",
+      "count": "au total",
+      "empty": {
+        "title": "Aucune candidature pour le moment",
+        "subtitle": "Recherchez des jobs et générez des candidatures pour commencer."
+      },
+      "unknownPosition": "Poste inconnu",
+      "match": "match",
+      "viewCoverLetter": "Voir la lettre de motivation",
+      "created": "Créé le",
+      "applied": "Postulé le",
+      "statuses": {
+        "DRAFT": "BROUILLON",
+        "APPLIED": "POSTULÉ",
+        "INTERVIEW": "ENTRETIEN",
+        "OFFER": "OFFRE",
+        "REJECTED": "REFUSÉ",
+        "WITHDRAWN": "RETIRÉ"
+      }
+    },
+    "onboarding": {
+      "title": "Téléchargez votre CV",
+      "subtitle": "PDF ou DOCX — L'IA extraira votre profil automatiquement",
+      "processing": {
+        "title": "L'IA analyse votre CV...",
+        "subtitle": "Extraction des compétences, expériences et qualifications",
+        "steps": {
+          "reading": "Lecture du document",
+          "extraction": "Extraction IA",
+          "indexing": "Indexation"
+        }
+      },
+      "success": {
+        "title": "Profil extrait avec succès !",
+        "years": "ans",
+        "skills": "Compétences",
+        "education": "Formation",
+        "at": "à",
+        "certifications": "Certifications",
+        "from": "de",
+        "goDashboard": "Aller au Tableau de bord"
+      },
+      "dropzone": {
+        "title": "Glissez-déposez votre CV ici",
+        "or": "ou",
+        "browse": "Parcourir les fichiers",
+        "hint": "Prend en charge les formats PDF et DOCX"
+      }
+    },
+    "settings": {
+      "title": "Préférences de Job",
+      "subtitle": "Configurez vos critères de recherche pour obtenir de meilleurs matchs",
+      "workType": {
+        "title": "Type de travail",
+        "remoteOnly": "Télétravail uniquement",
+        "contractType": "Type de contrat",
+        "any": "Tous"
+      },
+      "salary": {
+        "title": "Fourchette de salaire",
+        "min": "Minimum (€/an)",
+        "max": "Maximum (€/an)"
+      },
+      "preferences": {
+        "title": "Préférences",
+        "roles": "Postes préférés",
+        "rolesHint": "Séparés par des virgules",
+        "excluded": "Technologies exclues",
+        "excludedHint": "Technologies que vous voulez éviter",
+        "locations": "Lieux préférés",
+        "locationsHint": "Séparés par des virgules"
+      },
+      "actions": {
+        "saving": "Enregistrement...",
+        "save": "Enregistrer les préférences",
+        "saved": "Enregistré !"
+      }
+    },
+    "applyModal": {
+      "title": "Postuler",
+      "close": "Fermer",
+      "loading": "Génération de la lettre de motivation...",
+      "coverLetter": "Lettre de motivation",
+      "regenerate": "Régénérer",
+      "edit": "Modifier",
+      "preview": "Aperçu",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "openOffer": "Ouvrir l'offre",
+      "sending": "Envoi...",
+      "submitVia": "Soumettre via {{ source }}",
+      "markApplied": "J'ai postulé"
     }
   }
 }

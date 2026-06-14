@@ -1,7 +1,7 @@
 <div class="jc-onboarding">
   <div class="jc-header">
-    <h1><fa-icon icon="cloud-arrow-up"></fa-icon> Upload your CV</h1>
-    <p class="jc-subtitle">PDF or DOCX — AI will extract your profile automatically</p>
+    <h1 jhiTranslate="jobCopilot.onboarding.title">Upload your CV</h1>
+    <p class="jc-subtitle" jhiTranslate="jobCopilot.onboarding.subtitle">PDF or DOCX — AI will extract your profile automatically</p>
   </div>
 
   @if (uploading()) {
@@ -9,22 +9,22 @@
       <div class="jc-processing-animation">
         <div class="spinner-grow text-primary" role="status"></div>
       </div>
-      <h3>AI is analyzing your CV...</h3>
-      <p>Extracting skills, experience, and qualifications</p>
+      <h3 jhiTranslate="jobCopilot.onboarding.processing.title">AI is analyzing your CV...</h3>
+      <p jhiTranslate="jobCopilot.onboarding.processing.subtitle">Extracting skills, experience, and qualifications</p>
       <div class="jc-steps">
         <div class="jc-step active">
           <fa-icon icon="file-pdf"></fa-icon>
-          <span>Reading document</span>
+          <span jhiTranslate="jobCopilot.onboarding.processing.steps.reading">Reading document</span>
         </div>
         <div class="jc-step-divider"></div>
         <div class="jc-step active">
           <fa-icon icon="robot"></fa-icon>
-          <span>AI extraction</span>
+          <span jhiTranslate="jobCopilot.onboarding.processing.steps.extraction">AI extraction</span>
         </div>
         <div class="jc-step-divider"></div>
         <div class="jc-step">
           <fa-icon icon="database"></fa-icon>
-          <span>Indexing</span>
+          <span jhiTranslate="jobCopilot.onboarding.processing.steps.indexing">Indexing</span>
         </div>
       </div>
     </div>
@@ -33,7 +33,7 @@
       <div class="jc-success-icon">
         <fa-icon icon="circle-check" size="3x"></fa-icon>
       </div>
-      <h2>Profile extracted successfully!</h2>
+      <h2 jhiTranslate="jobCopilot.onboarding.success.title">Profile extracted successfully!</h2>
 
       <jhi-cv-quality [profile]="profile()!" />
 
@@ -49,7 +49,7 @@
                 <span><fa-icon icon="location-dot"></fa-icon> {{ profile()!.location }}</span>
               }
               @if (profile()!.yearsOfExperience) {
-                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()!.yearsOfExperience }} years</span>
+                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()!.yearsOfExperience }} <span jhiTranslate="jobCopilot.onboarding.success.years">years</span></span>
               }
             </div>
           </div>
@@ -57,7 +57,7 @@
 
         @if (profile()!.skills) {
           <div class="jc-ep-section">
-            <h4><fa-icon icon="code"></fa-icon> Skills</h4>
+            <h4 jhiTranslate="jobCopilot.onboarding.success.skills"><fa-icon icon="code"></fa-icon> Skills</h4>
             <div class="jc-skill-tags">
               @for (skill of parseSkills(profile()!.skills); track skill.name) {
                 <span class="jc-skill-tag">{{ skill.name }}</span>
@@ -68,12 +68,12 @@
 
         @if (profile()!.education) {
           <div class="jc-ep-section">
-            <h4><fa-icon icon="graduation-cap"></fa-icon> Education</h4>
+            <h4 jhiTranslate="jobCopilot.onboarding.success.education"><fa-icon icon="graduation-cap"></fa-icon> Education</h4>
             <div class="jc-items-list">
               @for (edu of parseEducation(profile()!.education); track edu.id) {
                 <div class="jc-item">
                   <strong>{{ edu.degree }}</strong> @if (edu.school) {
-                    <span>at {{ edu.school }}</span>
+                    <span><span jhiTranslate="jobCopilot.onboarding.success.at">at</span> {{ edu.school }}</span>
                   }
                 </div>
               } @empty {
@@ -85,12 +85,12 @@
 
         @if (profile()!.certifications) {
           <div class="jc-ep-section">
-            <h4><fa-icon icon="certificate"></fa-icon> Certifications</h4>
+            <h4 jhiTranslate="jobCopilot.onboarding.success.certifications"><fa-icon icon="certificate"></fa-icon> Certifications</h4>
             <div class="jc-items-list">
               @for (cert of parseCertifications(profile()!.certifications); track cert.id) {
                 <div class="jc-item">
                   <strong>{{ cert.name }}</strong> @if (cert.issuer) {
-                    <span>from {{ cert.issuer }}</span>
+                    <span><span jhiTranslate="jobCopilot.onboarding.success.from">from</span> {{ cert.issuer }}</span>
                   }
                 </div>
               } @empty {
@@ -102,7 +102,7 @@
       </div>
 
       <button class="jc-btn jc-btn-primary jc-btn-lg" (click)="goToDashboard()">
-        <fa-icon icon="arrow-right"></fa-icon> Go to Dashboard
+        <fa-icon icon="arrow-right"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.success.goDashboard">Go to Dashboard</span>
       </button>
     </div>
   } @else {
@@ -117,11 +117,11 @@
         <div class="jc-dropzone-icon">
           <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
         </div>
-        <h3>Drag & drop your CV here</h3>
-        <p>or</p>
+        <h3 jhiTranslate="jobCopilot.onboarding.dropzone.title">Drag & drop your CV here</h3>
+        <p jhiTranslate="jobCopilot.onboarding.dropzone.or">or</p>
         <input type="file" #fileInput accept=".pdf,.docx" (change)="onFileSelected($event)" hidden />
-        <button class="jc-btn jc-btn-primary" (click)="fileInput.click()"><fa-icon icon="folder-open"></fa-icon> Browse files</button>
-        <p class="jc-dropzone-hint">Supports PDF and DOCX formats</p>
+        <button class="jc-btn jc-btn-primary" (click)="fileInput.click()"><fa-icon icon="folder-open"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.dropzone.browse">Browse files</span></button>
+        <p class="jc-dropzone-hint" jhiTranslate="jobCopilot.onboarding.dropzone.hint">Supports PDF and DOCX formats</p>
       </div>
     </div>
   }

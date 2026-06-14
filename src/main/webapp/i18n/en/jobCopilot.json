@@ -33,6 +33,171 @@
       "reset": "Restart",
       "send": "Send",
       "answerPlaceholder": "Type your answer..."
+    },
+    "search": {
+      "title": "Job Search",
+      "subtitle": "Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail",
+      "tabs": {
+        "keyword": "Keyword Search",
+        "ats": "ATS / Board URL"
+      },
+      "form": {
+        "keywordsPlaceholder": "Keywords (e.g. Java Spring Boot)",
+        "locationPlaceholder": "Location",
+        "allSources": "All sources",
+        "atsPlaceholder": "Paste ATS board URL (Greenhouse, Lever...)"
+      },
+      "actions": {
+        "searching": "Searching...",
+        "search": "Search",
+        "matching": "Matching...",
+        "matchProfile": "Match My Profile",
+        "advanced": "Advanced...",
+        "matchAdvanced": "Match Advanced",
+        "fetching": "Fetching...",
+        "fetchJobs": "Fetch Jobs"
+      },
+      "results": {
+        "matchTitle": "Match Results",
+        "foundTitle": "Jobs Found",
+        "matches": "matches",
+        "results": "results",
+        "unknown": "Unknown",
+        "remote": "Remote",
+        "view": "View",
+        "apply": "Apply",
+        "salaryFrom": "From",
+        "salaryUpTo": "Up to"
+      }
+    },
+    "dashboard": {
+      "subtitle": "Your AI-powered career assistant",
+      "loading": "Loading your profile...",
+      "welcome": {
+        "title": "Welcome to Job Copilot",
+        "subtitle": "Upload your CV and let AI find your perfect job match",
+        "features": {
+          "extraction": "AI Profile Extraction",
+          "search": "Smart Job Search",
+          "matching": "Semantic Matching",
+          "tracking": "Application Tracking"
+        },
+        "action": "Upload your CV"
+      },
+      "profile": {
+        "fallback": "Your Profile",
+        "yearsExp": "years exp.",
+        "updateCv": "Update CV",
+        "moreSkills": "+{{ count }} more"
+      },
+      "actions": {
+        "search": {
+          "title": "Search Jobs",
+          "description": "Find opportunities across multiple sources"
+        },
+        "apps": {
+          "title": "Applications",
+          "description": "Track and manage your applications"
+        },
+        "prefs": {
+          "title": "Preferences",
+          "description": "Configure your job search criteria"
+        }
+      }
+    },
+    "applications": {
+      "title": "My Applications",
+      "count": "total",
+      "empty": {
+        "title": "No applications yet",
+        "subtitle": "Search for jobs and generate applications to get started."
+      },
+      "unknownPosition": "Unknown Position",
+      "match": "match",
+      "viewCoverLetter": "View Cover Letter",
+      "created": "Created",
+      "applied": "Applied",
+      "statuses": {
+        "DRAFT": "DRAFT",
+        "APPLIED": "APPLIED",
+        "INTERVIEW": "INTERVIEW",
+        "OFFER": "OFFER",
+        "REJECTED": "REJECTED",
+        "WITHDRAWN": "WITHDRAWN"
+      }
+    },
+    "onboarding": {
+      "title": "Upload your CV",
+      "subtitle": "PDF or DOCX — AI will extract your profile automatically",
+      "processing": {
+        "title": "AI is analyzing your CV...",
+        "subtitle": "Extracting skills, experience, and qualifications",
+        "steps": {
+          "reading": "Reading document",
+          "extraction": "AI extraction",
+          "indexing": "Indexing"
+        }
+      },
+      "success": {
+        "title": "Profile extracted successfully!",
+        "years": "years",
+        "skills": "Skills",
+        "education": "Education",
+        "at": "at",
+        "certifications": "Certifications",
+        "from": "from",
+        "goDashboard": "Go to Dashboard"
+      },
+      "dropzone": {
+        "title": "Drag & drop your CV here",
+        "or": "or",
+        "browse": "Browse files",
+        "hint": "Supports PDF and DOCX formats"
+      }
+    },
+    "settings": {
+      "title": "Job Preferences",
+      "subtitle": "Configure your job search criteria to get better matches",
+      "workType": {
+        "title": "Work Type",
+        "remoteOnly": "Remote only",
+        "contractType": "Contract Type",
+        "any": "Any"
+      },
+      "salary": {
+        "title": "Salary Range",
+        "min": "Minimum (€/year)",
+        "max": "Maximum (€/year)"
+      },
+      "preferences": {
+        "title": "Preferences",
+        "roles": "Preferred Roles",
+        "rolesHint": "Comma separated",
+        "excluded": "Excluded Technologies",
+        "excludedHint": "Technologies you want to avoid",
+        "locations": "Preferred Locations",
+        "locationsHint": "Comma separated"
+      },
+      "actions": {
+        "saving": "Saving...",
+        "save": "Save Preferences",
+        "saved": "Saved!"
+      }
+    },
+    "applyModal": {
+      "title": "Apply",
+      "close": "Close",
+      "loading": "Generating cover letter...",
+      "coverLetter": "Cover Letter",
+      "regenerate": "Regenerate",
+      "edit": "Edit",
+      "preview": "Preview",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "openOffer": "Open Offer",
+      "sending": "Sending...",
+      "submitVia": "Submit via {{ source }}",
+      "markApplied": "I've applied"
     }
   }
 }

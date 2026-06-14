@@ -1,43 +1,43 @@
 <div class="jc-dashboard">
   <div class="jc-header">
     <div class="jc-header-content">
-      <h1><fa-icon icon="briefcase"></fa-icon> Job Copilot</h1>
-      <p class="jc-subtitle">Your AI-powered career assistant</p>
+      <h1 jhiTranslate="global.title">Job Copilot</h1>
+      <p class="jc-subtitle" jhiTranslate="jobCopilot.dashboard.subtitle">Your AI-powered career assistant</p>
     </div>
   </div>
 
   @if (loading()) {
     <div class="jc-loading">
       <div class="spinner-border text-primary" role="status"></div>
-      <p>Loading your profile...</p>
+      <p jhiTranslate="jobCopilot.dashboard.loading">Loading your profile...</p>
     </div>
   } @else if (!profile()) {
     <div class="jc-empty-state">
       <div class="jc-empty-icon">
         <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
       </div>
-      <h2>Welcome to Job Copilot</h2>
-      <p>Upload your CV and let AI find your perfect job match</p>
+      <h2 jhiTranslate="jobCopilot.dashboard.welcome.title">Welcome to Job Copilot</h2>
+      <p jhiTranslate="jobCopilot.dashboard.welcome.subtitle">Upload your CV and let AI find your perfect job match</p>
       <div class="jc-features">
         <div class="jc-feature">
           <fa-icon icon="robot"></fa-icon>
-          <span>AI Profile Extraction</span>
+          <span jhiTranslate="jobCopilot.dashboard.welcome.features.extraction">AI Profile Extraction</span>
         </div>
         <div class="jc-feature">
           <fa-icon icon="magnifying-glass"></fa-icon>
-          <span>Smart Job Search</span>
+          <span jhiTranslate="jobCopilot.dashboard.welcome.features.search">Smart Job Search</span>
         </div>
         <div class="jc-feature">
           <fa-icon icon="chart-line"></fa-icon>
-          <span>Semantic Matching</span>
+          <span jhiTranslate="jobCopilot.dashboard.welcome.features.matching">Semantic Matching</span>
         </div>
         <div class="jc-feature">
           <fa-icon icon="paper-plane"></fa-icon>
-          <span>Application Tracking</span>
+          <span jhiTranslate="jobCopilot.dashboard.welcome.features.tracking">Application Tracking</span>
         </div>
       </div>
       <a routerLink="/job-copilot/onboarding" class="jc-btn jc-btn-primary jc-btn-lg">
-        <fa-icon icon="cloud-arrow-up"></fa-icon> Upload your CV
+        <fa-icon icon="cloud-arrow-up"></fa-icon> <span jhiTranslate="jobCopilot.dashboard.welcome.action">Upload your CV</span>
       </a>
     </div>
   } @else {
@@ -48,20 +48,20 @@
             <fa-icon icon="user-circle" size="2x"></fa-icon>
           </div>
           <div class="jc-profile-info">
-            <h2>{{ profile()?.fullName || 'Your Profile' }}</h2>
+            <h2>{{ profile()?.fullName || ('jobCopilot.dashboard.profile.fallback' | translate) }}</h2>
             <div class="jc-profile-meta">
               @if (profile()?.location) {
                 <span><fa-icon icon="location-dot"></fa-icon> {{ profile()?.location }}</span>
               }
               @if (profile()?.yearsOfExperience) {
-                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()?.yearsOfExperience }} years exp.</span>
+                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()?.yearsOfExperience }} <span jhiTranslate="jobCopilot.dashboard.profile.yearsExp">years exp.</span></span>
               }
               @if (profile()?.email) {
                 <span><fa-icon icon="envelope"></fa-icon> {{ profile()?.email }}</span>
               }
             </div>
           </div>
-          <a routerLink="/job-copilot/onboarding" class="jc-btn jc-btn-ghost" title="Update CV">
+          <a routerLink="/job-copilot/onboarding" class="jc-btn jc-btn-ghost" [title]="'jobCopilot.dashboard.profile.updateCv' | translate">
             <fa-icon icon="arrows-rotate"></fa-icon>
           </a>
         </div>
@@ -72,7 +72,7 @@
               <span class="jc-skill-tag">{{ skill }}</span>
             }
             @if (parseSkills(profile()?.skills).length > 10) {
-              <span class="jc-skill-more">+{{ parseSkills(profile()?.skills).length - 10 }} more</span>
+              <span class="jc-skill-more" jhiTranslate="jobCopilot.dashboard.profile.moreSkills" [translateValues]="{ count: parseSkills(profile()?.skills).length - 10 }">+{{ parseSkills(profile()?.skills).length - 10 }} more</span>
             }
           </div>
         }
@@ -102,24 +102,24 @@
         <a routerLink="/job-copilot/search" class="jc-action-card jc-action-search">
           <fa-icon icon="magnifying-glass" size="lg"></fa-icon>
           <div>
-            <strong>Search Jobs</strong>
-            <span>Find opportunities across multiple sources</span>
+            <strong jhiTranslate="jobCopilot.dashboard.actions.search.title">Search Jobs</strong>
+            <span jhiTranslate="jobCopilot.dashboard.actions.search.description">Find opportunities across multiple sources</span>
           </div>
           <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
         </a>
         <a routerLink="/job-copilot/applications" class="jc-action-card jc-action-apps">
           <fa-icon icon="list-check" size="lg"></fa-icon>
           <div>
-            <strong>Applications</strong>
-            <span>Track and manage your applications</span>
+            <strong jhiTranslate="jobCopilot.dashboard.actions.apps.title">Applications</strong>
+            <span jhiTranslate="jobCopilot.dashboard.actions.apps.description">Track and manage your applications</span>
           </div>
           <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
         </a>
         <a routerLink="/job-copilot/settings" class="jc-action-card jc-action-settings">
           <fa-icon icon="gear" size="lg"></fa-icon>
           <div>
-            <strong>Preferences</strong>
-            <span>Configure your job search criteria</span>
+            <strong jhiTranslate="jobCopilot.dashboard.actions.prefs.title">Preferences</strong>
+            <span jhiTranslate="jobCopilot.dashboard.actions.prefs.description">Configure your job search criteria</span>
           </div>
           <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
         </a>

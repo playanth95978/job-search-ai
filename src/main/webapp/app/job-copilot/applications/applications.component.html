@@ -1,14 +1,14 @@
 <div class="jc-applications">
   <div class="jc-apps-header">
-    <h1><fa-icon icon="list-check"></fa-icon> My Applications</h1>
-    <span class="jc-apps-count" *ngIf="applications().length > 0">{{ applications().length }} total</span>
+    <h1 jhiTranslate="jobCopilot.applications.title">My Applications</h1>
+    <span class="jc-apps-count" *ngIf="applications().length > 0">{{ applications().length }} <span jhiTranslate="jobCopilot.applications.count">total</span></span>
   </div>
 
   @if (applications().length === 0) {
     <div class="jc-empty">
       <fa-icon icon="paper-plane" size="2x" class="jc-empty-icon"></fa-icon>
-      <h3>No applications yet</h3>
-      <p>Search for jobs and generate applications to get started.</p>
+      <h3 jhiTranslate="jobCopilot.applications.empty.title">No applications yet</h3>
+      <p jhiTranslate="jobCopilot.applications.empty.subtitle">Search for jobs and generate applications to get started.</p>
     </div>
   }
 
@@ -19,16 +19,16 @@
           <fa-icon [icon]="getStatusIcon(app.status)"></fa-icon>
         </div>
         <div class="jc-app-info">
-          <strong>{{ app.jobOffer?.title || 'Unknown Position' }}</strong>
-          <div class="jc-app-company"><fa-icon icon="building"></fa-icon> {{ app.jobOffer?.company || 'Unknown' }}</div>
+          <strong>{{ app.jobOffer?.title || ('jobCopilot.applications.unknownPosition' | translate) }}</strong>
+          <div class="jc-app-company"><fa-icon icon="building"></fa-icon> {{ app.jobOffer?.company || ('jobCopilot.search.results.unknown' | translate) }}</div>
         </div>
         <div class="jc-app-controls">
           @if (app.matchScore) {
-            <span class="jc-match-badge">{{ app.matchScore * 100 | number: '1.0-0' }}% match</span>
+            <span class="jc-match-badge">{{ app.matchScore * 100 | number: '1.0-0' }}% <span jhiTranslate="jobCopilot.applications.match">match</span></span>
           }
           @if (app.status === 'DRAFT') {
             <button (click)="openApplyModal(app)" class="jc-btn jc-btn-primary jc-btn-sm">
-              <fa-icon icon="paper-plane"></fa-icon> Postuler
+              <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
             </button>
           }
           <select
@@ -38,7 +38,7 @@
             (ngModelChange)="updateStatus(app.id!, $event)"
           >
             @for (s of statuses; track s) {
-              <option [value]="s">{{ s }}</option>
+              <option [value]="s">{{ 'jobCopilot.applications.statuses.' + s | translate }}</option>
             }
           </select>
         </div>
@@ -46,15 +46,15 @@
 
       @if (app.coverLetter) {
         <details class="jc-cover-letter">
-          <summary><fa-icon icon="file-alt"></fa-icon> View Cover Letter</summary>
+          <summary><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applications.viewCoverLetter">View Cover Letter</span></summary>
           <div class="jc-cover-content">{{ app.coverLetter }}</div>
         </details>
       }
 
       <div class="jc-app-footer">
-        <span><fa-icon icon="calendar-alt"></fa-icon> Created {{ app.createdAt | date: 'mediumDate' }}</span>
+        <span><fa-icon icon="calendar-alt"></fa-icon> <span jhiTranslate="jobCopilot.applications.created">Created</span> {{ app.createdAt | date: 'mediumDate' }}</span>
         @if (app.appliedAt) {
-          <span>&middot; Applied {{ app.appliedAt | date: 'mediumDate' }}</span>
+          <span>&middot; <span jhiTranslate="jobCopilot.applications.applied">Applied</span> {{ app.appliedAt | date: 'mediumDate' }}</span>
         }
       </div>
     </div>

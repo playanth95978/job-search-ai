@@ -1,8 +1,8 @@
 <div (click)="close()" class="jc-modal-backdrop">
   <div (click)="$event.stopPropagation()" class="jc-modal">
     <div class="jc-modal-header">
-      <h2><fa-icon icon="paper-plane"></fa-icon> Postuler</h2>
-      <button (click)="close()" aria-label="Fermer" class="jc-modal-close">
+      <h2 jhiTranslate="jobCopilot.applyModal.title"><fa-icon icon="paper-plane"></fa-icon> Postuler</h2>
+      <button (click)="close()" [aria-label]="'jobCopilot.applyModal.close' | translate" class="jc-modal-close">
         <fa-icon icon="xmark"></fa-icon>
       </button>
     </div>
@@ -15,8 +15,8 @@
             <span [style.background]="sourceColor()" class="jc-source-badge">{{ sourceLabel() }}</span>
           }
         </div>
-        <div class="jc-modal-offer-company">
-          <fa-icon icon="building"></fa-icon> {{ o.company || 'Unknown' }}
+    <div class="jc-modal-offer-company">
+          <fa-icon icon="building"></fa-icon> {{ o.company || ('jobCopilot.search.results.unknown' | translate) }}
           @if (o.location) {
             <span class="jc-separator">&middot;</span>
             <fa-icon icon="location-dot"></fa-icon> {{ o.location }}
@@ -27,7 +27,7 @@
 
     @if (loading()) {
       <div class="jc-modal-loading">
-        <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> Génération de la lettre de motivation...
+        <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.loading">Génération de la lettre de motivation...</span>
       </div>
     } @else {
       @if (resultMessage()) {
@@ -35,7 +35,7 @@
       } @else if (application()) {
         <div class="jc-modal-body">
           <div class="jc-modal-label-row">
-            <label class="jc-modal-label" for="apply-cover-letter">Lettre de motivation</label>
+            <label class="jc-modal-label" for="apply-cover-letter" jhiTranslate="jobCopilot.applyModal.coverLetter">Lettre de motivation</label>
             <div class="jc-modal-label-actions">
               <select
                 (ngModelChange)="language.set($event)"
@@ -53,13 +53,13 @@
                 } @else {
                   <fa-icon icon="sync"></fa-icon>
                 }
-                Régénérer
+                <span jhiTranslate="jobCopilot.applyModal.regenerate">Régénérer</span>
               </button>
               <button (click)="togglePreview()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
                 @if (previewMode()) {
-                  <fa-icon icon="pencil-alt"></fa-icon> Modifier
+                  <fa-icon icon="pencil-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.edit">Modifier</span>
                 } @else {
-                  <fa-icon icon="eye"></fa-icon> Aperçu
+                  <fa-icon icon="eye"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.preview">Aperçu</span>
                 }
               </button>
             </div>
@@ -84,24 +84,24 @@
 
       <div class="jc-modal-actions">
         @if (resultMessage()) {
-          <button (click)="close()" class="jc-btn jc-btn-primary"><fa-icon icon="check"></fa-icon> Fermer</button>
+          <button (click)="close()" class="jc-btn jc-btn-primary"><fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.close">Fermer</span></button>
         } @else if (application()) {
           <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost">
-            <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon> {{ copied() ? 'Copié !' : 'Copier' }}
+            <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon> {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
           </button>
 
           @if (applyUrl()) {
             <a [href]="applyUrl()" class="jc-btn jc-btn-ghost" rel="noopener" target="_blank">
-              <fa-icon icon="external-link-alt"></fa-icon> Ouvrir l'offre
+              <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.openOffer">Ouvrir l'offre</span>
             </a>
           }
 
           @if (autoApplySupported()) {
             <button (click)="submitAuto()" [disabled]="submitting()" class="jc-btn jc-btn-accent">
               @if (submitting()) {
-                <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> Envoi...
+                <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.sending">Envoi...</span>
               } @else {
-                <fa-icon icon="paper-plane"></fa-icon> Soumettre via {{ sourceLabel() }}
+                <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.submitVia" [translateValues]="{ source: sourceLabel() }">Soumettre via {{ sourceLabel() }}</span>
               }
             </button>
           }
@@ -110,7 +110,7 @@
             @if (submitting()) {
               <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> ...
             } @else {
-              <fa-icon icon="check"></fa-icon> J'ai postulé
+              <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.markApplied">J'ai postulé</span>
             }
           </button>
         }
