@@ -3,7 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { TranslateModule } from '@ngx-translate/core';
 import { marked } from 'marked';
+
+import { TranslateDirective } from 'app/shared/language';
+
 import { JobCopilotService } from '../job-copilot.service';
 import { SanitizerService } from '../../../shared/sanitizer/sanitizer.service';
 import { JobApplication, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
@@ -27,7 +31,7 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string }[] = [
 @Component({
   selector: 'jhi-apply-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslateDirective, TranslateModule],
   templateUrl: './apply-modal.component.html',
   styleUrl: './apply-modal.component.scss',
 })
@@ -60,7 +64,6 @@ export class ApplyModalComponent implements OnInit {
   ngOnInit(): void {
     this.service.getAutoApplySources().subscribe({
       next: sources => this.autoApplySupported.set(sources.includes(this.offer()?.source ?? '')),
-      error() {},
     });
 
     if (this.existingApplication) {
