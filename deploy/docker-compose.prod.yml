@@ -90,6 +90,8 @@ services:
       onnx-init:
         condition: service_completed_successfully
     restart: unless-stopped
+    ports:
+      - '8080:8080'
 
   nginx:
     image: nginx:alpine
