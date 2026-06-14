@@ -144,5 +144,48 @@
       "not.image": "Le fichier doit être une image et non du type \"{{ fileType }}\""
     }
   },
-  "footer": "Ceci est votre pied de page"
+  "footer": {
+    "ariaTitle": "Pied de page Job Search AI",
+    "description": "Trouvez plus rapidement les opportunités qui correspondent à votre profil grâce à l'intelligence artificielle.",
+    "aiSearch": {
+      "title": "Recherche d'emploi IA",
+      "cvAnalysis": "Analyse de CV",
+      "matching": "Matching CV ↔ Offres",
+      "coverLetter": "Générateur de lettres de motivation",
+      "interviewSimulator": "Simulateur d'entretien"
+    },
+    "navigation": {
+      "title": "Navigation",
+      "home": "Accueil",
+      "jobs": "Offres d'emploi",
+      "companies": "Entreprises",
+      "aiAssistant": "Assistant IA",
+      "uploadCv": "Importer mon CV",
+      "dashboard": "Tableau de bord"
+    },
+    "resources": {
+      "title": "Ressources",
+      "careerAdvice": "Conseils carrière",
+      "cvGuide": "Guide CV",
+      "interviewPrep": "Préparation aux entretiens",
+      "faq": "FAQ",
+      "blog": "Blog"
+    },
+    "legal": {
+      "title": "Légal",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité",
+      "cookies": "Cookies",
+      "notice": "Mentions légales"
+    },
+    "company": {
+      "title": "Entreprise",
+      "about": "À propos",
+      "contact": "Contact",
+      "partners": "Partenaires",
+      "press": "Presse"
+    },
+    "copyright": "© {{ year }} Job Search AI. Tous droits réservés.",
+    "tagline": "Propulsé par l'IA pour connecter les talents aux meilleures opportunités."
+  }
 }

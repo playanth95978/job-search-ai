@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, RendererFactory2 } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, Renderer2, RendererFactory2 } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 
 import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
@@ -6,21 +7,20 @@ import dayjs from 'dayjs/esm';
 
 import { AppPageTitleStrategy } from 'app/app-page-title-strategy';
 import { AccountService } from 'app/core/auth/account.service';
-import { CommonModule } from '@angular/common';
+import Footer from 'app/layouts/footer/footer';
 
 @Component({
   selector: 'jhi-main',
   templateUrl: './main.html',
   providers: [AppPageTitleStrategy],
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, Footer],
 })
 export default class Main implements OnInit {
   private readonly router = inject(Router);
   private readonly appPageTitleStrategy = inject(AppPageTitleStrategy);
   private readonly accountService = inject(AccountService);
   private readonly translateService = inject(TranslateService);
-  private readonly rootRenderer = inject(RendererFactory2);
-  private readonly renderer: any;
+  private readonly renderer: Renderer2;
 
   constructor() {
     const rootRenderer = inject(RendererFactory2);

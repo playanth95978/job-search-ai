@@ -2,25 +2,29 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { TranslateModule } from '@ngx-translate/core';
+
+import { TranslateDirective } from 'app/shared/language';
+
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { UserPreferenceDto } from '../shared/job-copilot.model';
 
 @Component({
   selector: 'jhi-job-copilot-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslateDirective, TranslateModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
 })
 export class SettingsComponent implements OnInit {
-  private service = inject(JobCopilotService);
-
   prefs: Partial<UserPreferenceDto> = {};
   rolesInput = '';
   excludedInput = '';
   locationsInput = '';
   saving = signal(false);
   saved = signal(false);
+
+  private service = inject(JobCopilotService);
 
   ngOnInit(): void {
     this.service.getPreferences().subscribe({
@@ -35,7 +39,6 @@ export class SettingsComponent implements OnInit {
         this.excludedInput = this.parseJson(p.excludedTechnologies).join(', ');
         this.locationsInput = this.parseJson(p.preferredLocations).join(', ');
       },
-      error: () => {},
     });
   }
 
@@ -70,7 +73,8 @@ export class SettingsComponent implements OnInit {
   private parseJson(json?: string): string[] {
     if (!json) return [];
     try {
-      return JSON.parse(json);
+      const parsed: unknown = JSON.parse(json);
+      return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
     } catch {
       return [];
     }

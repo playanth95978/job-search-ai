@@ -1,60 +1,97 @@
-<footer class="footer py-5 mt-5 border-top bg-light">
-  <div class="container">
-    <div class="row">
-      <div class="col-12 col-md-4 mb-4 mb-md-0">
-        <h5 class="fw-bold mb-3">
-          <span class="text-primary me-2">●</span>
-          Assistant IA
-        </h5>
-        <p class="text-muted small lh-lg" jhiTranslate="footer.footer-description">
-          Votre compagnon intelligent pour accéder rapidement à toutes vos données d'entreprise (GitLab, Jira, Confluence).
+<footer class="footer jsa-footer mt-5" aria-labelledby="job-search-ai-footer-heading">
+  <div class="container py-5">
+    <h2 id="job-search-ai-footer-heading" class="visually-hidden" jhiTranslate="footer.ariaTitle">Pied de page Job Search AI</h2>
+
+    <div class="row g-4 g-xl-5">
+      <div class="col-12 col-xl-4">
+        <a class="footer-brand d-inline-flex align-items-center gap-3 mb-3" routerLink="/" aria-label="Job Search AI - Accueil">
+          <span class="footer-logo-mark" aria-hidden="true">AI</span>
+          <span class="footer-logo-text">Job Search AI</span>
+        </a>
+
+        <p class="footer-description mb-4" jhiTranslate="footer.description">
+          Trouvez plus rapidement les opportunités qui correspondent à votre profil grâce à l'intelligence artificielle.
         </p>
-        <!--        <div class="social-links mt-4">-->
-        <!--          <a class="btn btn-outline-secondary btn-sm rounded-circle me-2 border-0" href="#">-->
-        <!--            <fa-icon icon="github"></fa-icon>-->
-        <!--          </a>-->
-        <!--          <a class="btn btn-outline-secondary btn-sm rounded-circle me-2 border-0" href="#">-->
-        <!--            <fa-icon icon="linkedin"></fa-icon>-->
-        <!--          </a>-->
-        <!--          <a class="btn btn-outline-secondary btn-sm rounded-circle border-0" href="#">-->
-        <!--            <fa-icon icon="twitter"></fa-icon>-->
-        <!--          </a>-->
-        <!--        </div>-->
+
+        <section class="footer-ai-card" aria-labelledby="footer-ai-search-title">
+          <h3 id="footer-ai-search-title" class="footer-heading mb-3" jhiTranslate="footer.aiSearch.title">Recherche d'emploi IA</h3>
+          <div class="d-flex flex-wrap gap-2">
+            @for (link of aiSearchLinks; track link.labelKey) {
+              @if (link.routerLink) {
+                <a class="footer-ai-link" [routerLink]="link.routerLink" jhiTranslate="{{ link.labelKey }}">{{ link.label }}</a>
+              } @else {
+                <a class="footer-ai-link" [href]="link.href" jhiTranslate="{{ link.labelKey }}">{{ link.label }}</a>
+              }
+            }
+          </div>
+        </section>
       </div>
 
-      <div class="col-6 col-md-2 offset-md-2 mb-4 mb-md-0">
-        <h6 class="text-uppercase fw-bold mb-3 small">Navigation</h6>
-        <ul class="nav flex-column small">
-          <li class="nav-item mb-2">
-            <a class="nav-link p-0 text-muted" jhiTranslate="footer.footer-links.home" routerLink="/">Accueil</a>
-          </li>
-          <li class="nav-item mb-2">
-            <a class="nav-link p-0 text-muted" jhiTranslate="footer.footer-links.chat" routerLink="/chat">Conversations</a>
-          </li>
-          <li class="nav-item mb-2">
-            <a class="nav-link p-0 text-muted" href="#" jhiTranslate="footer.footer-links.documentation">Documentation</a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="col-6 col-md-2 mb-4 mb-md-0">
-        <h6 class="text-uppercase fw-bold mb-3 small">Support</h6>
-        <ul class="nav flex-column small">
-          <li class="nav-item mb-2">
-            <a class="nav-link p-0 text-muted" href="#" jhiTranslate="footer.footer-links.support">Support</a>
-          </li>
-          <li class="nav-item mb-2">
-            <a class="nav-link p-0 text-muted" href="#" jhiTranslate="footer.footer-links.legal">Mentions Légales</a>
-          </li>
-        </ul>
+      <div class="col-12 col-xl-8">
+        <div class="row g-4">
+          @for (section of sections; track section.titleKey) {
+            <section class="col-6 col-md-3" [attr.aria-labelledby]="section.titleKey">
+              <h3 [id]="section.titleKey" class="footer-heading mb-3" jhiTranslate="{{ section.titleKey }}">{{ section.title }}</h3>
+              <ul class="list-unstyled footer-link-list mb-0">
+                @for (link of section.links; track link.labelKey) {
+                  <li>
+                    @if (link.routerLink) {
+                      <a class="footer-link" [routerLink]="link.routerLink" jhiTranslate="{{ link.labelKey }}">{{ link.label }}</a>
+                    } @else {
+                      <a class="footer-link" [href]="link.href" jhiTranslate="{{ link.labelKey }}">{{ link.label }}</a>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        </div>
       </div>
     </div>
 
-    <div class="d-flex flex-column flex-sm-row justify-content-between py-4 mt-4 border-top">
-      <p class="small text-muted mb-0" jhiTranslate="footer.title">© 2026 Assistant IA Interne. Tous droits réservés.</p>
-      <div class="small text-muted mt-2 mt-sm-0">
-        <span>v1.2.0</span>
+    <div class="footer-divider"></div>
+
+    <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-4">
+      <div>
+        <p class="footer-copyright mb-1">
+          <span jhiTranslate="footer.copyright" [translateValues]="{ year: currentYear }">
+            © {{ currentYear }} Job Search AI. Tous droits réservés.
+          </span>
+        </p>
+        <p class="footer-tagline mb-0" jhiTranslate="footer.tagline">
+          Propulsé par l'IA pour connecter les talents aux meilleures opportunités.
+        </p>
       </div>
+
+      <nav class="footer-social d-flex align-items-center gap-2" aria-label="Réseaux sociaux">
+        <a class="footer-social-link" href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path
+              d="M6.94 8.98H3.75v10.19h3.19V8.98ZM5.35 4.83a1.85 1.85 0 1 0 0 3.7 1.85 1.85 0 0 0 0-3.7Zm13.9 8.5c0-3.07-1.64-4.5-3.83-4.5a3.31 3.31 0 0 0-3 1.65h-.04v-1.5H9.33v10.19h3.18v-5.04c0-1.33.25-2.62 1.9-2.62 1.63 0 1.65 1.52 1.65 2.7v4.96h3.19v-5.84Z"
+            />
+          </svg>
+        </a>
+        <a
+          class="footer-social-link"
+          href="https://github.com/playanth95978/job-search-ai"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path
+              d="M12 3.5a8.5 8.5 0 0 0-2.69 16.56c.43.08.59-.19.59-.42v-1.48c-2.4.52-2.9-1.03-2.9-1.03-.39-1-.96-1.27-.96-1.27-.79-.54.06-.53.06-.53.87.06 1.33.9 1.33.9.78 1.33 2.04.95 2.53.73.08-.56.31-.95.56-1.17-1.91-.22-3.92-.96-3.92-4.25 0-.94.34-1.7.89-2.3-.09-.22-.39-1.1.09-2.27 0 0 .73-.23 2.39.88A8.29 8.29 0 0 1 12 7.08c.7 0 1.4.1 2.05.28 1.65-1.11 2.38-.88 2.38-.88.48 1.17.18 2.05.09 2.27.56.6.89 1.36.89 2.3 0 3.3-2.01 4.03-3.93 4.24.32.27.6.8.6 1.61v2.74c0 .23.15.5.6.42A8.5 8.5 0 0 0 12 3.5Z"
+            />
+          </svg>
+        </a>
+        <a class="footer-social-link" href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter">
+          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path
+              d="M14.73 10.62 20.75 3.7h-1.43l-5.23 6.01L9.91 3.7H5.1l6.31 9.08-6.31 7.25h1.43l5.52-6.34 4.41 6.34h4.81l-6.54-9.41Zm-1.95 2.24-.64-.9-5.09-7.2h2.17l4.11 5.82.64.9 5.35 7.57h-2.17l-4.37-6.19Z"
+            />
+          </svg>
+        </a>
+      </nav>
     </div>
   </div>
 </footer>
