@@ -113,7 +113,7 @@
 
         <!-- Account -->
         <div class="d-inline-block" ngbDropdown>
-          @let accountRef = account;
+          @let accountRef = account();
           <button class="nav-link dropdown-toggle account-toggle" data-cy="accountMenu" id="account-menu" ngbDropdownToggle>
             @if (!accountRef?.imageUrl) {
               <fa-icon [fixedWidth]="true" icon="user" />

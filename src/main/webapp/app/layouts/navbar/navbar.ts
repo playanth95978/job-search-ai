@@ -42,7 +42,7 @@ export default class Navbar implements OnInit {
   readonly languages = LANGUAGES;
   openAPIEnabled = signal(false);
   readonly version: string;
-  account = inject(AccountService).account();
+  account = inject(AccountService).account;
 
   private readonly loginService = inject(LoginService);
   private readonly translateService = inject(TranslateService);
