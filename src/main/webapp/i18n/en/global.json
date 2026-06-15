@@ -144,5 +144,48 @@
       "not.image": "File was expected to be an image but was found to be \"{{ fileType }}\""
     }
   },
-  "footer": "This is your footer"
+  "footer": {
+    "ariaTitle": "Job Search AI footer",
+    "description": "Find opportunities matching your profile faster with artificial intelligence.",
+    "aiSearch": {
+      "title": "AI job search",
+      "cvAnalysis": "Resume analysis",
+      "matching": "Resume ↔ Job matching",
+      "coverLetter": "Cover letter generator",
+      "interviewSimulator": "Interview simulator"
+    },
+    "navigation": {
+      "title": "Navigation",
+      "home": "Home",
+      "jobs": "Jobs",
+      "companies": "Companies",
+      "aiAssistant": "AI Assistant",
+      "uploadCv": "Upload my resume",
+      "dashboard": "Dashboard"
+    },
+    "resources": {
+      "title": "Resources",
+      "careerAdvice": "Career advice",
+      "cvGuide": "Resume guide",
+      "interviewPrep": "Interview preparation",
+      "faq": "FAQ",
+      "blog": "Blog"
+    },
+    "legal": {
+      "title": "Legal",
+      "terms": "Terms of use",
+      "privacy": "Privacy policy",
+      "cookies": "Cookies",
+      "notice": "Legal notice"
+    },
+    "company": {
+      "title": "Company",
+      "about": "About",
+      "contact": "Contact",
+      "partners": "Partners",
+      "press": "Press"
+    },
+    "copyright": "© {{ year }} Job Search AI. All rights reserved.",
+    "tagline": "Powered by AI to connect talent with the best opportunities."
+  }
 }
