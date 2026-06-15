@@ -8,6 +8,7 @@ import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import org.jspecify.annotations.NonNull;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
@@ -54,6 +55,7 @@ public class JobOfferIngestionService {
         }
     }
 
+
     private JobOffer prepareForIngestion(JobOffer offer) {
         try {
             String hash = contentJobOfferHash(offer);
@@ -62,7 +64,7 @@ public class JobOfferIngestionService {
             if (offer.getSourceId() != null && offer.getSource() != null) {
                 List<JobOffer> existing = jobOfferRepository.findBySourceIdAndSource(offer.getSourceId(), offer.getSource());
                 if (!existing.isEmpty()) {
-                    JobOffer existingOffer = existing.get(0);
+                    JobOffer existingOffer = existing.getFirst();
                     if (hash.equals(existingOffer.getContentHash())) {
                         log.debug("Offer {}/{} already exists and is unchanged", offer.getSource(), offer.getSourceId());
                         return null; // Skip unchanged

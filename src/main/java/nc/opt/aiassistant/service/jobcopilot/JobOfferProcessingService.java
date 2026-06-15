@@ -3,12 +3,17 @@ package nc.opt.aiassistant.service.jobcopilot;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,28 +31,28 @@ public class JobOfferProcessingService {
      * Background task to process pending embeddings.
      * In production, this could be triggered by an event or a more sophisticated queue.
      */
-    //    @Scheduled(fixedDelay = 5000)
-    //    public void processPendingOffers() {
-    //        List<JobOffer> pending = jobOfferRepository.findByEmbeddingStatus(EmbeddingStatus.PENDING, PageRequest.of(0, BATCH_SIZE * 2));
-    //
-    //        if (pending.isEmpty()) return;
-    //
-    //        log.info("Processing {} pending job offers for embeddings", pending.size());
-    //
-    //        // Split into batches for the embedding model
-    //        List<List<JobOffer>> batches = IntStream.range(0, (pending.size() + BATCH_SIZE - 1) / BATCH_SIZE)
-    //            .mapToObj(i -> pending.subList(i * BATCH_SIZE, Math.min(pending.size(), (i + 1) * BATCH_SIZE)))
-    //            .toList();
-    //
-    //        // Process each batch (could be parallelized with Virtual Threads)
-    //        batches.forEach(this::processBatchAsync);
-    //    }
-    //
-    //    @Async("processExecutor")
-    //    public CompletableFuture<Void> processBatchAsync(List<JobOffer> batch) {
-    //        processBatch(batch);
-    //        return CompletableFuture.completedFuture(null);
-    //    }
+    @Scheduled(fixedDelay = 5000)
+    public void processPendingOffers() {
+        List<JobOffer> pending = jobOfferRepository.findByEmbeddingStatus(EmbeddingStatus.PENDING, PageRequest.of(0, BATCH_SIZE * 2));
+
+        if (pending.isEmpty()) return;
+
+        log.info("Processing {} pending job offers for embeddings", pending.size());
+
+        // Split into batches for the embedding model
+        List<List<JobOffer>> batches = IntStream.range(0, (pending.size() + BATCH_SIZE - 1) / BATCH_SIZE)
+            .mapToObj(i -> pending.subList(i * BATCH_SIZE, Math.min(pending.size(), (i + 1) * BATCH_SIZE)))
+            .toList();
+
+        // Process each batch (could be parallelized with Virtual Threads)
+        batches.forEach(this::processBatchAsync);
+    }
+
+    @Async("processExecutor")
+    public CompletableFuture<Void> processBatchAsync(List<JobOffer> batch) {
+        processBatch(batch);
+        return CompletableFuture.completedFuture(null);
+    }
 
     @Transactional
     @Async("processExecutor")
