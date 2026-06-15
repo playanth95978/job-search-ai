@@ -46,18 +46,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  parseSkills(skills?: string): string[] {
-    if (!skills) return [];
-    try {
-      return JSON.parse(skills);
-    } catch {
-      return skills
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
-    }
-  }
-
   getStatusIcon(status: string): string {
     return applicationStatusIcon(status);
   }

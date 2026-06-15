@@ -55,41 +55,6 @@ export class OnboardingComponent {
     });
   }
 
-  /** Accepts a structured array (DTO) or a legacy JSON/comma string. */
-  private toArray(value: unknown): any[] {
-    if (Array.isArray(value)) return value;
-    if (typeof value === 'string' && value.trim()) {
-      try {
-        const parsed = JSON.parse(value);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return value
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean);
-      }
-    }
-    return [];
-  }
-
-  parseSkills(value?: unknown): { name: string }[] {
-    return this.toArray(value)
-      .map(s => (typeof s === 'string' ? { name: s } : s))
-      .filter(s => s?.name);
-  }
-
-  parseEducation(value?: unknown): any[] {
-    return this.toArray(value);
-  }
-
-  parseCertifications(value?: unknown): any[] {
-    return this.toArray(value);
-  }
-
-  parseExperiences(value?: unknown): any[] {
-    return this.toArray(value);
-  }
-
   goToDashboard(): void {
     this.router.navigate(['/job-copilot']);
   }

@@ -59,7 +59,7 @@
           <div class="jc-ep-section">
             <h4 jhiTranslate="jobCopilot.onboarding.success.skills"><fa-icon icon="code"></fa-icon> Skills</h4>
             <div class="jc-skill-tags">
-              @for (skill of parseSkills(profile()!.skills); track skill.name) {
+              @for (skill of profile()!.skills ?? []; track skill.name) {
                 <span class="jc-skill-tag">{{ skill.name }}</span>
               }
             </div>
@@ -70,14 +70,12 @@
           <div class="jc-ep-section">
             <h4 jhiTranslate="jobCopilot.onboarding.success.education"><fa-icon icon="graduation-cap"></fa-icon> Education</h4>
             <div class="jc-items-list">
-              @for (edu of parseEducation(profile()!.education); track edu.id) {
+              @for (edu of profile()!.education ?? []; track edu.id) {
                 <div class="jc-item">
                   <strong>{{ edu.degree }}</strong> @if (edu.school) {
                     <span><span jhiTranslate="jobCopilot.onboarding.success.at">at</span> {{ edu.school }}</span>
                   }
                 </div>
-              } @empty {
-                <p>{{ profile()!.education }}</p>
               }
             </div>
           </div>
@@ -87,14 +85,12 @@
           <div class="jc-ep-section">
             <h4 jhiTranslate="jobCopilot.onboarding.success.certifications"><fa-icon icon="certificate"></fa-icon> Certifications</h4>
             <div class="jc-items-list">
-              @for (cert of parseCertifications(profile()!.certifications); track cert.id) {
+              @for (cert of profile()!.certifications ?? []; track cert.id) {
                 <div class="jc-item">
                   <strong>{{ cert.name }}</strong> @if (cert.issuer) {
                     <span><span jhiTranslate="jobCopilot.onboarding.success.from">from</span> {{ cert.issuer }}</span>
                   }
                 </div>
-              } @empty {
-                <p>{{ profile()!.certifications }}</p>
               }
             </div>
           </div>
