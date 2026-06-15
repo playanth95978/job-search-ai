@@ -1,7 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  signal,
+  viewChild
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -14,7 +21,7 @@ import { RegisterService } from './register.service';
 @Component({
   selector: 'jhi-register',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateDirective, TranslateModule, RouterLink, ReactiveFormsModule, PasswordStrengthBar],
+  imports: [TranslateDirective, TranslateModule, ReactiveFormsModule, PasswordStrengthBar],
   templateUrl: './register.html',
 })
 export default class Register implements AfterViewInit {

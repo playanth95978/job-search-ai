@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { UserPreferenceDto } from '../shared/job-copilot.model';
+import { TranslatePipe } from "@ngx-translate/core";
 
 @Component({
   selector: 'jhi-job-copilot-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
 })
