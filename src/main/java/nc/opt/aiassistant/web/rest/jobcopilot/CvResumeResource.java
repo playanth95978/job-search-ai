@@ -66,7 +66,7 @@ public class CvResumeResource {
     public ResponseEntity<CandidateProfileDto> getCandidateProfile() {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         return candidateProfileRepository
-            .findByUserId(userId)
+            .findTopByUserIdOrderByCreatedAtDesc(userId)
             .map(candidateProfileMapper::toDto)
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.noContent().build());

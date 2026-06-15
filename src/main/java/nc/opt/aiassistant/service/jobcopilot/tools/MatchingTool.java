@@ -25,7 +25,7 @@ public class MatchingTool {
 
     @Tool(description = "Match the candidate profile against all available job offers. Returns ranked matches with scores.")
     public String matchJobs(@ToolParam(description = "User ID of the candidate") String userId) {
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         if (profile == null) return "No candidate profile found. Upload a CV first.";
 
         List<JobOffer> offers = jobOfferRepository.findAll();

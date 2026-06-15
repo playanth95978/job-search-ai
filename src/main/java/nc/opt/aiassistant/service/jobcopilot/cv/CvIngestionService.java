@@ -71,7 +71,7 @@ public class CvIngestionService {
      */
     public CvReviewDto review(String userId) {
         CandidateProfile profile = profileRepository
-            .findByUserId(userId)
+            .findTopByUserIdOrderByCreatedAtDesc(userId)
             .orElseThrow(() -> new IllegalStateException("No CV profile found for user " + userId));
 
         String markdown = profile.getRawMarkdown();

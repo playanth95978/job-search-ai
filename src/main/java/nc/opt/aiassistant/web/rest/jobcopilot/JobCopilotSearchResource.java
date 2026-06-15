@@ -74,7 +74,7 @@ public class JobCopilotSearchResource {
     @GetMapping("/match")
     public ResponseEntity<List<MatchResultDto>> matchJobs(@RequestParam(name = "topK", defaultValue = "30") int topK) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         if (profile == null) return ResponseEntity.badRequest().build();
 
         // Pre-filter by semantic (cosine) similarity to the profile instead of scoring every offer,

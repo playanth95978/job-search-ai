@@ -26,7 +26,7 @@ public class CoverLetterTool {
         @ToolParam(description = "User ID") String userId,
         @ToolParam(description = "Job offer ID (UUID)") String jobOfferId
     ) {
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         if (profile == null) return "No candidate profile found. Upload a CV first.";
 
         JobOffer offer = jobOfferRepository.findById(UUID.fromString(jobOfferId)).orElse(null);

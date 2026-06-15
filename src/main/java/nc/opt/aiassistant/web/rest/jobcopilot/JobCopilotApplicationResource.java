@@ -48,7 +48,7 @@ public class JobCopilotApplicationResource {
         @RequestParam(required = false) String language
     ) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         JobOffer offer = jobOfferRepository.findById(jobOfferId).orElse(null);
         if (profile == null || offer == null) return ResponseEntity.badRequest().build();
 
@@ -84,7 +84,7 @@ public class JobCopilotApplicationResource {
     @PostMapping("/{jobOfferId}/cover-letter")
     public ResponseEntity<String> generateCoverLetter(@PathVariable UUID jobOfferId, @RequestParam(required = false) String language) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         JobOffer offer = jobOfferRepository.findById(jobOfferId).orElse(null);
         if (profile == null || offer == null) return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(coverLetterService.generate(profile, offer, language));

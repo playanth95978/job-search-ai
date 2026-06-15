@@ -17,7 +17,7 @@ public class CvParsingTool {
 
     @Tool(description = "Get the candidate profile for the current user. Returns skills, experience, education, etc.")
     public String getCandidateProfile(@ToolParam(description = "User ID of the candidate") String userId) {
-        return profileRepository.findByUserId(userId).map(this::formatProfile).orElse("No CV uploaded yet. Please upload your CV first.");
+        return profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).map(this::formatProfile).orElse("No CV uploaded yet. Please upload your CV first.");
     }
 
     private String formatProfile(CandidateProfile p) {

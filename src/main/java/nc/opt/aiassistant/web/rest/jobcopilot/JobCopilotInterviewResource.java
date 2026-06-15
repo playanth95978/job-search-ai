@@ -25,7 +25,7 @@ public class JobCopilotInterviewResource {
     @PostMapping("/start")
     public ResponseEntity<InterviewMessageDto> start(@RequestParam UUID jobOfferId, @RequestParam(required = false) String language) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         JobOffer offer = jobOfferRepository.findById(jobOfferId).orElse(null);
         if (profile == null || offer == null) return ResponseEntity.badRequest().build();
 
@@ -43,7 +43,7 @@ public class JobCopilotInterviewResource {
         @RequestParam(required = false) String language
     ) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         JobOffer offer = jobOfferRepository.findById(jobOfferId).orElse(null);
         if (profile == null || offer == null) return ResponseEntity.badRequest().build();
 

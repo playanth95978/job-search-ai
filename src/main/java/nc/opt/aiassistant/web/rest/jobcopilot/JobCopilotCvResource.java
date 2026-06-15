@@ -33,7 +33,7 @@ public class JobCopilotCvResource {
     public ResponseEntity<CandidateProfileDto> getProfile() {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         return profileRepository
-            .findByUserId(userId)
+            .findTopByUserIdOrderByCreatedAtDesc(userId)
             .map(candidateProfileMapper::toDto)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
