@@ -40,11 +40,11 @@
               <select
                 (ngModelChange)="language.set($event)"
                 [ngModel]="language()"
-                aria-label="Langue de la lettre de motivation"
+                [aria-label]="'jobCopilot.applyModal.languages.ariaLabel' | translate"
                 class="jc-modal-lang-select"
               >
                 @for (lang of languages; track lang.value) {
-                  <option [value]="lang.value">{{ lang.label }}</option>
+                  <option [value]="lang.value">{{ lang.labelKey | translate }}</option>
                 }
               </select>
               <button (click)="regenerateCoverLetter()" [disabled]="regenerating()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">

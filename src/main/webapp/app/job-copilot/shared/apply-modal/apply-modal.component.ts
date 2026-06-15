@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { TranslateService } from '@ngx-translate/core';
 import { marked } from 'marked';
 
 import { JobCopilotService } from '../job-copilot.service';
@@ -19,12 +20,12 @@ function stripMarkdownFence(text: string): string {
 }
 
 /** Languages the cover letter can be generated in. The value is sent to the LLM as part of its prompt. */
-export const COVER_LETTER_LANGUAGES: { value: string; label: string }[] = [
-  { value: '', label: "Langue de l'offre" },
-  { value: 'French', label: 'Français' },
-  { value: 'English', label: 'English' },
-  { value: 'Spanish', label: 'Español' },
-  { value: 'German', label: 'Deutsch' },
+export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: string }[] = [
+  { value: '', label: "Langue de l'offre", labelKey: 'jobCopilot.applyModal.languages.offer' },
+  { value: 'French', label: 'Français', labelKey: 'jobCopilot.applyModal.languages.french' },
+  { value: 'English', label: 'English', labelKey: 'jobCopilot.applyModal.languages.english' },
+  { value: 'Spanish', label: 'Español', labelKey: 'jobCopilot.applyModal.languages.spanish' },
+  { value: 'German', label: 'Deutsch', labelKey: 'jobCopilot.applyModal.languages.german' },
 ];
 
 @Component({
@@ -59,6 +60,7 @@ export class ApplyModalComponent implements OnInit {
   );
   private service = inject(JobCopilotService);
   private sanitizer = inject(SanitizerService);
+  private translateService = inject(TranslateService);
 
   ngOnInit(): void {
     this.service.getAutoApplySources().subscribe({
@@ -78,13 +80,13 @@ export class ApplyModalComponent implements OnInit {
           this.loading.set(false);
         },
         error: err => {
-          this.error.set(err.error?.message ?? 'Failed to create application');
+          this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.create'));
           this.loading.set(false);
         },
       });
     } else {
       this.loading.set(false);
-      this.error.set('No job offer provided');
+      this.error.set(this.translateService.instant('jobCopilot.applyModal.error.noOffer'));
     }
   }
 
@@ -113,7 +115,7 @@ export class ApplyModalComponent implements OnInit {
         this.regenerating.set(false);
       },
       error: err => {
-        this.error.set(err.error?.message ?? 'Failed to generate cover letter');
+        this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.regenerate'));
         this.regenerating.set(false);
       },
     });
@@ -138,7 +140,7 @@ export class ApplyModalComponent implements OnInit {
             this.submitting.set(false);
             this.application.set(outcome.application);
             if (outcome.autoApplied) {
-              this.resultMessage.set(`Candidature envoyée automatiquement via ${this.sourceLabel()}.`);
+              this.resultMessage.set(this.translateService.instant('jobCopilot.applyModal.success.autoApplied', { source: this.sourceLabel() }));
               this.applied.emit(outcome.application);
             } else {
               this.error.set(outcome.message);
@@ -146,13 +148,13 @@ export class ApplyModalComponent implements OnInit {
           },
           error: err => {
             this.submitting.set(false);
-            this.error.set(err.error?.message ?? "L'envoi automatique a échoué");
+            this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.autoApply'));
           },
         });
       },
       error: err => {
         this.submitting.set(false);
-        this.error.set(err.error?.message ?? 'Failed to save the cover letter');
+        this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.save'));
       },
     });
   }
@@ -168,18 +170,18 @@ export class ApplyModalComponent implements OnInit {
           next: updated => {
             this.submitting.set(false);
             this.application.set(updated);
-            this.resultMessage.set('Candidature marquée comme envoyée.');
+            this.resultMessage.set(this.translateService.instant('jobCopilot.applyModal.success.markedApplied'));
             this.applied.emit(updated);
           },
           error: err => {
             this.submitting.set(false);
-            this.error.set(err.error?.message ?? 'Failed to update status');
+            this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.status'));
           },
         });
       },
       error: err => {
         this.submitting.set(false);
-        this.error.set(err.error?.message ?? 'Failed to save the cover letter');
+        this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.save'));
       },
     });
   }

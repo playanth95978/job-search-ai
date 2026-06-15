@@ -197,7 +197,27 @@
       "openOffer": "Open Offer",
       "sending": "Sending...",
       "submitVia": "Submit via {{ source }}",
-      "markApplied": "I've applied"
+      "markApplied": "I've applied",
+      "languages": {
+        "ariaLabel": "Cover letter language",
+        "offer": "Offer language",
+        "french": "French",
+        "english": "English",
+        "spanish": "Spanish",
+        "german": "German"
+      },
+      "success": {
+        "autoApplied": "Application sent automatically via {{ source }}.",
+        "markedApplied": "Application marked as sent."
+      },
+      "error": {
+        "create": "Failed to create application",
+        "noOffer": "No job offer provided",
+        "regenerate": "Failed to generate cover letter",
+        "autoApply": "Automatic submission failed",
+        "save": "Failed to save the cover letter",
+        "status": "Failed to update status"
+      }
     }
   }
 }

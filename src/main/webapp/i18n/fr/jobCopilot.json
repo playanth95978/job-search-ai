@@ -197,7 +197,27 @@
       "openOffer": "Ouvrir l'offre",
       "sending": "Envoi...",
       "submitVia": "Soumettre via {{ source }}",
-      "markApplied": "J'ai postulé"
+      "markApplied": "J'ai postulé",
+      "languages": {
+        "ariaLabel": "Langue de la lettre de motivation",
+        "offer": "Langue de l'offre",
+        "french": "Français",
+        "english": "Anglais",
+        "spanish": "Espagnol",
+        "german": "Allemand"
+      },
+      "success": {
+        "autoApplied": "Candidature envoyée automatiquement via {{ source }}.",
+        "markedApplied": "Candidature marquée comme envoyée."
+      },
+      "error": {
+        "create": "Échec de la création de la candidature",
+        "noOffer": "Aucune offre d'emploi fournie",
+        "regenerate": "Échec de la génération de la lettre de motivation",
+        "autoApply": "L'envoi automatique a échoué",
+        "save": "Échec de l'enregistrement de la lettre de motivation",
+        "status": "Échec de la mise à jour du statut"
+      }
     }
   }
 }
