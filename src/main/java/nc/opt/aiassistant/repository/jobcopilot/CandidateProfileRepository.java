@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CandidateProfileRepository extends JpaRepository<CandidateProfile, UUID> {
     Optional<CandidateProfile> findTopByUserIdOrderByCreatedAtDesc(String userId);
+
+    Optional<CandidateProfile> findByUserId(String userId);
 }
