@@ -27,7 +27,7 @@
           <fa-icon [icon]="iconFor(m.rating)"></fa-icon>
           {{ 'jobCopilot.cvQuality.ratings.' + m.rating | translate }}
         </span>
-        <span class="jc-cv-metric-detail">{{ m.detail }}</span>
+        <span class="jc-cv-metric-detail">{{ m.detailKey ? (m.detailKey | translate: m.detailParams) : m.detail }}</span>
       </div>
     }
   </div>
@@ -48,7 +48,7 @@
     }
 
     @if (reviewError(); as err) {
-      <div class="jc-cv-ai-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ err }}</div>
+      <div class="jc-cv-ai-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ 'jobCopilot.cvQuality.aiReview.error' | translate }}</div>
     }
 
     @if (review(); as r) {

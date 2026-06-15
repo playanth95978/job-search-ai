@@ -9,13 +9,26 @@
         "loading": "Analyse de votre CV par l'IA en cours...",
         "strengths": "Points forts",
         "improvements": "Pistes d'amélioration",
-        "refresh": "Relancer l'analyse IA"
+        "refresh": "Relancer l'analyse IA",
+        "error": "L'analyse IA a échoué"
       },
       "metrics": {
         "length": "Longueur",
         "content": "Contenu",
         "ats": "Compatible ATS",
-        "completeness": "Complétude du profil"
+        "completeness": "Complétude du profil",
+        "details": {
+          "noText": "Aucun texte lisible n'a été extrait du document.",
+          "tooShort": "Trop court ({{words}} mots) — visez au moins ~300 mots.",
+          "idealLength": "{{words}} mots — longueur idéale (1–2 pages).",
+          "bitLong": "Un peu long ({{words}} mots) — envisagez de réduire à 2 pages.",
+          "tooLong": "Trop long ({{words}} mots) — les recruteurs survolent, restez concis.",
+          "allSections": "Toutes les sections clés détectées.",
+          "missingSections": "Manquant ou faible : {{missing}}.",
+          "atsStruggle": "Les outils de scan pourraient avoir des difficultés : {{issues}}.",
+          "atsClear": "Structure claire, facile à analyser pour un ATS.",
+          "profileSections": "{{completed}}/{{total}} sections clés du profil détectées."
+        }
       },
       "ratings": {
         "good": "Bon",

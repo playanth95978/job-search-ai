@@ -12,6 +12,8 @@ export interface CvMetric {
   label: string;
   rating: CvRating;
   detail: string;
+  detailKey?: string;
+  detailParams?: Record<string, unknown>;
 }
 
 const RATING_LABEL: Record<CvRating, string> = {
@@ -127,22 +129,28 @@ function hasMeaningfulText(value?: string): boolean {
 function analyzeLength(words: number): CvMetric {
   let rating: CvRating;
   let detail: string;
+  let detailKey: string;
 
   if (words === 0) {
     rating = 'poor';
     detail = 'No readable text was extracted from the document.';
+    detailKey = 'noText';
   } else if (words < 250) {
     rating = 'poor';
     detail = `Too short (${words} words) — aim for at least ~300 words.`;
+    detailKey = 'tooShort';
   } else if (words <= 1000) {
     rating = 'good';
     detail = `${words} words — ideal length (1–2 pages).`;
+    detailKey = 'idealLength';
   } else if (words <= 1400) {
     rating = 'fair';
     detail = `A bit long (${words} words) — consider trimming to 2 pages.`;
+    detailKey = 'bitLong';
   } else {
     rating = 'poor';
     detail = `Too long (${words} words) — recruiters skim, keep it concise.`;
+    detailKey = 'tooLong';
   }
 
   return {
@@ -150,6 +158,8 @@ function analyzeLength(words: number): CvMetric {
     label: 'Length',
     rating,
     detail,
+    detailKey: `jobCopilot.cvQuality.metrics.details.${detailKey}`,
+    detailParams: { words },
   };
 }
 
@@ -180,6 +190,8 @@ function analyzeContent(profile: CandidateProfile, skills: string[], experiences
     label: 'Content',
     rating: rate(ratio, 0.8, 0.5),
     detail: missing.length ? `Missing or weak: ${missing.join(', ')}.` : 'All key sections detected.',
+    detailKey: missing.length ? 'jobCopilot.cvQuality.metrics.details.missingSections' : 'jobCopilot.cvQuality.metrics.details.allSections',
+    detailParams: { missing: missing.join(', ') },
   };
 }
 
@@ -215,6 +227,8 @@ function analyzeAts(text: string, words: number, skills: string[], emailField?: 
     label: 'ATS-friendly',
     rating: rate(ratio, 0.8, 0.5),
     detail: issues.length ? `Parsers may struggle: ${issues.join(', ')}.` : 'Clear structure, easy for ATS to parse.',
+    detailKey: issues.length ? 'jobCopilot.cvQuality.metrics.details.atsStruggle' : 'jobCopilot.cvQuality.metrics.details.atsClear',
+    detailParams: { issues: issues.join(', ') },
   };
 }
 
@@ -240,6 +254,8 @@ function analyzeCompleteness(profile: CandidateProfile, text: string, skills: st
     label: 'Profile completeness',
     rating: rate(ratio, 0.85, 0.5),
     detail: `${completed}/${checks.length} key profile sections detected.`,
+    detailKey: 'jobCopilot.cvQuality.metrics.details.profileSections',
+    detailParams: { completed, total: checks.length },
   };
 }
 

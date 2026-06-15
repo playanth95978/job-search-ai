@@ -9,13 +9,26 @@
         "loading": "Analyzing your CV with AI...",
         "strengths": "Strengths",
         "improvements": "Improvements",
-        "refresh": "Re-run AI review"
+        "refresh": "Re-run AI review",
+        "error": "AI review failed"
       },
       "metrics": {
         "length": "Length",
         "content": "Content",
         "ats": "ATS-friendly",
-        "completeness": "Profile completeness"
+        "completeness": "Profile completeness",
+        "details": {
+          "noText": "No readable text was extracted from the document.",
+          "tooShort": "Too short ({{words}} words) — aim for at least ~300 words.",
+          "idealLength": "{{words}} words — ideal length (1–2 pages).",
+          "bitLong": "A bit long ({{words}} words) — consider trimming to 2 pages.",
+          "tooLong": "Too long ({{words}} words) — recruiters skim, keep it concise.",
+          "allSections": "All key sections detected.",
+          "missingSections": "Missing or weak: {{missing}}.",
+          "atsStruggle": "Parsers may struggle: {{issues}}.",
+          "atsClear": "Clear structure, easy for ATS to parse.",
+          "profileSections": "{{completed}}/{{total}} key profile sections detected."
+        }
       },
       "ratings": {
         "good": "Good",
