@@ -8,6 +8,8 @@ import { marked } from 'marked';
 import { JobCopilotService } from '../job-copilot.service';
 import { SanitizerService } from '../../../shared/sanitizer/sanitizer.service';
 import { JobApplication, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
+import { TranslatePipe } from "@ngx-translate/core";
+import TranslateDirective from "../../../shared/language/translate.directive";
 
 /** Strips a leading/trailing ```` ```markdown ... ``` ```` (or ```` ``` ... ``` ````) fence some LLMs wrap their output in. */
 function stripMarkdownFence(text: string): string {
@@ -28,7 +30,7 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string }[] = [
 @Component({
   selector: 'jhi-apply-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective],
   templateUrl: './apply-modal.component.html',
   styleUrl: './apply-modal.component.scss',
 })
