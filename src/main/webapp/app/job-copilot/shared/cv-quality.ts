@@ -91,8 +91,39 @@ function rate(ratio: number, goodAt: number, fairAt: number): CvRating {
 /**
  * Removes duplicates and normalizes skills.
  */
-function uniqueSkills(skills: unknown[]): string[] {
-  return [...new Set(skills.map(skill => String(skill).trim().toLowerCase()).filter(Boolean))];
+function uniqueSkills(skills: string[]): string[] {
+  return [...new Set(skills.map(skill => skill.trim().toLowerCase()).filter(Boolean))];
+}
+
+/**
+ * Coerces a field that may be an array (structured DTO) OR a JSON/comma string (legacy entity)
+ * into an array — so the metrics work regardless of which endpoint produced the profile.
+ */
+function coerceArray(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return value
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+  }
+  return [];
+}
+
+/** Extracts skill names whether items are strings or `{ name }` objects. */
+function toSkillNames(value: unknown): string[] {
+  return coerceArray(value)
+    .map(item => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object' && 'name' in item) return String((item as { name?: unknown }).name ?? '');
+      return '';
+    })
+    .filter(Boolean);
 }
 
 /**
@@ -155,7 +186,7 @@ function analyzeContent(profile: CandidateProfile, skills: string[], experiences
     hasMeaningfulText(profile.email),
     skills.length >= 3,
     experiences.length >= 1,
-    (profile.education?.length ?? 0) > 0,
+    coerceArray(profile.education).length > 0,
     (profile.yearsOfExperience ?? 0) > 0,
   ];
 
@@ -222,7 +253,7 @@ function analyzeCompleteness(profile: CandidateProfile, text: string, skills: st
   const checks = [
     hasMeaningfulText(profile.fullName),
     hasMeaningfulText(profile.email),
-    (profile.education?.length ?? 0) > 0,
+    coerceArray(profile.education).length > 0,
     experiences.length > 0,
     skills.length >= 3,
     /linkedin\.com/i.test(text),
@@ -250,9 +281,9 @@ export function analyzeCv(profile: CandidateProfile): CvMetric[] {
 
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-  const skills = uniqueSkills((profile.skills ?? []).map(s => s.name ?? ''));
+  const skills = uniqueSkills(toSkillNames(profile.skills));
 
-  const experiences = profile.experiences ?? [];
+  const experiences = coerceArray(profile.experiences);
 
   return [
     analyzeLength(words),

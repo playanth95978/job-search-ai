@@ -55,49 +55,39 @@ export class OnboardingComponent {
     });
   }
 
-  parseSkills(skillsJson?: string): any[] {
-    if (!skillsJson) return [];
-    try {
-      const skills = JSON.parse(skillsJson);
-      if (Array.isArray(skills) && skills.length > 0 && typeof skills[0] === 'object') {
-        return skills;
+  /** Accepts a structured array (DTO) or a legacy JSON/comma string. */
+  private toArray(value: unknown): any[] {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string' && value.trim()) {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return value
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
       }
-      return skills.map((s: any) => (typeof s === 'string' ? { name: s } : s));
-    } catch {
-      return skillsJson
-        .split(',')
-        .map(s => ({ name: s.trim() }))
-        .filter(s => s.name.length > 0);
     }
+    return [];
   }
 
-  parseEducation(eduJson?: string): any[] {
-    if (!eduJson) return [];
-    try {
-      const edu = JSON.parse(eduJson);
-      return Array.isArray(edu) ? edu : [];
-    } catch {
-      return [];
-    }
+  parseSkills(value?: unknown): { name: string }[] {
+    return this.toArray(value)
+      .map(s => (typeof s === 'string' ? { name: s } : s))
+      .filter(s => s?.name);
   }
 
-  parseCertifications(certJson?: string): any[] {
-    if (!certJson) return [];
-    try {
-      const certs = JSON.parse(certJson);
-      return Array.isArray(certs) ? certs : [];
-    } catch {
-      return [];
-    }
+  parseEducation(value?: unknown): any[] {
+    return this.toArray(value);
   }
 
-  parseExperiences(exp?: string): { company: string; role: string }[] {
-    if (!exp) return [];
-    try {
-      return JSON.parse(exp);
-    } catch {
-      return [];
-    }
+  parseCertifications(value?: unknown): any[] {
+    return this.toArray(value);
+  }
+
+  parseExperiences(value?: unknown): any[] {
+    return this.toArray(value);
   }
 
   goToDashboard(): void {
