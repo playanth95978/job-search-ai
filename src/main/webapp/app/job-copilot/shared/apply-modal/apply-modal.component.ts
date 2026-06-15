@@ -1,4 +1,4 @@
-import { Component, computed, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
@@ -36,12 +36,12 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string }[] = [
 })
 export class ApplyModalComponent implements OnInit {
   /** Provide either an existing draft application... */
-  @Input() existingApplication?: JobApplication;
+  existingApplication = input<JobApplication | undefined>();
   /** ...or a job offer to create a new draft application for. */
-  @Input() jobOffer?: JobOfferPreview;
-  @Input() jobOfferId?: string;
-  @Output() closed = new EventEmitter<void>();
-  @Output() applied = new EventEmitter<JobApplication>();
+  jobOffer = input<JobOfferPreview | undefined>();
+  jobOfferId = input<string | undefined>();
+  closed = output<void>();
+  applied = output<JobApplication>();
   application = signal<JobApplication | null>(null);
   coverLetter = signal('');
   loading = signal(true);
@@ -66,12 +66,12 @@ export class ApplyModalComponent implements OnInit {
       error() {},
     });
 
-    if (this.existingApplication) {
-      this.application.set(this.existingApplication);
-      this.coverLetter.set(this.existingApplication.coverLetter ?? '');
+    if (this.existingApplication()) {
+      this.application.set(this.existingApplication()!);
+      this.coverLetter.set(this.existingApplication()?.coverLetter ?? '');
       this.loading.set(false);
-    } else if (this.jobOfferId) {
-      this.service.createApplication(this.jobOfferId, true, this.language() || undefined).subscribe({
+    } else if (this.jobOfferId()) {
+      this.service.createApplication(this.jobOfferId()!, true, this.language() || undefined).subscribe({
         next: app => {
           this.application.set(app);
           this.coverLetter.set(app.coverLetter ?? '');
@@ -88,29 +88,19 @@ export class ApplyModalComponent implements OnInit {
     }
   }
 
-  offer(): JobOfferPreview | undefined {
-    return this.application()?.jobOffer ?? this.jobOffer;
-  }
+  offer = computed(() => this.application()?.jobOffer ?? this.jobOffer());
 
-  sourceLabel(): string {
-    return jobSourceLabel(this.offer()?.source);
-  }
+  sourceLabel = computed(() => jobSourceLabel(this.offer()?.source));
 
-  sourceColor(): string {
-    return jobSourceColor(this.offer()?.source);
-  }
+  sourceColor = computed(() => jobSourceColor(this.offer()?.source));
 
-  applyUrl(): string | undefined {
-    return this.offer()?.applyUrl;
-  }
+  applyUrl = computed(() => this.offer()?.applyUrl);
 
   togglePreview(): void {
     this.previewMode.update(v => !v);
   }
 
-  offerId(): string | undefined {
-    return this.jobOfferId ?? this.application()?.jobOffer?.id;
-  }
+  offerId = computed(() => this.jobOfferId() ?? this.application()?.jobOffer?.id);
 
   regenerateCoverLetter(): void {
     const offerId = this.offerId();
