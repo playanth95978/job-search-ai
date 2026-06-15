@@ -89,23 +89,6 @@ function rate(ratio: number, goodAt: number, fairAt: number): CvRating {
 }
 
 /**
- * Parses a JSON array field tolerantly.
- */
-function parseArray(json?: string): unknown[] {
-  if (!json) return [];
-
-  try {
-    const value: unknown = JSON.parse(json);
-    return Array.isArray(value) ? value : [];
-  } catch {
-    return json
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-  }
-}
-
-/**
  * Removes duplicates and normalizes skills.
  */
 function uniqueSkills(skills: unknown[]): string[] {
@@ -172,7 +155,7 @@ function analyzeContent(profile: CandidateProfile, skills: string[], experiences
     hasMeaningfulText(profile.email),
     skills.length >= 3,
     experiences.length >= 1,
-    hasMeaningfulText(profile.education),
+    (profile.education?.length ?? 0) > 0,
     (profile.yearsOfExperience ?? 0) > 0,
   ];
 
@@ -239,7 +222,7 @@ function analyzeCompleteness(profile: CandidateProfile, text: string, skills: st
   const checks = [
     hasMeaningfulText(profile.fullName),
     hasMeaningfulText(profile.email),
-    hasMeaningfulText(profile.education),
+    (profile.education?.length ?? 0) > 0,
     experiences.length > 0,
     skills.length >= 3,
     /linkedin\.com/i.test(text),
@@ -267,9 +250,9 @@ export function analyzeCv(profile: CandidateProfile): CvMetric[] {
 
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-  const skills = uniqueSkills(parseArray(profile.skills));
+  const skills = uniqueSkills((profile.skills ?? []).map(s => s.name ?? ''));
 
-  const experiences = parseArray(profile.experiences);
+  const experiences = profile.experiences ?? [];
 
   return [
     analyzeLength(words),

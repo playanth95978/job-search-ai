@@ -32,6 +32,7 @@ export class JobCopilotService {
   }
 
   getProfile(): Observable<CandidateProfile> {
+
     return this.http.get<CandidateProfile>(`${this.baseUrl}/cv/profile`);
   }
 

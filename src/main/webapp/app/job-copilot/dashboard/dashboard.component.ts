@@ -7,6 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { applicationStatusColor, applicationStatusIcon, ApplicationStats, CandidateProfile } from '../shared/job-copilot.model';
 import { CvQualityComponent } from '../shared/cv-quality/cv-quality.component';
+import { candidateProfileToResume } from "../cv-builder/candidate-profile.mapper";
 
 @Component({
   selector: 'jhi-job-copilot-dashboard',

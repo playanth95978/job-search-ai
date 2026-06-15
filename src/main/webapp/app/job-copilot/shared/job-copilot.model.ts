@@ -1,20 +1,26 @@
+import {
+  CandidateProfileCertificationDto,
+  CandidateProfileEducationDto,
+  CandidateProfileExperienceDto,
+  CandidateProfileLanguageDto,
+  CandidateProfileSkillDto
+} from "../cv-builder/candidate-profile.mapper";
+
 export interface CandidateProfile {
   id?: string;
-  userId: string;
+  userId?: string;
   fullName?: string;
   email?: string;
   location?: string;
   yearsOfExperience?: number;
-  skills?: string;
-  experiences?: string;
-  preferredRoles?: string;
-  languages?: string;
-  education?: string;
-  certifications?: string;
+  skills?: CandidateProfileSkillDto[];
+  experiences?: CandidateProfileExperienceDto[];
+  preferredRoles?: string[];
+  languages?: CandidateProfileLanguageDto[];
+  education?: CandidateProfileEducationDto[];
+  certifications?: CandidateProfileCertificationDto[];
   rawMarkdown?: string;
   cvFilename?: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface JobOffer {

@@ -65,14 +65,16 @@
             <fa-icon icon="arrows-rotate"></fa-icon>
           </a>
         </div>
+        @let skills = profile()?.skills;
 
-        @if (profile()?.skills) {
+        @if (skills) {
           <div class="jc-skills">
-            @for (skill of parseSkills(profile()?.skills).slice(0, 10); track skill) {
-              <span class="jc-skill-tag">{{ skill }}</span>
+            @for (skill of skills.slice(0, 10); track skill) {
+              <span class="jc-skill-tag">{{ skill.name}}</span>
             }
-            @if (parseSkills(profile()?.skills).length > 10) {
-              <span class="jc-skill-more" jhiTranslate="jobCopilot.dashboard.profile.moreSkills" [translateValues]="{ count: parseSkills(profile()?.skills).length - 10 }">+{{ parseSkills(profile()?.skills).length - 10 }} more</span>
+            @if (skills?.length! > 10) {
+              @let count = (skills?.length ?? 0) - 10;
+              <span class="jc-skill-more" jhiTranslate="jobCopilot.dashboard.profile.moreSkills" [translateValues]="{ count:count }">+{{ count}} more</span>
             }
           </div>
         }
