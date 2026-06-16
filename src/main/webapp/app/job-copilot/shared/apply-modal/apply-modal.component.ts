@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
@@ -30,17 +30,17 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: s
 
 @Component({
   selector: 'jhi-apply-modal',
-  standalone: true,
   imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective],
   templateUrl: './apply-modal.component.html',
   styleUrl: './apply-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplyModalComponent implements OnInit {
   /** Provide either an existing draft application... */
   existingApplication = input<JobApplication | undefined>();
   /** ...or a job offer to create a new draft application for. */
-  jobOffer = input<JobOfferPreview | undefined>();
-  jobOfferId = input<string | undefined>();
+  jobOffer = model<JobOfferPreview | undefined>();
+  jobOfferId = model<string | undefined>();
   closed = output<void>();
   applied = output<JobApplication>();
   application = signal<JobApplication | null>(null);

@@ -132,8 +132,8 @@ export class JobSearchComponent {
 
   private openModal(offerId: string, offer: JobOfferPreview): void {
     const modalRef = this.modalService.open(ApplyModalComponent, { size: 'lg', backdrop: 'static' });
-    modalRef.componentInstance.jobOfferId = offerId;
-    modalRef.componentInstance.jobOffer = offer;
+    modalRef.componentInstance.jobOfferId.set(offerId);
+    modalRef.componentInstance.jobOffer.set(offer);
     modalRef.closed.subscribe(res => {
       if (res) {
         // Optionnel : rafraîchir ou traiter le résultat de la candidature
