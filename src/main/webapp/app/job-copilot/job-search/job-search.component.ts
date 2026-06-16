@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
 import {
@@ -17,7 +18,7 @@ import {
 @Component({
   selector: 'jhi-job-copilot-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent, ApplyModalComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule],
   templateUrl: './job-search.component.html',
   styleUrl: './job-search.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,13 +42,9 @@ export class JobSearchComponent {
   error = signal<string | null>(null);
   activeTab = signal<'search' | 'ats'>('search');
 
-  selectedOfferId = signal<string | null>(null);
-  selectedOffer = signal<JobOfferPreview | null>(null);
-  /** True while the full description of the opened offer is being fetched. */
-  enriching = signal(false);
-
   private service = inject(JobCopilotService);
   private translateService = inject(TranslateService);
+  private modalService = inject(NgbModal);
 
   search(): void {
     this.searching.set(true);
@@ -109,9 +106,7 @@ export class JobSearchComponent {
 
   openApplyModal(offer: JobOfferPreview & { id?: string }): void {
     if (offer.id) {
-      this.selectedOfferId.set(offer.id);
-      this.selectedOffer.set(offer);
-      this.enrichOffer(offer.id);
+      this.openModal(offer.id, offer);
       return;
     }
 
@@ -126,9 +121,7 @@ export class JobSearchComponent {
       next: res => {
         const found = res.body?.[0];
         if (found?.id) {
-          this.selectedOfferId.set(found.id);
-          this.selectedOffer.set({ ...offer, ...found });
-          this.enrichOffer(found.id);
+          this.openModal(found.id, { ...offer, ...found });
         } else {
           this.error.set('Offer not found.');
         }
@@ -137,9 +130,26 @@ export class JobSearchComponent {
     });
   }
 
-  closeApplyModal(): void {
-    this.selectedOfferId.set(null);
-    this.selectedOffer.set(null);
+  private openModal(offerId: string, offer: JobOfferPreview): void {
+    const modalRef = this.modalService.open(ApplyModalComponent, { size: 'lg', backdrop: 'static' });
+    modalRef.componentInstance.jobOfferId = offerId;
+    modalRef.componentInstance.jobOffer = offer;
+    modalRef.closed.subscribe(res => {
+      if (res) {
+        // Optionnel : rafraîchir ou traiter le résultat de la candidature
+      }
+    });
+
+    // Enrichir l'offre en arrière-plan pour mettre à jour la liste et s'assurer que les données sont complètes
+    this.service.enrichJob(offerId).subscribe({
+      next: enriched => {
+        this.offers.update(list => list.map(o => (o.id === offerId ? { ...o, ...enriched } : o)));
+        // Si la modale est encore ouverte, on peut mettre à jour son offre
+        if (modalRef.componentInstance) {
+          modalRef.componentInstance.jobOffer = { ...offer, ...enriched };
+        }
+      },
+    });
   }
 
   getScoreClass(score: number): string {
@@ -154,21 +164,5 @@ export class JobSearchComponent {
 
   getSourceColor(source?: string): string {
     return jobSourceColor(source);
-  }
-
-  /**
-   * Lazily fetches the full description of the opened offer (one request per click) and queues it
-   * for embedding. Patches both the list row and the open preview with the enriched data.
-   */
-  private enrichOffer(id: string): void {
-    this.enriching.set(true);
-    this.service.enrichJob(id).subscribe({
-      next: enriched => {
-        this.offers.update(list => list.map(o => (o.id === id ? { ...o, ...enriched } : o)));
-        this.selectedOffer.update(sel => (sel ? { ...sel, ...enriched } : sel));
-        this.enriching.set(false);
-      },
-      error: () => this.enriching.set(false),
-    });
   }
 }

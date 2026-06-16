@@ -1,11 +1,18 @@
 <div class="jc-search">
   <div class="jc-search-header">
     <h1 jhiTranslate="jobCopilot.search.title">Job Search</h1>
-    <p jhiTranslate="jobCopilot.search.subtitle">Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail</p>
+    <p jhiTranslate="jobCopilot.search.subtitle">
+      Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail
+    </p>
   </div>
 
   <div class="jc-search-tabs">
-    <button class="jc-tab" [class.active]="activeTab() === 'search'" (click)="activeTab.set('search')" jhiTranslate="jobCopilot.search.tabs.keyword">
+    <button
+      class="jc-tab"
+      [class.active]="activeTab() === 'search'"
+      (click)="activeTab.set('search')"
+      jhiTranslate="jobCopilot.search.tabs.keyword"
+    >
       <fa-icon icon="search"></fa-icon> Keyword Search
     </button>
     <button class="jc-tab" [class.active]="activeTab() === 'ats'" (click)="activeTab.set('ats')" jhiTranslate="jobCopilot.search.tabs.ats">
@@ -49,21 +56,25 @@
       <div class="jc-search-actions">
         <button class="jc-btn jc-btn-primary" (click)="search()" [disabled]="searching()">
           @if (searching()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.searching">Searching...</span>
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.actions.searching">Searching...</span>
           } @else {
             <fa-icon icon="search"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.search">Search</span>
           }
         </button>
         <button class="jc-btn jc-btn-secondary" (click)="matchAll()" [disabled]="matching()">
           @if (matching()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matching">Matching...</span>
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.actions.matching">Matching...</span>
           } @else {
-            <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</span>
+            <fa-icon icon="wand-magic-sparkles"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</span>
           }
         </button>
         <button class="jc-btn jc-btn-accent" (click)="matchAdvanced()" [disabled]="matchingAdvanced()">
           @if (matchingAdvanced()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.advanced">Advanced...</span>
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.actions.advanced">Advanced...</span>
           } @else {
             <fa-icon icon="chart-line"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matchAdvanced">Match Advanced</span>
           }
@@ -87,7 +98,8 @@
       <div class="jc-search-actions">
         <button class="jc-btn jc-btn-primary" (click)="fetchUrl()" [disabled]="fetching()">
           @if (fetching()) {
-            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.fetching">Fetching...</span>
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.actions.fetching">Fetching...</span>
           } @else {
             <fa-icon icon="download"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.fetchJobs">Fetch Jobs</span>
           }
@@ -103,7 +115,9 @@
   @if (matchResults().length > 0) {
     <div class="jc-results-header">
       <h2 jhiTranslate="jobCopilot.search.results.matchTitle">Match Results</h2>
-      <span class="jc-results-count">{{ matchResults().length }} <span jhiTranslate="jobCopilot.search.results.matches">matches</span></span>
+      <span class="jc-results-count"
+        >{{ matchResults().length }} <span jhiTranslate="jobCopilot.search.results.matches">matches</span></span
+      >
     </div>
     <div class="jc-results">
       @for (match of matchResults(); track match.jobOffer.id) {
@@ -210,14 +224,5 @@
         </div>
       }
     </div>
-  }
-
-  @if (selectedOfferId(); as offerId) {
-    <jhi-apply-modal
-      (applied)="closeApplyModal()"
-      (closed)="closeApplyModal()"
-      [jobOfferId]="offerId"
-      [jobOffer]="selectedOffer() ?? undefined"
-    />
   }
 </div>

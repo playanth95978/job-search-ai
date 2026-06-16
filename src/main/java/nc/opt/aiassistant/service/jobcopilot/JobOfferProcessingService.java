@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
@@ -23,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class JobOfferProcessingService {
 
     private static final int BATCH_SIZE = 50;
-    private static final int MAX_RETRIES = 5;
+    private static final int MAX_RETRIES = 2;
     private final JobOfferRepository jobOfferRepository;
     private final JobOfferEmbeddingService embeddingService;
 

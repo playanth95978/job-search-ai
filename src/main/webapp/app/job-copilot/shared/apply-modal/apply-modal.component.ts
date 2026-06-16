@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { marked } from 'marked';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { JobCopilotService } from '../job-copilot.service';
 import { SanitizerService } from '../../../shared/sanitizer/sanitizer.service';
 import { JobApplication, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
-import { TranslatePipe } from "@ngx-translate/core";
-import TranslateDirective from "../../../shared/language/translate.directive";
+import TranslateDirective from '../../../shared/language/translate.directive';
 
 /** Strips a leading/trailing ```` ```markdown ... ``` ```` (or ```` ``` ... ``` ````) fence some LLMs wrap their output in. */
 function stripMarkdownFence(text: string): string {
@@ -61,6 +61,7 @@ export class ApplyModalComponent implements OnInit {
   private service = inject(JobCopilotService);
   private sanitizer = inject(SanitizerService);
   private translateService = inject(TranslateService);
+  private activeModal = inject(NgbActiveModal);
 
   ngOnInit(): void {
     this.service.getAutoApplySources().subscribe({
@@ -140,8 +141,11 @@ export class ApplyModalComponent implements OnInit {
             this.submitting.set(false);
             this.application.set(outcome.application);
             if (outcome.autoApplied) {
-              this.resultMessage.set(this.translateService.instant('jobCopilot.applyModal.success.autoApplied', { source: this.sourceLabel() }));
+              this.resultMessage.set(
+                this.translateService.instant('jobCopilot.applyModal.success.autoApplied', { source: this.sourceLabel() }),
+              );
               this.applied.emit(outcome.application);
+              this.activeModal.close(outcome.application);
             } else {
               this.error.set(outcome.message);
             }
@@ -172,6 +176,7 @@ export class ApplyModalComponent implements OnInit {
             this.application.set(updated);
             this.resultMessage.set(this.translateService.instant('jobCopilot.applyModal.success.markedApplied'));
             this.applied.emit(updated);
+            this.activeModal.close(updated);
           },
           error: err => {
             this.submitting.set(false);
@@ -188,5 +193,6 @@ export class ApplyModalComponent implements OnInit {
 
   close(): void {
     this.closed.emit();
+    this.activeModal.dismiss();
   }
 }
