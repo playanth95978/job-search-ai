@@ -71,6 +71,18 @@
       "json": "Export as JSON",
       "import": "Import JSON",
       "import-profile": "load your cv"
+    },
+    "rewrite": {
+      "button": "Improve with AI",
+      "title": "AI suggestions",
+      "loading": "Generating variants…",
+      "original": "Original",
+      "apply": "Apply",
+      "variants": {
+        "professional": "Professional",
+        "concise": "Concise",
+        "ats": "ATS-optimized"
+      }
     }
   }
 }

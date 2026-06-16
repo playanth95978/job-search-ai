@@ -21,6 +21,21 @@ export interface ResumeVersionApiDto {
   createdAt: string;
 }
 
+export type RewriteKind = 'summary' | 'experience' | 'project';
+
+export interface RewriteRequest {
+  text: string;
+  kind: RewriteKind;
+  jobTitle?: string;
+  company?: string;
+}
+
+export interface RewriteResponse {
+  professional: string;
+  concise: string;
+  ats: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CvResumeApiService {
   private http = inject(HttpClient);
@@ -51,6 +66,11 @@ export class CvResumeApiService {
 
   restoreVersion(id: string): Observable<ResumeApiDto> {
     return this.http.post<ResumeApiDto>(`${this.url}/resume/versions/${id}/restore`, {});
+  }
+
+  /** Rewrites a CV free-text field into 3 AI variants (professional / concise / ATS). */
+  rewrite(request: RewriteRequest): Observable<RewriteResponse> {
+    return this.http.post<RewriteResponse>(`${this.url}/rewrite`, request);
   }
 
   /** The user's extracted candidate profile, or null when none exists yet (HTTP 204). */

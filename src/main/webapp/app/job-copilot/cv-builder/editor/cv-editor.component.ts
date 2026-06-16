@@ -7,6 +7,7 @@ import TranslateDirective from 'app/shared/language/translate.directive';
 
 import { ResumeStore } from '../resume-store';
 import { Experience, Project, SectionKey } from '../resume.model';
+import { AiRewriteComponent } from '../ai-rewrite/ai-rewrite.component';
 
 /**
  * Left panel: the editable form. Every field writes through {@link ResumeStore} so the
@@ -16,7 +17,7 @@ import { Experience, Project, SectionKey } from '../resume.model';
 @Component({
   selector: 'jhi-cv-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule, TranslateDirective],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule, TranslateDirective, AiRewriteComponent],
   templateUrl: './cv-editor.component.html',
   styleUrl: './cv-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

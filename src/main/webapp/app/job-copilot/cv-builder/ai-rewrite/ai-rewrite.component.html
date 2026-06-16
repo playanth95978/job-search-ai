@@ -1,0 +1,41 @@
+<div class="ai-rewrite">
+  <button type="button" class="ai-rewrite-btn" [disabled]="disabled()" (click)="run()">
+    <fa-icon icon="wand-magic-sparkles" />
+    <span jhiTranslate="cvBuilder.rewrite.button">Améliorer avec l'IA</span>
+  </button>
+
+  @if (open()) {
+    <div class="ai-rewrite-panel">
+      <div class="ai-rewrite-head">
+        <span jhiTranslate="cvBuilder.rewrite.title">Suggestions IA</span>
+        <button type="button" class="ai-rewrite-close" (click)="close()"><fa-icon icon="xmark" /></button>
+      </div>
+
+      @if (loading()) {
+        <div class="ai-rewrite-loading">
+          <fa-icon icon="circle-notch" [animation]="'spin'" />
+          <span jhiTranslate="cvBuilder.rewrite.loading">Génération des variantes…</span>
+        </div>
+      } @else if (error(); as err) {
+        <div class="ai-rewrite-error"><fa-icon icon="circle-exclamation" /> {{ err }}</div>
+      } @else {
+        <div class="ai-rewrite-original">
+          <span class="ai-rewrite-tag" jhiTranslate="cvBuilder.rewrite.original">Original</span>
+          <p>{{ text() }}</p>
+        </div>
+
+        @for (v of variants(); track v.key) {
+          <div class="ai-rewrite-variant">
+            <div class="ai-rewrite-variant-head">
+              <span class="ai-rewrite-tag" [jhiTranslate]="v.labelKey">{{ v.key }}</span>
+              <button type="button" class="ai-rewrite-apply" (click)="choose(v)">
+                <fa-icon icon="check" /> <span jhiTranslate="cvBuilder.rewrite.apply">Appliquer</span>
+              </button>
+            </div>
+            <p>{{ v.text }}</p>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

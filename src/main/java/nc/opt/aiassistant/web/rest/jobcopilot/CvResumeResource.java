@@ -6,9 +6,8 @@ import lombok.RequiredArgsConstructor;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.jobcopilot.CvResumeService;
-import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
-import nc.opt.aiassistant.service.jobcopilot.dto.ResumeDto;
-import nc.opt.aiassistant.service.jobcopilot.dto.ResumeVersionDto;
+import nc.opt.aiassistant.service.jobcopilot.CvRewriteService;
+import nc.opt.aiassistant.service.jobcopilot.dto.*;
 import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class CvResumeResource {
 
     private final CvResumeService cvResumeService;
+    private final CvRewriteService cvRewriteService;
     private final CandidateProfileRepository candidateProfileRepository;
     private final CandidateProfileMapper candidateProfileMapper;
 
@@ -62,6 +62,11 @@ public class CvResumeResource {
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/rewrite")
+    public ResponseEntity<RewriteResponseDto> rewrite(@RequestBody RewriteRequestDto request) {
+        return ResponseEntity.ok(cvRewriteService.rewrite(request));
+    }
+
     @GetMapping("/resume/candidate-profile")
     public ResponseEntity<CandidateProfileDto> getCandidateProfile() {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
@@ -71,5 +76,4 @@ public class CvResumeResource {
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.noContent().build());
     }
-
 }
