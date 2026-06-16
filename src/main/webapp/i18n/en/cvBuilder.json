@@ -83,6 +83,11 @@
         "concise": "Concise",
         "ats": "ATS-optimized"
       }
+    },
+    "review": {
+      "button": "AI Review",
+      "strengths": "Strengths",
+      "improvements": "Improvements"
     }
   }
 }

@@ -67,6 +67,11 @@ public class CvResumeResource {
         return ResponseEntity.ok(cvRewriteService.rewrite(request));
     }
 
+    @PostMapping("/review")
+    public ResponseEntity<CvReviewDto> review(@RequestBody ReviewRequestDto request) {
+        return ResponseEntity.ok(cvRewriteService.reviewResume(request.content()));
+    }
+
     @GetMapping("/resume/candidate-profile")
     public ResponseEntity<CandidateProfileDto> getCandidateProfile() {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();

@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+.cv-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    opacity: 0.92;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.cv-review-error {
+  margin-top: 0.6rem;
+  color: #ef4444;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cv-review-result {
+  margin-top: 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-left: 4px solid var(--bs-border-color);
+  border-radius: 12px;
+  background: var(--bs-body-bg);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.cv-review-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.cv-review-score {
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
+}
+
+.cv-review-score-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cv-review-score-max {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+}
+
+.cv-review-summary {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.cv-review-block {
+  h5 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0.4rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  li {
+    font-size: 0.86rem;
+    line-height: 1.4;
+  }
+}
+
+.rating-good .cv-review-score-value {
+  color: #10b981;
+}
+.rating-good {
+  border-left-color: #10b981;
+}
+.rating-fair .cv-review-score-value {
+  color: #f59e0b;
+}
+.rating-fair {
+  border-left-color: #f59e0b;
+}
+.rating-poor .cv-review-score-value {
+  color: #ef4444;
+}
+.rating-poor {
+  border-left-color: #ef4444;
+}

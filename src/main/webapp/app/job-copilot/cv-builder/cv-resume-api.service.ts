@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { CandidateProfileDto } from './candidate-profile.mapper';
+import { CvReview } from '../shared/job-copilot.model';
 
 /** Stored resume envelope (server side). `data` is the full Resume JSON, stringified. */
 export interface ResumeApiDto {
@@ -71,6 +72,11 @@ export class CvResumeApiService {
   /** Rewrites a CV free-text field into 3 AI variants (professional / concise / ATS). */
   rewrite(request: RewriteRequest): Observable<RewriteResponse> {
     return this.http.post<RewriteResponse>(`${this.url}/rewrite`, request);
+  }
+
+  /** AI review of the whole resume (score + strengths + improvements). */
+  reviewResume(content: string): Observable<CvReview> {
+    return this.http.post<CvReview>(`${this.url}/review`, { content });
   }
 
   /** The user's extracted candidate profile, or null when none exists yet (HTTP 204). */

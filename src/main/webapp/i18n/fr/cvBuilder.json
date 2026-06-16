@@ -83,6 +83,11 @@
         "concise": "Concis",
         "ats": "Optimisé ATS"
       }
+    },
+    "review": {
+      "button": "Revue IA",
+      "strengths": "Points forts",
+      "improvements": "À améliorer"
     }
   }
 }

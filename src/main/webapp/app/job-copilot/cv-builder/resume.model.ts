@@ -166,3 +166,42 @@ export function emptySkill(): Skill {
 export function emptyLanguage(): Language {
   return { id: uid(), name: '', level: '' };
 }
+
+/** Readable plain-text rendering of the resume, sent to the AI for review. */
+export function resumeToPlainText(r: Resume): string {
+  const p = r.personal;
+  const lines: string[] = [];
+  lines.push(`${p.firstName} ${p.lastName}${p.title ? ' — ' + p.title : ''}`.trim());
+  const contact = [p.email, p.phone, p.location, p.linkedin, p.github, p.website].filter(Boolean).join(' | ');
+  if (contact) lines.push(contact);
+  if (r.summary) lines.push('\nSUMMARY\n' + r.summary);
+  if (r.experiences.length) {
+    lines.push('\nEXPERIENCE');
+    for (const e of r.experiences) {
+      lines.push(`- ${e.jobTitle} @ ${e.company} (${e.startDate} - ${e.current ? 'present' : e.endDate})`);
+      if (e.description) lines.push(`  ${e.description}`);
+      for (const a of e.achievements) lines.push(`  • ${a}`);
+    }
+  }
+  if (r.education.length) {
+    lines.push('\nEDUCATION');
+    for (const ed of r.education) lines.push(`- ${ed.degree} @ ${ed.school} (${ed.startDate} - ${ed.endDate})`);
+  }
+  if (r.skills.length)
+    lines.push(
+      '\nSKILLS\n' +
+        r.skills
+          .map(s => s.name)
+          .filter(Boolean)
+          .join(', '),
+    );
+  if (r.languages.length) lines.push('\nLANGUAGES\n' + r.languages.map(l => `${l.name} (${l.level})`).join(', '));
+  if (r.projects.length) {
+    lines.push('\nPROJECTS');
+    for (const pr of r.projects) lines.push(`- ${pr.name}: ${pr.description}`);
+  }
+  if (r.certifications.length) {
+    lines.push('\nCERTIFICATIONS\n' + r.certifications.map(c => `${c.name} (${c.issuer})`).join(', '));
+  }
+  return lines.join('\n');
+}

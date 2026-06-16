@@ -10,6 +10,7 @@ import TranslateDirective from 'app/shared/language/translate.directive';
 import { ResumeStore } from './resume-store';
 import { CvEditorComponent } from './editor/cv-editor.component';
 import { CvPreviewComponent } from './preview/cv-preview.component';
+import { CvReviewComponent } from './cv-review/cv-review.component';
 import { FONT_FAMILIES, Resume, ResumeTemplateId } from './resume.model';
 import { CvResumeApiService } from './cv-resume-api.service';
 import { candidateProfileToResume } from './candidate-profile.mapper';
@@ -17,7 +18,16 @@ import { candidateProfileToResume } from './candidate-profile.mapper';
 @Component({
   selector: 'jhi-cv-builder',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule, TranslateDirective, CvEditorComponent, CvPreviewComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    FaIconComponent,
+    TranslateModule,
+    TranslateDirective,
+    CvEditorComponent,
+    CvPreviewComponent,
+    CvReviewComponent,
+  ],
   templateUrl: './cv-builder.component.html',
   styleUrl: './cv-builder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

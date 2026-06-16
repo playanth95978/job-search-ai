@@ -1,0 +1,48 @@
+<div class="cv-review">
+  <button type="button" class="cv-review-btn" [disabled]="loading()" (click)="run()">
+    @if (loading()) {
+      <fa-icon icon="circle-notch" [animation]="'spin'" />
+    } @else {
+      <fa-icon icon="wand-magic-sparkles" />
+    }
+    <span jhiTranslate="cvBuilder.review.button">Revue IA</span>
+  </button>
+
+  @if (error(); as err) {
+    <div class="cv-review-error"><fa-icon icon="circle-exclamation" /> {{ err }}</div>
+  }
+
+  @if (review(); as r) {
+    <div class="cv-review-result" [class]="'rating-' + scoreClass()">
+      <div class="cv-review-head">
+        <div class="cv-review-score">
+          <span class="cv-review-score-value">{{ r.score }}</span
+          ><span class="cv-review-score-max">/100</span>
+        </div>
+        <p class="cv-review-summary">{{ r.summary }}</p>
+      </div>
+
+      @if (r.strengths.length) {
+        <div class="cv-review-block">
+          <h5><fa-icon icon="circle-check" /> <span jhiTranslate="cvBuilder.review.strengths">Points forts</span></h5>
+          <ul>
+            @for (s of r.strengths; track s) {
+              <li>{{ s }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (r.improvements.length) {
+        <div class="cv-review-block">
+          <h5><fa-icon icon="triangle-exclamation" /> <span jhiTranslate="cvBuilder.review.improvements">À améliorer</span></h5>
+          <ul>
+            @for (i of r.improvements; track i) {
+              <li>{{ i }}</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+</div>

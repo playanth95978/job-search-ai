@@ -1,7 +1,9 @@
 package nc.opt.aiassistant.service.jobcopilot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.RewriteRequestDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.RewriteResponseDto;
 import org.springframework.ai.chat.client.ChatClient;
@@ -23,6 +25,37 @@ public class CvRewriteService {
     public CvRewriteService(@Qualifier("mistralAiChatModel") ChatModel chatModel, ObjectMapper objectMapper) {
         this.chatClient = ChatClient.builder(chatModel).build();
         this.objectMapper = objectMapper;
+    }
+
+    /** Reviews the whole resume and returns a score + strengths + actionable improvements. */
+    public CvReviewDto reviewResume(String content) {
+        String text = content == null ? "" : content.trim();
+        if (text.isEmpty()) {
+            return new CvReviewDto(0, "No resume content to review.", List.of(), List.of("Add content to your resume first."));
+        }
+        String prompt =
+            """
+            You are an expert technical recruiter and ATS specialist. Review the resume below and give
+            concise, actionable feedback. Be specific and reference what is (or is not) present.
+            Answer in the SAME LANGUAGE as the resume.
+            Return ONLY valid JSON with exactly these keys:
+            {
+              "score": number between 0 and 100,
+              "summary": "one or two sentence overall assessment",
+              "strengths": ["short bullet", "..."],
+              "improvements": ["short actionable suggestion", "..."]
+            }
+
+            Resume:
+            """ + text;
+
+        String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
+        try {
+            return objectMapper.readValue(json, CvReviewDto.class);
+        } catch (Exception e) {
+            log.error("Failed to parse resume review: {}", e.getMessage());
+            return new CvReviewDto(0, "The AI review could not be generated. Please try again.", List.of(), List.of());
+        }
     }
 
     public RewriteResponseDto rewrite(RewriteRequestDto request) {
