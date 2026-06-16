@@ -47,6 +47,10 @@ const routes: Routes = [
   },
   {
     path: '',
+    loadChildren: () => import('./pages/pages.routes'),
+  },
+  {
+    path: '',
     loadChildren: () => import('./entities/entity.routes'),
   },
   ...errorRoute,

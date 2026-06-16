@@ -1,0 +1,46 @@
+<main class="pages-faq">
+  <header class="page-hero py-5">
+    <div class="container py-4 py-lg-5">
+      <nav aria-label="Fil d'Ariane" class="mb-3">
+        <ol class="breadcrumb mb-0 small">
+          <li class="breadcrumb-item"><a class="link-light" routerLink="/">Accueil</a></li>
+          <li class="breadcrumb-item active text-white-50" aria-current="page">FAQ</li>
+        </ol>
+      </nav>
+      <h1 class="display-5 fw-bold mb-3">Foire aux questions</h1>
+      <p class="lead mb-0 col-lg-8">Les réponses aux questions les plus fréquentes sur Job Search AI.</p>
+    </div>
+  </header>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <div class="accordion accordion-flush" id="faqAccordion">
+          @for (item of items; track item.question; let i = $index) {
+            <div class="accordion-item border rounded-3 mb-3 shadow-sm overflow-hidden">
+              <h2 class="accordion-header">
+                <button
+                  class="accordion-button collapsed fw-semibold"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  [attr.data-bs-target]="'#faq-' + i"
+                  [attr.aria-controls]="'faq-' + i"
+                >
+                  {{ item.question }}
+                </button>
+              </h2>
+              <div [id]="'faq-' + i" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body text-secondary">{{ item.answer }}</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="text-center mt-5">
+          <p class="text-secondary mb-3">Vous ne trouvez pas votre réponse&nbsp;?</p>
+          <a class="btn btn-primary" routerLink="/contact">Contactez-nous</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

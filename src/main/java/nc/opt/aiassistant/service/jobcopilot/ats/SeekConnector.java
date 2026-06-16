@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
+import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -83,32 +84,42 @@ public class SeekConnector implements AtsConnector {
 
     private List<JobOffer> parseFromHtml(Document doc) {
         List<JobOffer> results = new ArrayList<>();
-        Elements articles = doc.select("article[data-testid], article[data-card-type], [data-testid*='job-card']");
+        // Seek tags each result card with stable data-automation attributes.
+        Elements articles = doc.select("article[data-automation='normalJob'], article[data-automation='premiumJob']");
         if (articles.isEmpty()) {
-            articles = doc.select("article, div[data-job-id]");
+            articles = doc.select("article[data-testid='job-card'], article");
         }
 
         for (Element article : articles) {
             try {
                 JobOffer offer = new JobOffer();
-                String title = extractText(article, "a[data-testid*='title'], h3 a, a[href*='/job/']");
+                String title = extractText(article, "[data-automation='jobTitle']");
                 if (title.isBlank()) continue;
                 offer.setTitle(title);
 
-                offer.setCompany(extractText(article, "[data-testid*='company'], span[data-testid*='company']"));
-                offer.setLocation(extractText(article, "[data-testid*='location'], span[data-testid*='location']"));
+                offer.setCompany(extractText(article, "[data-automation='jobCompany']"));
+                String location = extractText(article, "[data-automation='jobLocation'], [data-automation='jobCardLocation']");
+                offer.setLocation(location);
                 offer.setSource(JobSource.SEEK);
-                offer.setRemote(isRemote(offer.getLocation(), offer.getTitle()));
 
-                Element link = article.selectFirst("a[href*='/job/']");
+                // Short teaser shown on the card — usable description until the offer is enriched on click.
+                String teaser = extractText(article, "[data-automation='jobShortDescription']");
+                offer.setDescription(teaser);
+
+                offer.setRemote(isRemote(location, title));
+
+                Element link = article.selectFirst("a[data-automation='jobTitle'], a[href*='/job/']");
                 if (link != null) {
                     String href = link.absUrl("href");
                     offer.setApplyUrl(href);
                     offer.setSourceId(extractJobId(href));
                 }
 
-                String salary = extractText(article, "[data-testid*='salary'], span[data-testid*='salary']");
+                String salary = extractText(article, "[data-automation='jobSalary']");
                 if (!salary.isBlank()) parseSalary(salary, offer);
+
+                // Scraped from the list: only a teaser so far — enrich lazily, don't embed yet.
+                offer.setEmbeddingStatus(EmbeddingStatus.STUB);
 
                 results.add(offer);
                 if (results.size() >= 50) break;
@@ -117,6 +128,52 @@ public class SeekConnector implements AtsConnector {
             }
         }
         return results;
+    }
+
+    /**
+     * Fetches the full description (and structured data) of a single offer from its detail page.
+     * One HTTP request per call — meant to be triggered lazily when a user opens the offer,
+     * which keeps the request rate well below Seek's anti-bot thresholds.
+     *
+     * @return the parsed offer, or {@code null} if the page could not be fetched/parsed.
+     */
+    @Override
+    public JobOffer fetchDetail(String url) {
+        if (url == null || url.isBlank()) return null;
+        try {
+            Document doc = Jsoup.connect(url)
+                .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36")
+                .timeout(15_000)
+                .get();
+
+            for (Element script : doc.select("script[type='application/ld+json']")) {
+                try {
+                    JsonNode json = objectMapper.readTree(script.html());
+                    if ("JobPosting".equals(json.path("@type").asText())) {
+                        return parseJobPosting(json);
+                    }
+                    if (json.isArray()) {
+                        for (JsonNode item : json) {
+                            if ("JobPosting".equals(item.path("@type").asText())) {
+                                return parseJobPosting(item);
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            // Fallback: full description block rendered in the page.
+            String details = extractText(doc, "[data-automation='jobAdDetails']");
+            if (!details.isBlank()) {
+                JobOffer offer = new JobOffer();
+                offer.setDescription(details);
+                offer.setSource(JobSource.SEEK);
+                return offer;
+            }
+        } catch (Exception e) {
+            log.warn("Seek detail fetch failed for {}: {}", url, e.getMessage());
+        }
+        return null;
     }
 
     private JobOffer parseJobPosting(JsonNode json) {

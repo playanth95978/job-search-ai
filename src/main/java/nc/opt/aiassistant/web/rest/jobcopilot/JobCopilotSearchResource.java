@@ -3,6 +3,7 @@ package nc.opt.aiassistant.web.rest.jobcopilot;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
@@ -11,7 +12,7 @@ import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.criteria.JobOfferCriteria;
 import nc.opt.aiassistant.service.dto.JobOfferDTO;
-import nc.opt.aiassistant.service.jobcopilot.JobOfferProcessingService;
+import nc.opt.aiassistant.service.jobcopilot.JobOfferEnrichmentService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobOfferQueryService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobSearchService;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
@@ -33,7 +34,7 @@ public class JobCopilotSearchResource {
     private final JobSearchService jobSearchService;
     private final JobMatchingService matchingService;
     private final CandidateProfileRepository profileRepository;
-    private final JobOfferProcessingService jobOfferProcessingService;
+    private final JobOfferEnrichmentService jobOfferEnrichmentService;
     private final ObjectMapper objectMapper;
     private final JobOfferQueryService jobOfferQueryService;
 
@@ -61,9 +62,21 @@ public class JobCopilotSearchResource {
         @RequestParam(required = false) String location,
         @RequestParam(required = false) String source
     ) {
+        // Embeddings are not triggered here: full-description offers are queued as PENDING and
+        // indexed by the background poller, while teaser-only (STUB) offers are enriched lazily
+        // on click via /{id}/enrich.
         List<JobOffer> offers = jobSearchService.searchAll(keywords, location, source);
-        jobOfferProcessingService.processBatch(offers);
         return ResponseEntity.ok(offers);
+    }
+
+    /**
+     * {@code POST /jobs/{id}/enrich} : fetches the full description of a list (STUB) offer from its
+     * source detail page and queues it for embedding. Idempotent: already-enriched offers are
+     * returned unchanged. Meant to be called when the user opens an offer.
+     */
+    @PostMapping("/{id}/enrich")
+    public ResponseEntity<JobOffer> enrich(@PathVariable UUID id) {
+        return ResponseEntity.ok(jobOfferEnrichmentService.enrich(id));
     }
 
     @PostMapping("/fetch")
@@ -84,9 +97,6 @@ public class JobCopilotSearchResource {
         List<MatchResultDto> results = matchingService.matchJobs(profile, offers);
         return ResponseEntity.ok(results);
     }
-
-
-
 
     private String buildSemanticQuery(CandidateProfile profile) {
         StringBuilder sb = new StringBuilder();

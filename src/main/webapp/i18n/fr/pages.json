@@ -1,0 +1,11 @@
+{
+  "pages": {
+    "about": { "title": "À propos | Job Search AI" },
+    "contact": { "title": "Contact | Job Search AI" },
+    "faq": { "title": "FAQ | Job Search AI" },
+    "terms": { "title": "Conditions d'utilisation | Job Search AI" },
+    "privacy": { "title": "Politique de confidentialité | Job Search AI" },
+    "cookies": { "title": "Politique de cookies | Job Search AI" },
+    "notice": { "title": "Mentions légales | Job Search AI" }
+  }
+}

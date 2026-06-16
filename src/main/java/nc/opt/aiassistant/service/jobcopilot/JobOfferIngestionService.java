@@ -8,7 +8,6 @@ import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import org.jspecify.annotations.NonNull;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
@@ -55,7 +54,6 @@ public class JobOfferIngestionService {
         }
     }
 
-
     private JobOffer prepareForIngestion(JobOffer offer) {
         try {
             String hash = contentJobOfferHash(offer);
@@ -78,7 +76,11 @@ public class JobOfferIngestionService {
 
             offer.setContentHash(hash);
             offer.setSearchText(buildSearchText(offer));
-            offer.setEmbeddingStatus(EmbeddingStatus.PENDING);
+            // Connectors may flag a list result as STUB (teaser only) so the embedding poller
+            // skips it until it is enriched on click; otherwise queue it for embedding.
+            if (offer.getEmbeddingStatus() != EmbeddingStatus.STUB) {
+                offer.setEmbeddingStatus(EmbeddingStatus.PENDING);
+            }
 
             Instant now = Instant.now();
             if (offer.getCreatedAt() == null) offer.setCreatedAt(now);
@@ -95,7 +97,7 @@ public class JobOfferIngestionService {
      * Builds an optimized search text for retrieval.
      * Uses a canonical semantic structure for better retrieval performance.
      */
-    private String buildSearchText(JobOffer offer) {
+    public String buildSearchText(JobOffer offer) {
         StringBuilder sb = new StringBuilder();
 
         // Structure optimisée pour les embeddings et BM25

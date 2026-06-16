@@ -1,0 +1,22 @@
+// Shared styles for the public/static pages (about, contact, faq, legal).
+// Kept intentionally tiny — layout relies on Bootstrap utilities (per-component
+// style budget is 2kb). Only the bits Bootstrap can't express live here.
+
+.page-hero {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+}
+
+.page-prose {
+  max-width: 760px;
+
+  h2 {
+    margin-top: 2.5rem;
+    font-size: 1.5rem;
+  }
+
+  p,
+  li {
+    line-height: 1.75;
+  }
+}
