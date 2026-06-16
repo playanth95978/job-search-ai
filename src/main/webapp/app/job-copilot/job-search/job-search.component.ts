@@ -23,9 +23,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobSearchComponent {
-  private service = inject(JobCopilotService);
-  private translateService = inject(TranslateService);
-
   keywords = '';
   location = '';
   source = '';
@@ -46,6 +43,11 @@ export class JobSearchComponent {
 
   selectedOfferId = signal<string | null>(null);
   selectedOffer = signal<JobOfferPreview | null>(null);
+  /** True while the full description of the opened offer is being fetched. */
+  enriching = signal(false);
+
+  private service = inject(JobCopilotService);
+  private translateService = inject(TranslateService);
 
   search(): void {
     this.searching.set(true);
@@ -109,6 +111,7 @@ export class JobSearchComponent {
     if (offer.id) {
       this.selectedOfferId.set(offer.id);
       this.selectedOffer.set(offer);
+      this.enrichOffer(offer.id);
       return;
     }
 
@@ -125,6 +128,7 @@ export class JobSearchComponent {
         if (found?.id) {
           this.selectedOfferId.set(found.id);
           this.selectedOffer.set({ ...offer, ...found });
+          this.enrichOffer(found.id);
         } else {
           this.error.set('Offer not found.');
         }
@@ -150,5 +154,21 @@ export class JobSearchComponent {
 
   getSourceColor(source?: string): string {
     return jobSourceColor(source);
+  }
+
+  /**
+   * Lazily fetches the full description of the opened offer (one request per click) and queues it
+   * for embedding. Patches both the list row and the open preview with the enriched data.
+   */
+  private enrichOffer(id: string): void {
+    this.enriching.set(true);
+    this.service.enrichJob(id).subscribe({
+      next: enriched => {
+        this.offers.update(list => list.map(o => (o.id === id ? { ...o, ...enriched } : o)));
+        this.selectedOffer.update(sel => (sel ? { ...sel, ...enriched } : sel));
+        this.enriching.set(false);
+      },
+      error: () => this.enriching.set(false),
+    });
   }
 }

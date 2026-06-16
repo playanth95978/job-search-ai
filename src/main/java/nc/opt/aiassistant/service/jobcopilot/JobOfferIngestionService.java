@@ -67,6 +67,11 @@ public class JobOfferIngestionService {
                         log.debug("Offer {}/{} already exists and is unchanged", offer.getSource(), offer.getSourceId());
                         return null; // Skip unchanged
                     }
+                    // Don't let a re-scraped teaser (STUB) overwrite an already enriched/indexed offer.
+                    if (offer.getEmbeddingStatus() == EmbeddingStatus.STUB && existingOffer.getEmbeddingStatus() != EmbeddingStatus.STUB) {
+                        log.debug("Keeping enriched offer {}/{} over incoming stub", offer.getSource(), offer.getSourceId());
+                        return null;
+                    }
                     // Update existing offer if changed
                     offer.setId(existingOffer.getId());
                 }

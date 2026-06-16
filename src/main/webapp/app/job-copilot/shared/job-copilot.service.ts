@@ -16,7 +16,7 @@ import {
   UserPreferenceDto,
 } from './job-copilot.model';
 import { createRequestOption } from '../../core/request/request-util';
-import { Resume } from "../cv-builder/resume.model";
+import { Resume } from '../cv-builder/resume.model';
 
 @Injectable({ providedIn: 'root' })
 export class JobCopilotService {
@@ -32,7 +32,6 @@ export class JobCopilotService {
   }
 
   getProfile(): Observable<CandidateProfile> {
-
     return this.http.get<CandidateProfile>(`${this.baseUrl}/cv/profile`);
   }
 
@@ -55,6 +54,11 @@ export class JobCopilotService {
 
   fetchFromUrl(url: string): Observable<JobOffer[]> {
     return this.http.post<JobOffer[]>(`${this.baseUrl}/jobs/fetch`, null, { params: { url } });
+  }
+
+  /** Lazily fetches the full description of a list (STUB) offer and queues it for embedding. */
+  enrichJob(id: string): Observable<JobOffer> {
+    return this.http.post<JobOffer>(`${this.baseUrl}/jobs/${id}/enrich`, null);
   }
 
   matchJobs(topK?: number): Observable<MatchResult[]> {
