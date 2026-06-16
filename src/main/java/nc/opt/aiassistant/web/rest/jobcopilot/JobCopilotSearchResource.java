@@ -98,6 +98,23 @@ public class JobCopilotSearchResource {
         return ResponseEntity.ok(results);
     }
 
+    @GetMapping("/match-advanced")
+    public ResponseEntity<List<MatchResultDto>> matchAdvanced() {
+        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        if (profile == null) return ResponseEntity.badRequest().build();
+
+        // Build a semantic query from profile
+        String query = buildSemanticQuery(profile);
+
+        // Perform hybrid search with limit 30
+        List<JobOffer> offers = jobSearchService.searchHybrid(query, 30);
+
+        // Score the results
+        List<MatchResultDto> results = matchingService.matchJobs(profile, offers);
+        return ResponseEntity.ok(results);
+    }
+
     private String buildSemanticQuery(CandidateProfile profile) {
         StringBuilder sb = new StringBuilder();
 
