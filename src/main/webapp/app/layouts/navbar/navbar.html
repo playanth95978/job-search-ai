@@ -36,14 +36,6 @@
           </a>
         </li>
 
-        <!-- Chat / Historique -->
-        <li class="nav-item">
-          <a (click)="collapseNavbar()" class="nav-link" routerLink="/chat" routerLinkActive="active">
-            <fa-icon [fixedWidth]="true" class="me-1" icon="comments" />
-            <span jhiTranslate="home.history.title">Historique</span>
-          </a>
-        </li>
-
         <!-- Administration Dropdown -->
         <li *jhiHasAnyAuthority="'ROLE_ADMIN'" class="nav-item" ngbDropdown>
           <button class="nav-link dropdown-toggle" data-cy="adminMenu" id="admin-menu" ngbDropdownToggle>
@@ -109,8 +101,6 @@
       </ul>
 
       <div class="d-flex align-items-center gap-2 jc-navbar-actions">
-
-
         <!-- Account -->
         <div class="d-inline-block" ngbDropdown>
           @let accountRef = account();

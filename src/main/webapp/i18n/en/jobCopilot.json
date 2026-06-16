@@ -201,6 +201,7 @@
       "title": "Apply",
       "close": "Close",
       "loading": "Generating cover letter...",
+      "loadingDescription": "Loading description…",
       "coverLetter": "Cover Letter",
       "regenerate": "Regenerate",
       "edit": "Edit",

@@ -15,11 +15,22 @@
             <span [style.background]="sourceColor()" class="jc-source-badge">{{ sourceLabel() }}</span>
           }
         </div>
-    <div class="jc-modal-offer-company">
+        <div class="jc-modal-offer-company">
           <fa-icon icon="building"></fa-icon> {{ o.company || ('jobCopilot.search.results.unknown' | translate) }}
           @if (o.location) {
             <span class="jc-separator">&middot;</span>
             <fa-icon icon="location-dot"></fa-icon> {{ o.location }}
+          }
+        </div>
+
+        <div class="jc-modal-offer-description">
+          @if (descriptionHtml(); as desc) {
+            <div [innerHTML]="desc" class="jc-offer-description-body"></div>
+          } @else if (enriching()) {
+            <div class="jc-modal-loading">
+              <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+              <span jhiTranslate="jobCopilot.applyModal.loadingDescription">Chargement de la description…</span>
+            </div>
           }
         </div>
       </div>
@@ -27,7 +38,8 @@
 
     @if (loading()) {
       <div class="jc-modal-loading">
-        <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.loading">Génération de la lettre de motivation...</span>
+        <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+        <span jhiTranslate="jobCopilot.applyModal.loading">Génération de la lettre de motivation...</span>
       </div>
     } @else {
       @if (resultMessage()) {
@@ -35,7 +47,9 @@
       } @else if (application()) {
         <div class="jc-modal-body">
           <div class="jc-modal-label-row">
-            <label class="jc-modal-label" for="apply-cover-letter" jhiTranslate="jobCopilot.applyModal.coverLetter">Lettre de motivation</label>
+            <label class="jc-modal-label" for="apply-cover-letter" jhiTranslate="jobCopilot.applyModal.coverLetter"
+              >Lettre de motivation</label
+            >
             <div class="jc-modal-label-actions">
               <select
                 (ngModelChange)="language.set($event)"
@@ -84,10 +98,13 @@
 
       <div class="jc-modal-actions">
         @if (resultMessage()) {
-          <button (click)="close()" class="jc-btn jc-btn-primary"><fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.close">Fermer</span></button>
+          <button (click)="close()" class="jc-btn jc-btn-primary">
+            <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.close">Fermer</span>
+          </button>
         } @else if (application()) {
           <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost">
-            <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon> {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
+            <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>
+            {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
           </button>
 
           @if (applyUrl()) {
@@ -99,9 +116,13 @@
           @if (autoApplySupported()) {
             <button (click)="submitAuto()" [disabled]="submitting()" class="jc-btn jc-btn-accent">
               @if (submitting()) {
-                <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.sending">Envoi...</span>
+                <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                <span jhiTranslate="jobCopilot.applyModal.sending">Envoi...</span>
               } @else {
-                <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.submitVia" [translateValues]="{ source: sourceLabel() }">Soumettre via {{ sourceLabel() }}</span>
+                <fa-icon icon="paper-plane"></fa-icon>
+                <span jhiTranslate="jobCopilot.applyModal.submitVia" [translateValues]="{ source: sourceLabel() }"
+                  >Soumettre via {{ sourceLabel() }}</span
+                >
               }
             </button>
           }

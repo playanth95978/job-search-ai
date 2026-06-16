@@ -201,6 +201,7 @@
       "title": "Postuler",
       "close": "Fermer",
       "loading": "Génération de la lettre de motivation...",
+      "loadingDescription": "Chargement de la description…",
       "coverLetter": "Lettre de motivation",
       "regenerate": "Régénérer",
       "edit": "Modifier",

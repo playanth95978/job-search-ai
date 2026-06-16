@@ -134,21 +134,10 @@ export class JobSearchComponent {
     const modalRef = this.modalService.open(ApplyModalComponent, { size: 'lg', backdrop: 'static' });
     modalRef.componentInstance.jobOfferId.set(offerId);
     modalRef.componentInstance.jobOffer.set(offer);
-    modalRef.closed.subscribe(res => {
-      if (res) {
-        // Optionnel : rafraîchir ou traiter le résultat de la candidature
-      }
-    });
 
-    // Enrichir l'offre en arrière-plan pour mettre à jour la liste et s'assurer que les données sont complètes
-    this.service.enrichJob(offerId).subscribe({
-      next: enriched => {
-        this.offers.update(list => list.map(o => (o.id === offerId ? { ...o, ...enriched } : o)));
-        // Si la modale est encore ouverte, on peut mettre à jour son offre
-        if (modalRef.componentInstance) {
-          modalRef.componentInstance.jobOffer = { ...offer, ...enriched };
-        }
-      },
+    // The modal owns the lazy enrichment; patch the list row with the offer it fetched.
+    modalRef.componentInstance.enrichedOffer.subscribe((enriched: JobOffer) => {
+      this.offers.update(list => list.map(o => (o.id === offerId ? { ...o, ...enriched } : o)));
     });
   }
 

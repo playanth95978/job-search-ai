@@ -9,7 +9,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { JobCopilotService } from '../job-copilot.service';
 import { SanitizerService } from '../../../shared/sanitizer/sanitizer.service';
-import { JobApplication, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
+import { JobApplication, JobOffer, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
 import TranslateDirective from '../../../shared/language/translate.directive';
 
 /** Strips a leading/trailing ```` ```markdown ... ``` ```` (or ```` ``` ... ``` ````) fence some LLMs wrap their output in. */
@@ -54,10 +54,19 @@ export class ApplyModalComponent implements OnInit {
   previewMode = signal(true);
   language = signal('');
   regenerating = signal(false);
+  /** True while the full description is being fetched from the source. */
+  enriching = signal(false);
+  /** Emits the enriched offer so the parent list can be refreshed. */
+  enrichedOffer = output<JobOffer>();
   readonly languages = COVER_LETTER_LANGUAGES;
   coverLetterHtml = computed<SafeHtml>(() =>
     this.sanitizer.sanitizeHtml(marked.parse(stripMarkdownFence(this.coverLetter()), { async: false })),
   );
+  /** Sanitized full description, preferring the freshly enriched offer. */
+  descriptionHtml = computed<SafeHtml | null>(() => {
+    const description = this.jobOffer()?.description ?? this.application()?.jobOffer?.description;
+    return description ? this.sanitizer.sanitizeHtml(description) : null;
+  });
   private service = inject(JobCopilotService);
   private sanitizer = inject(SanitizerService);
   private translateService = inject(TranslateService);
@@ -68,6 +77,8 @@ export class ApplyModalComponent implements OnInit {
       next: sources => this.autoApplySupported.set(sources.includes(this.offer()?.source ?? '')),
       error() {},
     });
+
+    this.enrichOffer();
 
     if (this.existingApplication()) {
       this.application.set(this.existingApplication()!);
@@ -194,5 +205,20 @@ export class ApplyModalComponent implements OnInit {
   close(): void {
     this.closed.emit();
     this.activeModal.dismiss();
+  }
+
+  /** Lazily fetches the full description (one request) and queues the offer for embedding. */
+  private enrichOffer(): void {
+    const id = this.jobOfferId();
+    if (!id) return;
+    this.enriching.set(true);
+    this.service.enrichJob(id).subscribe({
+      next: full => {
+        this.jobOffer.update(current => ({ ...current, ...full }));
+        this.enrichedOffer.emit(full);
+        this.enriching.set(false);
+      },
+      error: () => this.enriching.set(false),
+    });
   }
 }

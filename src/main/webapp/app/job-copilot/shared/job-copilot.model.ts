@@ -3,8 +3,8 @@ import {
   CandidateProfileEducationDto,
   CandidateProfileExperienceDto,
   CandidateProfileLanguageDto,
-  CandidateProfileSkillDto
-} from "../cv-builder/candidate-profile.mapper";
+  CandidateProfileSkillDto,
+} from '../cv-builder/candidate-profile.mapper';
 
 export interface CandidateProfile {
   id?: string;
@@ -138,6 +138,8 @@ export interface JobOfferPreview {
   location?: string;
   source?: string;
   applyUrl?: string;
+  /** Full description, populated lazily once the offer is enriched on open. */
+  description?: string;
 }
 
 export const JOB_SOURCE_LABELS: Record<string, string> = {
@@ -165,10 +167,10 @@ export const JOB_SOURCE_COLORS: Record<string, string> = {
 export const SEARCHABLE_JOB_SOURCES: { value: string; label: string }[] = [
   { value: 'EMPLOI_NC', label: JOB_SOURCE_LABELS['EMPLOI_NC'] },
   { value: 'FRANCE_TRAVAIL', label: JOB_SOURCE_LABELS['FRANCE_TRAVAIL'] },
-  { value: 'REMOTEOK', label: JOB_SOURCE_LABELS['REMOTEOK'] },
-  { value: 'HELLOWORK', label: JOB_SOURCE_LABELS['HELLOWORK'] },
-  { value: 'GREENHOUSE', label: JOB_SOURCE_LABELS['GREENHOUSE'] },
-  { value: 'LEVER', label: JOB_SOURCE_LABELS['LEVER'] },
+  // { value: 'REMOTEOK', label: JOB_SOURCE_LABELS['REMOTEOK'] },
+  // { value: 'HELLOWORK', label: JOB_SOURCE_LABELS['HELLOWORK'] },
+  // { value: 'GREENHOUSE', label: JOB_SOURCE_LABELS['GREENHOUSE'] },
+  // { value: 'LEVER', label: JOB_SOURCE_LABELS['LEVER'] },
   { value: 'SEEK', label: JOB_SOURCE_LABELS['SEEK'] },
 ];
 
