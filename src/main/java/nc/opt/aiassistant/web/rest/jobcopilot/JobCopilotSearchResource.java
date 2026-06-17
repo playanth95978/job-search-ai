@@ -17,6 +17,7 @@ import nc.opt.aiassistant.service.jobcopilot.ats.JobOfferQueryService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobSearchService;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.matching.JobMatchingService;
+import nc.opt.aiassistant.web.rest.errors.BadRequestAlertException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -88,8 +89,9 @@ public class JobCopilotSearchResource {
     public ResponseEntity<List<MatchResultDto>> matchJobs(@RequestParam(name = "topK", defaultValue = "30") int topK) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
-        if (profile == null) return ResponseEntity.badRequest().build();
-
+        if (profile == null) {
+            throw new BadRequestAlertException("Entity not found", "ENTITY_NAME", "profileNotfound");
+        }
         // Pre-filter by semantic (cosine) similarity to the profile instead of scoring every offer,
         // so we no longer return unrelated jobs with a low score. topK is caller-configurable.
         String query = buildSemanticQuery(profile);
