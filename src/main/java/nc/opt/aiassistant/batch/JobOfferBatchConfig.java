@@ -9,6 +9,8 @@ import nc.opt.aiassistant.service.jobcopilot.JobOfferIngestionService;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferProcessingService;
 import nc.opt.aiassistant.service.jobcopilot.ats.EmploiNcConnector;
 import nc.opt.aiassistant.service.jobcopilot.ats.FranceTravailConnector;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.EnableJdbcJobRepository;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -26,28 +28,32 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
+@EnableBatchProcessing
+@EnableJdbcJobRepository
 public class JobOfferBatchConfig {
 
-    private final JobRepository jobRepository;
     private final JobOfferIngestionService ingestionService;
     private final JobOfferRepository jobOfferRepository;
     private final JobOfferProcessingService jobOfferProcessingService;
 
     public JobOfferBatchConfig(
-        JobRepository jobRepository,
         PlatformTransactionManager transactionManager,
         JobOfferIngestionService ingestionService,
         JobOfferRepository jobOfferRepository,
         JobOfferProcessingService jobOfferProcessingService
     ) {
-        this.jobRepository = jobRepository;
         this.ingestionService = ingestionService;
         this.jobOfferRepository = jobOfferRepository;
         this.jobOfferProcessingService = jobOfferProcessingService;
     }
 
     @Bean
-    public Job ingestJobOffersJob(Step ingestFranceTravailStep, Step ingestEmploiNcStep, Step processEmbeddingsStep) {
+    public Job ingestJobOffersJob(
+        JobRepository jobRepository,
+        Step ingestFranceTravailStep,
+        Step ingestEmploiNcStep,
+        Step processEmbeddingsStep
+    ) {
         return new JobBuilder("ingestJobOffersJob", jobRepository)
             .start(ingestFranceTravailStep)
             .next(ingestEmploiNcStep)
@@ -56,7 +62,7 @@ public class JobOfferBatchConfig {
     }
 
     @Bean
-    public Step ingestFranceTravailStep(FranceTravailConnector connector) {
+    public Step ingestFranceTravailStep(JobRepository jobRepository, FranceTravailConnector connector) {
         return new StepBuilder("ingestFranceTravailStep", jobRepository)
             .<JobOffer, JobOffer>chunk(5)
             .reader(new AtsItemReader(connector, "informatique", "Nouvelle-Calédonie"))
@@ -66,7 +72,7 @@ public class JobOfferBatchConfig {
     }
 
     @Bean
-    public Step ingestEmploiNcStep(EmploiNcConnector connector) {
+    public Step ingestEmploiNcStep(JobRepository jobRepository, EmploiNcConnector connector) {
         return new StepBuilder("ingestEmploiNcStep", jobRepository)
             .<JobOffer, JobOffer>chunk(50)
             .reader(new AtsItemReader(connector, null, null))
@@ -76,7 +82,7 @@ public class JobOfferBatchConfig {
     }
 
     @Bean
-    public Step processEmbeddingsStep() {
+    public Step processEmbeddingsStep(JobRepository jobRepository) {
         return new StepBuilder("processEmbeddingsStep", jobRepository)
             .<JobOffer, JobOffer>chunk(50)
             .reader(pendingEmbeddingReader())
