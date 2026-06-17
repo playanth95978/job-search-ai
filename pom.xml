@@ -273,11 +273,9 @@
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>jcache</artifactId>
     </dependency>
-    <!-- Source: https://mvnrepository.com/artifact/org.springframework.batch/spring-batch-core -->
     <dependency>
-      <groupId>org.springframework.batch</groupId>
-      <artifactId>spring-batch-core</artifactId>
-      <version>6.0.4</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-batch</artifactId>
     </dependency>
     <dependency>
       <groupId>com.tngtech.archunit</groupId>

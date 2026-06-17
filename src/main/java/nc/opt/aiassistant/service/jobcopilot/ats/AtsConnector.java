@@ -4,6 +4,7 @@ import java.util.List;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
+import reactor.core.publisher.Flux;
 
 public interface AtsConnector {
     boolean supports(String url);
@@ -11,6 +12,13 @@ public interface AtsConnector {
     JobSource getSource();
 
     List<JobOffer> fetchJobs(String keywords, String location);
+
+    /**
+     * Fetches jobs with pagination using Flux (useful for Spring Batch ingestion).
+     */
+    default Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {
+        return Flux.fromIterable(fetchJobs(keywords, location));
+    }
 
     /**
      * Fetches the full offer (notably its complete description) from its detail page.

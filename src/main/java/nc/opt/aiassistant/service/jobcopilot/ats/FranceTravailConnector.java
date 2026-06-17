@@ -20,12 +20,16 @@ public class FranceTravailConnector implements AtsConnector {
 
     private static final String API_BASE = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
     private final ObjectMapper objectMapper;
+    private final org.springframework.web.reactive.function.client.WebClient.Builder webClientBuilder;
 
     @Value("${application.job-copilot.france-travail.client-id:}")
     private String clientId;
 
     @Value("${application.job-copilot.france-travail.client-secret:}")
     private String clientSecret;
+
+    private String cachedToken;
+    private java.time.Instant tokenExpiry;
 
     @Override
     public boolean supports(String url) {
@@ -85,7 +89,11 @@ public class FranceTravailConnector implements AtsConnector {
         return offer;
     }
 
-    private String getAccessToken() {
+    private synchronized String getAccessToken() {
+        if (cachedToken != null && tokenExpiry != null && tokenExpiry.isAfter(java.time.Instant.now().plusSeconds(60))) {
+            return cachedToken;
+        }
+
         RestClient client = RestClient.create();
         String body = client
             .post()
@@ -101,21 +109,31 @@ public class FranceTravailConnector implements AtsConnector {
             .retrieve()
             .body(String.class);
         try {
-            return objectMapper.readTree(body).path("access_token").asText();
+            JsonNode node = objectMapper.readTree(body);
+            cachedToken = node.path("access_token").asText();
+            int expiresIn = node.path("expires_in").asInt(3600);
+            tokenExpiry = java.time.Instant.now().plusSeconds(expiresIn);
+            return cachedToken;
         } catch (Exception e) {
             throw new IllegalStateException("Failed to get France Travail token", e);
         }
     }
 
-    private Flux<JobOffer> fetchJobsFt(String keywords, String location) {
+    @Override
+    public Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {
+        if (clientId.isBlank() || clientSecret.isBlank()) {
+            return Flux.empty();
+        }
+
         final int pageSize = 50;
-        RestClient client = RestClient.create();
         return Flux.generate(
             () -> 0,
             (start, sink) -> {
                 try {
                     int end = start + pageSize - 1;
-                    String body = client
+                    String token = getAccessToken();
+                    String body = webClientBuilder
+                        .build()
                         .get()
                         .uri(uriBuilder -> {
                             uriBuilder
@@ -127,9 +145,10 @@ public class FranceTravailConnector implements AtsConnector {
                             }
                             return uriBuilder.build();
                         })
-                        .header("Authorization", "Bearer " + getAccessToken())
+                        .header("Authorization", "Bearer " + token)
                         .retrieve()
-                        .body(String.class);
+                        .bodyToMono(String.class)
+                        .block();
 
                     JsonNode root = objectMapper.readTree(body);
                     JsonNode results = root.path("resultats");
@@ -138,10 +157,8 @@ public class FranceTravailConnector implements AtsConnector {
                         return start;
                     }
                     for (JsonNode r : results) {
-                        JobOffer offer = mapJobOffer(r);
-                        sink.next(offer);
+                        sink.next(mapJobOffer(r));
                     }
-                    // dernière page
                     if (results.size() < pageSize) {
                         sink.complete();
                     }

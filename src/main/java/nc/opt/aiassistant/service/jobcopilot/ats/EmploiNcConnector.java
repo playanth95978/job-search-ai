@@ -2,14 +2,12 @@ package nc.opt.aiassistant.service.jobcopilot.ats;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
 /**
  * Connector for New Caledonia job offers published on emploi.nc / emploi.gouv.nc,
@@ -32,6 +30,7 @@ public class EmploiNcConnector implements AtsConnector {
     private static final int PAGE_SIZE = 50;
 
     private final ObjectMapper objectMapper;
+    private final org.springframework.web.reactive.function.client.WebClient.Builder webClientBuilder;
 
     @Override
     public boolean supports(String url) {
@@ -45,27 +44,50 @@ public class EmploiNcConnector implements AtsConnector {
 
     @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
-        List<JobOffer> results = new ArrayList<>();
-        try {
-            String where = buildWhere(keywords, location);
-            RestClient client = RestClient.create();
-            String body = client
-                .get()
-                .uri(RECORDS_API, uriBuilder ->
-                    uriBuilder.queryParam("where", where).queryParam("limit", PAGE_SIZE).queryParam("order_by", "date_debut desc").build()
-                )
-                .retrieve()
-                .body(String.class);
+        return fetchJobsPaginated(keywords, location).collectList().block();
+    }
 
-            JsonNode root = objectMapper.readTree(body);
-            for (JsonNode r : root.path("results")) {
-                results.add(mapJobOffer(r));
+    @Override
+    public reactor.core.publisher.Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {
+        return reactor.core.publisher.Flux.generate(
+            () -> 0,
+            (offset, sink) -> {
+                try {
+                    String where = buildWhere(keywords, location);
+                    String body = webClientBuilder
+                        .build()
+                        .get()
+                        .uri(RECORDS_API, uriBuilder ->
+                            uriBuilder
+                                .queryParam("where", where)
+                                .queryParam("limit", PAGE_SIZE)
+                                .queryParam("offset", offset)
+                                .queryParam("order_by", "date_debut desc")
+                                .build()
+                        )
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+
+                    JsonNode root = objectMapper.readTree(body);
+                    JsonNode results = root.path("results");
+                    if (results.isEmpty()) {
+                        sink.complete();
+                        return offset;
+                    }
+                    for (JsonNode r : results) {
+                        sink.next(mapJobOffer(r));
+                    }
+                    if (results.size() < PAGE_SIZE) {
+                        sink.complete();
+                    }
+                    return offset + PAGE_SIZE;
+                } catch (Exception e) {
+                    sink.error(e);
+                    return offset;
+                }
             }
-            log.info("Emploi.nc returned {} offers (keywords='{}', location='{}')", results.size(), keywords, location);
-        } catch (Exception e) {
-            log.error("Emploi.nc fetch failed: {}", e.getMessage());
-        }
-        return results;
+        ).cast(JobOffer.class);
     }
 
     /** Builds an ODSQL {@code where} clause filtering on active offers, keywords and city. */

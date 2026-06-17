@@ -54,7 +54,7 @@ public class JobOfferIngestionService {
         }
     }
 
-    private JobOffer prepareForIngestion(JobOffer offer) {
+    public JobOffer prepareForIngestion(JobOffer offer) {
         try {
             String hash = contentJobOfferHash(offer);
 

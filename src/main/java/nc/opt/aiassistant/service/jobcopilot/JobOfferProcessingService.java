@@ -12,7 +12,6 @@ import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +27,9 @@ public class JobOfferProcessingService {
 
     /**
      * Background task to process pending embeddings.
-     * In production, this could be triggered by an event or a more sophisticated queue.
+     * Note: Now primarily handled by Spring Batch JobOfferBatchConfig for mass ingestion.
      */
-    @Scheduled(fixedDelay = 5000)
+    // @Scheduled(fixedDelay = 5000)
     public void processPendingOffers() {
         List<JobOffer> pending = jobOfferRepository.findByEmbeddingStatus(EmbeddingStatus.PENDING, PageRequest.of(0, BATCH_SIZE * 2));
 
