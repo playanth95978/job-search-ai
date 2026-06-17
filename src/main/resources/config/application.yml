@@ -122,6 +122,9 @@ spring:
             - mxbai-embed-large
             - nomic-embed-text
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+  batch:
+    jdbc:
+      initialize-schema: never
   servlet:
     multipart:
       max-file-size: 50MB
