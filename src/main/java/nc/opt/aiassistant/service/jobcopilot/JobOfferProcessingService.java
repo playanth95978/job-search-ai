@@ -46,6 +46,7 @@ public class JobOfferProcessingService {
         batches.forEach(this::processBatchAsync);
     }
 
+    @Transactional
     @Async("processExecutor")
     public CompletableFuture<Void> processBatchAsync(List<JobOffer> batch) {
         processBatch(batch);
@@ -53,7 +54,6 @@ public class JobOfferProcessingService {
     }
 
     @Transactional
-    @Async("processExecutor")
     public void processBatch(List<JobOffer> batch) {
         List<UUID> ids = batch.stream().map(JobOffer::getId).toList();
 

@@ -35,6 +35,7 @@ public class JobOfferBatchConfig {
     private final JobOfferIngestionService ingestionService;
     private final JobOfferRepository jobOfferRepository;
     private final JobOfferProcessingService jobOfferProcessingService;
+    private final PlatformTransactionManager transactionManager;
 
     public JobOfferBatchConfig(
         PlatformTransactionManager transactionManager,
@@ -42,6 +43,7 @@ public class JobOfferBatchConfig {
         JobOfferRepository jobOfferRepository,
         JobOfferProcessingService jobOfferProcessingService
     ) {
+        this.transactionManager = transactionManager;
         this.ingestionService = ingestionService;
         this.jobOfferRepository = jobOfferRepository;
         this.jobOfferProcessingService = jobOfferProcessingService;
@@ -64,7 +66,7 @@ public class JobOfferBatchConfig {
     @Bean
     public Step ingestFranceTravailStep(JobRepository jobRepository, FranceTravailConnector connector) {
         return new StepBuilder("ingestFranceTravailStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(5)
+            .<JobOffer, JobOffer>chunk(5, transactionManager)
             .reader(new AtsItemReader(connector, "informatique", "Nouvelle-Calédonie"))
             .processor(ingestionProcessor())
             .writer(jobOfferWriter())
@@ -74,7 +76,7 @@ public class JobOfferBatchConfig {
     @Bean
     public Step ingestEmploiNcStep(JobRepository jobRepository, EmploiNcConnector connector) {
         return new StepBuilder("ingestEmploiNcStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(50)
+            .<JobOffer, JobOffer>chunk(50, transactionManager)
             .reader(new AtsItemReader(connector, null, null))
             .processor(ingestionProcessor())
             .writer(jobOfferWriter())
@@ -84,7 +86,7 @@ public class JobOfferBatchConfig {
     @Bean
     public Step processEmbeddingsStep(JobRepository jobRepository) {
         return new StepBuilder("processEmbeddingsStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(50)
+            .<JobOffer, JobOffer>chunk(50, transactionManager)
             .reader(pendingEmbeddingReader())
             .writer(embeddingWriter())
             .build();
