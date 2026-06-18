@@ -124,13 +124,17 @@ public class JobCopilotSearchResource {
         appendJsonList(sb, profile.getSkills(), "Skills: ");
 
         if (profile.getRawMarkdown() != null && !profile.getRawMarkdown().isBlank()) {
-            // Use the first 500 chars of resume as context if needed,
-            // but usually skills and roles are better for retrieval
             String resume = profile.getRawMarkdown();
             sb.append("Background: ").append(resume, 0, Math.min(resume.length(), 1000));
         }
 
-        return sb.toString().trim();
+        String query = sb.toString().trim();
+        if (query.isBlank()) {
+            log.warn("Semantic query is empty for user {} — profile has no roles, skills or rawMarkdown", profile.getUserId());
+        } else {
+            log.info("Semantic query built for user {}: '{}'", profile.getUserId(), query.substring(0, Math.min(query.length(), 200)));
+        }
+        return query;
     }
 
     private void appendJsonList(StringBuilder sb, String json, String prefix) {

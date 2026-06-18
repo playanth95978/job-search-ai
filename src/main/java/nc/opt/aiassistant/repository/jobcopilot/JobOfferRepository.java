@@ -28,7 +28,10 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
     @Query(value = "SELECT * FROM job_offer WHERE search_text ||| :query ORDER BY paradedb.score(id) DESC LIMIT :limit", nativeQuery = true)
     List<JobOffer> searchBM25(String query, int limit);
 
-    @Query(value = "SELECT * FROM job_offer ORDER BY embedding <=> cast(:embedding as vector) LIMIT :limit", nativeQuery = true)
+    @Query(
+        value = "SELECT * FROM job_offer WHERE embedding IS NOT NULL ORDER BY embedding <=> cast(:embedding as vector) LIMIT :limit",
+        nativeQuery = true
+    )
     List<JobOffer> searchVector(@Param("embedding") Vector embedding, @Param("limit") int limit);
 
     List<JobOffer> findByEmbeddingStatus(EmbeddingStatus status, Pageable pageable);
@@ -37,4 +40,9 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
     @Transactional
     @Query("UPDATE JobOffer j SET j.embeddingStatus = :status WHERE j.id IN :ids")
     void updateStatus(List<UUID> ids, EmbeddingStatus status);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE JobOffer j SET j.embeddingStatus = :status")
+    void updateAllStatus(@Param("status") EmbeddingStatus status);
 }

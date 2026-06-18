@@ -12,6 +12,7 @@ import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ public class JobOfferProcessingService {
      * Background task to process pending embeddings.
      * Note: Now primarily handled by Spring Batch JobOfferBatchConfig for mass ingestion.
      */
-    // @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 500000)
     public void processPendingOffers() {
         List<JobOffer> pending = jobOfferRepository.findByEmbeddingStatus(EmbeddingStatus.PENDING, PageRequest.of(0, BATCH_SIZE * 2));
 
@@ -44,6 +45,24 @@ public class JobOfferProcessingService {
 
         // Process each batch (could be parallelized with Virtual Threads)
         batches.forEach(this::processBatchAsync);
+    }
+
+    @Transactional
+    public void reindexAll() {
+        log.info("Starting full reindexing of job offers");
+        jobOfferRepository.updateAllStatus(EmbeddingStatus.PENDING);
+
+        // Process everything in batches
+        boolean hasMore = true;
+        while (hasMore) {
+            List<JobOffer> pending = jobOfferRepository.findByEmbeddingStatus(EmbeddingStatus.PENDING, PageRequest.of(0, BATCH_SIZE));
+            if (pending.isEmpty()) {
+                hasMore = false;
+            } else {
+                processBatch(pending);
+            }
+        }
+        log.info("Finished full reindexing of job offers");
     }
 
     @Transactional
@@ -63,6 +82,10 @@ public class JobOfferProcessingService {
 
             List<String> texts = batch.stream().map(JobOffer::getSearchText).toList();
             List<float[]> embeddings = embeddingService.embedBatch(texts);
+            log.debug("Generated embeddings for {} offers", batch.size());
+            embeddings.forEach(embedding -> {
+                log.debug("Embedding: {}", embedding);
+            });
 
             for (int i = 0; i < batch.size(); i++) {
                 JobOffer offer = batch.get(i);

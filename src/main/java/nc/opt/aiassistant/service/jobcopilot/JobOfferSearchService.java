@@ -54,9 +54,12 @@ public class JobOfferSearchService {
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        log.info("Performing semantic (cosine) search for: '{}' (topK: {})", query, topK);
+        log.info("Performing semantic (cosine) search for: '{}' (topK: {})", query.substring(0, Math.min(query.length(), 100)), topK);
         float[] queryEmbedding = jobOfferEmbeddingModel.embed(query);
-        return jobOfferRepository.searchVector(Vector.of(queryEmbedding), topK);
+        log.info("Query embedded ({} dims), querying vector index…", queryEmbedding.length);
+        List<JobOffer> results = jobOfferRepository.searchVector(Vector.of(queryEmbedding), topK);
+        log.info("searchVector returned {} offers", results.size());
+        return results;
     }
 
     /**
@@ -72,13 +75,21 @@ public class JobOfferSearchService {
             .searchVector(Vector.of(queryEmbedding), limit * 3)
             .stream()
             .map(this::toDocument)
+            .filter(java.util.Objects::nonNull)
             .toList();
 
-        List<Document> bm25Docs = jobOfferRepository
-            .searchBM25(query, limit * 3)
-            .stream()
-            .map(this::toDocument)
-            .toList();
+        List<Document> bm25Docs;
+        try {
+            bm25Docs = jobOfferRepository
+                .searchBM25(query, limit * 3)
+                .stream()
+                .map(this::toDocument)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+        } catch (Exception e) {
+            log.warn("BM25 search failed (ParadeDB may not be available): {}", e.getMessage());
+            bm25Docs = List.of();
+        }
 
         if (vectorDocs.isEmpty() && bm25Docs.isEmpty()) {
             return List.of();
