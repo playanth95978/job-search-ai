@@ -67,7 +67,8 @@
       "fontSize": "Font size"
     },
     "export": {
-      "pdf": "Export / print to PDF",
+      "pdf": "Export as PDF (faithful render)",
+      "docx": "Export as Word (.docx)",
       "json": "Export as JSON",
       "import": "Import JSON",
       "import-profile": "load your cv"

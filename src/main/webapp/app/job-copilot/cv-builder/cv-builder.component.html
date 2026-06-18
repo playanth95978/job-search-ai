@@ -44,8 +44,11 @@
       <button type="button" class="cv-tool" (click)="loadProfile()" [title]="'cvBuilder.export.import-profile' | translate">
         <fa-icon icon="sync" />
       </button>
-      <button type="button" class="cv-tool" (click)="print()" [title]="'cvBuilder.export.pdf' | translate">
+      <button type="button" class="cv-tool" (click)="exportPdf()" [title]="'cvBuilder.export.pdf' | translate">
         <fa-icon icon="file-pdf" />
+      </button>
+      <button type="button" class="cv-tool" (click)="exportDocx()" [title]="'cvBuilder.export.docx' | translate">
+        <fa-icon icon="file-word" />
       </button>
       <button type="button" class="cv-tool" (click)="exportJson()" [title]="'cvBuilder.export.json' | translate">
         <fa-icon icon="download" />
@@ -100,7 +103,7 @@
       </div>
       <jhi-cv-editor />
     </section>
-    <section class="cv-preview-pane">
+    <section class="cv-preview-pane" #previewPane>
       <jhi-cv-preview [resume]="r" />
     </section>
   </div>

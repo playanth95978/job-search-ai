@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { debounceTime, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -15,6 +15,7 @@ import { CvMatchComponent } from './cv-match/cv-match.component';
 import { FONT_FAMILIES, Resume, ResumeTemplateId } from './resume.model';
 import { CvResumeApiService } from './cv-resume-api.service';
 import { candidateProfileToResume } from './candidate-profile.mapper';
+import { CvExportService } from './cv-export.service';
 
 @Component({
   selector: 'jhi-cv-builder',
@@ -37,8 +38,11 @@ import { candidateProfileToResume } from './candidate-profile.mapper';
 export class CvBuilderComponent {
   readonly store = inject(ResumeStore);
   private readonly api = inject(CvResumeApiService);
+  private readonly exportService = inject(CvExportService);
   readonly r = this.store.resume;
   readonly fonts = FONT_FAMILIES;
+
+  @ViewChild('previewPane', { read: ElementRef }) private previewPane!: ElementRef<HTMLElement>;
 
   readonly templates: { id: ResumeTemplateId; labelKey: string }[] = [
     { id: 'modern', labelKey: 'cvBuilder.templates.modern' },
@@ -102,9 +106,14 @@ export class CvBuilderComponent {
     reader.readAsText(file);
   }
 
-  /** Interim PDF export via the browser print dialog (see roadmap for exact Puppeteer rendering). */
-  print(): void {
-    window.print();
+  exportPdf(): void {
+    const cvPage: HTMLElement | null = this.previewPane.nativeElement.querySelector('.cv-page');
+    if (!cvPage) return;
+    void this.exportService.exportPdf(cvPage, `${this.safeName()}.pdf`);
+  }
+
+  exportDocx(): void {
+    void this.exportService.exportDocx(this.r(), `${this.safeName()}.docx`);
   }
 
   /** Prefills the editor from the user's extracted candidate profile, keeping the chosen template/theme. */

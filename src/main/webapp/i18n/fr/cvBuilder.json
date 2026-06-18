@@ -67,7 +67,8 @@
       "fontSize": "Taille de police"
     },
     "export": {
-      "pdf": "Exporter / Imprimer en PDF",
+      "pdf": "Exporter en PDF (fidèle)",
+      "docx": "Exporter en Word (.docx)",
       "json": "Exporter en JSON",
       "import": "Importer un JSON",
       "import-profile": "Charger votre CV"
