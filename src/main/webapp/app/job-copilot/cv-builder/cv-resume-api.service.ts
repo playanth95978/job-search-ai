@@ -37,6 +37,18 @@ export interface RewriteResponse {
   ats: string;
 }
 
+export interface CvMatchResult {
+  globalScore: number;
+  skillsScore: number;
+  experienceScore: number;
+  keywordScore: number;
+  missingSkills: string[];
+  missingKeywords: string[];
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class CvResumeApiService {
   private http = inject(HttpClient);
@@ -77,6 +89,11 @@ export class CvResumeApiService {
   /** AI review of the whole resume (score + strengths + improvements). */
   reviewResume(content: string): Observable<CvReview> {
     return this.http.post<CvReview>(`${this.url}/review`, { content });
+  }
+
+  /** Matches the resume against a pasted job offer (scores + missing skills/keywords + suggestions). */
+  matchResume(content: string, offer: string): Observable<CvMatchResult> {
+    return this.http.post<CvMatchResult>(`${this.url}/match`, { content, offer });
   }
 
   /** The user's extracted candidate profile, or null when none exists yet (HTTP 204). */

@@ -168,40 +168,103 @@ export function emptyLanguage(): Language {
 }
 
 /** Readable plain-text rendering of the resume, sent to the AI for review. */
-export function resumeToPlainText(r: Resume): string {
-  const p = r.personal;
-  const lines: string[] = [];
-  lines.push(`${p.firstName} ${p.lastName}${p.title ? ' — ' + p.title : ''}`.trim());
+type SectionBuilder = (resume: Resume) => string[];
+
+function buildHeader(resume: Resume): string[] {
+  const { personal: p } = resume;
+
+  const lines = [`${p.firstName} ${p.lastName}${p.title ? ` — ${p.title}` : ''}`.trim()];
+
   const contact = [p.email, p.phone, p.location, p.linkedin, p.github, p.website].filter(Boolean).join(' | ');
-  if (contact) lines.push(contact);
-  if (r.summary) lines.push('\nSUMMARY\n' + r.summary);
-  if (r.experiences.length) {
-    lines.push('\nEXPERIENCE');
-    for (const e of r.experiences) {
-      lines.push(`- ${e.jobTitle} @ ${e.company} (${e.startDate} - ${e.current ? 'present' : e.endDate})`);
-      if (e.description) lines.push(`  ${e.description}`);
-      for (const a of e.achievements) lines.push(`  • ${a}`);
+
+  if (contact) {
+    lines.push(contact);
+  }
+
+  return lines;
+}
+
+function buildSummary(resume: Resume): string[] {
+  return resume.summary ? ['SUMMARY', resume.summary] : [];
+}
+
+function buildExperiences(resume: Resume): string[] {
+  if (!resume.experiences.length) {
+    return [];
+  }
+
+  return [
+    'EXPERIENCE',
+    ...resume.experiences.flatMap(exp => [
+      `- ${exp.jobTitle} @ ${exp.company} (${exp.startDate} - ${exp.current ? 'present' : exp.endDate})`,
+      ...(exp.description ? [`  ${exp.description}`] : []),
+      ...exp.achievements.map(a => `  • ${a}`),
+    ]),
+  ];
+}
+
+function buildEducation(resume: Resume): string[] {
+  if (!resume.education.length) {
+    return [];
+  }
+
+  return ['EDUCATION', ...resume.education.map(ed => `- ${ed.degree} @ ${ed.school} (${ed.startDate} - ${ed.endDate})`)];
+}
+
+function buildSkills(resume: Resume): string[] {
+  const skills = resume.skills
+    .map(skill => skill.name)
+    .filter(Boolean)
+    .join(', ');
+
+  return skills ? ['SKILLS', skills] : [];
+}
+
+function buildLanguages(resume: Resume): string[] {
+  if (!resume.languages.length) {
+    return [];
+  }
+
+  return ['LANGUAGES', resume.languages.map(lang => `${lang.name} (${lang.level})`).join(', ')];
+}
+
+function buildProjects(resume: Resume): string[] {
+  if (!resume.projects.length) {
+    return [];
+  }
+
+  return ['PROJECTS', ...resume.projects.map(project => `- ${project.name}: ${project.description}`)];
+}
+
+function buildCertifications(resume: Resume): string[] {
+  if (!resume.certifications.length) {
+    return [];
+  }
+
+  return ['CERTIFICATIONS', resume.certifications.map(cert => `${cert.name} (${cert.issuer})`).join(', ')];
+}
+
+const SECTION_BUILDERS: SectionBuilder[] = [
+  buildSummary,
+  buildExperiences,
+  buildEducation,
+  buildSkills,
+  buildLanguages,
+  buildProjects,
+  buildCertifications,
+];
+
+export function resumeToPlainText(resume: Resume): string {
+  const lines = buildHeader(resume);
+
+  for (const builder of SECTION_BUILDERS) {
+    const section = builder(resume);
+
+    if (section.length) {
+      lines.push('');
+      lines.push(...section);
     }
   }
-  if (r.education.length) {
-    lines.push('\nEDUCATION');
-    for (const ed of r.education) lines.push(`- ${ed.degree} @ ${ed.school} (${ed.startDate} - ${ed.endDate})`);
-  }
-  if (r.skills.length)
-    lines.push(
-      '\nSKILLS\n' +
-        r.skills
-          .map(s => s.name)
-          .filter(Boolean)
-          .join(', '),
-    );
-  if (r.languages.length) lines.push('\nLANGUAGES\n' + r.languages.map(l => `${l.name} (${l.level})`).join(', '));
-  if (r.projects.length) {
-    lines.push('\nPROJECTS');
-    for (const pr of r.projects) lines.push(`- ${pr.name}: ${pr.description}`);
-  }
-  if (r.certifications.length) {
-    lines.push('\nCERTIFICATIONS\n' + r.certifications.map(c => `${c.name} (${c.issuer})`).join(', '));
-  }
+
   return lines.join('\n');
 }

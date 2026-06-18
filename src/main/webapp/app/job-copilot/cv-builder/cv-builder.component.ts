@@ -11,6 +11,7 @@ import { ResumeStore } from './resume-store';
 import { CvEditorComponent } from './editor/cv-editor.component';
 import { CvPreviewComponent } from './preview/cv-preview.component';
 import { CvReviewComponent } from './cv-review/cv-review.component';
+import { CvMatchComponent } from './cv-match/cv-match.component';
 import { FONT_FAMILIES, Resume, ResumeTemplateId } from './resume.model';
 import { CvResumeApiService } from './cv-resume-api.service';
 import { candidateProfileToResume } from './candidate-profile.mapper';
@@ -27,6 +28,7 @@ import { candidateProfileToResume } from './candidate-profile.mapper';
     CvEditorComponent,
     CvPreviewComponent,
     CvReviewComponent,
+    CvMatchComponent,
   ],
   templateUrl: './cv-builder.component.html',
   styleUrl: './cv-builder.component.scss',

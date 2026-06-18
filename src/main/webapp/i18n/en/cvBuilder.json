@@ -88,6 +88,20 @@
       "button": "AI Review",
       "strengths": "Strengths",
       "improvements": "Improvements"
+    },
+    "match": {
+      "button": "Match against an offer",
+      "title": "Match against an offer",
+      "placeholder": "Paste the job offer text here…",
+      "run": "Analyze",
+      "scores": {
+        "skills": "Skills",
+        "experience": "Experience",
+        "keywords": "Keywords"
+      },
+      "missingSkills": "Missing skills",
+      "missingKeywords": "Missing keywords",
+      "suggestions": "Suggestions"
     }
   }
 }

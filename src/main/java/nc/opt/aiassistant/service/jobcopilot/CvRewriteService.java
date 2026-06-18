@@ -3,6 +3,7 @@ package nc.opt.aiassistant.service.jobcopilot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import nc.opt.aiassistant.service.jobcopilot.dto.CvMatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.RewriteRequestDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.RewriteResponseDto;
@@ -55,6 +56,45 @@ public class CvRewriteService {
         } catch (Exception e) {
             log.error("Failed to parse resume review: {}", e.getMessage());
             return new CvReviewDto(0, "The AI review could not be generated. Please try again.", List.of(), List.of());
+        }
+    }
+
+    /** Matches the resume against a pasted job offer: scores + missing skills/keywords + suggestions. */
+    public CvMatchResultDto matchAgainstOffer(String content, String offer) {
+        String cv = content == null ? "" : content.trim();
+        String job = offer == null ? "" : offer.trim();
+        if (cv.isEmpty() || job.isEmpty()) {
+            return new CvMatchResultDto(0, 0, 0, 0, List.of(), List.of(), List.of(), List.of(), List.of());
+        }
+        String prompt = """
+            You are an expert technical recruiter. Compare the RESUME against the JOB OFFER and assess the fit.
+            Answer in the SAME LANGUAGE as the resume. Be specific and base everything on the two texts only.
+            Return ONLY valid JSON with exactly these keys (all scores are integers 0-100):
+            {
+              "globalScore": number,
+              "skillsScore": number,
+              "experienceScore": number,
+              "keywordScore": number,
+              "missingSkills": ["skills required by the offer but absent from the resume"],
+              "missingKeywords": ["important keywords from the offer missing in the resume"],
+              "strengths": ["where the resume matches the offer well"],
+              "weaknesses": ["gaps vs the offer"],
+              "suggestions": ["concrete actions to better match this offer"]
+            }
+
+            ===== RESUME =====
+            %s
+
+            ===== JOB OFFER =====
+            %s
+            """.formatted(cv, job);
+
+        CvMatchResultDto cvMatchResultDto = chatClient.prompt().user(prompt).call().entity(CvMatchResultDto.class);
+        try {
+            return cvMatchResultDto;
+        } catch (Exception e) {
+            log.error("Failed to parse CV match result: {}", e.getMessage());
+            return new CvMatchResultDto(0, 0, 0, 0, List.of(), List.of(), List.of(), List.of(), List.of());
         }
     }
 

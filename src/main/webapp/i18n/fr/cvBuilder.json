@@ -88,6 +88,20 @@
       "button": "Revue IA",
       "strengths": "Points forts",
       "improvements": "À améliorer"
+    },
+    "match": {
+      "button": "Match avec une offre",
+      "title": "Match avec une offre",
+      "placeholder": "Collez ici le texte de l'offre d'emploi…",
+      "run": "Analyser",
+      "scores": {
+        "skills": "Compétences",
+        "experience": "Expérience",
+        "keywords": "Mots-clés"
+      },
+      "missingSkills": "Compétences manquantes",
+      "missingKeywords": "Mots-clés manquants",
+      "suggestions": "Suggestions"
     }
   }
 }

@@ -1,0 +1,88 @@
+<div class="cv-match">
+  @if (!open()) {
+    <button type="button" class="cv-match-btn" (click)="open.set(true)">
+      <fa-icon icon="bullseye" /> <span jhiTranslate="cvBuilder.match.button">Match avec une offre</span>
+    </button>
+  } @else {
+    <div class="cv-match-panel">
+      <div class="cv-match-head">
+        <span jhiTranslate="cvBuilder.match.title">Match avec une offre</span>
+        <button type="button" class="cv-match-close" (click)="open.set(false)"><fa-icon icon="xmark" /></button>
+      </div>
+
+      <textarea
+        rows="5"
+        [ngModel]="offer()"
+        (ngModelChange)="offer.set($event)"
+        [placeholder]="'cvBuilder.match.placeholder' | translate"
+      ></textarea>
+
+      <button type="button" class="cv-match-run" [disabled]="!offer().trim() || loading()" (click)="run()">
+        @if (loading()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'" />
+        } @else {
+          <fa-icon icon="bullseye" />
+        }
+        <span jhiTranslate="cvBuilder.match.run">Analyser</span>
+      </button>
+
+      @if (error(); as err) {
+        <div class="cv-match-error"><fa-icon icon="circle-exclamation" /> {{ err }}</div>
+      }
+
+      @if (result(); as m) {
+        <div class="cv-match-result">
+          <div class="cv-match-global" [class]="'rating-' + globalRating()">
+            <span class="cv-match-global-value">{{ m.globalScore }}</span
+            ><span class="cv-match-global-max">/100</span>
+          </div>
+
+          <div class="cv-match-scores">
+            <div class="cv-match-score">
+              <span jhiTranslate="cvBuilder.match.scores.skills">Compétences</span><strong>{{ m.skillsScore }}</strong>
+            </div>
+            <div class="cv-match-score">
+              <span jhiTranslate="cvBuilder.match.scores.experience">Expérience</span><strong>{{ m.experienceScore }}</strong>
+            </div>
+            <div class="cv-match-score">
+              <span jhiTranslate="cvBuilder.match.scores.keywords">Mots-clés</span><strong>{{ m.keywordScore }}</strong>
+            </div>
+          </div>
+
+          @if (m.missingSkills.length) {
+            <div class="cv-match-block">
+              <h5 jhiTranslate="cvBuilder.match.missingSkills">Compétences manquantes</h5>
+              <div class="cv-match-tags">
+                @for (s of m.missingSkills; track s) {
+                  <span class="cv-match-tag">{{ s }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          @if (m.missingKeywords.length) {
+            <div class="cv-match-block">
+              <h5 jhiTranslate="cvBuilder.match.missingKeywords">Mots-clés manquants</h5>
+              <div class="cv-match-tags">
+                @for (k of m.missingKeywords; track k) {
+                  <span class="cv-match-tag">{{ k }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          @if (m.suggestions.length) {
+            <div class="cv-match-block">
+              <h5><fa-icon icon="wand-magic-sparkles" /> <span jhiTranslate="cvBuilder.match.suggestions">Suggestions</span></h5>
+              <ul>
+                @for (sug of m.suggestions; track sug) {
+                  <li>{{ sug }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
