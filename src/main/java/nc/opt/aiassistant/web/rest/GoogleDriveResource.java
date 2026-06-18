@@ -27,8 +27,8 @@ public class GoogleDriveResource {
     private final GoogleDriveAuthService authService;
     private final JwtEncoder jwtEncoder;
 
-    @Value("${jhipster.security.authentication.jwt.token-validity-in-seconds:0}")
-    private long tokenValidityInSeconds;
+    @Value("${jhipster.security.authentication.jwt.token-validity-in-seconds-for-remember-me:2592000}")
+    private long tokenValidityInSecondsForRememberMe;
 
     public GoogleDriveResource(GoogleDriveAuthService authService, JwtEncoder jwtEncoder) {
         this.authService = authService;
@@ -39,6 +39,11 @@ public class GoogleDriveResource {
     public ResponseEntity<Void> login() {
         String authUrl = authService.buildAuthorizationUrl();
         return ResponseEntity.status(302).header(HttpHeaders.LOCATION, authUrl).build();
+    }
+
+    @GetMapping("/oauth/login-url")
+    public ResponseEntity<Map<String, String>> loginUrl() {
+        return ResponseEntity.ok(Map.of("url", authService.buildAuthorizationUrl()));
     }
 
     @PostMapping("/oauth/google")
@@ -58,7 +63,7 @@ public class GoogleDriveResource {
                 String authorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.joining(" "));
 
                 var now = Instant.now();
-                Instant validity = now.plus(this.tokenValidityInSeconds, ChronoUnit.SECONDS);
+                Instant validity = now.plus(this.tokenValidityInSecondsForRememberMe, ChronoUnit.SECONDS);
 
                 JwtClaimsSet.Builder builder = JwtClaimsSet.builder()
                     .issuedAt(now)

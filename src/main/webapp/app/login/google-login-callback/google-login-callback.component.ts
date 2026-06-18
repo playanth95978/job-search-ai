@@ -19,23 +19,30 @@ export class GoogleLoginCallbackComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      const code = params['code'];
-      if (code) {
-        this.http.post<any>('/api/google-drive/oauth/google', { code }).subscribe({
-          next: response => {
-            const jwt = response.id_token;
-            this.authServerProvider.authenticateSuccess({ id_token: jwt }, false);
-            this.accountService.identity(true).subscribe(() => {
-              this.router.navigate(['/']);
-            });
-          },
-          error: () => {
-            this.router.navigate(['/login'], { queryParams: { error: true } });
-          },
-        });
-      } else {
+      // Google returns ?error=access_denied when the user cancels
+      if (params['error']) {
         this.router.navigate(['/login']);
+        return;
       }
+
+      const code = params['code'];
+      if (!code) {
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      this.http.post<{ id_token: string }>('/api/google-drive/oauth/google', { code }).subscribe({
+        next: response => {
+          // rememberMe = true : token stocké dans localStorage pour persistance inter-sessions
+          this.authServerProvider.authenticateSuccess({ id_token: response.id_token }, true);
+          this.accountService.identity(true).subscribe(() => {
+            this.router.navigate(['/']);
+          });
+        },
+        error: () => {
+          this.router.navigate(['/login'], { queryParams: { error: true } });
+        },
+      });
     });
   }
 }

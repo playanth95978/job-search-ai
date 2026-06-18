@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -29,6 +30,7 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   private readonly accountService = inject(AccountService);
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
 
   ngOnInit(): void {
     // if already authenticated then navigate to home page
@@ -57,6 +59,14 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   }
 
   loginWithGoogle(): void {
-    window.location.href = '/api/google-drive/oauth/login';
+    this.http.get<{ url: string }>('/api/google-drive/oauth/login-url').subscribe({
+      next: ({ url }) => {
+        window.location.href = url;
+      },
+      error: () => {
+        // fallback direct redirect si l'endpoint échoue
+        window.location.href = '/api/google-drive/oauth/login';
+      },
+    });
   }
 }

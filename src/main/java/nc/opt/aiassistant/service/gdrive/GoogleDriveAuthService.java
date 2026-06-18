@@ -58,7 +58,7 @@ public class GoogleDriveAuthService {
             "&scope=" +
             encode(SCOPES) +
             "&access_type=offline" +
-            "&prompt=consent"
+            "&prompt=select_account"
         );
     }
 
