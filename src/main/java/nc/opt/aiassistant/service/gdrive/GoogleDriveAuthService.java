@@ -48,6 +48,11 @@ public class GoogleDriveAuthService {
     }
 
     public String buildAuthorizationUrl() {
+        if (config.getClientId() == null || config.getRedirectUri() == null) {
+            throw new IllegalStateException(
+                "Google OAuth non configuré : GOOGLE_CLIENT_ID et GOOGLE_REDIRECT_URI doivent être définis en variables d'environnement"
+            );
+        }
         return (
             AUTH_URL +
             "?client_id=" +
