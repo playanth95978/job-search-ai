@@ -80,6 +80,13 @@ textarea {
   align-self: flex-start;
 }
 
+.cv-generate-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--bs-secondary-color);
+}
+
 .cv-match-error {
   color: #ef4444;
   font-size: 0.85rem;

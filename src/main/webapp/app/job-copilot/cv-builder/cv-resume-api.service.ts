@@ -49,6 +49,36 @@ export interface CvMatchResult {
   suggestions: string[];
 }
 
+/** Structured resume produced by POST /generate. Mirrors the backend GeneratedResumeDto. */
+export interface GeneratedResume {
+  personal: {
+    firstName: string;
+    lastName: string;
+    title: string;
+    email: string;
+    phone: string;
+    location: string;
+    linkedin: string;
+    github: string;
+    website: string;
+  };
+  summary: string;
+  experiences: {
+    jobTitle: string;
+    company: string;
+    startDate: string;
+    endDate: string;
+    current: boolean;
+    description: string;
+    achievements: string[];
+  }[];
+  education: { degree: string; school: string; startDate: string; endDate: string; description: string }[];
+  projects: { name: string; description: string; url: string; technologies: string[] }[];
+  certifications: { name: string; issuer: string; date: string }[];
+  skills: { name: string; level: number }[];
+  languages: { name: string; level: string }[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class CvResumeApiService {
   private http = inject(HttpClient);
@@ -94,6 +124,11 @@ export class CvResumeApiService {
   /** Matches the resume against a pasted job offer (scores + missing skills/keywords + suggestions). */
   matchResume(content: string, offer: string): Observable<CvMatchResult> {
     return this.http.post<CvMatchResult>(`${this.url}/match`, { content, offer });
+  }
+
+  /** Generates a full structured resume from free-form source text (+ optional target offer). */
+  generateResume(source: string, offer?: string): Observable<GeneratedResume> {
+    return this.http.post<GeneratedResume>(`${this.url}/generate`, { source, offer: offer ?? '' });
   }
 
   /** The user's extracted candidate profile, or null when none exists yet (HTTP 204). */

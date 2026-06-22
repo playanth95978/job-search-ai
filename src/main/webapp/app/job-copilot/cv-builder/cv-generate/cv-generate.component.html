@@ -1,0 +1,50 @@
+<div class="cv-match">
+  @if (!open()) {
+    <button type="button" class="cv-match-btn" (click)="open.set(true)">
+      <fa-icon icon="wand-magic-sparkles" /> <span jhiTranslate="cvBuilder.generate.button">Générer avec l'IA</span>
+    </button>
+  } @else {
+    <div class="cv-match-panel">
+      <div class="cv-match-head">
+        <span jhiTranslate="cvBuilder.generate.title">Générer le CV avec l'IA</span>
+        <button type="button" class="cv-match-close" (click)="open.set(false)"><fa-icon icon="xmark" /></button>
+      </div>
+
+      <p class="cv-generate-hint" jhiTranslate="cvBuilder.generate.hint">
+        Collez un ancien CV, votre profil LinkedIn ou des notes libres. L'IA structurera le tout et remplacera le contenu actuel
+        (annulable).
+      </p>
+
+      <textarea
+        rows="8"
+        [ngModel]="source()"
+        (ngModelChange)="source.set($event)"
+        [placeholder]="'cvBuilder.generate.sourcePlaceholder' | translate"
+      ></textarea>
+
+      <textarea
+        rows="3"
+        [ngModel]="offer()"
+        (ngModelChange)="offer.set($event)"
+        [placeholder]="'cvBuilder.generate.offerPlaceholder' | translate"
+      ></textarea>
+
+      <button type="button" class="cv-match-run" [disabled]="!source().trim() || loading()" (click)="run()">
+        @if (loading()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'" />
+        } @else {
+          <fa-icon icon="wand-magic-sparkles" />
+        }
+        <span jhiTranslate="cvBuilder.generate.run">Générer</span>
+      </button>
+
+      @if (loading()) {
+        <p class="cv-generate-hint" jhiTranslate="cvBuilder.generate.loading">Génération du CV…</p>
+      }
+
+      @if (error(); as err) {
+        <div class="cv-match-error"><fa-icon icon="circle-exclamation" /> {{ err }}</div>
+      }
+    </div>
+  }
+</div>

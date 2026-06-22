@@ -90,6 +90,15 @@
       "strengths": "Points forts",
       "improvements": "À améliorer"
     },
+    "generate": {
+      "button": "Générer avec l'IA",
+      "title": "Générer le CV avec l'IA",
+      "hint": "Collez un ancien CV, votre profil LinkedIn ou des notes libres. L'IA structurera le tout et remplacera le contenu actuel (annulable).",
+      "sourcePlaceholder": "Collez ici votre ancien CV, votre profil LinkedIn ou des notes libres…",
+      "offerPlaceholder": "Optionnel : collez une offre d'emploi pour adapter le CV à ce poste…",
+      "run": "Générer",
+      "loading": "Génération du CV…"
+    },
     "match": {
       "button": "Match avec une offre",
       "title": "Match avec une offre",

@@ -5,6 +5,8 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvMatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.GenerateResumeRequestDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.GeneratedResumeDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.RewriteRequestDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.RewriteResponseDto;
 import org.springframework.ai.chat.client.ChatClient;
@@ -96,6 +98,78 @@ public class CvRewriteService {
             log.error("Failed to parse CV match result: {}", e.getMessage());
             return new CvMatchResultDto(0, 0, 0, 0, List.of(), List.of(), List.of(), List.of(), List.of());
         }
+    }
+
+    /**
+     * Generates a complete, structured resume from free-form input (an old CV, LinkedIn export,
+     * raw notes…), optionally tailored toward a target job offer. Returns a {@link GeneratedResumeDto}
+     * ready to auto-fill the CV builder.
+     */
+    public GeneratedResumeDto generateFullResume(GenerateResumeRequestDto request) {
+        String source = request.source() == null ? "" : request.source().trim();
+        if (source.isEmpty()) {
+            return emptyGeneratedResume();
+        }
+        String offer = request.offer() == null ? "" : request.offer().trim();
+        String tailoring = offer.isEmpty()
+            ? ""
+            : """
+
+              Tailor the resume toward the TARGET JOB OFFER below: surface the most relevant
+              experience, skills and keywords, and phrase the summary for this role.
+              Never invent experience the source does not support.
+
+              ===== TARGET JOB OFFER =====
+              %s
+              """.formatted(offer);
+
+        String prompt = """
+            You are an expert CV/resume writer and ATS specialist. From the SOURCE below, produce a
+            complete, well-structured resume. Use the SAME LANGUAGE as the source. Extract and organize
+            every relevant fact; improve wording with strong action verbs, but DO NOT invent facts
+            (employers, dates, diplomas, figures). Leave a field empty ("") when the source does not
+            provide it. Write 3-5 concise, impact-oriented achievements per experience when possible.
+            Skill "level" is an integer 1-5 (use 3 when unknown). Dates are short strings like "2021"
+            or "Jan 2021"; set "current": true for an ongoing role and leave its endDate empty.
+            %s
+            Return ONLY valid JSON with exactly this shape (no markdown, no comments):
+            {
+              "personal": { "firstName": "", "lastName": "", "title": "", "email": "", "phone": "",
+                            "location": "", "linkedin": "", "github": "", "website": "" },
+              "summary": "",
+              "experiences": [ { "jobTitle": "", "company": "", "startDate": "", "endDate": "",
+                                 "current": false, "description": "", "achievements": [""] } ],
+              "education": [ { "degree": "", "school": "", "startDate": "", "endDate": "", "description": "" } ],
+              "projects": [ { "name": "", "description": "", "url": "", "technologies": [""] } ],
+              "certifications": [ { "name": "", "issuer": "", "date": "" } ],
+              "skills": [ { "name": "", "level": 3 } ],
+              "languages": [ { "name": "", "level": "" } ]
+            }
+
+            ===== SOURCE =====
+            %s
+            """.formatted(tailoring, source);
+
+        try {
+            GeneratedResumeDto result = chatClient.prompt().user(prompt).call().entity(GeneratedResumeDto.class);
+            return result == null ? emptyGeneratedResume() : result;
+        } catch (Exception e) {
+            log.error("Failed to generate full resume: {}", e.getMessage());
+            return emptyGeneratedResume();
+        }
+    }
+
+    private GeneratedResumeDto emptyGeneratedResume() {
+        return new GeneratedResumeDto(
+            new GeneratedResumeDto.GeneratedPersonalDto("", "", "", "", "", "", "", "", ""),
+            "",
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of()
+        );
     }
 
     public RewriteResponseDto rewrite(RewriteRequestDto request) {

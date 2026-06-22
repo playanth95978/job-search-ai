@@ -90,6 +90,15 @@
       "strengths": "Strengths",
       "improvements": "Improvements"
     },
+    "generate": {
+      "button": "Generate with AI",
+      "title": "Generate resume with AI",
+      "hint": "Paste an old CV, your LinkedIn profile or free-form notes. The AI will structure everything and replace the current content (undoable).",
+      "sourcePlaceholder": "Paste your old CV, LinkedIn profile or free-form notes here…",
+      "offerPlaceholder": "Optional: paste a job offer to tailor the resume to this role…",
+      "run": "Generate",
+      "loading": "Generating resume…"
+    },
     "match": {
       "button": "Match against an offer",
       "title": "Match against an offer",
