@@ -1,0 +1,102 @@
+.wu-processing {
+  text-align: center;
+  padding: 1.5rem 0;
+
+  h3 {
+    margin-top: 1rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+}
+
+.wu-success {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  animation: wu-fade 0.4s ease-out both;
+
+  .wu-success-icon {
+    color: #10b981;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .wu-success-name {
+    color: var(--bs-secondary-color);
+    margin: 0.25rem 0 0.75rem;
+  }
+}
+
+.wu-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.wu-rehint {
+  font-size: 0.82rem;
+  color: var(--bs-secondary-color);
+  margin: 0;
+}
+
+.wu-dropzone {
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 18px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  transition: all 0.25s ease;
+
+  &:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.03);
+  }
+
+  &.jc-dropzone-active {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.06);
+    transform: scale(1.01);
+  }
+
+  .jc-dropzone-icon {
+    color: #667eea;
+    margin-bottom: 0.5rem;
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+  }
+
+  .jc-dropzone-hint {
+    margin: 0.75rem 0 0;
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color);
+  }
+}
+
+.wu-error {
+  margin-top: 1rem;
+  color: #ef4444;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+@keyframes wu-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

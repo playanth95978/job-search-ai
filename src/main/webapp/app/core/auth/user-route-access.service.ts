@@ -14,6 +14,13 @@ export const UserRouteAccessService: CanActivateFn = (next: ActivatedRouteSnapsh
   return accountService.identity().pipe(
     map(account => {
       if (account) {
+        // First-login gate: send authenticated users through the onboarding wizard once.
+        // The onboarding route itself is excluded to avoid a redirect loop.
+        if (!account.onboardingCompleted && !state.url.startsWith('/onboarding')) {
+          router.navigate(['/onboarding']);
+          return false;
+        }
+
         const { authorities } = next.data;
 
         if (!authorities || authorities.length === 0 || accountService.hasAnyAuthority(authorities)) {

@@ -132,19 +132,20 @@ public class FranceTravailConnector implements AtsConnector {
                 try {
                     int end = start + pageSize - 1;
                     String token = getAccessToken();
+                    // API_BASE is an absolute URL: build the full URI from it explicitly. Using the
+                    // WebClient UriBuilder's path(API_BASE) would drop scheme/host -> "Host is not specified".
+                    org.springframework.web.util.UriComponentsBuilder uriComponentsBuilder =
+                        org.springframework.web.util.UriComponentsBuilder.fromUriString(API_BASE)
+                            .queryParam("motsCles", keywords)
+                            .queryParam("range", start + "-" + end);
+                    if (location != null && !location.isBlank()) {
+                        uriComponentsBuilder.queryParam("codePostal", location);
+                    }
+                    java.net.URI uri = uriComponentsBuilder.build().toUri();
                     String body = webClientBuilder
                         .build()
                         .get()
-                        .uri(uriBuilder -> {
-                            uriBuilder
-                                .path(API_BASE)
-                                .queryParam("motsCles", keywords)
-                                .queryParam("range", start + "-" + end);
-                            if (location != null && !location.isBlank()) {
-                                uriBuilder.queryParam("codePostal", location);
-                            }
-                            return uriBuilder.build();
-                        })
+                        .uri(uri)
                         .header("Authorization", "Bearer " + token)
                         .retrieve()
                         .bodyToMono(String.class)

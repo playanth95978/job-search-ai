@@ -1,0 +1,32 @@
+<jhi-step-hero
+  icon="circle-check"
+  [title]="'onboarding.summary.title' | translate"
+  [subtitle]="'onboarding.summary.subtitle' | translate"
+/>
+
+@if (profile(); as p) {
+  <jhi-cv-quality [profile]="p" />
+}
+
+<div class="ob-grid" style="margin-top: 1.25rem">
+  @if (roles().length) {
+    <div class="ob-field ob-grid-full">
+      <label class="ob-label" jhiTranslate="onboarding.preferences.roles">Postes recherchés</label>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem">
+        @for (r of roles(); track r) {
+          <span class="jc-skill-tag">{{ r }}</span>
+        }
+      </div>
+    </div>
+  }
+  @if (locations().length) {
+    <div class="ob-field ob-grid-full">
+      <label class="ob-label" jhiTranslate="onboarding.preferences.locations">Localisations</label>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.35rem">
+        @for (l of locations(); track l) {
+          <span class="jc-skill-tag">{{ l }}</span>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,9 @@
+<div class="step-hero">
+  <div class="step-hero-icon">
+    <fa-icon [icon]="icon()" />
+  </div>
+  <h2 class="step-hero-title">{{ title() }}</h2>
+  @if (subtitle()) {
+    <p class="step-hero-subtitle">{{ subtitle() }}</p>
+  }
+</div>

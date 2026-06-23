@@ -1,0 +1,44 @@
+<div class="ob-wizard">
+  <div class="ob-wizard-inner">
+    <div class="ob-brand">
+      <span class="ob-brand-badge"><fa-icon icon="wand-magic-sparkles" /></span>
+      <span jhiTranslate="onboarding.brand">Bienvenue</span>
+    </div>
+
+    <jhi-stepper
+      [autoNavigate]="false"
+      (finished)="finish()"
+      [backLabel]="'onboarding.actions.back' | translate"
+      [nextLabel]="'onboarding.actions.next' | translate"
+      [finishLabel]="'onboarding.actions.finish' | translate"
+    >
+      <jhi-step [stepId]="'welcome'" [label]="'onboarding.steps.welcome' | translate" [formGroupInput]="welcomeForm">
+        <ng-template jhiStepContent>
+          <jhi-welcome-upload-step (uploaded)="onUploaded($event)" />
+        </ng-template>
+      </jhi-step>
+
+      <jhi-step [stepId]="'profile'" [label]="'onboarding.steps.profile' | translate" [formGroupInput]="profileForm">
+        <ng-template jhiStepContent>
+          <jhi-profile-step [form]="profileForm" />
+        </ng-template>
+      </jhi-step>
+
+      <jhi-step [stepId]="'preferences'" [label]="'onboarding.steps.preferences' | translate" [formGroupInput]="prefsForm">
+        <ng-template jhiStepContent>
+          <jhi-preferences-step [form]="prefsForm" />
+        </ng-template>
+      </jhi-step>
+
+      <jhi-step [stepId]="'summary'" [label]="'onboarding.steps.summary' | translate" [formGroupInput]="summaryForm">
+        <ng-template jhiStepContent>
+          <jhi-summary-step
+            [profile]="profile()"
+            [roles]="prefsForm.controls.preferredRoles.value ?? []"
+            [locations]="prefsForm.controls.preferredLocations.value ?? []"
+          />
+        </ng-template>
+      </jhi-step>
+    </jhi-stepper>
+  </div>
+</div>

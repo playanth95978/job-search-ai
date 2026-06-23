@@ -122,6 +122,21 @@ public class AccountResource {
     }
 
     /**
+     * {@code POST  /account/onboarding-complete} : marks the current user's first-login onboarding as done.
+     *
+     * @throws AccountResourceException {@code 500 (Internal Server Error)} if the user login wasn't found.
+     */
+    @PostMapping("/account/onboarding-complete")
+    public void completeOnboarding() {
+        String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() ->
+            new AccountResourceException("Current user login not found")
+        );
+        User user = userRepository.findOneByLogin(userLogin).orElseThrow(() -> new AccountResourceException("User could not be found"));
+        user.setOnboardingCompleted(true);
+        userRepository.save(user);
+    }
+
+    /**
      * {@code POST  /account/change-password} : changes the current user's password.
      *
      * @param passwordChangeDto current and new password.

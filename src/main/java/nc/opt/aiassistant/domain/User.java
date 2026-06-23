@@ -64,6 +64,10 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     @Column(name = "activated", nullable = false)
     private boolean activated = false;
 
+    @NotNull
+    @Column(name = "onboarding_completed", nullable = false)
+    private boolean onboardingCompleted = false;
+
     @Size(min = 2, max = 10)
     @Column(name = "lang_key", length = 10)
     private String langKey;
@@ -159,6 +163,14 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public boolean isOnboardingCompleted() {
+        return onboardingCompleted;
+    }
+
+    public void setOnboardingCompleted(boolean onboardingCompleted) {
+        this.onboardingCompleted = onboardingCompleted;
     }
 
     public String getActivationKey() {

@@ -26,6 +26,11 @@ export class AccountService {
     return this.http.post(this.applicationConfigService.getEndpointFor('api/account'), account);
   }
 
+  /** Marks the current user's first-login onboarding as completed (server-persisted). */
+  completeOnboarding(): Observable<{}> {
+    return this.http.post(this.applicationConfigService.getEndpointFor('api/account/onboarding-complete'), {});
+  }
+
   authenticate(identity: Account | null): void {
     this.userIdentity.set(identity);
     if (!identity) {

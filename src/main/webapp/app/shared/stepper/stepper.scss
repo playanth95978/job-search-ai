@@ -1,0 +1,220 @@
+jhi-stepper {
+  display: block;
+}
+
+/* ---- animations ---------------------------------------------------------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+/* ---- layout -------------------------------------------------------------- */
+.stepper-container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ---- header / progress --------------------------------------------------- */
+.stepper-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+  animation: fade-in 0.6s ease-out 0.1s both;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex: 0 0 auto;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.step-number {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: var(--bs-tertiary-bg, #f1f2f6);
+  color: var(--bs-secondary-color, #6b7280);
+  border: 1px solid var(--bs-border-color, #e5e7eb);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.step-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--bs-secondary-color, #9ca3af);
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+/* active step */
+.step-indicator.active {
+  .step-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
+    animation: pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .step-title {
+    color: var(--bs-body-color, #111827);
+  }
+}
+
+/* completed step */
+.step-indicator.completed {
+  .step-number {
+    background: #10b981;
+    color: #fff;
+    border-color: transparent;
+  }
+}
+
+/* invalid step (touched + invalid) */
+.step-indicator.invalid:not(.active) {
+  .step-number {
+    background: #ef4444;
+    color: #fff;
+    border-color: transparent;
+  }
+  .step-title {
+    color: #ef4444;
+  }
+}
+
+.step-indicator.active.invalid .step-number {
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+}
+
+.step-divider {
+  flex: 1 1 auto;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--bs-border-color, #e5e7eb);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 0;
+    background: #10b981;
+    transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &.filled::after {
+    width: 100%;
+  }
+}
+
+/* ---- step content card --------------------------------------------------- */
+.step-content {
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #e5e7eb);
+  border-radius: 24px;
+  padding: 2.25rem;
+  box-shadow: 0 20px 50px -25px rgba(102, 126, 234, 0.4);
+  animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---- actions ------------------------------------------------------------- */
+.stepper-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.75rem;
+}
+
+.stepper-back:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper-next {
+  &.invalid {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .stepper-arrow {
+    width: 1.15rem;
+    height: 1.15rem;
+    transition: transform 0.2s;
+  }
+
+  &:hover .stepper-arrow {
+    transform: translateX(3px);
+  }
+}
+
+/* hide step labels on small screens, keep the numbered pills */
+@media (max-width: 640px) {
+  .step-title {
+    display: none;
+  }
+}

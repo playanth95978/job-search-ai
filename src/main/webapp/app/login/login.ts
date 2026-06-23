@@ -33,10 +33,10 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   private readonly http = inject(HttpClient);
 
   ngOnInit(): void {
-    // if already authenticated then navigate to home page
-    this.accountService.identity().subscribe(() => {
-      if (this.accountService.isAuthenticated()) {
-        this.router.navigate(['']);
+    // if already authenticated then navigate to home page (or onboarding on first login)
+    this.accountService.identity().subscribe(account => {
+      if (account) {
+        this.router.navigate([account.onboardingCompleted ? '' : '/onboarding']);
       }
     });
   }
@@ -47,9 +47,12 @@ export default class LoginComponent implements OnInit, AfterViewInit {
 
   login(): void {
     this.loginService.login(this.loginForm.getRawValue()).subscribe({
-      next: () => {
+      next: account => {
         this.authenticationError.set(false);
-        if (!this.router.currentNavigation()) {
+        if (account && !account.onboardingCompleted) {
+          // First login: send the user through the onboarding wizard.
+          this.router.navigate(['/onboarding']);
+        } else if (!this.router.currentNavigation()) {
           // There were no routing during login (eg from navigationToStoredUrl)
           this.router.navigate(['']);
         }

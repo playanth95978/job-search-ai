@@ -12,7 +12,14 @@ const routes: Routes = [
     title: 'home.title',
   },
   {
+    path: 'onboarding',
+    canActivate: [UserRouteAccessService],
+    loadComponent: () => import('./onboarding/onboarding-wizard.component').then(m => m.OnboardingWizardComponent),
+    title: 'onboarding.title',
+  },
+  {
     path: 'job-copilot',
+    canActivate: [UserRouteAccessService],
     loadChildren: () => import('./job-copilot/job-copilot.routes'),
   },
   {

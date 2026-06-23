@@ -1,0 +1,56 @@
+{
+  "onboarding": {
+    "title": "Welcome",
+    "brand": "Let's set up your workspace",
+    "actions": {
+      "back": "Back",
+      "next": "Continue",
+      "finish": "Finish"
+    },
+    "steps": {
+      "welcome": "Welcome",
+      "profile": "Profile",
+      "preferences": "Preferences",
+      "summary": "Summary"
+    },
+    "welcome": {
+      "title": "Welcome! Let's import your CV",
+      "subtitle": "AI extracts your profile automatically. You can review everything next — this step is optional.",
+      "processing": "Analyzing your CV…",
+      "success": "CV imported successfully",
+      "reupload": "You can re-upload another file below.",
+      "dropzone": {
+        "title": "Drag & drop your CV here",
+        "browse": "Browse",
+        "hint": "PDF or DOCX. This step is optional."
+      }
+    },
+    "profile": {
+      "title": "Check your profile",
+      "subtitle": "Prefilled from your CV — adjust if needed.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "headline": "Headline / target role",
+      "location": "Location"
+    },
+    "preferences": {
+      "title": "Your search preferences",
+      "subtitle": "For relevant job recommendations.",
+      "roles": "Target roles",
+      "locations": "Locations",
+      "excluded": "Technologies to exclude",
+      "chipHint": "Press Enter or comma to add.",
+      "salaryMin": "Min salary (€)",
+      "salaryMax": "Max salary (€)",
+      "contractType": "Contract type",
+      "any": "Any",
+      "internship": "Internship / Apprenticeship",
+      "remote": "Remote",
+      "remoteOnly": "Remote only"
+    },
+    "summary": {
+      "title": "You're all set!",
+      "subtitle": "Review the summary and get started."
+    }
+  }
+}

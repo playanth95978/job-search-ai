@@ -40,6 +40,8 @@ public class AdminUserDTO implements Serializable {
 
     private boolean activated = false;
 
+    private boolean onboardingCompleted = false;
+
     @Size(min = 2, max = 10)
     private String langKey;
 
@@ -66,6 +68,7 @@ public class AdminUserDTO implements Serializable {
         this.lastName = user.getLastName();
         this.email = user.getEmail();
         this.activated = user.isActivated();
+        this.onboardingCompleted = user.isOnboardingCompleted();
         this.imageUrl = user.getImageUrl();
         this.langKey = user.getLangKey();
         this.createdBy = user.getCreatedBy();
@@ -129,6 +132,14 @@ public class AdminUserDTO implements Serializable {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public boolean isOnboardingCompleted() {
+        return onboardingCompleted;
+    }
+
+    public void setOnboardingCompleted(boolean onboardingCompleted) {
+        this.onboardingCompleted = onboardingCompleted;
     }
 
     public String getLangKey() {

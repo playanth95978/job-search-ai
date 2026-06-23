@@ -32,4 +32,5 @@
   <include file="config/liquibase/changelog/202606131090000_column_type_chat_conversation.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260614090000_add_resume_tables.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/202608179000000_add_tables_spring_batch.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260623120000_add_onboarding_flag.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

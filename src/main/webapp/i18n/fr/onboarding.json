@@ -1,0 +1,56 @@
+{
+  "onboarding": {
+    "title": "Bienvenue",
+    "brand": "Configurons votre espace",
+    "actions": {
+      "back": "Retour",
+      "next": "Continuer",
+      "finish": "Terminer"
+    },
+    "steps": {
+      "welcome": "Bienvenue",
+      "profile": "Profil",
+      "preferences": "Préférences",
+      "summary": "Récapitulatif"
+    },
+    "welcome": {
+      "title": "Bienvenue ! Importons votre CV",
+      "subtitle": "L'IA extrait automatiquement votre profil. Vous pourrez tout vérifier ensuite — cette étape est optionnelle.",
+      "processing": "Analyse de votre CV…",
+      "success": "CV importé avec succès",
+      "reupload": "Vous pouvez réimporter un autre fichier ci-dessous.",
+      "dropzone": {
+        "title": "Glissez-déposez votre CV ici",
+        "browse": "Parcourir",
+        "hint": "PDF ou DOCX. Cette étape est optionnelle."
+      }
+    },
+    "profile": {
+      "title": "Vérifiez votre profil",
+      "subtitle": "Pré-rempli depuis votre CV — ajustez si besoin.",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "headline": "Titre / poste visé",
+      "location": "Localisation"
+    },
+    "preferences": {
+      "title": "Vos préférences de recherche",
+      "subtitle": "Pour des recommandations d'offres pertinentes.",
+      "roles": "Postes recherchés",
+      "locations": "Localisations",
+      "excluded": "Technologies à exclure",
+      "chipHint": "Entrée ou virgule pour ajouter.",
+      "salaryMin": "Salaire min (€)",
+      "salaryMax": "Salaire max (€)",
+      "contractType": "Type de contrat",
+      "any": "Indifférent",
+      "internship": "Stage / Alternance",
+      "remote": "Télétravail",
+      "remoteOnly": "Télétravail uniquement"
+    },
+    "summary": {
+      "title": "Tout est prêt !",
+      "subtitle": "Vérifiez le récapitulatif puis lancez-vous."
+    }
+  }
+}

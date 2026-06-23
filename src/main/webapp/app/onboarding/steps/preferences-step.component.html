@@ -1,0 +1,52 @@
+<jhi-step-hero
+  icon="bullseye"
+  [title]="'onboarding.preferences.title' | translate"
+  [subtitle]="'onboarding.preferences.subtitle' | translate"
+/>
+
+<form [formGroup]="form()" class="ob-grid">
+  <div class="ob-field ob-grid-full">
+    <label class="ob-label" jhiTranslate="onboarding.preferences.roles">Postes recherchés</label>
+    <jhi-chip-input formControlName="preferredRoles" />
+    <span class="ob-hint" jhiTranslate="onboarding.preferences.chipHint">Entrée ou virgule pour ajouter.</span>
+  </div>
+
+  <div class="ob-field ob-grid-full">
+    <label class="ob-label" jhiTranslate="onboarding.preferences.locations">Localisations</label>
+    <jhi-chip-input formControlName="preferredLocations" />
+  </div>
+
+  <div class="ob-field ob-grid-full">
+    <label class="ob-label" jhiTranslate="onboarding.preferences.excluded">Technologies à exclure</label>
+    <jhi-chip-input formControlName="excludedTechnologies" />
+  </div>
+
+  <div class="ob-field">
+    <label class="ob-label" jhiTranslate="onboarding.preferences.salaryMin">Salaire min (€)</label>
+    <input class="ob-input" type="number" formControlName="salaryMin" min="0" />
+  </div>
+  <div class="ob-field">
+    <label class="ob-label" jhiTranslate="onboarding.preferences.salaryMax">Salaire max (€)</label>
+    <input class="ob-input" type="number" formControlName="salaryMax" min="0" />
+  </div>
+
+  <div class="ob-field">
+    <label class="ob-label" jhiTranslate="onboarding.preferences.contractType">Type de contrat</label>
+    <select class="ob-select" formControlName="contractType">
+      <option value="" jhiTranslate="onboarding.preferences.any">Indifférent</option>
+      <option value="CDI">CDI</option>
+      <option value="CDD">CDD</option>
+      <option value="FREELANCE">Freelance</option>
+      <option value="INTERNSHIP" jhiTranslate="onboarding.preferences.internship">Stage / Alternance</option>
+    </select>
+  </div>
+
+  <div class="ob-field">
+    <label class="ob-label" jhiTranslate="onboarding.preferences.remote">Télétravail</label>
+    <label class="ob-toggle">
+      <input type="checkbox" formControlName="remoteOnly" />
+      <span class="ob-toggle-slider"></span>
+      <span jhiTranslate="onboarding.preferences.remoteOnly">Télétravail uniquement</span>
+    </label>
+  </div>
+</form>

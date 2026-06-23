@@ -1,0 +1,57 @@
+<div class="stepper-container">
+  <!-- Progress header -->
+  <div class="stepper-header">
+    @for (step of steps(); track step.stepId(); let i = $index; let last = $last) {
+      <button
+        type="button"
+        (click)="goToStep(i)"
+        class="step-indicator"
+        [class.active]="currentStepIndex() === i"
+        [class.completed]="currentStepIndex() > i"
+        [class.invalid]="(i === currentStepIndex() ? effectiveForm().isValid() : step.isValid()) === false"
+      >
+        <span class="step-number">
+          @if (currentStepIndex() > i) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+          } @else {
+            {{ i + 1 }}
+          }
+        </span>
+        <span class="step-title">{{ stepLabel(step, i) }}</span>
+      </button>
+
+      @if (!last) {
+        <span class="step-divider" [class.filled]="currentStepIndex() > i"></span>
+      }
+    }
+  </div>
+
+  <!-- Active step content -->
+  <form [formGroup]="rootForm">
+    @if (currentStep(); as step) {
+      <div class="step-content" [attr.data-step]="currentStepIndex()">
+        <ng-container [ngTemplateOutlet]="step.content()?.template || null"></ng-container>
+      </div>
+    }
+  </form>
+
+  <!-- Navigation -->
+  <div class="stepper-actions">
+    <button type="button" class="jc-btn jc-btn-ghost stepper-back" [disabled]="isFirstStep()" (click)="prev()">
+      {{ backLabel() }}
+    </button>
+    <button
+      type="button"
+      class="jc-btn jc-btn-primary jc-btn-lg stepper-next"
+      [class.invalid]="effectiveForm().isValid() === false"
+      (click)="next()"
+    >
+      {{ isLastStep() ? finishLabel() : nextLabel() }}
+      <svg class="stepper-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+      </svg>
+    </button>
+  </div>
+</div>

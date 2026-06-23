@@ -1,0 +1,44 @@
+@keyframes hero-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.step-hero {
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: hero-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.step-hero-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 12px 28px -8px rgba(102, 126, 234, 0.6);
+}
+
+.step-hero-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 0.4rem;
+  color: var(--bs-body-color);
+}
+
+.step-hero-subtitle {
+  margin: 0 auto;
+  max-width: 42ch;
+  font-size: 0.95rem;
+  color: var(--bs-secondary-color);
+}

@@ -1,0 +1,48 @@
+<jhi-step-hero
+  icon="cloud-arrow-up"
+  [title]="'onboarding.welcome.title' | translate"
+  [subtitle]="'onboarding.welcome.subtitle' | translate"
+/>
+
+@if (uploading()) {
+  <div class="wu-processing">
+    <div class="spinner-grow text-primary" role="status"></div>
+    <h3 jhiTranslate="onboarding.welcome.processing">Analyse de votre CV…</h3>
+  </div>
+} @else if (profile(); as p) {
+  <div class="wu-success">
+    <div class="wu-success-icon"><fa-icon icon="circle-check" size="2x" /></div>
+    <h3 jhiTranslate="onboarding.welcome.success">CV importé avec succès</h3>
+    <p class="wu-success-name">{{ p.fullName }}</p>
+    @if (p.skills?.length) {
+      <div class="wu-skills">
+        @for (skill of (p.skills ?? []).slice(0, 12); track skill.name) {
+          <span class="jc-skill-tag">{{ skill.name }}</span>
+        }
+      </div>
+    }
+    <p class="wu-rehint" jhiTranslate="onboarding.welcome.reupload">Vous pouvez réimporter un autre fichier ci-dessous.</p>
+  </div>
+}
+
+<div
+  class="jc-dropzone wu-dropzone"
+  [class.jc-dropzone-active]="isDragOver()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="isDragOver.set(false)"
+  (drop)="onDrop($event)"
+>
+  <div class="jc-dropzone-content">
+    <div class="jc-dropzone-icon"><fa-icon icon="cloud-arrow-up" size="2x" /></div>
+    <h4 jhiTranslate="onboarding.welcome.dropzone.title">Glissez-déposez votre CV ici</h4>
+    <input type="file" #fileInput accept=".pdf,.docx" (change)="onFileSelected($event)" hidden />
+    <button type="button" class="jc-btn jc-btn-primary" (click)="fileInput.click()">
+      <fa-icon icon="folder-open" /> <span jhiTranslate="onboarding.welcome.dropzone.browse">Parcourir</span>
+    </button>
+    <p class="jc-dropzone-hint" jhiTranslate="onboarding.welcome.dropzone.hint">PDF ou DOCX. Cette étape est optionnelle.</p>
+  </div>
+</div>
+
+@if (error(); as err) {
+  <div class="wu-error"><fa-icon icon="circle-exclamation" /> {{ err }}</div>
+}
