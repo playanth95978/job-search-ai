@@ -1,0 +1,26 @@
+<section class="home-hero">
+  <span class="home-hero-badge" jhiTranslate="home.hero.badge">Copilote de carrière propulsé par l'IA</span>
+  <h1 class="home-hero-title" jhiTranslate="home.hero.title">Décrochez votre prochain job plus vite, avec l'IA à vos côtés</h1>
+  <p class="home-hero-subtitle" jhiTranslate="home.hero.subtitle">
+    Importez votre CV, recevez des offres pertinentes, générez des lettres de motivation sur-mesure et entraînez-vous aux entretiens — le
+    tout au même endroit.
+  </p>
+
+  <div class="home-hero-actions">
+    @if (account() !== null) {
+      <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/job-copilot">
+        <fa-icon icon="briefcase" />
+        <span jhiTranslate="home.hero.ctaPrimary">Ouvrir Job Copilot</span>
+      </a>
+      <a class="jc-btn jc-btn-outline jc-btn-lg" routerLink="/job-copilot/search">
+        <fa-icon icon="search" />
+        <span jhiTranslate="home.hero.ctaSecondary">Rechercher des offres</span>
+      </a>
+    } @else {
+      <button (click)="login()" class="jc-btn jc-btn-primary jc-btn-lg" type="button">
+        <fa-icon icon="sign-in-alt" />
+        <span jhiTranslate="global.menu.account.login">S'authentifier</span>
+      </button>
+    }
+  </div>
+</section>
