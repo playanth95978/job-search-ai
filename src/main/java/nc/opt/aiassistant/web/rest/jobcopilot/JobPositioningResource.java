@@ -22,14 +22,19 @@ public class JobPositioningResource {
     @GetMapping("/positioning")
     public ResponseEntity<CvMatchResultDto> positioning(
         @PathVariable UUID id,
-        @RequestParam(name = "refresh", defaultValue = "false") boolean refresh
+        @RequestParam(name = "refresh", defaultValue = "false") boolean refresh,
+        @RequestParam(name = "language", required = false) String language
     ) {
-        return ResponseEntity.ok(jobPositioningService.getPositioning(id, refresh));
+        return ResponseEntity.ok(jobPositioningService.getPositioning(id, refresh, language));
     }
 
     @PostMapping("/positioning/simulate")
-    public ResponseEntity<CvMatchResultDto> simulate(@PathVariable UUID id, @RequestBody SimulateRequest request) {
-        return ResponseEntity.ok(jobPositioningService.simulate(id, request == null ? List.of() : request.additions()));
+    public ResponseEntity<CvMatchResultDto> simulate(
+        @PathVariable UUID id,
+        @RequestBody SimulateRequest request,
+        @RequestParam(name = "language", required = false) String language
+    ) {
+        return ResponseEntity.ok(jobPositioningService.simulate(id, request == null ? List.of() : request.additions(), language));
     }
 
     /** What-if payload: skills/experience the candidate would add. */

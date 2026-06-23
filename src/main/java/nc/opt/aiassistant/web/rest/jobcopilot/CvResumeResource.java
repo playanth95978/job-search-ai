@@ -69,12 +69,12 @@ public class CvResumeResource {
 
     @PostMapping("/review")
     public ResponseEntity<CvReviewDto> review(@RequestBody ReviewRequestDto request) {
-        return ResponseEntity.ok(cvRewriteService.reviewResume(request.content()));
+        return ResponseEntity.ok(cvRewriteService.reviewResume(request.content(), request.language()));
     }
 
     @PostMapping("/match")
     public ResponseEntity<CvMatchResultDto> match(@RequestBody CvMatchRequestDto request) {
-        return ResponseEntity.ok(cvRewriteService.matchAgainstOffer(request.content(), request.offer()));
+        return ResponseEntity.ok(cvRewriteService.matchAgainstOffer(request.content(), request.offer(), request.language()));
     }
 
     @PostMapping("/generate")

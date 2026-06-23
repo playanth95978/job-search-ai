@@ -40,8 +40,24 @@ export class JobCopilotService {
     return this.http.get<Resume>(`${this.baseUrl}/cv/profile`);
   }
 
-  reviewCv(): Observable<CvReview> {
-    return this.http.get<CvReview>(`${this.baseUrl}/cv/review`);
+  reviewCv(language?: string): Observable<CvReview> {
+    const lang = language ?? this.translateService.getCurrentLang();
+    return this.http.post<CvReview>(`api/cv-builder/review`, { content: '', language: lang });
+  }
+
+  rewriteCv(text: string, kind: string, jobTitle?: string, company?: string, language?: string): Observable<any> {
+    const lang = language ?? this.translateService.getCurrentLang();
+    return this.http.post(`api/cv-builder/rewrite`, { text, kind, jobTitle, company, language: lang });
+  }
+
+  matchCv(content: string, offer: string, language?: string): Observable<CvMatchResult> {
+    const lang = language ?? this.translateService.getCurrentLang();
+    return this.http.post<CvMatchResult>(`api/cv-builder/match`, { content, offer, language: lang });
+  }
+
+  generateResume(source: string, offer?: string, language?: string): Observable<any> {
+    const lang = language ?? this.translateService.getCurrentLang();
+    return this.http.post(`api/cv-builder/generate`, { source, offer, language: lang });
   }
 
   // Jobs
@@ -74,15 +90,20 @@ export class JobCopilotService {
 
   // Positioning (CV vs offer)
   /** AI positioning of the current user's CV against an offer (cached server-side per user+offer). */
-  getPositioning(offerId: string, refresh = false): Observable<CvMatchResult> {
+  getPositioning(offerId: string, refresh = false, language?: string): Observable<CvMatchResult> {
     let params = new HttpParams();
     if (refresh) params = params.set('refresh', 'true');
+    const lang = language ?? this.translateService.getCurrentLang();
+    if (lang) params = params.set('language', lang);
     return this.http.get<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning`, { params });
   }
 
   /** "What-if" re-scoring: re-evaluate the offer as if the candidate had these extra skills. */
-  simulatePositioning(offerId: string, additions: string[]): Observable<CvMatchResult> {
-    return this.http.post<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning/simulate`, { additions });
+  simulatePositioning(offerId: string, additions: string[], language?: string): Observable<CvMatchResult> {
+    let params = new HttpParams();
+    const lang = language ?? this.translateService.getCurrentLang();
+    if (lang) params = params.set('language', lang);
+    return this.http.post<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning/simulate`, { additions }, { params });
   }
 
   // Applications

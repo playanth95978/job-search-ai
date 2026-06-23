@@ -34,7 +34,7 @@ public class JobPositioningService {
     private final ObjectMapper objectMapper;
 
     /** Returns the cached positioning for the offer, or computes + caches it on first request. */
-    public CvMatchResultDto getPositioning(UUID offerId, boolean refresh) {
+    public CvMatchResultDto getPositioning(UUID offerId, boolean refresh, String language) {
         String userId = currentUserId();
 
         if (!refresh) {
@@ -51,13 +51,13 @@ public class JobPositioningService {
         String cvContent = buildCvContent(profile);
         String offerText = buildOfferText(offerId);
 
-        CvMatchResultDto result = cvRewriteService.matchAgainstOffer(cvContent, offerText);
+        CvMatchResultDto result = cvRewriteService.matchAgainstOffer(cvContent, offerText, language);
         cache(userId, offerId, result);
         return result;
     }
 
     /** Re-scores the CV against the offer with extra skills/experience added (not cached). */
-    public CvMatchResultDto simulate(UUID offerId, List<String> additions) {
+    public CvMatchResultDto simulate(UUID offerId, List<String> additions, String language) {
         String userId = currentUserId();
         CandidateProfile profile = requireProfile(userId);
 
@@ -71,7 +71,7 @@ public class JobPositioningService {
                 ".";
         }
         String offerText = buildOfferText(offerId);
-        return cvRewriteService.matchAgainstOffer(cvContent, offerText);
+        return cvRewriteService.matchAgainstOffer(cvContent, offerText, language);
     }
 
     private void cache(String userId, UUID offerId, CvMatchResultDto result) {

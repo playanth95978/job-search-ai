@@ -31,16 +31,20 @@ public class CvRewriteService {
     }
 
     /** Reviews the whole resume and returns a score + strengths + actionable improvements. */
-    public CvReviewDto reviewResume(String content) {
+    public CvReviewDto reviewResume(String content, String language) {
         String text = content == null ? "" : content.trim();
         if (text.isEmpty()) {
             return new CvReviewDto(0, "No resume content to review.", List.of(), List.of("Add content to your resume first."));
         }
+        String languageInstruction = (language == null || language.isBlank())
+            ? "Answer in the SAME LANGUAGE as the resume."
+            : "Answer in " + language + ".";
+
         String prompt =
             """
             You are an expert technical recruiter and ATS specialist. Review the resume below and give
             concise, actionable feedback. Be specific and reference what is (or is not) present.
-            Answer in the SAME LANGUAGE as the resume.
+            %s
             Return ONLY valid JSON with exactly these keys:
             {
               "score": number between 0 and 100,
@@ -50,7 +54,7 @@ public class CvRewriteService {
             }
 
             Resume:
-            """ + text;
+            """.formatted(languageInstruction) + text;
 
         String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
         try {
@@ -62,15 +66,18 @@ public class CvRewriteService {
     }
 
     /** Matches the resume against a pasted job offer: scores + missing skills/keywords + suggestions. */
-    public CvMatchResultDto matchAgainstOffer(String content, String offer) {
+    public CvMatchResultDto matchAgainstOffer(String content, String offer, String language) {
         String cv = content == null ? "" : content.trim();
         String job = offer == null ? "" : offer.trim();
         if (cv.isEmpty() || job.isEmpty()) {
             return new CvMatchResultDto(0, 0, 0, 0, List.of(), List.of(), List.of(), List.of(), List.of());
         }
+        String languageInstruction = (language == null || language.isBlank())
+            ? "Answer in the SAME LANGUAGE as the resume."
+            : "Answer in " + language + ".";
         String prompt = """
             You are an expert technical recruiter. Compare the RESUME against the JOB OFFER and assess the fit.
-            Answer in the SAME LANGUAGE as the resume. Be specific and base everything on the two texts only.
+            %s Be specific and base everything on the two texts only.
             Return ONLY valid JSON with exactly these keys (all scores are integers 0-100):
             {
               "globalScore": number,
@@ -89,7 +96,8 @@ public class CvRewriteService {
 
             ===== JOB OFFER =====
             %s
-            """.formatted(cv, job);
+
+            """.formatted(languageInstruction, cv, job);
 
         CvMatchResultDto cvMatchResultDto = chatClient.prompt().user(prompt).call().entity(CvMatchResultDto.class);
         try {
@@ -123,9 +131,13 @@ public class CvRewriteService {
               %s
               """.formatted(offer);
 
+        String languageInstruction = (request.language() == null || request.language().isBlank())
+            ? "Use the SAME LANGUAGE as the source."
+            : "Write the resume in " + request.language() + ".";
+
         String prompt = """
             You are an expert CV/resume writer and ATS specialist. From the SOURCE below, produce a
-            complete, well-structured resume. Use the SAME LANGUAGE as the source. Extract and organize
+            complete, well-structured resume. %s Extract and organize
             every relevant fact; improve wording with strong action verbs, but DO NOT invent facts
             (employers, dates, diplomas, figures). Leave a field empty ("") when the source does not
             provide it. Write 3-5 concise, impact-oriented achievements per experience when possible.
@@ -148,7 +160,7 @@ public class CvRewriteService {
 
             ===== SOURCE =====
             %s
-            """.formatted(tailoring, source);
+            """.formatted(languageInstruction, tailoring, source);
 
         try {
             GeneratedResumeDto result = chatClient.prompt().user(prompt).call().entity(GeneratedResumeDto.class);
@@ -179,9 +191,13 @@ public class CvRewriteService {
         }
 
         String context = buildContext(request);
+        String languageInstruction = (request.language() == null || request.language().isBlank())
+            ? "Keep the SAME LANGUAGE as the input text."
+            : "Write in " + request.language() + ".";
+
         String prompt = """
             You are an expert CV/resume writer. Rewrite the %s text below in THREE variants.
-            Keep the SAME LANGUAGE as the input text. Do not invent facts; only rephrase and improve.
+            %s Do not invent facts; only rephrase and improve.
 
             - "professional": polished, impactful, strong action verbs.
             - "concise": shorter, straight to the point, no filler.
@@ -192,7 +208,7 @@ public class CvRewriteService {
 
             Text to rewrite:
             %s
-            """.formatted(safeKind(request.kind()), context, text);
+            """.formatted(safeKind(request.kind()), languageInstruction, context, text);
 
         String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
         try {

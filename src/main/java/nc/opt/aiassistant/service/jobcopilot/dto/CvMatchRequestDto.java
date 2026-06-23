@@ -5,5 +5,6 @@ package nc.opt.aiassistant.service.jobcopilot.dto;
  *
  * @param content plain-text rendering of the current resume
  * @param offer   the raw job offer text pasted by the user
+ * @param language optional language for the match
  */
-public record CvMatchRequestDto(String content, String offer) {}
+public record CvMatchRequestDto(String content, String offer, String language) {}
