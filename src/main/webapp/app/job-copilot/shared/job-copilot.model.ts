@@ -111,6 +111,19 @@ export interface CvReview {
   improvements: string[];
 }
 
+/** AI positioning / match result of a CV against a job offer (all scores 0..100). */
+export interface CvMatchResult {
+  globalScore: number;
+  skillsScore: number;
+  experienceScore: number;
+  keywordScore: number;
+  missingSkills: string[];
+  missingKeywords: string[];
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+}
+
 export interface ApplyOutcome {
   autoApplied: boolean;
   autoApplySupported: boolean;

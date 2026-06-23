@@ -9,7 +9,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { JobCopilotService } from '../job-copilot.service';
 import { SanitizerService } from '../../../shared/sanitizer/sanitizer.service';
-import { JobApplication, JobOffer, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
+import { CvMatchResult, JobApplication, JobOffer, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
+import { MatchResultComponent } from '../match-result/match-result.component';
 import TranslateDirective from '../../../shared/language/translate.directive';
 
 /** Strips a leading/trailing ```` ```markdown ... ``` ```` (or ```` ``` ... ``` ````) fence some LLMs wrap their output in. */
@@ -30,7 +31,7 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: s
 
 @Component({
   selector: 'jhi-apply-modal',
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective, MatchResultComponent],
   templateUrl: './apply-modal.component.html',
   styleUrl: './apply-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +59,21 @@ export class ApplyModalComponent implements OnInit {
   enriching = signal(false);
   /** Emits the enriched offer so the parent list can be refreshed. */
   enrichedOffer = output<JobOffer>();
+
+  // --- Positioning (CV vs this offer) -------------------------------------
+  positioning = signal<CvMatchResult | null>(null);
+  positioningLoading = signal(false);
+  positioningError = signal<string | null>(null);
+  /** Missing skills the user toggles for the "what-if" simulation. */
+  selectedAdditions = signal<string[]>([]);
+  simulated = signal<CvMatchResult | null>(null);
+  simulating = signal(false);
+  /** globalScore delta of the simulation vs the baseline positioning. */
+  simulationDelta = computed(() => {
+    const base = this.positioning();
+    const sim = this.simulated();
+    return base && sim ? sim.globalScore - base.globalScore : 0;
+  });
   readonly languages = COVER_LETTER_LANGUAGES;
   coverLetterHtml = computed<SafeHtml>(() =>
     this.sanitizer.sanitizeHtml(marked.parse(stripMarkdownFence(this.coverLetter()), { async: false })),
@@ -79,6 +95,7 @@ export class ApplyModalComponent implements OnInit {
     });
 
     this.enrichOffer();
+    this.loadPositioning();
 
     if (this.existingApplication()) {
       this.application.set(this.existingApplication()!);
@@ -205,6 +222,46 @@ export class ApplyModalComponent implements OnInit {
   close(): void {
     this.closed.emit();
     this.activeModal.dismiss();
+  }
+
+  /** Loads the cached/computed positioning analysis for the current offer (one LLM call max). */
+  private loadPositioning(): void {
+    const id = this.offerId();
+    if (!id) return;
+    this.positioningLoading.set(true);
+    this.positioningError.set(null);
+    this.service.getPositioning(id).subscribe({
+      next: result => {
+        this.positioning.set(result);
+        this.positioningLoading.set(false);
+      },
+      error: err => {
+        this.positioningError.set(err.error?.message ?? this.translateService.instant('jobCopilot.positioning.error'));
+        this.positioningLoading.set(false);
+      },
+    });
+  }
+
+  toggleAddition(skill: string): void {
+    this.selectedAdditions.update(list => (list.includes(skill) ? list.filter(s => s !== skill) : [...list, skill]));
+  }
+
+  isSelected(skill: string): boolean {
+    return this.selectedAdditions().includes(skill);
+  }
+
+  /** Runs the "what-if" simulation with the selected missing skills added to the CV. */
+  simulate(): void {
+    const id = this.offerId();
+    if (!id || this.simulating() || this.selectedAdditions().length === 0) return;
+    this.simulating.set(true);
+    this.service.simulatePositioning(id, this.selectedAdditions()).subscribe({
+      next: result => {
+        this.simulated.set(result);
+        this.simulating.set(false);
+      },
+      error: () => this.simulating.set(false),
+    });
   }
 
   /** Lazily fetches the full description (one request) and queues the offer for embedding. */

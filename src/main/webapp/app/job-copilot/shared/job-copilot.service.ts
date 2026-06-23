@@ -6,6 +6,7 @@ import {
   ApplicationStats,
   ApplyOutcome,
   CandidateProfile,
+  CvMatchResult,
   ChatMessageHistory,
   CvReview,
   InterviewMessage,
@@ -69,6 +70,19 @@ export class JobCopilotService {
 
   matchAdvanced(): Observable<MatchResult[]> {
     return this.http.get<MatchResult[]>(`${this.baseUrl}/jobs/match-advanced`);
+  }
+
+  // Positioning (CV vs offer)
+  /** AI positioning of the current user's CV against an offer (cached server-side per user+offer). */
+  getPositioning(offerId: string, refresh = false): Observable<CvMatchResult> {
+    let params = new HttpParams();
+    if (refresh) params = params.set('refresh', 'true');
+    return this.http.get<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning`, { params });
+  }
+
+  /** "What-if" re-scoring: re-evaluate the offer as if the candidate had these extra skills. */
+  simulatePositioning(offerId: string, additions: string[]): Observable<CvMatchResult> {
+    return this.http.post<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning/simulate`, { additions });
   }
 
   // Applications

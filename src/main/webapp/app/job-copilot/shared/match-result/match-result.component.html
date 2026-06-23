@@ -1,0 +1,75 @@
+@if (result(); as m) {
+  <div class="cv-match-result">
+    <div class="cv-match-global" [class]="'rating-' + globalRating()">
+      <span class="cv-match-global-value">{{ m.globalScore }}</span
+      ><span class="cv-match-global-max">/100</span>
+    </div>
+
+    <div class="cv-match-scores">
+      <div class="cv-match-score">
+        <span jhiTranslate="cvBuilder.match.scores.skills">Compétences</span><strong>{{ m.skillsScore }}</strong>
+      </div>
+      <div class="cv-match-score">
+        <span jhiTranslate="cvBuilder.match.scores.experience">Expérience</span><strong>{{ m.experienceScore }}</strong>
+      </div>
+      <div class="cv-match-score">
+        <span jhiTranslate="cvBuilder.match.scores.keywords">Mots-clés</span><strong>{{ m.keywordScore }}</strong>
+      </div>
+    </div>
+
+    @if (m.missingSkills.length) {
+      <div class="cv-match-block">
+        <h5 jhiTranslate="cvBuilder.match.missingSkills">Compétences manquantes</h5>
+        <div class="cv-match-tags">
+          @for (s of m.missingSkills; track s) {
+            <span class="cv-match-tag">{{ s }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if (m.missingKeywords.length) {
+      <div class="cv-match-block">
+        <h5 jhiTranslate="cvBuilder.match.missingKeywords">Mots-clés manquants</h5>
+        <div class="cv-match-tags">
+          @for (k of m.missingKeywords; track k) {
+            <span class="cv-match-tag">{{ k }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if (m.strengths.length) {
+      <div class="cv-match-block">
+        <h5><fa-icon icon="circle-check" /> <span jhiTranslate="jobCopilot.positioning.strengths">Points forts</span></h5>
+        <ul>
+          @for (st of m.strengths; track st) {
+            <li>{{ st }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (m.weaknesses.length) {
+      <div class="cv-match-block">
+        <h5><fa-icon icon="triangle-exclamation" /> <span jhiTranslate="jobCopilot.positioning.weaknesses">Points faibles</span></h5>
+        <ul>
+          @for (w of m.weaknesses; track w) {
+            <li>{{ w }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (m.suggestions.length) {
+      <div class="cv-match-block">
+        <h5><fa-icon icon="wand-magic-sparkles" /> <span jhiTranslate="cvBuilder.match.suggestions">Suggestions</span></h5>
+        <ul>
+          @for (sug of m.suggestions; track sug) {
+            <li>{{ sug }}</li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+}

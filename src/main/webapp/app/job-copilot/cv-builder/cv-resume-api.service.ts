@@ -37,17 +37,9 @@ export interface RewriteResponse {
   ats: string;
 }
 
-export interface CvMatchResult {
-  globalScore: number;
-  skillsScore: number;
-  experienceScore: number;
-  keywordScore: number;
-  missingSkills: string[];
-  missingKeywords: string[];
-  strengths: string[];
-  weaknesses: string[];
-  suggestions: string[];
-}
+// Sourced from the shared model; re-exported so existing imports keep working.
+import { CvMatchResult } from '../shared/job-copilot.model';
+export type { CvMatchResult };
 
 /** Structured resume produced by POST /generate. Mirrors the backend GeneratedResumeDto. */
 export interface GeneratedResume {

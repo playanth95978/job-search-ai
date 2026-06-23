@@ -139,6 +139,16 @@
         "WITHDRAWN": "WITHDRAWN"
       }
     },
+    "positioning": {
+      "title": "My positioning",
+      "loading": "Analyzing your positioning…",
+      "error": "Positioning analysis failed.",
+      "strengths": "Strengths",
+      "weaknesses": "Weaknesses",
+      "whatIf": "What if I added…",
+      "simulate": "Simulate",
+      "noProfile": "Import your CV first to see your positioning."
+    },
     "onboarding": {
       "title": "Upload your CV",
       "subtitle": "PDF or DOCX — AI will extract your profile automatically",

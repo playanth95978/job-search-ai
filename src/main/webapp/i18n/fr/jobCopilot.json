@@ -139,6 +139,16 @@
         "WITHDRAWN": "RETIRÉ"
       }
     },
+    "positioning": {
+      "title": "Mon positionnement",
+      "loading": "Analyse de votre positionnement…",
+      "error": "L'analyse de positionnement a échoué.",
+      "strengths": "Points forts",
+      "weaknesses": "Points faibles",
+      "whatIf": "Et si j'ajoutais…",
+      "simulate": "Simuler",
+      "noProfile": "Importez d'abord votre CV pour voir votre positionnement."
+    },
     "onboarding": {
       "title": "Téléchargez votre CV",
       "subtitle": "PDF ou DOCX — L'IA extraira votre profil automatiquement",
