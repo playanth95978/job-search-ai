@@ -7,6 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { AccountService } from 'app/core/auth/account.service';
 import { TranslateDirective } from 'app/shared/language';
+import { RevealOnScrollDirective } from 'app/shared/reveal/reveal-on-scroll.directive';
 import { applicationStatusColor, applicationStatusIcon, ApplicationStats } from 'app/job-copilot/shared/job-copilot.model';
 import { JobCopilotService } from 'app/job-copilot/shared/job-copilot.service';
 
@@ -75,7 +76,7 @@ const QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.html',
   styleUrl: './home.scss',
-  imports: [TranslateDirective, TranslateModule, RouterLink, FaIconComponent, LowerCasePipe],
+  imports: [TranslateDirective, TranslateModule, RouterLink, FaIconComponent, LowerCasePipe, RevealOnScrollDirective],
 })
 export default class Home {
   public readonly account = inject(AccountService).account;

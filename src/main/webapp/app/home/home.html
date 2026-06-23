@@ -28,11 +28,16 @@
 
   @if (account() !== null) {
     @if (statsEntries().length > 0) {
-      <section class="home-section">
-        <h2 class="home-section-title" jhiTranslate="home.stats.title">Aperçu de vos candidatures</h2>
+      <section class="home-section home-stats-section">
+        <h2 class="home-section-title" appReveal="up" jhiTranslate="home.stats.title">Aperçu de vos candidatures</h2>
         <div class="jc-stats-grid">
-          @for (entry of statsEntries(); track entry[0]) {
-            <div class="jc-stat-card" [style.border-left-color]="statusColor(entry[0])">
+          @for (entry of statsEntries(); track entry[0]; let i = $index, even = $even) {
+            <div
+              class="jc-stat-card"
+              [appReveal]="even ? 'left' : 'right'"
+              [revealDelay]="i * 70"
+              [style.border-left-color]="statusColor(entry[0])"
+            >
               <div class="jc-stat-icon" [style.color]="statusColor(entry[0])">
                 <fa-icon [icon]="statusIcon(entry[0])" />
               </div>
@@ -55,25 +60,35 @@
     }
   } @else {
     <section class="home-section">
-      <div class="alert alert-warning">
-        <span jhiTranslate="home.guest.title">Bienvenue sur Job Search AI</span>
-        <p class="mb-0" jhiTranslate="home.guest.subtitle">
+      <div class="home-guest-card" appReveal="up">
+        <h3 jhiTranslate="home.guest.title">Bienvenue sur Job Search AI</h3>
+        <p jhiTranslate="home.guest.subtitle">
           Connectez-vous pour accéder à votre tableau de bord personnalisé, vos candidatures et votre copilote de carrière IA.
         </p>
-      </div>
-
-      <div class="alert alert-warning">
-        <span jhiTranslate="global.messages.info.register.noaccount">Vous n&apos;avez pas encore de compte ?</span>&nbsp;
-        <a class="alert-link" routerLink="/account/register" jhiTranslate="global.messages.info.register.link">Créer un compte</a>
+        <div class="home-guest-actions">
+          <button (click)="login()" class="jc-btn jc-btn-primary" type="button">
+            <fa-icon icon="sign-in-alt" />
+            <span jhiTranslate="global.menu.account.login">S'authentifier</span>
+          </button>
+          <a class="jc-btn jc-btn-outline" routerLink="/account/register">
+            <fa-icon icon="user-plus" />
+            <span jhiTranslate="global.messages.info.register.link">Créer un compte</span>
+          </a>
+        </div>
       </div>
     </section>
   }
 
   <section class="home-section">
-    <h2 class="home-section-title" jhiTranslate="home.quickAccess.title">Accès rapide</h2>
+    <h2 class="home-section-title" appReveal="up" jhiTranslate="home.quickAccess.title">Accès rapide</h2>
     <div class="jc-actions home-quick-access">
-      @for (item of quickAccessItems; track item.routerLink) {
-        <a [class]="'jc-action-card ' + item.cssClass" [routerLink]="item.routerLink">
+      @for (item of quickAccessItems; track item.routerLink; let i = $index, even = $even) {
+        <a
+          [class]="'jc-action-card ' + item.cssClass"
+          [appReveal]="even ? 'left' : 'right'"
+          [revealDelay]="i * 70"
+          [routerLink]="item.routerLink"
+        >
           <fa-icon [icon]="item.icon" size="lg" />
           <div>
             <strong jhiTranslate="{{ item.titleKey }}"></strong>
