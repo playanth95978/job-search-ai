@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { catchError, of, switchMap } from 'rxjs';
+import { catchError, finalize, forkJoin, of, switchMap } from 'rxjs';
 
 import { TranslateDirective } from 'app/shared/language';
 import { AccountService } from 'app/core/auth/account.service';
@@ -75,9 +75,15 @@ export class OnboardingWizardComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Best-effort prefill — both endpoints may 404 for a brand-new user.
-    this.jobCopilot.getProfile().subscribe({ next: p => this.applyProfile(p), error: () => undefined });
-    this.jobCopilot.getPreferences().subscribe({ next: pref => this.applyPrefs(pref), error: () => undefined });
+    // Best-effort prefill in a single subscription. Each source is guarded with catchError so a
+    // 404 for a brand-new user doesn't short-circuit forkJoin and drop the other result.
+    forkJoin({
+      profile: this.jobCopilot.getProfile().pipe(catchError(() => of(null))),
+      prefs: this.jobCopilot.getPreferences().pipe(catchError(() => of(null))),
+    }).subscribe(({ profile, prefs }) => {
+      if (profile) this.applyProfile(profile);
+      if (prefs) this.applyPrefs(prefs);
+    });
   }
 
   onUploaded(p: CandidateProfile): void {
@@ -91,27 +97,24 @@ export class OnboardingWizardComponent implements OnInit {
       .updatePreferences(this.buildPrefs())
       .pipe(
         catchError(() => of(null)),
-        switchMap(() => this.accountService.completeOnboarding()),
-        switchMap(() => this.accountService.identity(true)),
+        switchMap(() => this.accountService.completeOnboarding().pipe(catchError(() => of(null)))),
+        switchMap(() => this.accountService.identity(true).pipe(catchError(() => of(null)))),
+        // Always release the guard so the button stays usable if navigation didn't occur.
+        finalize(() => this.submitting.set(false)),
       )
-      .subscribe({
-        next: () => this.router.navigate(['/job-copilot']),
-        error: () => {
-          this.submitting.set(false);
-          this.router.navigate(['/job-copilot']);
-        },
-      });
+      .subscribe(() => this.router.navigate(['/job-copilot']));
   }
 
   private applyProfile(p: CandidateProfile): void {
     this.profile.set(p);
     const parts = (p.fullName ?? '').trim().split(/\s+/).filter(Boolean);
     const first = parts.shift() ?? '';
+    const profileFormsControls = this.profileForm.controls;
     this.profileForm.patchValue({
-      firstName: this.profileForm.controls.firstName.value || first,
-      lastName: this.profileForm.controls.lastName.value || parts.join(' '),
-      title: this.profileForm.controls.title.value || (p.preferredRoles?.[0] ?? ''),
-      location: this.profileForm.controls.location.value || (p.location ?? ''),
+      firstName: profileFormsControls.firstName.value || first,
+      lastName: profileFormsControls.lastName.value || parts.join(' '),
+      title: profileFormsControls.title.value || (p.preferredRoles?.[0] ?? ''),
+      location: profileFormsControls.location.value || (p.location ?? ''),
     });
   }
 
