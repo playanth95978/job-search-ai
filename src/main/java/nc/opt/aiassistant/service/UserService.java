@@ -225,6 +225,22 @@ public class UserService {
     }
 
     /**
+     * Marks the current user's first-login onboarding as completed and evicts the user caches so
+     * the next {@code GET /api/account} reflects the new flag (otherwise the cached user keeps
+     * {@code onboardingCompleted=false} and the front-end guard loops back to the wizard).
+     */
+    public void completeOnboarding() {
+        SecurityUtils.getCurrentUserLogin()
+            .flatMap(userRepository::findOneByLogin)
+            .ifPresent(user -> {
+                user.setOnboardingCompleted(true);
+                userRepository.save(user);
+                this.clearUserCaches(user);
+                LOG.debug("Completed onboarding for User: {}", user);
+            });
+    }
+
+    /**
      * Update basic information (first name, last name, email, language) for the current user.
      *
      * @param firstName first name of user.

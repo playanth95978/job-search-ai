@@ -128,12 +128,8 @@ public class AccountResource {
      */
     @PostMapping("/account/onboarding-complete")
     public void completeOnboarding() {
-        String userLogin = SecurityUtils.getCurrentUserLogin().orElseThrow(() ->
-            new AccountResourceException("Current user login not found")
-        );
-        User user = userRepository.findOneByLogin(userLogin).orElseThrow(() -> new AccountResourceException("User could not be found"));
-        user.setOnboardingCompleted(true);
-        userRepository.save(user);
+        SecurityUtils.getCurrentUserLogin().orElseThrow(() -> new AccountResourceException("Current user login not found"));
+        userService.completeOnboarding();
     }
 
     /**
