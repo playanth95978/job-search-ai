@@ -131,7 +131,7 @@ export class JobSearchComponent {
   }
 
   private openModal(offerId: string, offer: JobOfferPreview): void {
-    const modalRef = this.modalService.open(ApplyModalComponent, { size: 'lg', backdrop: 'static' });
+    const modalRef = this.modalService.open(ApplyModalComponent, { size: 'xl', backdrop: 'static', scrollable: true });
     modalRef.componentInstance.jobOfferId.set(offerId);
     modalRef.componentInstance.jobOffer.set(offer);
 

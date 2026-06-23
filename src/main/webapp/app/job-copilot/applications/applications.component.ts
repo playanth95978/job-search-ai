@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
 import { ApplicationStatus, JobApplication } from '../shared/job-copilot.model';
@@ -10,18 +11,17 @@ import { ApplicationStatus, JobApplication } from '../shared/job-copilot.model';
 @Component({
   selector: 'jhi-job-copilot-applications',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent, ApplyModalComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule],
   templateUrl: './applications.component.html',
   styleUrl: './applications.component.scss',
 })
 export class ApplicationsComponent implements OnInit {
   private service = inject(JobCopilotService);
   private translateService = inject(TranslateService);
+  private modalService = inject(NgbModal);
 
   applications = signal<JobApplication[]>([]);
   statuses: ApplicationStatus[] = ['DRAFT', 'APPLIED', 'INTERVIEW', 'REJECTED', 'GHOSTED', 'OFFER', 'WITHDRAWN'];
-
-  selectedApplication = signal<JobApplication | null>(null);
 
   ngOnInit(): void {
     this.loadApplications();
@@ -42,16 +42,9 @@ export class ApplicationsComponent implements OnInit {
   }
 
   openApplyModal(app: JobApplication): void {
-    this.selectedApplication.set(app);
-  }
-
-  closeApplyModal(): void {
-    this.selectedApplication.set(null);
-  }
-
-  onApplied(): void {
-    this.selectedApplication.set(null);
-    this.loadApplications();
+    const modalRef = this.modalService.open(ApplyModalComponent, { size: 'xl', backdrop: 'static', scrollable: true });
+    modalRef.componentInstance.existingApplication.set(app);
+    modalRef.componentInstance.applied.subscribe(() => this.loadApplications());
   }
 
   getStatusIcon(status: string): string {

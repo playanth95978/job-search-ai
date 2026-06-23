@@ -1,29 +1,89 @@
-<div (click)="close()" class="jc-modal-backdrop">
-  <div (click)="$event.stopPropagation()" class="jc-modal">
-    <div class="jc-modal-header">
-      <h2 jhiTranslate="jobCopilot.applyModal.title"><fa-icon icon="paper-plane"></fa-icon> Postuler</h2>
-      <button (click)="close()" [aria-label]="'jobCopilot.applyModal.close' | translate" class="jc-modal-close">
-        <fa-icon icon="xmark"></fa-icon>
-      </button>
+<div class="modal-header jc-modal-header">
+  <h2 class="modal-title"><fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.title">Postuler</span></h2>
+  <button (click)="close()" [aria-label]="'jobCopilot.applyModal.close' | translate" class="jc-modal-close" type="button">
+    <fa-icon icon="xmark"></fa-icon>
+  </button>
+</div>
+
+<div class="modal-body">
+  @if (offer(); as o) {
+    <div class="jc-modal-offer">
+      <div class="jc-modal-offer-title">
+        <strong>{{ o.title }}</strong>
+        @if (o.source) {
+          <span [style.background]="sourceColor()" class="jc-source-badge">{{ sourceLabel() }}</span>
+        }
+      </div>
+      <div class="jc-modal-offer-company">
+        <fa-icon icon="building"></fa-icon> {{ o.company || ('jobCopilot.search.results.unknown' | translate) }}
+        @if (o.location) {
+          <span class="jc-separator">&middot;</span>
+          <fa-icon icon="location-dot"></fa-icon> {{ o.location }}
+        }
+      </div>
     </div>
+  }
 
-    @if (offer(); as o) {
-      <div class="jc-modal-offer">
-        <div class="jc-modal-offer-title">
-          <strong>{{ o.title }}</strong>
-          @if (o.source) {
-            <span [style.background]="sourceColor()" class="jc-source-badge">{{ sourceLabel() }}</span>
-          }
-        </div>
-        <div class="jc-modal-offer-company">
-          <fa-icon icon="building"></fa-icon> {{ o.company || ('jobCopilot.search.results.unknown' | translate) }}
-          @if (o.location) {
-            <span class="jc-separator">&middot;</span>
-            <fa-icon icon="location-dot"></fa-icon> {{ o.location }}
-          }
-        </div>
+  @if (resultMessage()) {
+    <div class="jc-modal-success"><fa-icon icon="circle-check"></fa-icon> {{ resultMessage() }}</div>
+  } @else {
+    <ul ngbNav #nav="ngbNav" [activeId]="activeTab()" (activeIdChange)="activeTab.set($event)" class="nav-tabs jc-modal-tabs">
+      <!-- Positioning -->
+      <li [ngbNavItem]="'position'">
+        <a ngbNavLink><fa-icon icon="bullseye"></fa-icon> <span jhiTranslate="jobCopilot.positioning.title">Mon positionnement</span></a>
+        <ng-template ngbNavContent>
+          @if (positioningLoading()) {
+            <div class="jc-modal-loading">
+              <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+              <span jhiTranslate="jobCopilot.positioning.loading">Analyse de votre positionnement…</span>
+            </div>
+          } @else if (positioningError(); as perr) {
+            <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ perr }}</div>
+          } @else if (positioning(); as p) {
+            <jhi-match-result [result]="p" />
 
-        <div class="jc-modal-offer-description">
+            @if (p.missingSkills.length) {
+              <div class="jc-whatif">
+                <h4 class="jc-whatif-title" jhiTranslate="jobCopilot.positioning.whatIf">Et si j'ajoutais…</h4>
+                <div class="jc-whatif-chips">
+                  @for (skill of p.missingSkills; track skill) {
+                    <button type="button" class="jc-whatif-chip" [class.selected]="isSelected(skill)" (click)="toggleAddition(skill)">
+                      {{ skill }}
+                    </button>
+                  }
+                </div>
+                <button
+                  type="button"
+                  class="jc-btn jc-btn-primary jc-btn-sm"
+                  [disabled]="selectedAdditions().length === 0 || simulating()"
+                  (click)="simulate()"
+                >
+                  @if (simulating()) {
+                    <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                  } @else {
+                    <fa-icon icon="wand-magic-sparkles"></fa-icon>
+                  }
+                  <span jhiTranslate="jobCopilot.positioning.simulate">Simuler</span>
+                </button>
+
+                @if (simulated(); as sim) {
+                  <div class="jc-whatif-result">
+                    <span class="jc-whatif-delta" [class.up]="simulationDelta() >= 0" [class.down]="simulationDelta() < 0">
+                      {{ p.globalScore }} → {{ sim.globalScore }} ({{ simulationDelta() >= 0 ? '+' : '' }}{{ simulationDelta() }})
+                    </span>
+                    <jhi-match-result [result]="sim" />
+                  </div>
+                }
+              </div>
+            }
+          }
+        </ng-template>
+      </li>
+
+      <!-- Offer description -->
+      <li [ngbNavItem]="'offer'">
+        <a ngbNavLink><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.tabs.offer">Offre</span></a>
+        <ng-template ngbNavContent>
           @if (descriptionHtml(); as desc) {
             <div [innerHTML]="desc" class="jc-offer-description-body"></div>
           } @else if (enriching()) {
@@ -31,164 +91,117 @@
               <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
               <span jhiTranslate="jobCopilot.applyModal.loadingDescription">Chargement de la description…</span>
             </div>
-          }
-        </div>
-      </div>
-    }
-
-    <div class="jc-positioning">
-      <h3 class="jc-positioning-title">
-        <fa-icon icon="bullseye"></fa-icon> <span jhiTranslate="jobCopilot.positioning.title">Mon positionnement</span>
-      </h3>
-
-      @if (positioningLoading()) {
-        <div class="jc-modal-loading">
-          <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
-          <span jhiTranslate="jobCopilot.positioning.loading">Analyse de votre positionnement…</span>
-        </div>
-      } @else if (positioningError(); as perr) {
-        <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ perr }}</div>
-      } @else if (positioning(); as p) {
-        <jhi-match-result [result]="p" />
-
-        <!-- What-if simulation -->
-        @if (p.missingSkills.length) {
-          <div class="jc-whatif">
-            <h4 class="jc-whatif-title" jhiTranslate="jobCopilot.positioning.whatIf">Et si j'ajoutais…</h4>
-            <div class="jc-whatif-chips">
-              @for (skill of p.missingSkills; track skill) {
-                <button type="button" class="jc-whatif-chip" [class.selected]="isSelected(skill)" (click)="toggleAddition(skill)">
-                  {{ skill }}
-                </button>
-              }
-            </div>
-            <button
-              type="button"
-              class="jc-btn jc-btn-primary jc-btn-sm"
-              [disabled]="selectedAdditions().length === 0 || simulating()"
-              (click)="simulate()"
-            >
-              @if (simulating()) {
-                <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
-              } @else {
-                <fa-icon icon="wand-magic-sparkles"></fa-icon>
-              }
-              <span jhiTranslate="jobCopilot.positioning.simulate">Simuler</span>
-            </button>
-
-            @if (simulated(); as sim) {
-              <div class="jc-whatif-result">
-                <span class="jc-whatif-delta" [class.up]="simulationDelta() >= 0" [class.down]="simulationDelta() < 0">
-                  {{ p.globalScore }} → {{ sim.globalScore }} ({{ simulationDelta() >= 0 ? '+' : '' }}{{ simulationDelta() }})
-                </span>
-                <jhi-match-result [result]="sim" />
-              </div>
-            }
-          </div>
-        }
-      }
-    </div>
-
-    @if (loading()) {
-      <div class="jc-modal-loading">
-        <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
-        <span jhiTranslate="jobCopilot.applyModal.loading">Génération de la lettre de motivation...</span>
-      </div>
-    } @else {
-      @if (resultMessage()) {
-        <div class="jc-modal-success"><fa-icon icon="circle-check"></fa-icon> {{ resultMessage() }}</div>
-      } @else if (application()) {
-        <div class="jc-modal-body">
-          <div class="jc-modal-label-row">
-            <label class="jc-modal-label" for="apply-cover-letter" jhiTranslate="jobCopilot.applyModal.coverLetter"
-              >Lettre de motivation</label
-            >
-            <div class="jc-modal-label-actions">
-              <select
-                (ngModelChange)="language.set($event)"
-                [ngModel]="language()"
-                [aria-label]="'jobCopilot.applyModal.languages.ariaLabel' | translate"
-                class="jc-modal-lang-select"
-              >
-                @for (lang of languages; track lang.value) {
-                  <option [value]="lang.value">{{ lang.labelKey | translate }}</option>
-                }
-              </select>
-              <button (click)="regenerateCoverLetter()" [disabled]="regenerating()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
-                @if (regenerating()) {
-                  <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
-                } @else {
-                  <fa-icon icon="sync"></fa-icon>
-                }
-                <span jhiTranslate="jobCopilot.applyModal.regenerate">Régénérer</span>
-              </button>
-              <button (click)="togglePreview()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
-                @if (previewMode()) {
-                  <fa-icon icon="pencil-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.edit">Modifier</span>
-                } @else {
-                  <fa-icon icon="eye"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.preview">Aperçu</span>
-                }
-              </button>
-            </div>
-          </div>
-          @if (previewMode()) {
-            <div [innerHTML]="coverLetterHtml()" class="jc-modal-preview"></div>
           } @else {
-            <textarea
-              (ngModelChange)="coverLetter.set($event)"
-              [ngModel]="coverLetter()"
-              class="jc-modal-textarea"
-              id="apply-cover-letter"
-              rows="12"
-            ></textarea>
+            <p class="jc-modal-empty" jhiTranslate="jobCopilot.applyModal.noDescription">Aucune description disponible.</p>
           }
-        </div>
-      }
+        </ng-template>
+      </li>
 
-      @if (error()) {
-        <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
-      }
-
-      <div class="jc-modal-actions">
-        @if (resultMessage()) {
-          <button (click)="close()" class="jc-btn jc-btn-primary">
-            <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.close">Fermer</span>
-          </button>
-        } @else if (application()) {
-          <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost">
-            <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>
-            {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
-          </button>
-
-          @if (applyUrl()) {
-            <a [href]="applyUrl()" class="jc-btn jc-btn-ghost" rel="noopener" target="_blank">
-              <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.openOffer">Ouvrir l'offre</span>
-            </a>
-          }
-
-          @if (autoApplySupported()) {
-            <button (click)="submitAuto()" [disabled]="submitting()" class="jc-btn jc-btn-accent">
-              @if (submitting()) {
-                <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
-                <span jhiTranslate="jobCopilot.applyModal.sending">Envoi...</span>
-              } @else {
-                <fa-icon icon="paper-plane"></fa-icon>
-                <span jhiTranslate="jobCopilot.applyModal.submitVia" [translateValues]="{ source: sourceLabel() }"
-                  >Soumettre via {{ sourceLabel() }}</span
+      <!-- Cover letter -->
+      <li [ngbNavItem]="'cover'">
+        <a ngbNavLink><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.tabs.cover">Candidature</span></a>
+        <ng-template ngbNavContent>
+          @if (loading()) {
+            <div class="jc-modal-loading">
+              <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+              <span jhiTranslate="jobCopilot.applyModal.loading">Génération de la lettre de motivation...</span>
+            </div>
+          } @else if (application()) {
+            <div class="jc-modal-body-inner">
+              <div class="jc-modal-label-row">
+                <label class="jc-modal-label" for="apply-cover-letter" jhiTranslate="jobCopilot.applyModal.coverLetter"
+                  >Lettre de motivation</label
                 >
+                <div class="jc-modal-label-actions">
+                  <select
+                    (ngModelChange)="language.set($event)"
+                    [ngModel]="language()"
+                    [aria-label]="'jobCopilot.applyModal.languages.ariaLabel' | translate"
+                    class="jc-modal-lang-select"
+                  >
+                    @for (lang of languages; track lang.value) {
+                      <option [value]="lang.value">{{ lang.labelKey | translate }}</option>
+                    }
+                  </select>
+                  <button (click)="regenerateCoverLetter()" [disabled]="regenerating()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
+                    @if (regenerating()) {
+                      <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                    } @else {
+                      <fa-icon icon="sync"></fa-icon>
+                    }
+                    <span jhiTranslate="jobCopilot.applyModal.regenerate">Régénérer</span>
+                  </button>
+                  <button (click)="togglePreview()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
+                    @if (previewMode()) {
+                      <fa-icon icon="pencil-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.edit">Modifier</span>
+                    } @else {
+                      <fa-icon icon="eye"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.preview">Aperçu</span>
+                    }
+                  </button>
+                </div>
+              </div>
+              @if (previewMode()) {
+                <div [innerHTML]="coverLetterHtml()" class="jc-modal-preview"></div>
+              } @else {
+                <textarea
+                  (ngModelChange)="coverLetter.set($event)"
+                  [ngModel]="coverLetter()"
+                  class="jc-modal-textarea"
+                  id="apply-cover-letter"
+                  rows="14"
+                ></textarea>
               }
-            </button>
+            </div>
           }
+        </ng-template>
+      </li>
+    </ul>
 
-          <button (click)="markAsApplied()" [disabled]="submitting()" class="jc-btn jc-btn-primary">
-            @if (submitting()) {
-              <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> ...
-            } @else {
-              <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.markApplied">J'ai postulé</span>
-            }
-          </button>
-        }
-      </div>
+    <div [ngbNavOutlet]="nav" class="jc-modal-tab-content"></div>
+  }
+
+  @if (error()) {
+    <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
+  }
+</div>
+
+<div class="modal-footer jc-modal-actions">
+  @if (resultMessage()) {
+    <button (click)="close()" class="jc-btn jc-btn-primary" type="button">
+      <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.close">Fermer</span>
+    </button>
+  } @else if (application()) {
+    <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost" type="button">
+      <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>
+      {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
+    </button>
+
+    @if (applyUrl()) {
+      <a [href]="applyUrl()" class="jc-btn jc-btn-ghost" rel="noopener" target="_blank">
+        <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.openOffer">Ouvrir l'offre</span>
+      </a>
     }
-  </div>
+
+    @if (autoApplySupported()) {
+      <button (click)="submitAuto()" [disabled]="submitting()" class="jc-btn jc-btn-accent" type="button">
+        @if (submitting()) {
+          <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+          <span jhiTranslate="jobCopilot.applyModal.sending">Envoi...</span>
+        } @else {
+          <fa-icon icon="paper-plane"></fa-icon>
+          <span jhiTranslate="jobCopilot.applyModal.submitVia" [translateValues]="{ source: sourceLabel() }"
+            >Soumettre via {{ sourceLabel() }}</span
+          >
+        }
+      </button>
+    }
+
+    <button (click)="markAsApplied()" [disabled]="submitting()" class="jc-btn jc-btn-primary" type="button">
+      @if (submitting()) {
+        <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon> ...
+      } @else {
+        <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.markApplied">J'ai postulé</span>
+      }
+    </button>
+  }
 </div>

@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, model, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { marked } from 'marked';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { JobCopilotService } from '../job-copilot.service';
 import { SanitizerService } from '../../../shared/sanitizer/sanitizer.service';
@@ -31,19 +31,21 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: s
 
 @Component({
   selector: 'jhi-apply-modal',
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective, MatchResultComponent],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective, MatchResultComponent, NgbNavModule],
   templateUrl: './apply-modal.component.html',
   styleUrl: './apply-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplyModalComponent implements OnInit {
   /** Provide either an existing draft application... */
-  existingApplication = input<JobApplication | undefined>();
+  existingApplication = model<JobApplication | undefined>();
   /** ...or a job offer to create a new draft application for. */
   jobOffer = model<JobOfferPreview | undefined>();
   jobOfferId = model<string | undefined>();
   closed = output<void>();
   applied = output<JobApplication>();
+  /** Active NgbNav tab. */
+  activeTab = signal<'position' | 'offer' | 'cover'>('position');
   application = signal<JobApplication | null>(null);
   coverLetter = signal('');
   loading = signal(true);
