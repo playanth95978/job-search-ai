@@ -210,6 +210,11 @@
     "applyModal": {
       "title": "Postuler",
       "close": "Fermer",
+      "tabs": {
+        "offer": "Offre",
+        "cover": "Candidature"
+      },
+      "noDescription": "Aucune description disponible.",
       "loading": "Génération de la lettre de motivation...",
       "loadingDescription": "Chargement de la description…",
       "coverLetter": "Lettre de motivation",

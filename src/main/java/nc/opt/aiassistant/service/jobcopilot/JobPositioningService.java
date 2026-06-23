@@ -63,7 +63,12 @@ public class JobPositioningService {
 
         String cvContent = buildCvContent(profile);
         if (additions != null && !additions.isEmpty()) {
-            cvContent += "\n\nAdditional skills/experience to consider: " + String.join(", ", additions) + ".";
+            // Explicit so the LLM treats these as ALREADY acquired (present in the resume), not as
+            // skills the candidate still needs — otherwise they keep showing up as "missing".
+            cvContent +=
+                "\n\n=== ADDITIONAL SKILLS & EXPERIENCE (now fully part of this resume — treat as acquired, demonstrated and present) ===\n" +
+                String.join(", ", additions) +
+                ".";
         }
         String offerText = buildOfferText(offerId);
         return cvRewriteService.matchAgainstOffer(cvContent, offerText);

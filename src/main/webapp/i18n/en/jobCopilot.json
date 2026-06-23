@@ -210,6 +210,11 @@
     "applyModal": {
       "title": "Apply",
       "close": "Close",
+      "tabs": {
+        "offer": "Offer",
+        "cover": "Application"
+      },
+      "noDescription": "No description available.",
       "loading": "Generating cover letter...",
       "loadingDescription": "Loading description…",
       "coverLetter": "Cover Letter",
