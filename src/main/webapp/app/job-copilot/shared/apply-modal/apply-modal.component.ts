@@ -114,13 +114,6 @@ export class ApplyModalComponent implements OnInit {
 
   offerId = computed(() => this.jobOfferId() ?? this.application()?.jobOffer?.id);
 
-  copyToClipboard(): void {
-    navigator.clipboard.writeText(this.coverLetter()).then(() => {
-      this.copied.set(true);
-      setTimeout(() => this.copied.set(false), 2000);
-    });
-  }
-
   submitAuto(): void {
     const app = this.application();
     if (!app?.id) return;

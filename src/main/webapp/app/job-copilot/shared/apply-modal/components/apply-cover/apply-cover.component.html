@@ -48,7 +48,10 @@
     }
   </div>
 }
-
+<button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost" type="button">
+  <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>
+  {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
+</button>
 @if (error()) {
   <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
 }

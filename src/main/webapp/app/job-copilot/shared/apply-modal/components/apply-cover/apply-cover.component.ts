@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml } from '@angular/platform-browser';
@@ -27,11 +27,11 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: s
 
 @Component({
   selector: 'jhi-apply-cover',
-  standalone: true,
   imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective],
   templateUrl: './apply-cover.component.html',
   styleUrl: './apply-cover.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
 export class ApplyCoverComponent {
   application = input<JobApplication | null>(null);
@@ -39,6 +39,7 @@ export class ApplyCoverComponent {
   loading = input(false);
   coverLetter = model('');
   language = signal('');
+  copied = signal(false);
 
   previewMode = signal(true);
   regenerating = signal(false);
@@ -72,6 +73,13 @@ export class ApplyCoverComponent {
         this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.regenerate'));
         this.regenerating.set(false);
       },
+    });
+  }
+
+  copyToClipboard(): void {
+    navigator.clipboard.writeText(this.coverLetter()).then(() => {
+      this.copied.set(true);
+      setTimeout(() => this.copied.set(false), 2000);
     });
   }
 }

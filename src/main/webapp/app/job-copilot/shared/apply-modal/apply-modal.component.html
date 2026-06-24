@@ -75,11 +75,6 @@
       <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.close">Fermer</span>
     </button>
   } @else if (application()) {
-    <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost" type="button">
-      <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>
-      {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
-    </button>
-
     @if (applyUrl()) {
       <a [href]="applyUrl()" class="jc-btn jc-btn-ghost" rel="noopener" target="_blank">
         <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.openOffer">Ouvrir l'offre</span>
