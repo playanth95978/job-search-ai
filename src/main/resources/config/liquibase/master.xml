@@ -34,4 +34,5 @@
   <include file="config/liquibase/changelog/202608179000000_add_tables_spring_batch.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260623120000_add_onboarding_flag.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260623150000_add_offer_positioning.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260623170000_add_offer_tailored_resume.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

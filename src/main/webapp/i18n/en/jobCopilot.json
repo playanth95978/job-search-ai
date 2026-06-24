@@ -149,6 +149,19 @@
       "simulate": "Simulate",
       "noProfile": "Import your CV first to see your positioning."
     },
+    "tailoring": {
+      "tab": "Tailored CV",
+      "intro": "Generate an ATS-optimized variant of your resume for this offer: skills reordered, wording aligned with the posting, off-topic content removed. Your main resume stays untouched.",
+      "generate": "Tailor my CV",
+      "regenerate": "Regenerate",
+      "loading": "Tailoring your CV to this offer…",
+      "openInBuilder": "Open in CV Builder",
+      "exportDocx": "Word",
+      "error": "CV tailoring failed.",
+      "summary": "Summary",
+      "topSkills": "Skills (reordered)",
+      "experiences": "Experience"
+    },
     "onboarding": {
       "title": "Upload your CV",
       "subtitle": "PDF or DOCX — AI will extract your profile automatically",

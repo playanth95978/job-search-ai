@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Persistent per-offer AI-tailored resume variant (ATS-optimized for one job offer).
+        Non-destructive (the master resume lives in `resume`). One row per (user_id, job_offer_id).
+    -->
+    <changeSet id="20260623170000-1" author="claude">
+        <createTable tableName="offer_tailored_resume">
+            <column name="id" type="${uuidType}" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="job_offer_id" type="${uuidType}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)"/>
+            <column name="created_at" type="timestamp"/>
+        </createTable>
+
+        <addUniqueConstraint
+            tableName="offer_tailored_resume"
+            columnNames="user_id, job_offer_id"
+            constraintName="ux_offer_tailored_user_offer"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -171,6 +171,57 @@ public class CvRewriteService {
         }
     }
 
+    /**
+     * Produces an ATS-optimized variant of an existing resume tailored to a specific job offer:
+     * reorders skills/experiences by relevance, rewrites bullets with the offer's keywords, drops
+     * off-topic content — without inventing any fact. Returns a {@link GeneratedResumeDto}.
+     */
+    public GeneratedResumeDto tailorResume(String resumeJson, String offerText) {
+        String resume = resumeJson == null ? "" : resumeJson.trim();
+        String offer = offerText == null ? "" : offerText.trim();
+        if (resume.isEmpty() || offer.isEmpty()) {
+            return emptyGeneratedResume();
+        }
+
+        String prompt = """
+            You are an expert resume writer and ATS specialist. Rewrite the RESUME (given as JSON) into
+            a variant TAILORED to the JOB OFFER below. Keep the SAME LANGUAGE as the resume.
+            Rules:
+            - Reorder skills and experiences so the most relevant to this offer come first.
+            - Rephrase the summary and the experience bullets to surface the offer's keywords naturally.
+            - Drop or downplay content irrelevant to this offer (but keep the work history truthful).
+            - DO NOT invent facts (employers, dates, diplomas, skills the candidate doesn't have).
+            - Skill "level" is an integer 1-5 (keep the original when known, else 3).
+            Return ONLY valid JSON with exactly this shape (no markdown, no comments):
+            {
+              "personal": { "firstName": "", "lastName": "", "title": "", "email": "", "phone": "",
+                            "location": "", "linkedin": "", "github": "", "website": "" },
+              "summary": "",
+              "experiences": [ { "jobTitle": "", "company": "", "startDate": "", "endDate": "",
+                                 "current": false, "description": "", "achievements": [""] } ],
+              "education": [ { "degree": "", "school": "", "startDate": "", "endDate": "", "description": "" } ],
+              "projects": [ { "name": "", "description": "", "url": "", "technologies": [""] } ],
+              "certifications": [ { "name": "", "issuer": "", "date": "" } ],
+              "skills": [ { "name": "", "level": 3 } ],
+              "languages": [ { "name": "", "level": "" } ]
+            }
+
+            ===== RESUME (JSON) =====
+            %s
+
+            ===== JOB OFFER =====
+            %s
+            """.formatted(resume, offer);
+
+        try {
+            GeneratedResumeDto result = chatClient.prompt().user(prompt).call().entity(GeneratedResumeDto.class);
+            return result == null ? emptyGeneratedResume() : result;
+        } catch (Exception e) {
+            log.error("Failed to tailor resume: {}", e.getMessage());
+            return emptyGeneratedResume();
+        }
+    }
+
     private GeneratedResumeDto emptyGeneratedResume() {
         return new GeneratedResumeDto(
             new GeneratedResumeDto.GeneratedPersonalDto("", "", "", "", "", "", "", "", ""),

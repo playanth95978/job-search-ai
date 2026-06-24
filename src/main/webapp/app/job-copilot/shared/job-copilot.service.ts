@@ -18,6 +18,7 @@ import {
 } from './job-copilot.model';
 import { createRequestOption } from '../../core/request/request-util';
 import { Resume } from '../cv-builder/resume.model';
+import { GeneratedResume } from '../cv-builder/cv-resume-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class JobCopilotService {
@@ -104,6 +105,13 @@ export class JobCopilotService {
     const lang = language ?? this.translateService.getCurrentLang();
     if (lang) params = params.set('language', lang);
     return this.http.post<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning/simulate`, { additions }, { params });
+  }
+
+  /** ATS-optimized variant of the user's resume tailored to this offer (cached server-side). */
+  getTailoredResume(offerId: string, refresh = false): Observable<GeneratedResume> {
+    let params = new HttpParams();
+    if (refresh) params = params.set('refresh', 'true');
+    return this.http.get<GeneratedResume>(`${this.baseUrl}/jobs/${offerId}/tailored`, { params });
   }
 
   // Applications

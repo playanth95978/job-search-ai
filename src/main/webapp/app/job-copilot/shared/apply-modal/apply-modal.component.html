@@ -80,6 +80,85 @@
         </ng-template>
       </li>
 
+      <!-- Tailored resume -->
+      <li [ngbNavItem]="'tailored'">
+        <a ngbNavLink><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.tailoring.tab">CV adapté</span></a>
+        <ng-template ngbNavContent>
+          @if (tailoringLoading()) {
+            <div class="jc-modal-loading">
+              <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+              <span jhiTranslate="jobCopilot.tailoring.loading">Adaptation de votre CV à cette offre…</span>
+            </div>
+          } @else if (tailoringError(); as terr) {
+            <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ terr }}</div>
+          } @else if (tailored(); as t) {
+            <div class="jc-tailored">
+              <div class="jc-tailored-actions">
+                <button (click)="openTailoredInBuilder()" [disabled]="openingBuilder()" class="jc-btn jc-btn-primary" type="button">
+                  @if (openingBuilder()) {
+                    <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                  } @else {
+                    <fa-icon icon="file-alt"></fa-icon>
+                  }
+                  <span jhiTranslate="jobCopilot.tailoring.openInBuilder">Ouvrir dans le CV Builder</span>
+                </button>
+                <button (click)="exportTailoredDocx()" class="jc-btn jc-btn-ghost" type="button">
+                  <fa-icon icon="file-word"></fa-icon> <span jhiTranslate="jobCopilot.tailoring.exportDocx">Word</span>
+                </button>
+                <button (click)="generateTailored(true)" class="jc-btn jc-btn-ghost" type="button">
+                  <fa-icon icon="sync"></fa-icon> <span jhiTranslate="jobCopilot.tailoring.regenerate">Régénérer</span>
+                </button>
+              </div>
+
+              @if (t.personal.title) {
+                <p class="jc-tailored-headline">{{ t.personal.title }}</p>
+              }
+              @if (t.summary) {
+                <div class="jc-tailored-block">
+                  <h5 jhiTranslate="jobCopilot.tailoring.summary">Résumé</h5>
+                  <p>{{ t.summary }}</p>
+                </div>
+              }
+              @if (tailoredTopSkills().length) {
+                <div class="jc-tailored-block">
+                  <h5 jhiTranslate="jobCopilot.tailoring.topSkills">Compétences (réordonnées)</h5>
+                  <div class="jc-tailored-skills">
+                    @for (s of tailoredTopSkills(); track s.name) {
+                      <span class="jc-skill-tag">{{ s.name }}</span>
+                    }
+                  </div>
+                </div>
+              }
+              @if (t.experiences.length) {
+                <div class="jc-tailored-block">
+                  <h5 jhiTranslate="jobCopilot.tailoring.experiences">Expériences</h5>
+                  <ul>
+                    @for (exp of t.experiences; track $index) {
+                      <li>
+                        <strong>{{ exp.jobTitle }}</strong>
+                        @if (exp.company) {
+                          · {{ exp.company }}
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="jc-tailored-intro">
+              <p jhiTranslate="jobCopilot.tailoring.intro">
+                Générez une variante de votre CV optimisée ATS pour cette offre : compétences réordonnées, formulations alignées sur
+                l'annonce, hors-sujet retiré. Votre CV principal n'est pas modifié.
+              </p>
+              <button (click)="generateTailored()" class="jc-btn jc-btn-primary" type="button">
+                <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.tailoring.generate">Adapter mon CV</span>
+              </button>
+            </div>
+          }
+        </ng-template>
+      </li>
+
       <!-- Offer description -->
       <li [ngbNavItem]="'offer'">
         <a ngbNavLink><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.tabs.offer">Offre</span></a>

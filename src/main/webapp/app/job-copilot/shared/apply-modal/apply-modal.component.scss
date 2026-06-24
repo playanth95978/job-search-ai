@@ -381,3 +381,62 @@
     color: #ef4444;
   }
 }
+
+/* Tailored resume tab */
+.jc-tailored-intro {
+  text-align: center;
+  padding: 1rem 0.5rem;
+
+  p {
+    color: var(--bs-secondary-color);
+    font-size: 0.9rem;
+    margin: 0 auto 1rem;
+    max-width: 48ch;
+  }
+}
+
+.jc-tailored-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.jc-tailored-headline {
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.jc-tailored-block {
+  margin-bottom: 1rem;
+
+  h5 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--bs-secondary-color);
+    margin: 0 0 0.4rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.88rem;
+  }
+}
+
+.jc-tailored-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}

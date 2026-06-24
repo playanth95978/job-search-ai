@@ -149,6 +149,19 @@
       "simulate": "Simuler",
       "noProfile": "Importez d'abord votre CV pour voir votre positionnement."
     },
+    "tailoring": {
+      "tab": "CV adapté",
+      "intro": "Générez une variante de votre CV optimisée ATS pour cette offre : compétences réordonnées, formulations alignées sur l'annonce, hors-sujet retiré. Votre CV principal n'est pas modifié.",
+      "generate": "Adapter mon CV",
+      "regenerate": "Régénérer",
+      "loading": "Adaptation de votre CV à cette offre…",
+      "openInBuilder": "Ouvrir dans le CV Builder",
+      "exportDocx": "Word",
+      "error": "L'adaptation du CV a échoué.",
+      "summary": "Résumé",
+      "topSkills": "Compétences (réordonnées)",
+      "experiences": "Expériences"
+    },
     "onboarding": {
       "title": "Téléchargez votre CV",
       "subtitle": "PDF ou DOCX — L'IA extraira votre profil automatiquement",
