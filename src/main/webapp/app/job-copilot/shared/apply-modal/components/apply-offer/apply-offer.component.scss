@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+.jc-modal-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0.5rem;
+  font-size: 0.95rem;
+  color: var(--bs-secondary-color);
+}
+
+.jc-offer-description-body {
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+
+  :first-child {
+    margin-top: 0;
+  }
+}
+
+.jc-modal-empty {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}

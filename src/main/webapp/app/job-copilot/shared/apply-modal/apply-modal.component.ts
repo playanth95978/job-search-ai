@@ -1,30 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, inject, model, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SafeHtml } from '@angular/platform-browser';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { marked } from 'marked';
 import { Router } from '@angular/router';
 import { NgbActiveModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
-import { of, switchMap } from 'rxjs';
 
 import { JobCopilotService } from '../job-copilot.service';
-import { SanitizerService } from '../../../shared/sanitizer/sanitizer.service';
-import { CvMatchResult, JobApplication, JobOffer, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
-import { MatchResultComponent } from '../match-result/match-result.component';
-import { CvResumeApiService, GeneratedResume } from '../../cv-builder/cv-resume-api.service';
-import { generatedResumeToResume } from '../../cv-builder/generated-resume.mapper';
-import { createEmptyResume, Resume } from '../../cv-builder/resume.model';
-import { CvExportService } from '../../cv-builder/cv-export.service';
+import { JobApplication, JobOffer, JobOfferPreview, jobSourceColor, jobSourceLabel } from '../job-copilot.model';
 import TranslateDirective from '../../../shared/language/translate.directive';
 
-/** Strips a leading/trailing ```` ```markdown ... ``` ```` (or ```` ``` ... ``` ````) fence some LLMs wrap their output in. */
-function stripMarkdownFence(text: string): string {
-  const trimmed = text.trim();
-  const match = /^```[a-zA-Z]*\n([\s\S]*)\n```$/.exec(trimmed);
-  return match ? match[1].trim() : trimmed;
-}
+import { ApplyPositionComponent } from './components/apply-position/apply-position.component';
+import { ApplyTailoredComponent } from './components/apply-tailored/apply-tailored.component';
+import { ApplyOfferComponent } from './components/apply-offer/apply-offer.component';
+import { ApplyCoverComponent } from './components/apply-cover/apply-cover.component';
 
 /** Languages the cover letter can be generated in. The value is sent to the LLM as part of its prompt. */
 export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: string }[] = [
@@ -37,7 +26,18 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: s
 
 @Component({
   selector: 'jhi-apply-modal',
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslatePipe, TranslateDirective, MatchResultComponent, NgbNavModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    FaIconComponent,
+    TranslatePipe,
+    TranslateDirective,
+    NgbNavModule,
+    ApplyPositionComponent,
+    ApplyTailoredComponent,
+    ApplyOfferComponent,
+    ApplyCoverComponent,
+  ],
   templateUrl: './apply-modal.component.html',
   styleUrl: './apply-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,44 +68,10 @@ export class ApplyModalComponent implements OnInit {
   /** Emits the enriched offer so the parent list can be refreshed. */
   enrichedOffer = output<JobOffer>();
 
-  // --- Positioning (CV vs this offer) -------------------------------------
-  positioning = signal<CvMatchResult | null>(null);
-  positioningLoading = signal(false);
-  positioningError = signal<string | null>(null);
-  /** Missing skills the user toggles for the "what-if" simulation. */
-  selectedAdditions = signal<string[]>([]);
-  simulated = signal<CvMatchResult | null>(null);
-  simulating = signal(false);
-  /** globalScore delta of the simulation vs the baseline positioning. */
-  simulationDelta = computed(() => {
-    const base = this.positioning();
-    const sim = this.simulated();
-    return base && sim ? sim.globalScore - base.globalScore : 0;
-  });
-
-  // --- Tailored resume (ATS variant for this offer) -----------------------
-  tailored = signal<GeneratedResume | null>(null);
-  tailoringLoading = signal(false);
-  tailoringError = signal<string | null>(null);
-  openingBuilder = signal(false);
-  /** Top reordered skills for the preview. */
-  tailoredTopSkills = computed(() => (this.tailored()?.skills ?? []).slice(0, 12));
-
   readonly languages = COVER_LETTER_LANGUAGES;
-  coverLetterHtml = computed<SafeHtml>(() =>
-    this.sanitizer.sanitizeHtml(marked.parse(stripMarkdownFence(this.coverLetter()), { async: false })),
-  );
-  /** Sanitized full description, preferring the freshly enriched offer. */
-  descriptionHtml = computed<SafeHtml | null>(() => {
-    const description = this.jobOffer()?.description ?? this.application()?.jobOffer?.description;
-    return description ? this.sanitizer.sanitizeHtml(description) : null;
-  });
   private service = inject(JobCopilotService);
-  private sanitizer = inject(SanitizerService);
   private translateService = inject(TranslateService);
   private activeModal = inject(NgbActiveModal);
-  private cvApi = inject(CvResumeApiService);
-  private exportService = inject(CvExportService);
   private router = inject(Router);
 
   ngOnInit(): void {
@@ -115,7 +81,6 @@ export class ApplyModalComponent implements OnInit {
     });
 
     this.enrichOffer();
-    this.loadPositioning();
 
     if (this.existingApplication()) {
       this.application.set(this.existingApplication()!);
@@ -147,28 +112,7 @@ export class ApplyModalComponent implements OnInit {
 
   applyUrl = computed(() => this.offer()?.applyUrl);
 
-  togglePreview(): void {
-    this.previewMode.update(v => !v);
-  }
-
   offerId = computed(() => this.jobOfferId() ?? this.application()?.jobOffer?.id);
-
-  regenerateCoverLetter(): void {
-    const offerId = this.offerId();
-    if (!offerId) return;
-    this.regenerating.set(true);
-    this.error.set(null);
-    this.service.generateCoverLetter(offerId, this.language() || undefined).subscribe({
-      next: letter => {
-        this.coverLetter.set(letter);
-        this.regenerating.set(false);
-      },
-      error: err => {
-        this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.regenerate'));
-        this.regenerating.set(false);
-      },
-    });
-  }
 
   copyToClipboard(): void {
     navigator.clipboard.writeText(this.coverLetter()).then(() => {
@@ -242,110 +186,6 @@ export class ApplyModalComponent implements OnInit {
   close(): void {
     this.closed.emit();
     this.activeModal.dismiss();
-  }
-
-  /** Loads the cached/computed positioning analysis for the current offer (one LLM call max). */
-  private loadPositioning(): void {
-    const id = this.offerId();
-    if (!id) return;
-    this.positioningLoading.set(true);
-    this.positioningError.set(null);
-    this.service.getPositioning(id).subscribe({
-      next: result => {
-        this.positioning.set(result);
-        this.positioningLoading.set(false);
-      },
-      error: err => {
-        this.positioningError.set(err.error?.message ?? this.translateService.instant('jobCopilot.positioning.error'));
-        this.positioningLoading.set(false);
-      },
-    });
-  }
-
-  toggleAddition(skill: string): void {
-    this.selectedAdditions.update(list => (list.includes(skill) ? list.filter(s => s !== skill) : [...list, skill]));
-  }
-
-  isSelected(skill: string): boolean {
-    return this.selectedAdditions().includes(skill);
-  }
-
-  /** Runs the "what-if" simulation with the selected missing skills added to the CV. */
-  simulate(): void {
-    const id = this.offerId();
-    if (!id || this.simulating() || this.selectedAdditions().length === 0) return;
-    this.simulating.set(true);
-    this.service.simulatePositioning(id, this.selectedAdditions()).subscribe({
-      next: result => {
-        this.simulated.set(result);
-        this.simulating.set(false);
-      },
-      error: () => this.simulating.set(false),
-    });
-  }
-
-  /** Generates (or refreshes) the offer-tailored resume variant. */
-  generateTailored(refresh = false): void {
-    const id = this.offerId();
-    if (!id || this.tailoringLoading()) return;
-    this.tailoringLoading.set(true);
-    this.tailoringError.set(null);
-    this.service.getTailoredResume(id, refresh).subscribe({
-      next: result => {
-        this.tailored.set(result);
-        this.tailoringLoading.set(false);
-      },
-      error: err => {
-        this.tailoringError.set(err.error?.message ?? this.translateService.instant('jobCopilot.tailoring.error'));
-        this.tailoringLoading.set(false);
-      },
-    });
-  }
-
-  /**
-   * Loads the tailored variant into the CV Builder: snapshots the current master as a version,
-   * saves the tailored resume as the working resume, then navigates to the builder.
-   */
-  openTailoredInBuilder(): void {
-    const tailored = this.tailored();
-    if (!tailored || this.openingBuilder()) return;
-    this.openingBuilder.set(true);
-    this.cvApi
-      .getResume()
-      .pipe(
-        switchMap(current => {
-          const base: Resume = current?.data ? (JSON.parse(current.data) as Resume) : createEmptyResume();
-          const mapped = generatedResumeToResume(tailored, base);
-          const snapshot$ = current ? this.cvApi.createVersion() : of(null);
-          return snapshot$.pipe(
-            switchMap(() => this.cvApi.saveResume({ title: mapped.title, template: mapped.template, data: JSON.stringify(mapped) })),
-          );
-        }),
-      )
-      .subscribe({
-        next: () => {
-          this.openingBuilder.set(false);
-          this.activeModal.close();
-          this.router.navigate(['/job-copilot/cv-builder']);
-        },
-        error: err => {
-          this.openingBuilder.set(false);
-          this.tailoringError.set(err.error?.message ?? this.translateService.instant('jobCopilot.tailoring.error'));
-        },
-      });
-  }
-
-  /** Exports the tailored variant directly as a .docx (no builder round-trip). */
-  exportTailoredDocx(): void {
-    const tailored = this.tailored();
-    if (!tailored) return;
-    const resume = generatedResumeToResume(tailored, createEmptyResume());
-    const name = `${resume.personal.firstName}-${resume.personal.lastName}`.trim() || 'cv';
-    const slug = name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    void this.exportService.exportDocx(resume, `${slug || 'cv'}-tailored.docx`);
   }
 
   /** Lazily fetches the full description (one request) and queues the offer for embedding. */

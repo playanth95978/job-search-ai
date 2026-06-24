@@ -1,0 +1,136 @@
+@import 'src/main/webapp/content/scss/bootstrap-variables';
+
+:host {
+  display: block;
+}
+
+.jc-modal-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0.5rem;
+  font-size: 0.95rem;
+  color: var(--bs-secondary-color);
+}
+
+.jc-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.jc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.jc-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.jc-btn-ghost {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  border: 1px solid var(--bs-border-color);
+
+  &:hover {
+    border-color: #667eea;
+    color: #667eea;
+  }
+}
+
+.jc-tailored-intro {
+  text-align: center;
+  padding: 1rem 0.5rem;
+
+  p {
+    color: var(--bs-secondary-color);
+    font-size: 0.9rem;
+    margin: 0 auto 1rem;
+    max-width: 48ch;
+  }
+}
+
+.jc-tailored-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.jc-tailored-headline {
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.jc-tailored-block {
+  margin-bottom: 1rem;
+
+  h5 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--bs-secondary-color);
+    margin: 0 0 0.4rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.88rem;
+  }
+}
+
+.jc-tailored-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.jc-skill-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+}

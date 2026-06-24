@@ -30,6 +30,7 @@ public class CvResumeService {
 
     private final CvResumeRepository resumeRepository;
     private final CvResumeVersionRepository versionRepository;
+    private final OfferCacheInvalidationService offerCacheInvalidationService;
 
     @Transactional(readOnly = true)
     public Optional<ResumeDto> getForCurrentUser() {
@@ -49,11 +50,17 @@ public class CvResumeService {
             created.setCreatedAt(now);
             return created;
         });
+        boolean contentChanged = !java.util.Objects.equals(resume.getData(), dto.data());
         resume.setTitle(dto.title());
         resume.setTemplate(dto.template());
         resume.setData(dto.data());
         resume.setUpdatedAt(now);
-        return toDto(resumeRepository.save(resume));
+        ResumeDto result = toDto(resumeRepository.save(resume));
+        // Resume content changed → tailored variants computed from the old CV are now stale.
+        if (contentChanged) {
+            offerCacheInvalidationService.evictTailored(userId);
+        }
+        return result;
     }
 
     /** Captures an immutable snapshot of the current resume and bumps its version. */
@@ -112,7 +119,9 @@ public class CvResumeService {
         resume.setTemplate(v.getTemplate());
         resume.setData(v.getData());
         resume.setUpdatedAt(Instant.now());
-        return Optional.of(toDto(resumeRepository.save(resume)));
+        ResumeDto result = toDto(resumeRepository.save(resume));
+        offerCacheInvalidationService.evictTailored(currentUser());
+        return Optional.of(result);
     }
 
     private String currentUser() {

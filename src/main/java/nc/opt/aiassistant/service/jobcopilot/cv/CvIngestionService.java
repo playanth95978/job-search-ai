@@ -2,21 +2,19 @@ package nc.opt.aiassistant.service.jobcopilot.cv;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
+import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
 import nc.opt.aiassistant.service.pdf.MistralOCRProcessService;
 import nc.opt.aiassistant.service.pdf.VectorPDFService;
-import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
@@ -38,6 +36,7 @@ public class CvIngestionService {
     private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
     private final CandidateProfileMapper candidateProfileMapper;
+    private final nc.opt.aiassistant.service.jobcopilot.OfferCacheInvalidationService offerCacheInvalidationService;
 
     public CvIngestionService(
         MistralOCRProcessService ocrService,
@@ -45,7 +44,8 @@ public class CvIngestionService {
         CandidateProfileRepository profileRepository,
         @Qualifier("mistralAiChatModel") ChatModel chatModel,
         ObjectMapper objectMapper,
-        CandidateProfileMapper candidateProfileMapper
+        CandidateProfileMapper candidateProfileMapper,
+        nc.opt.aiassistant.service.jobcopilot.OfferCacheInvalidationService offerCacheInvalidationService
     ) {
         this.ocrService = ocrService;
         this.vectorPDFService = vectorPDFService;
@@ -53,6 +53,7 @@ public class CvIngestionService {
         this.chatClient = ChatClient.builder(chatModel).build();
         this.objectMapper = objectMapper;
         this.candidateProfileMapper = candidateProfileMapper;
+        this.offerCacheInvalidationService = offerCacheInvalidationService;
     }
 
     /**
@@ -86,18 +87,18 @@ public class CvIngestionService {
 
         String prompt =
             """
-                You are an expert technical recruiter and ATS specialist. Review the following CV and give concise, \
-                actionable feedback to help the candidate improve it. Be specific and reference what is (or is not) in the CV.
-                Return ONLY valid JSON matching this exact structure:
-                {
-                  "score": number between 0 and 100,
-                  "summary": "one or two sentence overall assessment",
-                  "strengths": ["short bullet", "..."],
-                  "improvements": ["short actionable suggestion, e.g. 'quantify impact with metrics'", "..."]
-                }
+            You are an expert technical recruiter and ATS specialist. Review the following CV and give concise, \
+            actionable feedback to help the candidate improve it. Be specific and reference what is (or is not) in the CV.
+            Return ONLY valid JSON matching this exact structure:
+            {
+              "score": number between 0 and 100,
+              "summary": "one or two sentence overall assessment",
+              "strengths": ["short bullet", "..."],
+              "improvements": ["short actionable suggestion, e.g. 'quantify impact with metrics'", "..."]
+            }
 
-                CV content:
-                """ + markdown;
+            CV content:
+            """ + markdown;
 
         String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
 
@@ -154,23 +155,23 @@ public class CvIngestionService {
     CandidateProfileDto extractProfile(String markdown) {
         String prompt =
             """
-                Extract the candidate profile from this CV in JSON format.
-                Return ONLY valid JSON matching this structure:
-                {
-                  "fullName": "string",
-                  "email": "string or null",
-                  "location": "string or null",
-                  "yearsOfExperience": number or null,
-                  "skills": [{"id":"string (slug)","name":"string","level":number (1-5)}],
-                  "experiences": [{"id":"string (slug)","jobTitle":"string","company":"string","startDate":"string","endDate":"string or null","current":boolean,"description":"string","achievements":["string"]}],
-                  "preferredRoles": ["string"],
-                  "languages": [{"id":"string (slug)","name":"string","level":"string"}],
-                  "education": [{"id":"string (slug)","degree":"string","school":"string","startDate":"string","endDate":"string or null","description":"string"}],
-                  "certifications": [{"id":"string (slug)","name":"string","issuer":"string","date":"string"}]
-                }
+            Extract the candidate profile from this CV in JSON format.
+            Return ONLY valid JSON matching this structure:
+            {
+              "fullName": "string",
+              "email": "string or null",
+              "location": "string or null",
+              "yearsOfExperience": number or null,
+              "skills": [{"id":"string (slug)","name":"string","level":number (1-5)}],
+              "experiences": [{"id":"string (slug)","jobTitle":"string","company":"string","startDate":"string","endDate":"string or null","current":boolean,"description":"string","achievements":["string"]}],
+              "preferredRoles": ["string"],
+              "languages": [{"id":"string (slug)","name":"string","level":"string"}],
+              "education": [{"id":"string (slug)","degree":"string","school":"string","startDate":"string","endDate":"string or null","description":"string"}],
+              "certifications": [{"id":"string (slug)","name":"string","issuer":"string","date":"string"}]
+            }
 
-                CV content:
-                """ + markdown;
+            CV content:
+            """ + markdown;
 
         String json = chatClient.prompt().user(prompt).call().content();
         json = cleanJsonResponse(json);
@@ -179,7 +180,24 @@ public class CvIngestionService {
             return objectMapper.readValue(json, CandidateProfileDto.class);
         } catch (JsonProcessingException e) {
             log.error("Failed to parse profile extraction: {}. JSON was: {}", e.getMessage(), json);
-            return new CandidateProfileDto(null, null, null, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), null, null, null, null);
+            return new CandidateProfileDto(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                null,
+                null,
+                null,
+                null
+            );
         }
     }
 
@@ -200,6 +218,9 @@ public class CvIngestionService {
         profileRepository.findByUserId(userId).ifPresent(existing -> {
             profile.setId(existing.getId());
         });
-        return profileRepository.save(profile);
+        CandidateProfile saved = profileRepository.save(profile);
+        // The CV changed → drop any per-offer AI results computed from the previous CV.
+        offerCacheInvalidationService.evictAll(userId);
+        return saved;
     }
 }

@@ -1,0 +1,10 @@
+@if (descriptionHtml(); as desc) {
+  <div [innerHTML]="desc" class="jc-offer-description-body"></div>
+} @else if (enriching()) {
+  <div class="jc-modal-loading">
+    <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+    <span jhiTranslate="jobCopilot.applyModal.loadingDescription">Chargement de la description…</span>
+  </div>
+} @else {
+  <p class="jc-modal-empty" jhiTranslate="jobCopilot.applyModal.noDescription">Aucune description disponible.</p>
+}
