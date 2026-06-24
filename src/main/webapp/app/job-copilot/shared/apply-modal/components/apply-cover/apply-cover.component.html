@@ -8,6 +8,10 @@
     <div class="jc-modal-label-row">
       <label class="jc-modal-label" for="apply-cover-letter" jhiTranslate="jobCopilot.applyModal.coverLetter">Lettre de motivation</label>
       <div class="jc-modal-label-actions">
+        <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
+          <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>
+          {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
+        </button>
         <select
           (ngModelChange)="language.set($event)"
           [ngModel]="language()"
@@ -48,10 +52,7 @@
     }
   </div>
 }
-<button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost" type="button">
-  <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>
-  {{ (copied() ? 'jobCopilot.applyModal.copied' : 'jobCopilot.applyModal.copy') | translate }}
-</button>
+
 @if (error()) {
   <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
 }
