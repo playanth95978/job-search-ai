@@ -2,14 +2,21 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of, switchMap } from 'rxjs';
+
+import { JobCopilotService } from '../../../job-copilot.service';
+import { CvResumeApiService, GeneratedResume } from '../../../../cv-builder/cv-resume-api.service';
+import { CvExportService } from '../../../../cv-builder/cv-export.service';
+import { generatedResumeToResume } from '../../../../cv-builder/generated-resume.mapper';
+import { createEmptyResume, Resume } from '../../../../cv-builder/resume.model';
+import TranslateDirective from '../../../../../shared/language/translate.directive';
 
 @Component({
   selector: 'jhi-apply-tailored',
   standalone: true,
-  imports: [CommonModule, FaIconComponent, TranslatePipe, TranslateDirective],
+  imports: [CommonModule, FaIconComponent, TranslateDirective],
   templateUrl: './apply-tailored.component.html',
   styleUrl: './apply-tailored.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,11 +44,11 @@ export class ApplyTailoredComponent {
     this.tailoringLoading.set(true);
     this.tailoringError.set(null);
     this.service.getTailoredResume(id, refresh).subscribe({
-      next: result => {
+      next: (result: GeneratedResume) => {
         this.tailored.set(result);
         this.tailoringLoading.set(false);
       },
-      error: err => {
+      error: (err: any) => {
         this.tailoringError.set(err.error?.message ?? this.translateService.instant('jobCopilot.tailoring.error'));
         this.tailoringLoading.set(false);
       },
@@ -70,7 +77,7 @@ export class ApplyTailoredComponent {
           this.activeModal.close();
           this.router.navigate(['/job-copilot/cv-builder']);
         },
-        error: err => {
+        error: (err: any) => {
           this.openingBuilder.set(false);
           this.tailoringError.set(err.error?.message ?? this.translateService.instant('jobCopilot.tailoring.error'));
         },

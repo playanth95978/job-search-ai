@@ -5,10 +5,10 @@ import { SafeHtml } from '@angular/platform-browser';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { marked } from 'marked';
-import { JobCopilotService } from '../../job-copilot.service';
-import { SanitizerService } from '../../../../shared/sanitizer/sanitizer.service';
-import { JobApplication } from '../../job-copilot.model';
-import TranslateDirective from '../../../../shared/language/translate.directive';
+import { JobCopilotService } from '../../../job-copilot.service';
+import { SanitizerService } from '../../../../../shared/sanitizer/sanitizer.service';
+import { JobApplication } from '../../../job-copilot.model';
+import TranslateDirective from '../../../../../shared/language/translate.directive';
 
 /** Strips a leading/trailing ```` ```markdown ... ``` ```` (or ```` ``` ... ``` ````) fence some LLMs wrap their output in. */
 function stripMarkdownFence(text: string): string {
@@ -64,11 +64,11 @@ export class ApplyCoverComponent {
     this.regenerating.set(true);
     this.error.set(null);
     this.service.generateCoverLetter(id, this.language() || undefined).subscribe({
-      next: letter => {
+      next: (letter: string) => {
         this.coverLetter.set(letter);
         this.regenerating.set(false);
       },
-      error: err => {
+      error: (err: any) => {
         this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.regenerate'));
         this.regenerating.set(false);
       },

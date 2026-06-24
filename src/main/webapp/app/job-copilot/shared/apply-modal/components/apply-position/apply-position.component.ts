@@ -1,16 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { JobCopilotService } from '../../job-copilot.service';
-import { CvMatchResult } from '../../job-copilot.model';
-import { MatchResultComponent } from '../../match-result/match-result.component';
-import TranslateDirective from '../../../../shared/language/translate.directive';
+import { TranslateService } from '@ngx-translate/core';
+import { JobCopilotService } from '../../../job-copilot.service';
+import { CvMatchResult } from '../../../job-copilot.model';
+import { MatchResultComponent } from '../../../match-result/match-result.component';
+import TranslateDirective from '../../../../../shared/language/translate.directive';
 
 @Component({
   selector: 'jhi-apply-position',
   standalone: true,
-  imports: [CommonModule, FaIconComponent, TranslatePipe, TranslateDirective, MatchResultComponent],
+  imports: [CommonModule, FaIconComponent, TranslateDirective, MatchResultComponent],
   templateUrl: './apply-position.component.html',
   styleUrl: './apply-position.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,11 +44,11 @@ export class ApplyPositionComponent implements OnInit {
     this.positioningLoading.set(true);
     this.positioningError.set(null);
     this.service.getPositioning(id).subscribe({
-      next: result => {
+      next: (result: CvMatchResult) => {
         this.positioning.set(result);
         this.positioningLoading.set(false);
       },
-      error: err => {
+      error: (err: any) => {
         this.positioningError.set(err.error?.message ?? this.translateService.instant('jobCopilot.positioning.error'));
         this.positioningLoading.set(false);
       },
@@ -68,7 +68,7 @@ export class ApplyPositionComponent implements OnInit {
     if (!id || this.simulating() || this.selectedAdditions().length === 0) return;
     this.simulating.set(true);
     this.service.simulatePositioning(id, this.selectedAdditions()).subscribe({
-      next: result => {
+      next: (result: CvMatchResult) => {
         this.simulated.set(result);
         this.simulating.set(false);
       },
