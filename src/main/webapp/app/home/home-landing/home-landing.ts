@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
@@ -41,11 +41,11 @@ const TRUST: LandingItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeLanding {
-  loginAction = output<void>();
+  loginAction = output();
 
-  protected readonly features = FEATURES;
-  protected readonly steps = STEPS;
-  protected readonly trust = TRUST;
+  protected readonly features = signal(FEATURES);
+  protected readonly steps = signal(STEPS);
+  protected readonly trust = signal(TRUST);
 
   login(): void {
     this.loginAction.emit();

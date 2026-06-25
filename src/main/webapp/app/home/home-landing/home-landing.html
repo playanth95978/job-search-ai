@@ -3,10 +3,12 @@
   <section class="landing-section">
     <h2 class="landing-title" appReveal="up" jhiTranslate="home.landing.steps.title">Comment ça marche</h2>
     <div class="landing-steps">
-      @for (step of steps; track step.titleKey; let i = $index) {
+      @for (step of steps(); track step.titleKey; let i = $index) {
         <div class="landing-step" appReveal="up" [revealDelay]="i * 100">
           <div class="landing-step-num">{{ i + 1 }}</div>
-          <fa-icon class="landing-step-icon" [icon]="step.icon" size="2x" />
+          <div class="landing-step-icon-wrapper">
+            <fa-icon class="landing-step-icon" [icon]="step.icon" size="2x" />
+          </div>
           <strong jhiTranslate="{{ step.titleKey }}"></strong>
           <span jhiTranslate="{{ step.descKey }}"></span>
         </div>
@@ -20,14 +22,16 @@
     <p class="landing-subtitle" appReveal="up" jhiTranslate="home.landing.features.subtitle">
       Un copilote complet, de l'import du CV jusqu'à l'entretien.
     </p>
-    <div class="landing-grid">
-      @for (feature of features; track feature.titleKey; let i = $index, even = $even) {
-        <div class="landing-card" [appReveal]="even ? 'left' : 'right'" [revealDelay]="i * 70">
+    <div class="landing-bento">
+      @for (feature of features(); track feature.titleKey; let i = $index) {
+        <div class="landing-card" [class]="'card-' + i" appReveal="up" [revealDelay]="i * 50">
           <div class="landing-card-icon">
             <fa-icon [icon]="feature.icon" size="lg" />
           </div>
-          <strong jhiTranslate="{{ feature.titleKey }}"></strong>
-          <span jhiTranslate="{{ feature.descKey }}"></span>
+          <div class="landing-card-content">
+            <strong jhiTranslate="{{ feature.titleKey }}"></strong>
+            <span jhiTranslate="{{ feature.descKey }}"></span>
+          </div>
         </div>
       }
     </div>
@@ -36,7 +40,9 @@
   <!-- Angle local -->
   <section class="landing-local" appReveal="up">
     <div class="landing-local-inner">
-      <fa-icon icon="location-dot" size="2x" class="landing-local-icon" />
+      <div class="landing-local-badge">
+        <fa-icon icon="location-dot" size="2x" class="landing-local-icon" />
+      </div>
       <div>
         <h2 jhiTranslate="home.landing.localBanner.title">Pensé pour le marché calédonien</h2>
         <p jhiTranslate="home.landing.localBanner.desc">
@@ -50,9 +56,11 @@
   <!-- Confiance -->
   <section class="landing-section">
     <div class="landing-trust">
-      @for (item of trust; track item.titleKey; let i = $index) {
+      @for (item of trust(); track item.titleKey; let i = $index) {
         <div class="landing-trust-item" appReveal="up" [revealDelay]="i * 80">
-          <fa-icon [icon]="item.icon" />
+          <div class="landing-trust-icon">
+            <fa-icon [icon]="item.icon" />
+          </div>
           <div>
             <strong jhiTranslate="{{ item.titleKey }}"></strong>
             <span jhiTranslate="{{ item.descKey }}"></span>
@@ -64,17 +72,19 @@
 
   <!-- CTA final -->
   <section class="landing-cta" appReveal="up">
-    <h2 jhiTranslate="home.landing.cta.title">Prêt à accélérer votre recherche d'emploi ?</h2>
-    <p jhiTranslate="home.landing.cta.subtitle">Créez votre compte gratuit et importez votre CV en moins de deux minutes.</p>
-    <div class="landing-cta-actions">
-      <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/account/register">
-        <fa-icon icon="user-plus" />
-        <span jhiTranslate="home.landing.cta.register">Créer un compte gratuit</span>
-      </a>
-      <button (click)="login()" class="jc-btn jc-btn-outline jc-btn-lg" type="button">
-        <fa-icon icon="sign-in-alt" />
-        <span jhiTranslate="global.menu.account.login">S'authentifier</span>
-      </button>
+    <div class="landing-cta-content">
+      <h2 jhiTranslate="home.landing.cta.title">Prêt à accélérer votre recherche d'emploi ?</h2>
+      <p jhiTranslate="home.landing.cta.subtitle">Créez votre compte gratuit et importez votre CV en moins de deux minutes.</p>
+      <div class="landing-cta-actions">
+        <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/account/register">
+          <fa-icon icon="user-plus" />
+          <span jhiTranslate="home.landing.cta.register">Créer un compte gratuit</span>
+        </a>
+        <button (click)="login()" class="jc-btn jc-btn-outline jc-btn-lg" type="button">
+          <fa-icon icon="sign-in-alt" />
+          <span jhiTranslate="global.menu.account.login">S'authentifier</span>
+        </button>
+      </div>
     </div>
   </section>
 </div>
