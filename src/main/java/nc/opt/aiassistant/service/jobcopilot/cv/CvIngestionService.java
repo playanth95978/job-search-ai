@@ -75,7 +75,7 @@ public class CvIngestionService {
      * Runs an LLM review of the user's stored CV and returns a qualitative assessment
      * (overall score, summary, strengths and actionable improvements).
      */
-    public CvReviewDto review(String userId) {
+    public CvReviewDto review(String userId, String language) {
         CandidateProfile profile = profileRepository
             .findTopByUserIdOrderByCreatedAtDesc(userId)
             .orElseThrow(() -> new IllegalStateException("No CV profile found for user " + userId));
@@ -85,10 +85,12 @@ public class CvIngestionService {
             return new CvReviewDto(0, "No CV content available to review.", List.of(), List.of("Upload a CV first."));
         }
 
+        String lang = (language == null || language.isBlank()) ? "en" : language.trim();
         String prompt =
             """
             You are an expert technical recruiter and ATS specialist. Review the following CV and give concise, \
             actionable feedback to help the candidate improve it. Be specific and reference what is (or is not) in the CV.
+            Write ALL text fields (summary, strengths, improvements) in the language with ISO 639-1 code "%s".
             Return ONLY valid JSON matching this exact structure:
             {
               "score": number between 0 and 100,
@@ -98,7 +100,7 @@ public class CvIngestionService {
             }
 
             CV content:
-            """ + markdown;
+            """.formatted(lang) + markdown;
 
         String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
 

@@ -15,6 +15,74 @@
       "title": "Welcome to Job Search AI",
       "subtitle": "Sign in to access your personalized dashboard, your applications and your AI career copilot."
     },
+    "landing": {
+      "steps": {
+        "title": "How it works",
+        "import": {
+          "title": "Import your CV",
+          "desc": "We analyze it and automatically build your candidate profile."
+        },
+        "discover": {
+          "title": "Discover your jobs",
+          "desc": "Get relevant local and national offers, ranked by how well they fit you."
+        },
+        "apply": {
+          "title": "Apply & practice",
+          "desc": "Generated cover letters, Kanban tracking and interview simulations with an AI recruiter."
+        }
+      },
+      "features": {
+        "title": "Everything to land the job",
+        "subtitle": "A complete copilot, from CV upload to the interview.",
+        "search": {
+          "title": "Smart search",
+          "desc": "Semantic search that understands your profile, not just keywords."
+        },
+        "coverLetter": {
+          "title": "AI cover letters",
+          "desc": "Generated and tailored to each job, in one click."
+        },
+        "interview": {
+          "title": "Interview coaching",
+          "desc": "Practice with a virtual recruiter and get instant feedback."
+        },
+        "cv": {
+          "title": "ATS-optimized CV",
+          "desc": "Analysis, scoring and rewriting to get past automated recruiter filters."
+        },
+        "tracker": {
+          "title": "Kanban tracking",
+          "desc": "See all your applications, from draft to offer, with drag and drop."
+        },
+        "local": {
+          "title": "Local jobs + France Travail",
+          "desc": "Caledonian and national listings aggregated in one place."
+        }
+      },
+      "localBanner": {
+        "title": "Built for the New Caledonia market",
+        "desc": "Local listings from emploi.nc and France Travail, aggregated and analyzed in one place — where global tools don't go."
+      },
+      "trust": {
+        "free": {
+          "title": "Free to start",
+          "desc": "Create your account and import your CV at no cost."
+        },
+        "privacy": {
+          "title": "Your data stays private",
+          "desc": "Your CV and applications are never sold."
+        },
+        "local": {
+          "title": "Rooted in New Caledonia",
+          "desc": "Designed for the local context and job market."
+        }
+      },
+      "cta": {
+        "title": "Ready to speed up your job search?",
+        "subtitle": "Create your free account and import your CV in under two minutes.",
+        "register": "Create a free account"
+      }
+    },
     "quickAccess": {
       "title": "Quick access",
       "onboarding": {

@@ -11,6 +11,7 @@ import { RevealOnScrollDirective } from 'app/shared/reveal/reveal-on-scroll.dire
 import { applicationStatusColor, applicationStatusIcon, ApplicationStats } from 'app/job-copilot/shared/job-copilot.model';
 import { JobCopilotService } from 'app/job-copilot/shared/job-copilot.service';
 import { HomeBanniere } from './home-banniere/home-banniere';
+import { HomeLanding } from './home-landing/home-landing';
 
 interface QuickAccessItem {
   routerLink: string;
@@ -77,7 +78,16 @@ const QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.html',
   styleUrl: './home.scss',
-  imports: [TranslateDirective, TranslateModule, RouterLink, FaIconComponent, LowerCasePipe, RevealOnScrollDirective, HomeBanniere],
+  imports: [
+    TranslateDirective,
+    TranslateModule,
+    RouterLink,
+    FaIconComponent,
+    LowerCasePipe,
+    RevealOnScrollDirective,
+    HomeBanniere,
+    HomeLanding,
+  ],
 })
 export default class Home {
   public readonly account = inject(AccountService).account;

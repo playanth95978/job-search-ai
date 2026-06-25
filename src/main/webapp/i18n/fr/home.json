@@ -15,6 +15,74 @@
       "title": "Bienvenue sur Job Search AI",
       "subtitle": "Connectez-vous pour accéder à votre tableau de bord personnalisé, vos candidatures et votre copilote de carrière IA."
     },
+    "landing": {
+      "steps": {
+        "title": "Comment ça marche",
+        "import": {
+          "title": "Importez votre CV",
+          "desc": "On l'analyse et on construit automatiquement votre profil candidat."
+        },
+        "discover": {
+          "title": "Découvrez vos offres",
+          "desc": "Recevez des offres pertinentes, locales et nationales, classées par affinité."
+        },
+        "apply": {
+          "title": "Postulez & entraînez-vous",
+          "desc": "Lettres générées, suivi Kanban et simulations d'entretien avec un recruteur IA."
+        }
+      },
+      "features": {
+        "title": "Tout pour décrocher le job",
+        "subtitle": "Un copilote complet, de l'import du CV jusqu'à l'entretien.",
+        "search": {
+          "title": "Recherche intelligente",
+          "desc": "Une recherche sémantique qui comprend votre profil, pas seulement des mots-clés."
+        },
+        "coverLetter": {
+          "title": "Lettres de motivation IA",
+          "desc": "Générées et personnalisées pour chaque offre, en un clic."
+        },
+        "interview": {
+          "title": "Coaching d'entretien",
+          "desc": "Entraînez-vous avec un recruteur virtuel et recevez un feedback immédiat."
+        },
+        "cv": {
+          "title": "CV optimisé ATS",
+          "desc": "Analyse, score et réécriture pour passer les filtres automatiques des recruteurs."
+        },
+        "tracker": {
+          "title": "Suivi Kanban",
+          "desc": "Visualisez toutes vos candidatures, du brouillon à l'offre, en glisser-déposer."
+        },
+        "local": {
+          "title": "Offres locales + France Travail",
+          "desc": "Les annonces calédoniennes et nationales agrégées au même endroit."
+        }
+      },
+      "localBanner": {
+        "title": "Pensé pour le marché calédonien",
+        "desc": "Les offres locales d'emploi.nc et celles de France Travail, agrégées et analysées au même endroit — là où les outils mondiaux ne vont pas."
+      },
+      "trust": {
+        "free": {
+          "title": "Gratuit pour démarrer",
+          "desc": "Créez votre compte et importez votre CV sans rien payer."
+        },
+        "privacy": {
+          "title": "Vos données restent privées",
+          "desc": "Votre CV et vos candidatures ne sont jamais revendus."
+        },
+        "local": {
+          "title": "Ancré en Nouvelle-Calédonie",
+          "desc": "Conçu pour le contexte et le marché de l'emploi local."
+        }
+      },
+      "cta": {
+        "title": "Prêt à accélérer votre recherche d'emploi ?",
+        "subtitle": "Créez votre compte gratuit et importez votre CV en moins de deux minutes.",
+        "register": "Créer un compte gratuit"
+      }
+    },
     "quickAccess": {
       "title": "Accès rapide",
       "onboarding": {

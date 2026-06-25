@@ -33,45 +33,27 @@
         >
       </div>
     }
-  } @else {
     <section class="home-section">
-      <div class="home-guest-card" appReveal="up">
-        <h3 jhiTranslate="home.guest.title">Bienvenue sur Job Search AI</h3>
-        <p jhiTranslate="home.guest.subtitle">
-          Connectez-vous pour accéder à votre tableau de bord personnalisé, vos candidatures et votre copilote de carrière IA.
-        </p>
-        <div class="home-guest-actions">
-          <button (click)="login()" class="jc-btn jc-btn-primary" type="button">
-            <fa-icon icon="sign-in-alt" />
-            <span jhiTranslate="global.menu.account.login">S'authentifier</span>
-          </button>
-          <a class="jc-btn jc-btn-outline" routerLink="/account/register">
-            <fa-icon icon="user-plus" />
-            <span jhiTranslate="global.messages.info.register.link">Créer un compte</span>
+      <h2 class="home-section-title" appReveal="up" jhiTranslate="home.quickAccess.title">Accès rapide</h2>
+      <div class="jc-actions home-quick-access">
+        @for (item of quickAccessItems; track item.routerLink; let i = $index, even = $even) {
+          <a
+            [class]="'jc-action-card ' + item.cssClass"
+            [appReveal]="even ? 'left' : 'right'"
+            [revealDelay]="i * 70"
+            [routerLink]="item.routerLink"
+          >
+            <fa-icon [icon]="item.icon" size="lg" />
+            <div>
+              <strong jhiTranslate="{{ item.titleKey }}"></strong>
+              <span jhiTranslate="{{ item.subtitleKey }}"></span>
+            </div>
+            <fa-icon class="jc-action-arrow" icon="arrow-right" />
           </a>
-        </div>
+        }
       </div>
     </section>
+  } @else {
+    <jhi-home-landing (loginAction)="login()" />
   }
-
-  <section class="home-section">
-    <h2 class="home-section-title" appReveal="up" jhiTranslate="home.quickAccess.title">Accès rapide</h2>
-    <div class="jc-actions home-quick-access">
-      @for (item of quickAccessItems; track item.routerLink; let i = $index, even = $even) {
-        <a
-          [class]="'jc-action-card ' + item.cssClass"
-          [appReveal]="even ? 'left' : 'right'"
-          [revealDelay]="i * 70"
-          [routerLink]="item.routerLink"
-        >
-          <fa-icon [icon]="item.icon" size="lg" />
-          <div>
-            <strong jhiTranslate="{{ item.titleKey }}"></strong>
-            <span jhiTranslate="{{ item.subtitleKey }}"></span>
-          </div>
-          <fa-icon class="jc-action-arrow" icon="arrow-right" />
-        </a>
-      }
-    </div>
-  </section>
 </div>

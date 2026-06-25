@@ -40,8 +40,8 @@ public class JobCopilotCvResource {
     }
 
     @GetMapping("/review")
-    public ResponseEntity<CvReviewDto> review() {
+    public ResponseEntity<CvReviewDto> review(@RequestParam(required = false) String language) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        return ResponseEntity.ok(cvIngestionService.review(userId));
+        return ResponseEntity.ok(cvIngestionService.review(userId, language));
     }
 }

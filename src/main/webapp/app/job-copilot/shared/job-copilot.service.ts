@@ -41,9 +41,11 @@ export class JobCopilotService {
     return this.http.get<Resume>(`${this.baseUrl}/cv/profile`);
   }
 
-  reviewCv(): Observable<CvReview> {
+  reviewCv(language?: string): Observable<CvReview> {
     // Reviews the ingested CV (the profile's stored markdown), not an empty editor buffer.
-    return this.http.get<CvReview>(`${this.baseUrl}/cv/review`);
+    const lang = language ?? this.translateService.getCurrentLang();
+    const params = new HttpParams().set('language', lang);
+    return this.http.get<CvReview>(`${this.baseUrl}/cv/review`, { params });
   }
 
   rewriteCv(text: string, kind: string, jobTitle?: string, company?: string, language?: string): Observable<any> {
