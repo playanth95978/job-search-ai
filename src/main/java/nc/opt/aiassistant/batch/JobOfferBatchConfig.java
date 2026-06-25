@@ -109,10 +109,10 @@ public class JobOfferBatchConfig {
     // --- Emploi-NC ---
 
     @Bean
-    public Step ingestEmploiNcStep(JobRepository jobRepository, EmploiNcConnector connector) {
+    public Step ingestEmploiNcStep(JobRepository jobRepository, AtsItemReader emploiNcReader) {
         return new StepBuilder("ingestEmploiNcStep", jobRepository)
             .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
-            .reader(new AtsItemReader(connector, null, null))
+            .reader(emploiNcReader)
             .processor(statelessIngestionProcessor())
             .writer(jobOfferBatchWriter)
             .faultTolerant()
@@ -120,6 +120,13 @@ public class JobOfferBatchConfig {
             .skip(Exception.class)
             .listener(skipListener)
             .build();
+    }
+
+    @Bean
+    @StepScope
+    public AtsItemReader emploiNcReader(EmploiNcConnector connector) {
+        // Step-scoped so each run gets a fresh (lazy) reader rather than reusing an exhausted iterator.
+        return new AtsItemReader(connector, null, null);
     }
 
     // --- Shared components ---

@@ -128,7 +128,9 @@ public class FranceTravailConnector implements AtsConnector {
         }
 
         final int pageSize = 50;
-        return Flux.generate(
+        // Flux.generate allows at most one sink.next() per call: emit one page (a List) per call and
+        // fan it out with flatMapIterable.
+        return Flux.<java.util.List<JobOffer>, Integer>generate(
             () -> 0,
             (start, sink) -> {
                 try {
@@ -159,9 +161,11 @@ public class FranceTravailConnector implements AtsConnector {
                         sink.complete();
                         return start;
                     }
+                    java.util.List<JobOffer> page = new java.util.ArrayList<>();
                     for (JsonNode r : results) {
-                        sink.next(mapJobOffer(r));
+                        page.add(mapJobOffer(r));
                     }
+                    sink.next(page);
                     if (results.size() < pageSize) {
                         sink.complete();
                     }
@@ -171,7 +175,7 @@ public class FranceTravailConnector implements AtsConnector {
                     return start;
                 }
             }
-        ).cast(JobOffer.class);
+        ).flatMapIterable(page -> page);
     }
 
     /**
@@ -189,7 +193,9 @@ public class FranceTravailConnector implements AtsConnector {
 
         final int pageSize = 150;
         final int maxResults = 3150; // API hard cap: range value cannot exceed 3149
-        return Flux.generate(
+        // Flux.generate allows at most one sink.next() per call: emit one page (a List) per call and
+        // fan it out with flatMapIterable.
+        return Flux.<java.util.List<JobOffer>, Integer>generate(
             () -> 0,
             (start, sink) -> {
                 if (start >= maxResults) {
@@ -221,9 +227,11 @@ public class FranceTravailConnector implements AtsConnector {
                         sink.complete();
                         return start;
                     }
+                    java.util.List<JobOffer> page = new java.util.ArrayList<>();
                     for (JsonNode r : results) {
-                        sink.next(mapJobOffer(r));
+                        page.add(mapJobOffer(r));
                     }
+                    sink.next(page);
                     if (results.size() < pageSize) {
                         sink.complete();
                     }
@@ -240,7 +248,7 @@ public class FranceTravailConnector implements AtsConnector {
                     return start;
                 }
             }
-        ).cast(JobOffer.class);
+        ).flatMapIterable(page -> page);
     }
 
     private void parseSalary(String libelle, JobOffer offer) {

@@ -49,7 +49,9 @@ public class EmploiNcConnector implements AtsConnector {
 
     @Override
     public reactor.core.publisher.Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {
-        return reactor.core.publisher.Flux.generate(
+        // Flux.generate allows at most one sink.next() per call, so each call emits a whole page
+        // (a List) and flatMapIterable fans it out into individual offers.
+        return reactor.core.publisher.Flux.<java.util.List<JobOffer>, Integer>generate(
             () -> 0,
             (offset, sink) -> {
                 try {
@@ -75,9 +77,11 @@ public class EmploiNcConnector implements AtsConnector {
                         sink.complete();
                         return offset;
                     }
+                    java.util.List<JobOffer> page = new java.util.ArrayList<>();
                     for (JsonNode r : results) {
-                        sink.next(mapJobOffer(r));
+                        page.add(mapJobOffer(r));
                     }
+                    sink.next(page);
                     if (results.size() < PAGE_SIZE) {
                         sink.complete();
                     }
@@ -87,7 +91,7 @@ public class EmploiNcConnector implements AtsConnector {
                     return offset;
                 }
             }
-        ).cast(JobOffer.class);
+        ).flatMapIterable(page -> page);
     }
 
     /** Builds an ODSQL {@code where} clause filtering on active offers, keywords and city. */
