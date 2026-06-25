@@ -41,9 +41,9 @@ export class JobCopilotService {
     return this.http.get<Resume>(`${this.baseUrl}/cv/profile`);
   }
 
-  reviewCv(language?: string): Observable<CvReview> {
-    const lang = language ?? this.translateService.getCurrentLang();
-    return this.http.post<CvReview>(`api/cv-builder/review`, { content: '', language: lang });
+  reviewCv(): Observable<CvReview> {
+    // Reviews the ingested CV (the profile's stored markdown), not an empty editor buffer.
+    return this.http.get<CvReview>(`${this.baseUrl}/cv/review`);
   }
 
   rewriteCv(text: string, kind: string, jobTitle?: string, company?: string, language?: string): Observable<any> {
