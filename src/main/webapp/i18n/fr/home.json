@@ -16,6 +16,7 @@
       "subtitle": "Connectez-vous pour accéder à votre tableau de bord personnalisé, vos candidatures et votre copilote de carrière IA."
     },
     "landing": {
+      "newChat": "Nouveau Chat",
       "steps": {
         "title": "Comment ça marche",
         "import": {
@@ -121,9 +122,6 @@
       "title": "Historique",
       "noHistory": "Aucune conversation trouvée",
       "untitled": "Nouvelle conversation"
-    },
-    "landing": {
-      "newChat": "Nouveau Chat"
     }
   }
 }

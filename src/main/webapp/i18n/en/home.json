@@ -16,6 +16,7 @@
       "subtitle": "Sign in to access your personalized dashboard, your applications and your AI career copilot."
     },
     "landing": {
+      "newChat": "New chat",
       "steps": {
         "title": "How it works",
         "import": {
@@ -121,9 +122,6 @@
       "title": "History",
       "noHistory": "No conversation found",
       "untitled": "New conversation"
-    },
-    "landing": {
-      "newChat": "New chat"
     }
   }
 }
