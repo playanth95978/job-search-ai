@@ -1,121 +1,135 @@
 package nc.opt.aiassistant.batch;
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 import nc.opt.aiassistant.domain.JobOffer;
-import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferIngestionService;
-import nc.opt.aiassistant.service.jobcopilot.JobOfferProcessingService;
 import nc.opt.aiassistant.service.jobcopilot.ats.EmploiNcConnector;
 import nc.opt.aiassistant.service.jobcopilot.ats.FranceTravailConnector;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.EnableJdbcJobRepository;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
-import org.springframework.batch.infrastructure.item.ItemWriter;
-import org.springframework.batch.infrastructure.item.data.RepositoryItemReader;
-import org.springframework.batch.infrastructure.item.data.RepositoryItemWriter;
-import org.springframework.batch.infrastructure.item.data.builder.RepositoryItemReaderBuilder;
-import org.springframework.batch.infrastructure.item.data.builder.RepositoryItemWriterBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Sort;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
+/**
+ * Mass-ingestion batch for job offers.
+ *
+ * <p>The France Travail step is <b>partitioned by ROME grand domaine</b>: each of the 14 domaines
+ * runs as an independent worker step issuing its own {@code grandDomaine}-filtered query. This both
+ * covers every job category and keeps each query under the API's 3150-result hard cap (a single
+ * unfiltered query could never see more than 3150 offers). Workers run on virtual threads with a
+ * bounded concurrency to respect the API rate limits.</p>
+ *
+ * <p>Throughput levers vs. the previous design: chunk-level upsert + dedup in one {@code IN} query
+ * (see {@link JobOfferBatchWriter}) instead of one SELECT per offer, large chunks, and
+ * {@code faultTolerant} so a single bad page/offer skips instead of killing the whole job.</p>
+ *
+ * <p>Embedding generation is intentionally <b>not</b> part of this job — it is handled out-of-band by
+ * the scheduled embedding poller, so ingestion stays fast and restartable.</p>
+ */
 @Configuration
 @EnableBatchProcessing
 @EnableJdbcJobRepository
 public class JobOfferBatchConfig {
 
+    private static final int CHUNK_SIZE = 200;
+    private static final int SKIP_LIMIT = 100;
+    /** Concurrent France Travail partitions; bounded to stay within the API rate limits. */
+    private static final int PARTITION_CONCURRENCY = 4;
+
     private final JobOfferIngestionService ingestionService;
-    private final JobOfferRepository jobOfferRepository;
-    private final JobOfferProcessingService jobOfferProcessingService;
+    private final JobOfferBatchWriter jobOfferBatchWriter;
     private final PlatformTransactionManager transactionManager;
 
     public JobOfferBatchConfig(
         PlatformTransactionManager transactionManager,
         JobOfferIngestionService ingestionService,
-        JobOfferRepository jobOfferRepository,
-        JobOfferProcessingService jobOfferProcessingService
+        JobOfferBatchWriter jobOfferBatchWriter
     ) {
         this.transactionManager = transactionManager;
         this.ingestionService = ingestionService;
-        this.jobOfferRepository = jobOfferRepository;
-        this.jobOfferProcessingService = jobOfferProcessingService;
+        this.jobOfferBatchWriter = jobOfferBatchWriter;
     }
 
     @Bean
-    public Job ingestJobOffersJob(
-        JobRepository jobRepository,
-        Step ingestFranceTravailStep,
-        Step ingestEmploiNcStep,
-        Step processEmbeddingsStep
-    ) {
-        return new JobBuilder("ingestJobOffersJob", jobRepository)
-            .start(ingestFranceTravailStep)
-            .next(ingestEmploiNcStep)
-            .next(processEmbeddingsStep)
-            .build();
+    public Job ingestJobOffersJob(JobRepository jobRepository, Step ingestFranceTravailStep, Step ingestEmploiNcStep) {
+        return new JobBuilder("ingestJobOffersJob", jobRepository).start(ingestFranceTravailStep).next(ingestEmploiNcStep).build();
     }
 
+    // --- France Travail: partitioned by ROME grand domaine ---
+
     @Bean
-    public Step ingestFranceTravailStep(JobRepository jobRepository, FranceTravailConnector connector) {
+    public Step ingestFranceTravailStep(JobRepository jobRepository, Step franceTravailWorkerStep, TaskExecutor batchTaskExecutor) {
         return new StepBuilder("ingestFranceTravailStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(5, transactionManager)
-            .reader(new AtsItemReader(connector, "informatique", "Nouvelle-Calédonie"))
-            .processor(ingestionProcessor())
-            .writer(jobOfferWriter())
+            .partitioner(franceTravailWorkerStep.getName(), new GrandDomainePartitioner(List.of()))
+            .step(franceTravailWorkerStep)
+            .gridSize(RomeGrandDomaine.ALL.size())
+            .taskExecutor(batchTaskExecutor)
             .build();
     }
+
+    @Bean
+    public Step franceTravailWorkerStep(JobRepository jobRepository, AtsItemReader franceTravailReader) {
+        return new StepBuilder("franceTravailWorkerStep", jobRepository)
+            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
+            .reader(franceTravailReader)
+            .processor(statelessIngestionProcessor())
+            .writer(jobOfferBatchWriter)
+            .faultTolerant()
+            .skipLimit(SKIP_LIMIT)
+            .skip(Exception.class)
+            .build();
+    }
+
+    @Bean
+    @StepScope
+    public AtsItemReader franceTravailReader(
+        FranceTravailConnector connector,
+        @Value("#{stepExecutionContext['grandDomaine']}") String grandDomaine,
+        @Value("#{stepExecutionContext['departement']}") String departement
+    ) {
+        return new AtsItemReader(connector.fetchByGrandDomaine(grandDomaine, departement));
+    }
+
+    // --- Emploi-NC ---
 
     @Bean
     public Step ingestEmploiNcStep(JobRepository jobRepository, EmploiNcConnector connector) {
         return new StepBuilder("ingestEmploiNcStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(50, transactionManager)
+            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
             .reader(new AtsItemReader(connector, null, null))
-            .processor(ingestionProcessor())
-            .writer(jobOfferWriter())
+            .processor(statelessIngestionProcessor())
+            .writer(jobOfferBatchWriter)
+            .faultTolerant()
+            .skipLimit(SKIP_LIMIT)
+            .skip(Exception.class)
             .build();
     }
 
+    // --- Shared components ---
+
     @Bean
-    public Step processEmbeddingsStep(JobRepository jobRepository) {
-        return new StepBuilder("processEmbeddingsStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(50, transactionManager)
-            .reader(pendingEmbeddingReader())
-            .writer(embeddingWriter())
-            .build();
+    public ItemProcessor<JobOffer, JobOffer> statelessIngestionProcessor() {
+        // Dedup is done per-chunk in the writer, so the processor only enriches (no DB lookup).
+        return ingestionService::prepareForIngestionStateless;
     }
 
     @Bean
-    public ItemProcessor<JobOffer, JobOffer> ingestionProcessor() {
-        return ingestionService::prepareForIngestion;
-    }
-
-    @Bean
-    public RepositoryItemWriter<JobOffer> jobOfferWriter() {
-        return new RepositoryItemWriterBuilder<JobOffer>().repository(jobOfferRepository).methodName("save").build();
-    }
-
-    @Bean
-    public RepositoryItemReader<JobOffer> pendingEmbeddingReader() {
-        return new RepositoryItemReaderBuilder<JobOffer>()
-            .name("pendingEmbeddingReader")
-            .repository(jobOfferRepository)
-            .methodName("findByEmbeddingStatus")
-            .arguments(EmbeddingStatus.PENDING)
-            .pageSize(50)
-            .sorts(Map.of("createdAt", Sort.Direction.ASC))
-            .build();
-    }
-
-    @Bean
-    public ItemWriter<JobOffer> embeddingWriter() {
-        return chunk -> jobOfferProcessingService.processBatch(new ArrayList<>(chunk.getItems()));
+    public TaskExecutor batchTaskExecutor() {
+        SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("ft-partition-");
+        executor.setVirtualThreads(true);
+        executor.setConcurrencyLimit(PARTITION_CONCURRENCY);
+        return executor;
     }
 }

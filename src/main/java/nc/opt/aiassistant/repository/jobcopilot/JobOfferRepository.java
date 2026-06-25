@@ -1,5 +1,6 @@
 package nc.opt.aiassistant.repository.jobcopilot;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import nc.opt.aiassistant.domain.JobOffer;
@@ -21,6 +22,12 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
 
     @Query("SELECT j FROM JobOffer j WHERE j.sourceId = :sourceId AND j.source = :source")
     List<JobOffer> findBySourceIdAndSource(String sourceId, JobSource source);
+
+    /**
+     * Batch dedup lookup: loads every existing offer of a given source whose sourceId is in the chunk,
+     * in a single query, so mass ingestion avoids the N+1 of one SELECT per offer.
+     */
+    List<JobOffer> findBySourceAndSourceIdIn(JobSource source, Collection<String> sourceIds);
 
     @Query("SELECT j FROM JobOffer j WHERE LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<JobOffer> searchByKeyword(String keyword);

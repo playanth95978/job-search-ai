@@ -54,6 +54,28 @@ public class JobOfferIngestionService {
         }
     }
 
+    /**
+     * Enriches an offer (hash, search text, status, timestamps) WITHOUT any database lookup.
+     * Used by the mass-ingestion batch, where deduplication is done per-chunk in a single query
+     * (see the batch writer) instead of one SELECT per offer.
+     */
+    public JobOffer prepareForIngestionStateless(JobOffer offer) {
+        try {
+            offer.setContentHash(contentJobOfferHash(offer));
+            offer.setSearchText(buildSearchText(offer));
+            if (offer.getEmbeddingStatus() != EmbeddingStatus.STUB) {
+                offer.setEmbeddingStatus(EmbeddingStatus.PENDING);
+            }
+            Instant now = Instant.now();
+            if (offer.getCreatedAt() == null) offer.setCreatedAt(now);
+            offer.setUpdatedAt(now);
+            return offer;
+        } catch (Exception e) {
+            log.error("Failed to prepare job offer {}: {}", offer.getTitle(), e.getMessage());
+            return null;
+        }
+    }
+
     public JobOffer prepareForIngestion(JobOffer offer) {
         try {
             String hash = contentJobOfferHash(offer);

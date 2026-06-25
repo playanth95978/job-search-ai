@@ -2,6 +2,7 @@ package nc.opt.aiassistant.service.jobcopilot.ats;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import nc.opt.aiassistant.domain.enumeration.JobSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
 @Slf4j
@@ -166,6 +168,75 @@ public class FranceTravailConnector implements AtsConnector {
                     return start + pageSize;
                 } catch (Exception e) {
                     sink.error(e);
+                    return start;
+                }
+            }
+        ).cast(JobOffer.class);
+    }
+
+    /**
+     * Paginates over a single ROME grand domaine (and optionally a département), for mass ingestion.
+     *
+     * <p>Uses the maximum page size (150) and stops at the API's hard ceiling of 3150 results
+     * (range 0-3149); beyond that the API rejects the request. On any page error the partition ends
+     * gracefully (the other partitions keep running) rather than aborting the whole job.</p>
+     */
+    public Flux<JobOffer> fetchByGrandDomaine(String grandDomaine, String departement) {
+        if (clientId.isBlank() || clientSecret.isBlank()) {
+            log.warn("France Travail API credentials not configured");
+            return Flux.empty();
+        }
+
+        final int pageSize = 150;
+        final int maxResults = 3150; // API hard cap: range value cannot exceed 3149
+        return Flux.generate(
+            () -> 0,
+            (start, sink) -> {
+                if (start >= maxResults) {
+                    sink.complete();
+                    return start;
+                }
+                try {
+                    int end = Math.min(start + pageSize, maxResults) - 1;
+                    String token = getAccessToken();
+                    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(API_BASE)
+                        .queryParam("grandDomaine", grandDomaine)
+                        .queryParam("range", start + "-" + end);
+                    if (departement != null && !departement.isBlank()) {
+                        uriComponentsBuilder.queryParam("departement", departement);
+                    }
+                    URI uri = uriComponentsBuilder.build().toUri();
+                    String body = webClientBuilder
+                        .build()
+                        .get()
+                        .uri(uri)
+                        .header("Authorization", "Bearer " + token)
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+
+                    JsonNode root = objectMapper.readTree(body);
+                    JsonNode results = root.path("resultats");
+                    if (results.isEmpty()) {
+                        sink.complete();
+                        return start;
+                    }
+                    for (JsonNode r : results) {
+                        sink.next(mapJobOffer(r));
+                    }
+                    if (results.size() < pageSize) {
+                        sink.complete();
+                    }
+                    return start + pageSize;
+                } catch (Exception e) {
+                    log.error(
+                        "France Travail page {} (grandDomaine={}, dep={}) failed: {}",
+                        start,
+                        grandDomaine,
+                        departement,
+                        e.getMessage()
+                    );
+                    sink.complete();
                     return start;
                 }
             }
