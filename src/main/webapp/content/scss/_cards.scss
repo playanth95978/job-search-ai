@@ -1,0 +1,46 @@
+/* ==========================================================================
+Modern surface card — shared by the apply-modal tabs (and reusable elsewhere).
+Soft 1px border + layered shadow + generous radius (2026 "soft minimal" look).
+========================================================================== */
+
+.jc-card {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 18px;
+  padding: 1.25rem 1.4rem;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 12px 28px -18px rgba(16, 24, 40, 0.25);
+}
+
+.jc-card + .jc-card {
+  margin-top: 0.9rem;
+}
+
+/* Subtle gradient-tinted variant for "hero" cards (e.g. the score). */
+.jc-card-accent {
+  border-color: rgba(102, 126, 234, 0.25);
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.06), rgba(118, 75, 162, 0.02)), var(--bs-body-bg);
+}
+
+.jc-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bs-secondary-color);
+  margin: 0 0 0.9rem;
+
+  fa-icon {
+    color: #667eea;
+  }
+}
+
+.jc-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

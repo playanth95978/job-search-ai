@@ -1,13 +1,13 @@
 @if (tailoringLoading()) {
-  <div class="jc-modal-loading">
+  <div class="jc-card jc-modal-loading">
     <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
     <span jhiTranslate="jobCopilot.tailoring.loading">Adaptation de votre CV à cette offre…</span>
   </div>
 } @else if (tailoringError(); as terr) {
   <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ terr }}</div>
 } @else if (tailored(); as t) {
-  <div class="jc-tailored">
-    <div class="jc-tailored-actions">
+  <div class="jc-card jc-card-accent">
+    <div class="jc-card-actions">
       <button (click)="openTailoredInBuilder()" [disabled]="openingBuilder()" class="jc-btn jc-btn-primary" type="button">
         @if (openingBuilder()) {
           <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
@@ -23,7 +23,9 @@
         <fa-icon icon="sync"></fa-icon> <span jhiTranslate="jobCopilot.tailoring.regenerate">Régénérer</span>
       </button>
     </div>
+  </div>
 
+  <div class="jc-card">
     @if (t.personal.title) {
       <p class="jc-tailored-headline">{{ t.personal.title }}</p>
     }
@@ -60,12 +62,13 @@
     }
   </div>
 } @else {
-  <div class="jc-tailored-intro">
+  <div class="jc-card jc-tailored-intro">
+    <div class="jc-tailored-intro-icon"><fa-icon icon="wand-magic-sparkles" size="2x"></fa-icon></div>
     <p jhiTranslate="jobCopilot.tailoring.intro">
       Générez une variante de votre CV optimisée ATS pour cette offre : compétences réordonnées, formulations alignées sur l'annonce,
       hors-sujet retiré. Votre CV principal n'est pas modifié.
     </p>
-    <button (click)="generateTailored()" class="jc-btn jc-btn-primary" type="button">
+    <button (click)="generateTailored()" class="jc-btn jc-btn-primary jc-btn-lg" type="button">
       <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.tailoring.generate">Adapter mon CV</span>
     </button>
   </div>

@@ -1,12 +1,14 @@
 @if (loading()) {
-  <div class="jc-modal-loading">
+  <div class="jc-card jc-modal-loading">
     <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
     <span jhiTranslate="jobCopilot.applyModal.loading">Génération de la lettre de motivation...</span>
   </div>
 } @else if (application()) {
-  <div class="jc-modal-body-inner">
+  <div class="jc-card">
     <div class="jc-modal-label-row">
-      <label class="jc-modal-label" for="apply-cover-letter" jhiTranslate="jobCopilot.applyModal.coverLetter">Lettre de motivation</label>
+      <label class="jc-card-header" for="apply-cover-letter">
+        <fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.coverLetter">Lettre de motivation</span>
+      </label>
       <div class="jc-modal-label-actions">
         <button (click)="copyToClipboard()" class="jc-btn jc-btn-ghost jc-btn-sm" type="button">
           <fa-icon [icon]="copied() ? 'check' : 'copy'"></fa-icon>

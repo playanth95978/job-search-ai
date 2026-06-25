@@ -1,16 +1,23 @@
 @if (positioningLoading()) {
-  <div class="jc-modal-loading">
+  <div class="jc-card jc-modal-loading">
     <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
     <span jhiTranslate="jobCopilot.positioning.loading">Analyse de votre positionnement…</span>
   </div>
 } @else if (positioningError(); as perr) {
   <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ perr }}</div>
 } @else if (positioning(); as p) {
-  <jhi-match-result [result]="p" />
+  <div class="jc-card jc-card-accent">
+    <h3 class="jc-card-header">
+      <fa-icon icon="bullseye"></fa-icon> <span jhiTranslate="jobCopilot.positioning.title">Mon positionnement</span>
+    </h3>
+    <jhi-match-result [result]="p" />
+  </div>
 
   @if (p.missingSkills.length) {
-    <div class="jc-whatif">
-      <h4 class="jc-whatif-title" jhiTranslate="jobCopilot.positioning.whatIf">Et si j'ajoutais…</h4>
+    <div class="jc-card">
+      <h3 class="jc-card-header">
+        <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.positioning.whatIf">Et si j'ajoutais…</span>
+      </h3>
       <div class="jc-whatif-chips">
         @for (skill of p.missingSkills; track skill) {
           <button type="button" class="jc-whatif-chip" [class.selected]="isSelected(skill)" (click)="toggleAddition(skill)">

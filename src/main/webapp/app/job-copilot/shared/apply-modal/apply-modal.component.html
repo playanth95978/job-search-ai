@@ -7,7 +7,7 @@
 
 <div class="modal-body">
   @if (offer(); as o) {
-    <div class="jc-modal-offer">
+    <div class="jc-modal-offer mb-3">
       <div class="jc-modal-offer-title">
         <strong>{{ o.title }}</strong>
         @if (o.source) {
@@ -22,6 +22,7 @@
         }
       </div>
     </div>
+    <jhi-apply-offer [offer]="offer()" [enriching]="enriching()" />
   }
 
   @if (resultMessage()) {
@@ -41,14 +42,6 @@
         <a ngbNavLink><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.tailoring.tab">CV adapté</span></a>
         <ng-template ngbNavContent>
           <jhi-apply-tailored [offerId]="offerId()" />
-        </ng-template>
-      </li>
-
-      <!-- Offer description -->
-      <li [ngbNavItem]="'offer'">
-        <a ngbNavLink><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.tabs.offer">Offre</span></a>
-        <ng-template ngbNavContent>
-          <jhi-apply-offer [offer]="offer()" [enriching]="enriching()" />
         </ng-template>
       </li>
 
