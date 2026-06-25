@@ -1,7 +1,160 @@
 .jc-applications {
-  max-width: 960px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem;
+}
+
+/* --- Kanban board --- */
+.jc-board {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.jc-column {
+  flex: 0 0 280px;
+  width: 280px;
+  background: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 220px);
+}
+
+.jc-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-top: 3px solid;
+  border-radius: 14px 14px 0 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.jc-column-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.jc-column-count {
+  background: var(--bs-body-bg);
+  color: var(--bs-secondary-color);
+  border-radius: 20px;
+  padding: 0.05rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.jc-column-body {
+  padding: 0.5rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 80px;
+}
+
+.jc-column-empty {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 10px;
+  padding: 1.25rem 0.5rem;
+  margin: 0.25rem;
+}
+
+.jc-card {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-left: 4px solid;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  cursor: grab;
+  transition: box-shadow 0.15s;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.jc-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.jc-card-company {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+
+.jc-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+}
+
+.jc-card .jc-match-badge {
+  margin-top: 0.5rem;
+}
+
+.jc-card-apply {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.6rem;
+}
+
+/* CDK drag & drop states */
+.cdk-drag-preview {
+  border-radius: 10px;
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.jc-card-drag-placeholder {
+  background: rgba(102, 126, 234, 0.12);
+  border: 2px dashed #667eea;
+  border-radius: 10px;
+  min-height: 60px;
+  margin-bottom: 0.5rem;
+}
+
+.jc-column-body.cdk-drop-list-dragging .jc-card:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-receiving {
+  background: rgba(102, 126, 234, 0.06);
+  border-radius: 12px;
 }
 
 .jc-apps-header {

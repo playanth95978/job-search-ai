@@ -130,12 +130,16 @@
       "viewCoverLetter": "View Cover Letter",
       "created": "Created",
       "applied": "Applied",
+      "kanban": {
+        "dropHere": "Drop cards here"
+      },
       "statuses": {
         "DRAFT": "DRAFT",
         "APPLIED": "APPLIED",
         "INTERVIEW": "INTERVIEW",
         "OFFER": "OFFER",
         "REJECTED": "REJECTED",
+        "GHOSTED": "GHOSTED",
         "WITHDRAWN": "WITHDRAWN"
       }
     },

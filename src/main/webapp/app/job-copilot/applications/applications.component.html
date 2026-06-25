@@ -1,12 +1,10 @@
 <div class="jc-applications">
   <div class="jc-apps-header">
     <h1 jhiTranslate="jobCopilot.applications.title">My Applications</h1>
-    <span class="jc-apps-count" *ngIf="applications().length > 0"
-      >{{ applications().length }} <span jhiTranslate="jobCopilot.applications.count">total</span></span
-    >
+    <span class="jc-apps-count" *ngIf="total() > 0">{{ total() }} <span jhiTranslate="jobCopilot.applications.count">total</span></span>
   </div>
 
-  @if (applications().length === 0) {
+  @if (total() === 0) {
     <div class="jc-empty">
       <fa-icon icon="paper-plane" size="2x" class="jc-empty-icon"></fa-icon>
       <h3 jhiTranslate="jobCopilot.applications.empty.title">No applications yet</h3>
@@ -14,60 +12,58 @@
     </div>
   }
 
-  @for (app of applications(); track app.id) {
-    <div class="jc-app-card" [style.border-left-color]="getStatusColor(app.status)">
-      <div class="jc-app-header">
-        <div class="jc-app-status-icon" [style.color]="getStatusColor(app.status)">
-          <fa-icon [icon]="getStatusIcon(app.status)"></fa-icon>
+  <div class="jc-board" cdkDropListGroup>
+    @for (col of board(); track col.status) {
+      <div class="jc-column">
+        <div class="jc-column-header" [style.border-top-color]="getStatusColor(col.status)">
+          <span class="jc-column-title">
+            <fa-icon [icon]="getStatusIcon(col.status)" [style.color]="getStatusColor(col.status)"></fa-icon>
+            <span>{{ 'jobCopilot.applications.statuses.' + col.status | translate }}</span>
+          </span>
+          <span class="jc-column-count">{{ col.items.length }}</span>
         </div>
-        <div class="jc-app-info">
-          <strong>{{ app.jobOffer?.title || ('jobCopilot.applications.unknownPosition' | translate) }}</strong>
-          <div class="jc-app-company">
-            <fa-icon icon="building"></fa-icon> {{ app.jobOffer?.company || ('jobCopilot.search.results.unknown' | translate) }}
-          </div>
-        </div>
-        <div class="jc-app-controls">
-          @if (app.matchScore) {
-            <span class="jc-match-badge"
-              >{{ app.matchScore * 100 | number: '1.0-0' }}% <span jhiTranslate="jobCopilot.applications.match">match</span></span
-            >
-          }
-          @if (app.status === 'DRAFT') {
-            <button (click)="openApplyModal(app)" class="jc-btn jc-btn-primary jc-btn-sm">
-              <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
-            </button>
-          }
-          <select
-            class="jc-status-select"
-            [style.border-color]="getStatusColor(app.status)"
-            [ngModel]="app.status"
-            (ngModelChange)="updateStatus(app.id!, $event)"
-          >
-            @for (s of statuses; track s) {
-              <option [value]="s">{{ 'jobCopilot.applications.statuses.' + s | translate }}</option>
-            }
-          </select>
-        </div>
-      </div>
 
-      @if (app.coverLetter) {
-        <details class="jc-cover-letter">
-          <summary>
-            <fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applications.viewCoverLetter">View Cover Letter</span>
-          </summary>
-          <div class="jc-cover-content">{{ app.coverLetter }}</div>
-        </details>
-      }
-
-      <div class="jc-app-footer">
-        <span
-          ><fa-icon icon="calendar-alt"></fa-icon> <span jhiTranslate="jobCopilot.applications.created">Created</span>
-          {{ app.createdAt | date: 'mediumDate' }}</span
+        <div
+          class="jc-column-body"
+          [id]="'col-' + col.status"
+          cdkDropList
+          [cdkDropListData]="col.items"
+          [cdkDropListConnectedTo]="dropListIds"
+          (cdkDropListDropped)="drop($event, col.status)"
         >
-        @if (app.appliedAt) {
-          <span>&middot; <span jhiTranslate="jobCopilot.applications.applied">Applied</span> {{ app.appliedAt | date: 'mediumDate' }}</span>
-        }
+          @for (app of col.items; track app.id) {
+            <div class="jc-card" cdkDrag [style.border-left-color]="getStatusColor(col.status)">
+              <div class="jc-card-drag-placeholder" *cdkDragPlaceholder></div>
+
+              <div class="jc-card-title">{{ app.jobOffer?.title || ('jobCopilot.applications.unknownPosition' | translate) }}</div>
+              <div class="jc-card-company">
+                <fa-icon icon="building"></fa-icon> {{ app.jobOffer?.company || ('jobCopilot.search.results.unknown' | translate) }}
+              </div>
+
+              @if (app.matchScore) {
+                <span class="jc-match-badge"
+                  >{{ app.matchScore * 100 | number: '1.0-0' }}% <span jhiTranslate="jobCopilot.applications.match">match</span></span
+                >
+              }
+
+              <div class="jc-card-footer">
+                <span><fa-icon icon="calendar-alt"></fa-icon> {{ app.createdAt | date: 'mediumDate' }}</span>
+                @if (app.coverLetter) {
+                  <fa-icon icon="file-alt" [title]="'jobCopilot.applications.viewCoverLetter' | translate"></fa-icon>
+                }
+              </div>
+
+              @if (col.status === 'DRAFT') {
+                <button (click)="openApplyModal(app)" class="jc-btn jc-btn-primary jc-btn-sm jc-card-apply">
+                  <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
+                </button>
+              }
+            </div>
+          } @empty {
+            <div class="jc-column-empty" jhiTranslate="jobCopilot.applications.kanban.dropHere">Drop cards here</div>
+          }
+        </div>
       </div>
-    </div>
-  }
+    }
+  </div>
 </div>

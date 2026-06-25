@@ -130,12 +130,16 @@
       "viewCoverLetter": "Voir la lettre de motivation",
       "created": "Créé le",
       "applied": "Postulé le",
+      "kanban": {
+        "dropHere": "Déposez les cartes ici"
+      },
       "statuses": {
         "DRAFT": "BROUILLON",
         "APPLIED": "POSTULÉ",
         "INTERVIEW": "ENTRETIEN",
         "OFFER": "OFFRE",
         "REJECTED": "REFUSÉ",
+        "GHOSTED": "SANS RÉPONSE",
         "WITHDRAWN": "RETIRÉ"
       }
     },
