@@ -11,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.EnableJdbcJobRepo
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.parameters.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -67,7 +68,11 @@ public class JobOfferBatchConfig {
 
     @Bean
     public Job ingestJobOffersJob(JobRepository jobRepository, Step ingestFranceTravailStep, Step ingestEmploiNcStep) {
-        return new JobBuilder("ingestJobOffersJob", jobRepository).start(ingestFranceTravailStep).next(ingestEmploiNcStep).build();
+        return new JobBuilder("ingestJobOffersJob", jobRepository)
+            .incrementer(new RunIdIncrementer())
+            .start(ingestFranceTravailStep)
+            .next(ingestEmploiNcStep)
+            .build();
     }
 
     // --- France Travail: partitioned by ROME grand domaine ---

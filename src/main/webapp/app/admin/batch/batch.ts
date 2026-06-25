@@ -1,9 +1,13 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { NgbPagination } from '@ng-bootstrap/ng-bootstrap/pagination';
 import { Subscription, finalize, interval } from 'rxjs';
 
+import { ITEMS_PER_PAGE, TOTAL_COUNT_RESPONSE_HEADER } from 'app/config/pagination.constants';
+import { ItemCount } from 'app/shared/pagination';
 import { JobExecution, JobSummary } from './batch.model';
 import { BatchService } from './batch.service';
 
@@ -12,7 +16,7 @@ import { BatchService } from './batch.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './batch.html',
   styleUrl: './batch.scss',
-  imports: [DatePipe, DecimalPipe, FontAwesomeModule],
+  imports: [DatePipe, DecimalPipe, FontAwesomeModule, NgbPagination, ItemCount],
 })
 export default class Batch implements OnInit, OnDestroy {
   readonly jobs = signal<JobSummary[]>([]);
@@ -21,6 +25,10 @@ export default class Batch implements OnInit, OnDestroy {
   readonly loadingExecutions = signal(false);
   readonly launching = signal(false);
   readonly expanded = signal<number | undefined>(undefined);
+
+  readonly totalItems = signal(0);
+  readonly itemsPerPage = signal(ITEMS_PER_PAGE);
+  page = signal(1);
 
   private readonly batchService = inject(BatchService);
   private pollSub?: Subscription;
@@ -43,6 +51,7 @@ export default class Batch implements OnInit, OnDestroy {
   selectJob(name: string): void {
     this.selectedJob.set(name);
     this.expanded.set(undefined);
+    this.page.set(1);
     this.loadingExecutions.set(true);
     this.refreshExecutions();
   }
@@ -99,17 +108,27 @@ export default class Batch implements OnInit, OnDestroy {
     });
   }
 
-  private refreshExecutions(): void {
+  refreshExecutions(): void {
     const name = this.selectedJob();
     if (!name) {
       return;
     }
     this.batchService
-      .executions(name)
+      .executions(name, {
+        page: this.page() - 1,
+        size: this.itemsPerPage(),
+      })
       .pipe(finalize(() => this.loadingExecutions.set(false)))
       .subscribe({
-        next: executions => this.executions.set(executions),
+        next: (res: HttpResponse<JobExecution[]>) => {
+          this.onSuccess(res.body, res.headers);
+        },
         error: () => this.executions.set([]),
       });
+  }
+
+  private onSuccess(executions: JobExecution[] | null, headers: HttpHeaders): void {
+    this.totalItems.set(Number(headers.get(TOTAL_COUNT_RESPONSE_HEADER)));
+    this.executions.set(executions ?? []);
   }
 }

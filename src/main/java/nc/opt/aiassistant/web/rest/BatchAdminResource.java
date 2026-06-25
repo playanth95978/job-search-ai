@@ -16,6 +16,8 @@ import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.StepExecution;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.web.util.PaginationUtil;
 
 /**
  * Admin endpoints for the Spring Batch ingestion dashboard: list configured jobs, launch a run, and
@@ -80,16 +84,26 @@ public class BatchAdminResource {
 
     /** Recent executions for a job, most recent first. */
     @GetMapping("/jobs/{jobName}/executions")
-    public List<JobExecutionDTO> getExecutions(@PathVariable String jobName, @RequestParam(defaultValue = "30") int limit) {
+    public ResponseEntity<List<JobExecutionDTO>> getExecutions(@PathVariable String jobName, Pageable pageable) {
         requireJob(jobName);
-        List<JobInstance> instances = jobRepository.getJobInstances(jobName, 0, limit);
-        return instances
+        long totalInstances;
+        try {
+            totalInstances = jobRepository.getJobInstanceCount(jobName);
+        } catch (org.springframework.batch.core.launch.NoSuchJobException e) {
+            totalInstances = 0;
+        }
+        List<JobInstance> instances = jobRepository.getJobInstances(jobName, (int) pageable.getOffset(), pageable.getPageSize());
+        List<JobExecutionDTO> executions = instances
             .stream()
             .flatMap(instance -> jobRepository.getJobExecutions(instance).stream())
             .sorted(Comparator.comparing(JobExecution::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder())))
-            .limit(limit)
             .map(BatchAdminResource::toDto)
             .toList();
+
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), null);
+        headers.add("X-Total-Count", String.valueOf(totalInstances));
+
+        return ResponseEntity.ok().headers(headers).body(executions);
     }
 
     /** Launches a fresh run asynchronously; returns 202 with the job name. */

@@ -1,9 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
+import { createRequestOption } from 'app/core/request/request-util';
 
 import { JobExecution, JobSummary } from './batch.model';
 
@@ -18,8 +19,9 @@ export class BatchService {
     return this.http.get<JobSummary[]>(`${this.resourceUrl}/jobs`);
   }
 
-  executions(jobName: string): Observable<JobExecution[]> {
-    return this.http.get<JobExecution[]>(`${this.resourceUrl}/jobs/${jobName}/executions`);
+  executions(jobName: string, req?: any): Observable<HttpResponse<JobExecution[]>> {
+    const options = createRequestOption(req);
+    return this.http.get<JobExecution[]>(`${this.resourceUrl}/jobs/${jobName}/executions`, { params: options, observe: 'response' });
   }
 
   execute(jobName: string): Observable<void> {

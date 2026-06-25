@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 /**
  * Connector for New Caledonia job offers published on emploi.nc / emploi.gouv.nc,
@@ -48,10 +49,10 @@ public class EmploiNcConnector implements AtsConnector {
     }
 
     @Override
-    public reactor.core.publisher.Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {
+    public Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {
         // Flux.generate allows at most one sink.next() per call, so each call emits a whole page
         // (a List) and flatMapIterable fans it out into individual offers.
-        return reactor.core.publisher.Flux.<java.util.List<JobOffer>, Integer>generate(
+        return Flux.<List<JobOffer>, Integer>generate(
             () -> 0,
             (offset, sink) -> {
                 try {
