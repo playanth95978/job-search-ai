@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequestMapping("/api/google-drive")
@@ -57,8 +58,15 @@ public class GoogleDriveResource {
             .exchangeCodeForTokens(code)
             .flatMap(tokens -> {
                 String accessToken = (String) tokens.get("access_token");
-                return authService.getUserInfo(accessToken).map(authService::getOrCreateUser);
+                if (accessToken == null) {
+                    return Mono.error(new IllegalStateException("No access_token in Google token response: " + tokens));
+                }
+                return authService.getUserInfo(accessToken);
             })
+            // getOrCreateUser does blocking JPA work; keep it off the WebClient event-loop thread.
+            .flatMap(googleUser ->
+                Mono.fromCallable(() -> authService.getOrCreateUser(googleUser)).subscribeOn(Schedulers.boundedElastic())
+            )
             .map(user -> {
                 String authorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.joining(" "));
 
@@ -78,6 +86,7 @@ public class GoogleDriveResource {
                 var httpHeaders = new HttpHeaders();
                 httpHeaders.setBearerAuth(jwt);
                 return new ResponseEntity<>(new AuthenticateController.JWTToken(jwt), httpHeaders, HttpStatus.OK);
-            });
+            })
+            .doOnError(e -> log.error("Google login failed during code exchange / user resolution: {}", e.getMessage(), e));
     }
 }

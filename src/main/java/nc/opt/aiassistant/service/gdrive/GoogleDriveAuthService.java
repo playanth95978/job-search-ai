@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.config.ApplicationProperties;
 import nc.opt.aiassistant.domain.Authority;
@@ -13,6 +14,7 @@ import nc.opt.aiassistant.repository.UserRepository;
 import nc.opt.aiassistant.security.AuthoritiesConstants;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -34,17 +36,20 @@ public class GoogleDriveAuthService {
     private final WebClient webClient;
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public GoogleDriveAuthService(
         ApplicationProperties applicationProperties,
         WebClient.Builder webClientBuilder,
         UserRepository userRepository,
-        AuthorityRepository authorityRepository
+        AuthorityRepository authorityRepository,
+        PasswordEncoder passwordEncoder
     ) {
         this.config = applicationProperties.getGoogleDrive();
         this.webClient = webClientBuilder.build();
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public String buildAuthorizationUrl() {
@@ -100,7 +105,9 @@ public class GoogleDriveAuthService {
             log.info("Creating new Google user: {}", login);
             User newUser = new User();
             newUser.setLogin(login);
-            newUser.setPassword(""); // Not used for Google users
+            // Google users never sign in with a password, but the column requires a 60-char bcrypt
+            // hash (@Size(min=60,max=60), not null) — set an unguessable random one.
+            newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
             newUser.setFirstName(googleUser.given_name());
             newUser.setLastName(googleUser.family_name());
             newUser.setEmail(login);
