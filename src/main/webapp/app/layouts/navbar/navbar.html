@@ -73,6 +73,10 @@
               <fa-icon [fixedWidth]="true" class="me-2" icon="tasks" />
               <span jhiTranslate="global.menu.admin.logs">Logs</span>
             </a>
+            <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/batch" routerLinkActive="active">
+              <fa-icon [fixedWidth]="true" class="me-2" icon="list-check" />
+              <span jhiTranslate="global.menu.admin.batch">Jobs batch</span>
+            </a>
             @if (openAPIEnabled()) {
               <a (click)="collapseNavbar()" class="dropdown-item" routerLink="/admin/docs" routerLinkActive="active">
                 <fa-icon [fixedWidth]="true" class="me-2" icon="book" />

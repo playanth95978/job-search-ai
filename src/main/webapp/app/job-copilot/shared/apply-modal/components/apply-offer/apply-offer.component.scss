@@ -22,6 +22,22 @@
   }
 }
 
+.jc-modal-lang-select {
+  padding: 0.3rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+}
+
 .jc-modal-empty {
   color: var(--bs-secondary-color);
   font-size: 0.9rem;

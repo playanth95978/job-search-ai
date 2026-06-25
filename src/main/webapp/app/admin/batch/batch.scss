@@ -1,0 +1,13 @@
+.batch-dashboard {
+  .list-group-item-action {
+    cursor: pointer;
+  }
+
+  .exec-detail > td {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+  }
+
+  table .badge {
+    font-weight: 500;
+  }
+}

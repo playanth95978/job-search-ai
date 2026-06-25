@@ -23,6 +23,11 @@ const routes: Routes = [
     title: 'logs.title',
   },
   {
+    path: 'batch',
+    loadComponent: () => import('./batch/batch'),
+    title: 'global.menu.admin.batch',
+  },
+  {
     path: 'metrics',
     loadComponent: () => import('./metrics/metrics'),
     title: 'metrics.title',
