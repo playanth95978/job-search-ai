@@ -139,3 +139,31 @@ Horizontal Navbar (Job Search AI - 2026 style)
     }
   }
 }
+
+/* Dark-mode toggle button */
+.jc-theme-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+
+  fa-icon {
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+
+    fa-icon {
+      transform: rotate(20deg) scale(1.1);
+    }
+  }
+}

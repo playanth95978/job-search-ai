@@ -101,6 +101,17 @@
       </ul>
 
       <div class="d-flex align-items-center gap-2 jc-navbar-actions">
+        <!-- Dark mode toggle -->
+        <button
+          (click)="toggleTheme()"
+          class="nav-link jc-theme-toggle"
+          type="button"
+          [attr.aria-label]="'global.menu.theme' | translate"
+          [title]="'global.menu.theme' | translate"
+        >
+          <fa-icon [icon]="isDark() ? 'sun' : 'moon'" />
+        </button>
+
         <!-- Account -->
         <div class="d-inline-block" ngbDropdown>
           @let accountRef = account();

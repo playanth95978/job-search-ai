@@ -12,6 +12,18 @@
     <link rel="icon" href="favicon.ico" />
     <link rel="manifest" href="manifest.webapp" />
     <link rel="stylesheet" href="content/css/loading.css" />
+    <script>
+      // Set the theme before first paint to avoid a flash of the wrong theme (FOUC).
+      (function () {
+        try {
+          var t = localStorage.getItem('jsa.theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-bs-theme', t);
+        } catch (e) {}
+      })();
+    </script>
     <!-- jhipster-needle-add-resources-to-root - JHipster will add new resources here -->
   </head>
   <body>

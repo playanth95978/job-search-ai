@@ -291,7 +291,7 @@ html {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  background-color: #f8f9fa;
+  background-color: var(--bs-secondary-bg);
   padding-top: $jc-navbar-height;
 }
 
@@ -601,3 +601,61 @@ Chat UI Feature Styles (Sources, Thinking Steps, Suggestions, Feedback, Export)
 }
 
 /* jhipster-needle-scss-add-main JHipster will add new css style */
+
+/* ==========================================================================
+Dark mode — overrides for surfaces that hardcode light colors (the rest of the
+app uses Bootstrap var(--bs-*) tokens and flips automatically via data-bs-theme).
+========================================================================== */
+[data-bs-theme='dark'] {
+  /* Chat UI */
+  .sources-section .sources-toggle {
+    background: rgba(102, 126, 234, 0.12);
+    border-color: rgba(102, 126, 234, 0.35);
+    color: #aab8ff;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: rgba(102, 126, 234, 0.5);
+    }
+  }
+
+  .sources-section .source-card {
+    background: var(--bs-tertiary-bg);
+    border-color: var(--bs-border-color);
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.12);
+      border-color: rgba(102, 126, 234, 0.4);
+    }
+
+    .source-icon-wrapper {
+      background: rgba(102, 126, 234, 0.18);
+    }
+  }
+
+  .suggestion-chip {
+    background: var(--bs-tertiary-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+  }
+
+  /* Generic light surfaces hardcoded in a few feature components */
+  .jc-form-section,
+  .home-guest-card {
+    background: var(--bs-body-bg);
+  }
+
+  /* Global hardcoded colors that don't read well on a dark background */
+  a,
+  a:hover {
+    color: #b9a6ff;
+  }
+
+  .form-control {
+    background-color: var(--bs-body-bg);
+  }
+
+  .readonly {
+    background-color: var(--bs-tertiary-bg);
+  }
+}

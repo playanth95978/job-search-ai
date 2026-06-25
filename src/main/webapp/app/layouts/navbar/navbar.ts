@@ -8,6 +8,7 @@ import { environment } from 'environments/environment';
 
 import { LANGUAGES } from 'app/config/language.constants';
 import { AccountService } from 'app/core/auth/account.service';
+import { ThemeService } from 'app/core/theme/theme.service';
 import { StateStorageService } from 'app/core/auth/state-storage.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 import { LoginService } from 'app/login/login.service';
@@ -32,7 +33,6 @@ import ActiveMenuDirective from './active-menu.directive';
     FindLanguageFromKeyPipe,
     TranslateDirective,
     TranslateModule,
-
   ],
 })
 export default class Navbar implements OnInit {
@@ -42,6 +42,9 @@ export default class Navbar implements OnInit {
   openAPIEnabled = signal(false);
   readonly version: string;
   account = inject(AccountService).account;
+
+  private readonly themeService = inject(ThemeService);
+  readonly isDark = (): boolean => this.themeService.theme() === 'dark';
 
   private readonly loginService = inject(LoginService);
   private readonly translateService = inject(TranslateService);
@@ -86,5 +89,9 @@ export default class Navbar implements OnInit {
 
   toggleNavbar(): void {
     this.isNavbarCollapsed.update(isNavbarCollapsed => !isNavbarCollapsed);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 }

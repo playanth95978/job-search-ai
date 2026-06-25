@@ -31,7 +31,8 @@
         "database": "Database",
         "jhipster-needle-menu-add-admin-element": "JHipster will add additional menu entries here (do not translate!)"
       },
-      "language": "Language"
+      "language": "Language",
+      "theme": "Toggle theme (light / dark)"
     },
     "form": {
       "username.label": "Username",

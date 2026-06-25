@@ -9,12 +9,87 @@
 }
 
 /* Tabs */
-.jc-modal-tabs {
-  margin-bottom: 1rem;
+/* Modern segmented-control nav (replaces Bootstrap underline tabs). */
+.jc-modal-tabs.nav-tabs {
+  --jc-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: inline-flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  padding: 0.3rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 14px;
+  background: var(--bs-tertiary-bg);
+  width: 100%;
+
+  .nav-item {
+    flex: 1 1 auto;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    margin: 0;
+    padding: 0.55rem 0.85rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--bs-secondary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.15s ease;
+
+    fa-icon {
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    &:hover:not(.active) {
+      color: var(--bs-body-color);
+      background: color-mix(in srgb, var(--bs-body-bg) 70%, transparent);
+    }
+
+    &.active {
+      color: #fff;
+      background: var(--jc-grad);
+      box-shadow: 0 6px 16px -6px rgba(102, 126, 234, 0.6);
+
+      fa-icon {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .jc-modal-tabs.nav-tabs .nav-link span {
+    display: none;
+  }
 }
 
 .jc-modal-tab-content {
   min-height: 200px;
+  animation: jc-tab-in 0.25s ease-out;
+}
+
+@keyframes jc-tab-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .jc-modal-empty {
@@ -38,10 +113,21 @@
 }
 
 .jc-modal-offer {
-  background: var(--bs-tertiary-bg);
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
+  position: relative;
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.06), transparent), var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 14px;
+  padding: 0.85rem 1rem 0.85rem 1.15rem;
   margin-bottom: 1rem;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+  }
 }
 
 .jc-modal-offer-title {

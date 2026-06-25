@@ -1,5 +1,5 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, LOCALE_ID, importProvidersFrom, inject } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, importProvidersFrom, inject, provideAppInitializer } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import {
   NavigationError,
@@ -23,6 +23,8 @@ import { notificationInterceptor } from 'app/core/interceptor/notification.inter
 
 import './config/dayjs';
 import { TranslationModule } from 'app/shared/language/translation.module';
+
+import { ThemeService } from 'app/core/theme/theme.service';
 
 import { AppPageTitleStrategy } from './app-page-title-strategy';
 import routes from './app.routes';
@@ -58,5 +60,6 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'fr' },
     { provide: NgbDateAdapter, useClass: NgbDateDayjsAdapter },
     { provide: TitleStrategy, useClass: AppPageTitleStrategy },
+    provideAppInitializer(() => inject(ThemeService).init()),
   ],
 };
