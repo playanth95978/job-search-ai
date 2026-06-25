@@ -241,6 +241,7 @@
       "submitVia": "Soumettre via {{ source }}",
       "markApplied": "J'ai postulé",
       "languages": {
+        "original": "Originale",
         "ariaLabel": "Langue de la lettre de motivation",
         "offer": "Langue de l'offre",
         "french": "Français",

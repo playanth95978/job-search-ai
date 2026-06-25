@@ -1,16 +1,28 @@
 @if (descriptionHtml(); as desc) {
   <div class="jc-card">
-    <h3 class="jc-card-header"><fa-icon icon="file-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.tabs.offer">Offre</span></h3>
-    <select
-      (ngModelChange)="language.set($event)"
-      [ngModel]="language()"
-      [aria-label]="'jobCopilot.applyModal.languages.ariaLabel' | translate"
-      class="jc-modal-lang-select"
-    >
-      @for (lang of languages; track lang.value) {
-        <option [value]="lang.value">{{ lang.labelKey | translate }}</option>
+    <h3 class="jc-card-header">
+      <fa-icon icon="file-alt"></fa-icon>
+      <span jhiTranslate="jobCopilot.applyModal.tabs.offer">Offre</span>
+      @if (displayTitle()) {
+        : {{ displayTitle() }}
       }
-    </select>
+    </h3>
+    <div class="jc-modal-lang-container">
+      <select
+        (ngModelChange)="language.set($event)"
+        [ngModel]="language()"
+        [aria-label]="'jobCopilot.applyModal.languages.ariaLabel' | translate"
+        class="jc-modal-lang-select"
+      >
+        <option value="" jhiTranslate="jobCopilot.applyModal.languages.original">Original</option>
+        @for (lang of languages; track lang.value) {
+          <option [value]="lang.value">{{ lang.labelKey | translate }}</option>
+        }
+      </select>
+      @if (translating()) {
+        <fa-icon [animation]="'spin'" icon="circle-notch" class="jc-lang-loader"></fa-icon>
+      }
+    </div>
     <div [innerHTML]="desc" class="jc-offer-description-body"></div>
   </div>
 } @else if (enriching()) {

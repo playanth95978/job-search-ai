@@ -241,6 +241,7 @@
       "submitVia": "Submit via {{ source }}",
       "markApplied": "I've applied",
       "languages": {
+        "original": "Original",
         "ariaLabel": "Cover letter language",
         "offer": "Offer language",
         "french": "French",

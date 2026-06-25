@@ -79,6 +79,15 @@ export class JobCopilotService {
     return this.http.post<JobOffer>(`${this.baseUrl}/jobs/${id}/enrich`, null);
   }
 
+  translateJob(offer: JobOffer, language: string): Observable<JobOffer> {
+    const params = new HttpParams().set('language', language);
+    if (offer.id) {
+      return this.http.post<JobOffer>(`${this.baseUrl}/jobs/${offer.id}/translate`, null, { params });
+    } else {
+      return this.http.post<JobOffer>(`${this.baseUrl}/jobs/translate`, offer, { params });
+    }
+  }
+
   matchJobs(topK?: number): Observable<MatchResult[]> {
     let params = new HttpParams();
     if (topK != null) params = params.set('topK', topK);

@@ -50,16 +50,19 @@ public class JobOfferBatchConfig {
 
     private final JobOfferIngestionService ingestionService;
     private final JobOfferBatchWriter jobOfferBatchWriter;
+    private final BatchSkipListener skipListener;
     private final PlatformTransactionManager transactionManager;
 
     public JobOfferBatchConfig(
         PlatformTransactionManager transactionManager,
         JobOfferIngestionService ingestionService,
-        JobOfferBatchWriter jobOfferBatchWriter
+        JobOfferBatchWriter jobOfferBatchWriter,
+        BatchSkipListener skipListener
     ) {
         this.transactionManager = transactionManager;
         this.ingestionService = ingestionService;
         this.jobOfferBatchWriter = jobOfferBatchWriter;
+        this.skipListener = skipListener;
     }
 
     @Bean
@@ -89,6 +92,7 @@ public class JobOfferBatchConfig {
             .faultTolerant()
             .skipLimit(SKIP_LIMIT)
             .skip(Exception.class)
+            .listener(skipListener)
             .build();
     }
 
@@ -114,6 +118,7 @@ public class JobOfferBatchConfig {
             .faultTolerant()
             .skipLimit(SKIP_LIMIT)
             .skip(Exception.class)
+            .listener(skipListener)
             .build();
     }
 

@@ -9,10 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
+import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.criteria.JobOfferCriteria;
 import nc.opt.aiassistant.service.dto.JobOfferDTO;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferEnrichmentService;
+import nc.opt.aiassistant.service.jobcopilot.JobOfferTranslationService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobOfferQueryService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobSearchService;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
@@ -38,6 +40,8 @@ public class JobCopilotSearchResource {
     private final JobOfferEnrichmentService jobOfferEnrichmentService;
     private final ObjectMapper objectMapper;
     private final JobOfferQueryService jobOfferQueryService;
+    private final JobOfferTranslationService jobOfferTranslationService;
+    private final JobOfferRepository jobOfferRepository;
 
     /**
      * {@code GET  /jobs/_search} : query persisted job offers using JHipster criteria filters
@@ -78,6 +82,17 @@ public class JobCopilotSearchResource {
     @PostMapping("/{id}/enrich")
     public ResponseEntity<JobOffer> enrich(@PathVariable UUID id) {
         return ResponseEntity.ok(jobOfferEnrichmentService.enrich(id));
+    }
+
+    @PostMapping("/{id}/translate")
+    public ResponseEntity<JobOffer> translate(@PathVariable UUID id, @RequestParam String language) {
+        JobOffer offer = jobOfferRepository.findById(id).orElseThrow();
+        return ResponseEntity.ok(jobOfferTranslationService.translate(offer, language));
+    }
+
+    @PostMapping("/translate")
+    public ResponseEntity<JobOffer> translate(@RequestBody JobOffer offer, @RequestParam String language) {
+        return ResponseEntity.ok(jobOfferTranslationService.translate(offer, language));
     }
 
     @PostMapping("/fetch")
