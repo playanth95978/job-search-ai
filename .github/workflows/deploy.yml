@@ -45,12 +45,16 @@ jobs:
       - name: npm ci
         run: npm ci
 
+      - name: Build & push image (Jib)
+        run: |
+          ./mvnw compile
+
       # ── 5. Build prod JAR + image Docker (Jib → GHCR) ────────────────────
       # Jib construit l'image sans Docker démon et la pousse directement sur GHCR.
       # Le profil -Pprod déclenche le build Angular via le plugin frontend-maven.
-      - name: Build & push image (Jib)
+      - name: Build & Push
         run: |
-          ./mvnw -Pprod jib:build \
+          ./mvnw -Pprod clean package jib:build \
             -Djib.to.image=${{ env.IMAGE }} \
             -Djib.to.auth.username=${{ github.actor }} \
             -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
