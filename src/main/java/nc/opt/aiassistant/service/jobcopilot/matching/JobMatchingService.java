@@ -43,17 +43,35 @@ public class JobMatchingService {
         this.objectMapper = objectMapper;
     }
 
-    /** Matches a candidate profile against a list of job offers using hybrid scoring. */
+    /**
+     * Matches a candidate profile against a list of job offers using hybrid scoring.
+     *
+     * <p>The {@code offers} list <strong>must</strong> be ordered by retrieval relevance
+     * (cosine for "match", reranked for "match-advanced"): the position drives the semantic
+     * relevance component of the score, which is what differentiates offers — and the two
+     * search modes — once structured metadata (skills/salary/…) is sparse.
+     */
     public List<MatchResultDto> matchJobs(CandidateProfile profile, List<JobOffer> offers) {
         Set<String> candidateSkills = parseSkills(profile.getSkills());
-        UserPreferenceRepository preferenceRepository1 = preferenceRepository;
-        UserPreference prefs = preferenceRepository1.findByUserId(profile.getUserId()).orElse(null);
+        UserPreference prefs = preferenceRepository.findByUserId(profile.getUserId()).orElse(null);
 
-        return offers
-            .stream()
-            .map(offer -> scoreOffer(profile, candidateSkills, offer, prefs))
-            .sorted(Comparator.comparingDouble(MatchResultDto::score).reversed())
-            .toList();
+        int total = offers.size();
+        List<MatchResultDto> scored = new ArrayList<>(total);
+        for (int rank = 0; rank < total; rank++) {
+            double relevance = rankRelevance(rank, total);
+            scored.add(scoreOffer(profile, candidateSkills, offers.get(rank), prefs, relevance));
+        }
+        return scored.stream().sorted(Comparator.comparingDouble(MatchResultDto::score).reversed()).toList();
+    }
+
+    /**
+     * Maps a 0-based retrieval rank to a continuous relevance in {@code [0.4, 1.0]}: the top hit
+     * scores 1.0 and decays linearly to 0.4 for the last hit. Keeping a 0.4 floor (rather than 0)
+     * avoids punishing a still-relevant tail, while the spread breaks the "everything is 50%" tie.
+     */
+    private double rankRelevance(int rank, int total) {
+        if (total <= 1) return 1.0;
+        return 1.0 - 0.6 * ((double) rank / (total - 1));
     }
 
     /** Performs semantic search for job offers matching the candidate CV chunks. */
@@ -63,7 +81,13 @@ public class JobMatchingService {
         return rerankerService.rerank(query, results, topK);
     }
 
-    MatchResultDto scoreOffer(CandidateProfile profile, Set<String> candidateSkills, JobOffer offer, UserPreference prefs) {
+    MatchResultDto scoreOffer(
+        CandidateProfile profile,
+        Set<String> candidateSkills,
+        JobOffer offer,
+        UserPreference prefs,
+        double relevance
+    ) {
         Set<String> jobSkills = parseSkills(offer.getSkills());
         List<String> strengths = new ArrayList<>();
         List<String> weaknesses = new ArrayList<>();
@@ -73,7 +97,13 @@ public class JobMatchingService {
         double remoteScore = computeRemoteScore(offer, prefs, strengths, weaknesses);
         double salaryScore = computeSalaryScore(offer, prefs, strengths, weaknesses);
 
-        double finalScore = skillScore * 0.50 + locationScore * 0.20 + remoteScore * 0.15 + salaryScore * 0.15;
+        if (relevance >= 0.8) {
+            strengths.add("+ Strong match");
+        }
+
+        // Semantic relevance dominates: it is the most reliable signal when offers carry little
+        // structured metadata (skills/salary often absent), where the heuristics all collapse to 0.5.
+        double finalScore = relevance * 0.45 + skillScore * 0.35 + locationScore * 0.10 + remoteScore * 0.05 + salaryScore * 0.05;
 
         return new MatchResultDto(toDto(offer), Math.round(finalScore * 100.0) / 100.0, strengths, weaknesses);
     }
@@ -134,7 +164,8 @@ public class JobMatchingService {
             // Check if it's the new structured format or the old string list
             if (json.trim().startsWith("[{\"")) {
                 List<SkillDto> list = objectMapper.readValue(json, new TypeReference<>() {});
-                return list.stream()
+                return list
+                    .stream()
                     .map(SkillDto::name)
                     .filter(java.util.Objects::nonNull)
                     .map(String::toLowerCase)
