@@ -16,6 +16,39 @@ import {
 } from 'docx';
 import { Resume } from './resume.model';
 
+interface DocxSectionLabels {
+  summary: string;
+  experiences: string;
+  education: string;
+  skills: string;
+  languages: string;
+  projects: string;
+  certifications: string;
+  referees: string;
+}
+
+const DOCX_LABELS_FR: DocxSectionLabels = {
+  summary: 'Profil',
+  experiences: 'Expérience',
+  education: 'Formation',
+  skills: 'Compétences',
+  languages: 'Langues',
+  projects: 'Projets',
+  certifications: 'Certifications',
+  referees: 'Référents',
+};
+
+const DOCX_LABELS_EN: DocxSectionLabels = {
+  summary: 'Professional Summary',
+  experiences: 'Professional Experience',
+  education: 'Education & Qualifications',
+  skills: 'Key Skills',
+  languages: 'Languages',
+  projects: 'Projects',
+  certifications: 'Certifications & Licences',
+  referees: 'Referees',
+};
+
 @Injectable({ providedIn: 'root' })
 export class CvExportService {
   /**
@@ -68,12 +101,17 @@ export class CvExportService {
     const primary = resume.theme.primaryColor ?? '#2563eb';
     const primaryHex = primary.replace('#', '');
 
+    // The Australian template uses English headings and conventions; keep the DOCX consistent with it.
+    const isAustralian = resume.template === 'australian';
+    const labels = isAustralian ? DOCX_LABELS_EN : DOCX_LABELS_FR;
+    const presentLabel = isAustralian ? 'Present' : "Aujourd'hui";
+
     const sections = resume.sectionOrder.filter(s => !resume.hiddenSections.includes(s));
 
     const children: (Paragraph | Table)[] = [];
 
     // ── Header ────────────────────────────────────────────────────────────────
-    const { firstName, lastName, title: jobTitle, email, phone, location, linkedin, github, website } = resume.personal;
+    const { firstName, lastName, title: jobTitle, email, phone, location, linkedin, github, website, workingRights } = resume.personal;
     children.push(
       new Paragraph({
         text: `${firstName} ${lastName}`.trim(),
@@ -102,6 +140,15 @@ export class CvExportService {
       );
     }
 
+    if (workingRights) {
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: workingRights, size: 20, italics: true, color: '555555' })],
+        }),
+      );
+    }
+
     children.push(new Paragraph({ text: '' }));
 
     // ── Sections ──────────────────────────────────────────────────────────────
@@ -109,7 +156,7 @@ export class CvExportService {
       switch (section) {
         case 'summary':
           if (resume.summary) {
-            children.push(...this.sectionHeader('Profil', primaryHex));
+            children.push(...this.sectionHeader(labels.summary, primaryHex));
             children.push(new Paragraph({ text: resume.summary }));
             children.push(new Paragraph({ text: '' }));
           }
@@ -117,14 +164,14 @@ export class CvExportService {
 
         case 'experiences':
           if (resume.experiences.length) {
-            children.push(...this.sectionHeader('Expérience', primaryHex));
+            children.push(...this.sectionHeader(labels.experiences, primaryHex));
             for (const exp of resume.experiences) {
               children.push(
                 new Paragraph({
                   children: [
                     new TextRun({ text: exp.jobTitle, bold: true }),
                     new TextRun({
-                      text: `  —  ${exp.startDate} › ${exp.current ? "Aujourd'hui" : exp.endDate}`,
+                      text: `  —  ${exp.startDate} › ${exp.current ? presentLabel : exp.endDate}`,
                       color: '888888',
                       size: 20,
                     }),
@@ -147,7 +194,7 @@ export class CvExportService {
 
         case 'education':
           if (resume.education.length) {
-            children.push(...this.sectionHeader('Formation', primaryHex));
+            children.push(...this.sectionHeader(labels.education, primaryHex));
             for (const ed of resume.education) {
               children.push(
                 new Paragraph({
@@ -174,7 +221,7 @@ export class CvExportService {
 
         case 'skills':
           if (resume.skills.length) {
-            children.push(...this.sectionHeader('Compétences', primaryHex));
+            children.push(...this.sectionHeader(labels.skills, primaryHex));
             children.push(
               new Paragraph({
                 children: resume.skills.map(
@@ -191,7 +238,7 @@ export class CvExportService {
 
         case 'languages':
           if (resume.languages.length) {
-            children.push(...this.sectionHeader('Langues', primaryHex));
+            children.push(...this.sectionHeader(labels.languages, primaryHex));
             children.push(
               new Paragraph({
                 children: resume.languages.map(
@@ -208,7 +255,7 @@ export class CvExportService {
 
         case 'projects':
           if (resume.projects.length) {
-            children.push(...this.sectionHeader('Projets', primaryHex));
+            children.push(...this.sectionHeader(labels.projects, primaryHex));
             for (const proj of resume.projects) {
               children.push(
                 new Paragraph({
@@ -238,7 +285,7 @@ export class CvExportService {
 
         case 'certifications':
           if (resume.certifications.length) {
-            children.push(...this.sectionHeader('Certifications', primaryHex));
+            children.push(...this.sectionHeader(labels.certifications, primaryHex));
             for (const cert of resume.certifications) {
               children.push(
                 new Paragraph({
@@ -252,6 +299,27 @@ export class CvExportService {
             children.push(new Paragraph({ text: '' }));
           }
           break;
+      }
+    }
+
+    // ── Referees (Australian convention) ───────────────────────────────────────
+    if (isAustralian) {
+      children.push(...this.sectionHeader(labels.referees, primaryHex));
+      if (resume.referees.length) {
+        for (const ref of resume.referees) {
+          children.push(new Paragraph({ children: [new TextRun({ text: ref.name, bold: true })] }));
+          const role = [ref.position, ref.company].filter(Boolean).join(', ');
+          if (role) {
+            children.push(new Paragraph({ text: role }));
+          }
+          const refContact = [ref.email, ref.phone].filter(Boolean).join('  ·  ');
+          if (refContact) {
+            children.push(new Paragraph({ children: [new TextRun({ text: refContact, size: 20, color: '555555' })] }));
+          }
+          children.push(new Paragraph({ text: '' }));
+        }
+      } else {
+        children.push(new Paragraph({ children: [new TextRun({ text: 'Available upon request.', italics: true, color: '555555' })] }));
       }
     }
 

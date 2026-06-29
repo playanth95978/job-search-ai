@@ -23,6 +23,8 @@ export function generatedResumeToResume(dto: GeneratedResume, current: Resume): 
       linkedin: p?.linkedin ?? '',
       github: p?.github ?? '',
       website: p?.website ?? '',
+      // Working rights isn't part of the AI output: preserve whatever the user already entered.
+      workingRights: current.personal.workingRights,
     },
     summary: dto.summary ?? '',
     experiences: (dto.experiences ?? []).map(

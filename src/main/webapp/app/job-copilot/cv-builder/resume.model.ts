@@ -3,7 +3,7 @@
  * Kept framework-agnostic so it can be persisted as-is (backend `resume.data` jsonb).
  */
 
-export type ResumeTemplateId = 'modern' | 'professional' | 'minimalist';
+export type ResumeTemplateId = 'modern' | 'professional' | 'minimalist' | 'australian';
 
 export type SectionKey = 'summary' | 'experiences' | 'education' | 'skills' | 'languages' | 'projects' | 'certifications';
 
@@ -19,6 +19,8 @@ export interface PersonalInfo {
   linkedin: string;
   github: string;
   website: string;
+  /** Right-to-work / residency status (e.g. "Australian Citizen", "Full working rights"). Expected on Australian resumes. */
+  workingRights: string;
 }
 
 export interface Experience {
@@ -69,6 +71,16 @@ export interface Language {
   level: string;
 }
 
+/** A professional referee, commonly listed on Australian/UK resumes. */
+export interface Referee {
+  id: string;
+  name: string;
+  position: string;
+  company: string;
+  email: string;
+  phone: string;
+}
+
 export interface ResumeTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -87,6 +99,7 @@ export interface Resume {
   certifications: Certification[];
   skills: Skill[];
   languages: Language[];
+  referees: Referee[];
   template: ResumeTemplateId;
   theme: ResumeTheme;
   /** Display order of the body sections in the preview. */
@@ -128,6 +141,7 @@ export function createEmptyResume(): Resume {
       linkedin: '',
       github: '',
       website: '',
+      workingRights: '',
     },
     summary: '',
     experiences: [],
@@ -136,6 +150,7 @@ export function createEmptyResume(): Resume {
     certifications: [],
     skills: [],
     languages: [],
+    referees: [],
     template: 'modern',
     theme: { ...DEFAULT_THEME },
     sectionOrder: [...ALL_SECTIONS],
@@ -167,6 +182,10 @@ export function emptyLanguage(): Language {
   return { id: uid(), name: '', level: '' };
 }
 
+export function emptyReferee(): Referee {
+  return { id: uid(), name: '', position: '', company: '', email: '', phone: '' };
+}
+
 /** Readable plain-text rendering of the resume, sent to the AI for review. */
 type SectionBuilder = (resume: Resume) => string[];
 
@@ -179,6 +198,10 @@ function buildHeader(resume: Resume): string[] {
 
   if (contact) {
     lines.push(contact);
+  }
+
+  if (p.workingRights) {
+    lines.push(`Working rights: ${p.workingRights}`);
   }
 
   return lines;
@@ -244,6 +267,14 @@ function buildCertifications(resume: Resume): string[] {
   return ['CERTIFICATIONS', resume.certifications.map(cert => `${cert.name} (${cert.issuer})`).join(', ')];
 }
 
+function buildReferees(resume: Resume): string[] {
+  if (!resume.referees.length) {
+    return [];
+  }
+
+  return ['REFEREES', ...resume.referees.map(ref => `- ${ref.name}, ${ref.position} @ ${ref.company} (${ref.email} ${ref.phone})`)];
+}
+
 const SECTION_BUILDERS: SectionBuilder[] = [
   buildSummary,
   buildExperiences,
@@ -252,6 +283,7 @@ const SECTION_BUILDERS: SectionBuilder[] = [
   buildLanguages,
   buildProjects,
   buildCertifications,
+  buildReferees,
 ];
 
 export function resumeToPlainText(resume: Resume): string {

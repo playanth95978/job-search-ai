@@ -10,7 +10,8 @@
       "skills": "Compétences",
       "languages": "Langues",
       "projects": "Projets",
-      "certifications": "Certifications"
+      "certifications": "Certifications",
+      "referees": "Référents"
     },
     "fields": {
       "firstName": "Prénom",
@@ -40,7 +41,15 @@
       "technologies": "Technologies (séparées par des virgules)",
       "certName": "Certification",
       "issuer": "Organisme",
-      "date": "Date"
+      "date": "Date",
+      "workingRights": "Droit au travail",
+      "workingRightsPlaceholder": "ex. Citoyen australien, Résident permanent, Visa 482…",
+      "refName": "Nom du référent",
+      "refPosition": "Poste",
+      "refCompany": "Entreprise",
+      "refEmail": "Email",
+      "refPhone": "Téléphone",
+      "refHint": "Laissez vide pour afficher « Available upon request » sur le CV australien."
     },
     "actions": {
       "moveUp": "Monter",
@@ -53,12 +62,14 @@
       "addSkill": "Ajouter une compétence",
       "addLanguage": "Ajouter une langue",
       "addProject": "Ajouter un projet",
-      "addCertification": "Ajouter une certification"
+      "addCertification": "Ajouter une certification",
+      "addReferee": "Ajouter un référent"
     },
     "templates": {
       "modern": "Moderne",
       "professional": "Professionnel",
-      "minimalist": "Minimaliste"
+      "minimalist": "Minimaliste",
+      "australian": "Australien"
     },
     "theme": {
       "primary": "Couleur principale",

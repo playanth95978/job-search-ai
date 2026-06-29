@@ -52,6 +52,14 @@
         <span jhiTranslate="cvBuilder.fields.website">Site web</span>
         <input [ngModel]="r.personal.website" (ngModelChange)="store.patchPersonal({ website: $event })" />
       </label>
+      <label>
+        <span jhiTranslate="cvBuilder.fields.workingRights">Droit au travail</span>
+        <input
+          [ngModel]="r.personal.workingRights"
+          (ngModelChange)="store.patchPersonal({ workingRights: $event })"
+          [placeholder]="'cvBuilder.fields.workingRightsPlaceholder' | translate"
+        />
+      </label>
     </div>
   }
 </section>
@@ -315,3 +323,60 @@
     }
   </section>
 }
+
+<!-- Referees (rendered by the Australian template; optional elsewhere) -->
+<section class="cv-section">
+  <header class="cv-section-head">
+    <button type="button" class="cv-collapse" (click)="toggleCollapse('referees')">
+      <fa-icon [icon]="isCollapsed('referees') ? 'chevron-right' : 'chevron-left'" />
+    </button>
+    <h3 jhiTranslate="cvBuilder.sections.referees">Référents</h3>
+  </header>
+  @if (!isCollapsed('referees')) {
+    <div class="cv-section-body">
+      @for (ref of r.referees; track ref.id) {
+        <div class="cv-item">
+          <div class="cv-item-bar">
+            <span class="cv-item-title">{{ ref.name || ('cvBuilder.sections.referees' | translate) }}</span>
+            <button type="button" class="cv-del" (click)="store.removeReferee(ref.id)"><fa-icon icon="trash-alt" /></button>
+          </div>
+          <div class="cv-grid-2">
+            <input
+              [ngModel]="ref.name"
+              (ngModelChange)="store.patchReferee(ref.id, { name: $event })"
+              [placeholder]="'cvBuilder.fields.refName' | translate"
+            />
+            <input
+              [ngModel]="ref.position"
+              (ngModelChange)="store.patchReferee(ref.id, { position: $event })"
+              [placeholder]="'cvBuilder.fields.refPosition' | translate"
+            />
+          </div>
+          <div class="cv-grid-2">
+            <input
+              [ngModel]="ref.company"
+              (ngModelChange)="store.patchReferee(ref.id, { company: $event })"
+              [placeholder]="'cvBuilder.fields.refCompany' | translate"
+            />
+            <input
+              [ngModel]="ref.email"
+              (ngModelChange)="store.patchReferee(ref.id, { email: $event })"
+              [placeholder]="'cvBuilder.fields.refEmail' | translate"
+            />
+          </div>
+          <input
+            [ngModel]="ref.phone"
+            (ngModelChange)="store.patchReferee(ref.id, { phone: $event })"
+            [placeholder]="'cvBuilder.fields.refPhone' | translate"
+          />
+        </div>
+      }
+      <button type="button" class="cv-add" (click)="store.addReferee()">
+        <fa-icon icon="plus" /> <span jhiTranslate="cvBuilder.actions.addReferee">Ajouter un référent</span>
+      </button>
+      <p class="cv-hint" jhiTranslate="cvBuilder.fields.refHint">
+        Laissez vide pour afficher « Available upon request » sur le CV australien.
+      </p>
+    </div>
+  }
+</section>

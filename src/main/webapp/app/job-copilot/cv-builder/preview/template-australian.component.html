@@ -1,0 +1,153 @@
+@let r = resume();
+<div class="au-cv">
+  <header class="au-head">
+    <h1>{{ r.personal.firstName }} {{ r.personal.lastName }}</h1>
+    @if (r.personal.title) {
+      <p class="au-title">{{ r.personal.title }}</p>
+    }
+    <p class="au-contact">{{ contactLine() }}</p>
+    @if (r.personal.workingRights) {
+      <p class="au-rights">{{ r.personal.workingRights }}</p>
+    }
+  </header>
+
+  @for (s of sections(); track s) {
+    @switch (s) {
+      @case ('summary') {
+        @if (r.summary) {
+          <section>
+            <h2>Professional Summary</h2>
+            <p>{{ r.summary }}</p>
+          </section>
+        }
+      }
+      @case ('skills') {
+        @if (r.skills.length) {
+          <section>
+            <h2>Key Skills</h2>
+            <ul class="au-skills">
+              @for (sk of r.skills; track sk.id) {
+                <li>{{ sk.name }}</li>
+              }
+            </ul>
+          </section>
+        }
+      }
+      @case ('experiences') {
+        @if (r.experiences.length) {
+          <section>
+            <h2>Professional Experience</h2>
+            @for (e of r.experiences; track e.id) {
+              <article class="au-entry">
+                <div class="au-row">
+                  <strong>{{ e.jobTitle }}</strong
+                  ><span>{{ e.startDate }} — {{ e.current ? 'Present' : e.endDate }}</span>
+                </div>
+                @if (e.company) {
+                  <p class="au-org">{{ e.company }}</p>
+                }
+                @if (e.description) {
+                  <p>{{ e.description }}</p>
+                }
+                @if (e.achievements.length) {
+                  <ul class="au-bullets">
+                    @for (a of e.achievements; track $index) {
+                      <li>{{ a }}</li>
+                    }
+                  </ul>
+                }
+              </article>
+            }
+          </section>
+        }
+      }
+      @case ('education') {
+        @if (r.education.length) {
+          <section>
+            <h2>Education &amp; Qualifications</h2>
+            @for (ed of r.education; track ed.id) {
+              <article class="au-entry">
+                <div class="au-row">
+                  <strong>{{ ed.degree }}</strong
+                  ><span>{{ ed.startDate }} — {{ ed.endDate }}</span>
+                </div>
+                @if (ed.school) {
+                  <p class="au-org">{{ ed.school }}</p>
+                }
+                @if (ed.description) {
+                  <p>{{ ed.description }}</p>
+                }
+              </article>
+            }
+          </section>
+        }
+      }
+      @case ('certifications') {
+        @if (r.certifications.length) {
+          <section>
+            <h2>Certifications &amp; Licences</h2>
+            @for (c of r.certifications; track c.id) {
+              <div class="au-row">
+                <strong>{{ c.name }}</strong
+                ><span>{{ c.issuer }} · {{ c.date }}</span>
+              </div>
+            }
+          </section>
+        }
+      }
+      @case ('projects') {
+        @if (r.projects.length) {
+          <section>
+            <h2>Projects</h2>
+            @for (p of r.projects; track p.id) {
+              <article class="au-entry">
+                <strong>{{ p.name }}</strong>
+                @if (p.description) {
+                  <p>{{ p.description }}</p>
+                }
+              </article>
+            }
+          </section>
+        }
+      }
+      @case ('languages') {
+        @if (r.languages.length) {
+          <section>
+            <h2>Languages</h2>
+            <p>
+              @for (l of r.languages; track l.id) {
+                <span
+                  >{{ l.name }} ({{ l.level }})
+                  @if (!$last) {
+                    ,
+                  }
+                </span>
+              }
+            </p>
+          </section>
+        }
+      }
+    }
+  }
+
+  <section class="au-referees">
+    <h2>Referees</h2>
+    @if (r.referees.length) {
+      <div class="au-ref-grid">
+        @for (ref of r.referees; track ref.id) {
+          <div class="au-ref">
+            <strong>{{ ref.name }}</strong>
+            @if (ref.position || ref.company) {
+              <p class="au-org">{{ ref.position }}{{ ref.position && ref.company ? ', ' : '' }}{{ ref.company }}</p>
+            }
+            @if (ref.email || ref.phone) {
+              <p class="au-ref-contact">{{ ref.email }}{{ ref.email && ref.phone ? '  ·  ' : '' }}{{ ref.phone }}</p>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <p>Available upon request.</p>
+    }
+  </section>
+</div>

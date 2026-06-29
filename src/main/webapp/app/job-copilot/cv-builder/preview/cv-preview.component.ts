@@ -3,6 +3,7 @@ import { Resume } from '../resume.model';
 import { CvTemplateModernComponent } from './template-modern.component';
 import { CvTemplateProfessionalComponent } from './template-professional.component';
 import { CvTemplateMinimalistComponent } from './template-minimalist.component';
+import { CvTemplateAustralianComponent } from './template-australian.component';
 
 /**
  * Renders the live CV. Theme (colors/font/size) is applied via CSS custom properties on the
@@ -12,7 +13,7 @@ import { CvTemplateMinimalistComponent } from './template-minimalist.component';
 @Component({
   selector: 'jhi-cv-preview',
   standalone: true,
-  imports: [CvTemplateModernComponent, CvTemplateProfessionalComponent, CvTemplateMinimalistComponent],
+  imports: [CvTemplateModernComponent, CvTemplateProfessionalComponent, CvTemplateMinimalistComponent, CvTemplateAustralianComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let r = resume();
@@ -30,6 +31,9 @@ import { CvTemplateMinimalistComponent } from './template-minimalist.component';
         }
         @case ('minimalist') {
           <jhi-cv-tmpl-minimalist [resume]="r" />
+        }
+        @case ('australian') {
+          <jhi-cv-tmpl-australian [resume]="r" />
         }
         @default {
           <jhi-cv-tmpl-modern [resume]="r" />

@@ -12,12 +12,14 @@ import {
   emptyCertification,
   emptySkill,
   emptyLanguage,
+  emptyReferee,
   Experience,
   Education,
   Project,
   Certification,
   Skill,
   Language,
+  Referee,
 } from './resume.model';
 
 const DRAFT_KEY = 'jsa.cv-builder.draft';
@@ -117,7 +119,10 @@ export class ResumeStore {
   }
 
   setTemplate(template: ResumeTemplateId): void {
-    this.mutate(r => ({ ...r, template }));
+    this.mutate(r =>
+      // Australian resumes lead with Key Skills, so bring that section up near the top on switch.
+      template === 'australian' ? { ...r, template, sectionOrder: withSkillsAfterSummary(r.sectionOrder) } : { ...r, template },
+    );
   }
 
   patchTheme(patch: Partial<ResumeTheme>): void {
@@ -273,6 +278,17 @@ export class ResumeStore {
     this.patchItem('languages', id, patch);
   }
 
+  // referees
+  addReferee(): void {
+    this.addItem('referees', emptyReferee());
+  }
+  removeReferee(id: string): void {
+    this.removeItem('referees', id);
+  }
+  patchReferee(id: string, patch: Partial<Referee>): void {
+    this.patchItem('referees', id, patch);
+  }
+
   // ---- persistence --------------------------------------------------------
 
   private persist(resume: Resume): void {
@@ -297,6 +313,14 @@ export class ResumeStore {
   }
 }
 
+/** Moves "skills" to right after "summary" (or to the front if no summary), preserving every other section's order. */
+function withSkillsAfterSummary(order: SectionKey[]): SectionKey[] {
+  const next: SectionKey[] = order.filter(s => s !== 'skills');
+  const summaryIdx = next.indexOf('summary');
+  next.splice(summaryIdx >= 0 ? summaryIdx + 1 : 0, 0, 'skills');
+  return next;
+}
+
 /**
  * Guarantees every nested structure exists (theme, personal, lists), so a resume loaded from the
  * server / an old draft / an import can never crash the preview with `undefined` reads.
@@ -317,6 +341,7 @@ function normalizeResume(input: Partial<Resume> | null | undefined): Resume {
     certifications: input.certifications ?? [],
     skills: input.skills ?? [],
     languages: input.languages ?? [],
+    referees: input.referees ?? [],
     sectionOrder: input.sectionOrder?.length ? input.sectionOrder : base.sectionOrder,
     hiddenSections: input.hiddenSections ?? [],
     template: input.template ?? base.template,

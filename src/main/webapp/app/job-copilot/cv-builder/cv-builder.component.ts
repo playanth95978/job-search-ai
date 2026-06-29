@@ -50,6 +50,7 @@ export class CvBuilderComponent {
     { id: 'modern', labelKey: 'cvBuilder.templates.modern' },
     { id: 'professional', labelKey: 'cvBuilder.templates.professional' },
     { id: 'minimalist', labelKey: 'cvBuilder.templates.minimalist' },
+    { id: 'australian', labelKey: 'cvBuilder.templates.australian' },
   ];
 
   /** Becomes true once the server copy has been loaded, gating backend auto-save. */

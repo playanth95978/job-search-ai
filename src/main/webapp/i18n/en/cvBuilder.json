@@ -10,7 +10,8 @@
       "skills": "Skills",
       "languages": "Languages",
       "projects": "Projects",
-      "certifications": "Certifications"
+      "certifications": "Certifications",
+      "referees": "Referees"
     },
     "fields": {
       "firstName": "First name",
@@ -40,7 +41,15 @@
       "technologies": "Technologies (comma separated)",
       "certName": "Certification",
       "issuer": "Issuer",
-      "date": "Date"
+      "date": "Date",
+      "workingRights": "Working rights",
+      "workingRightsPlaceholder": "e.g. Australian Citizen, Permanent Resident, Subclass 482 visa…",
+      "refName": "Referee name",
+      "refPosition": "Position",
+      "refCompany": "Company",
+      "refEmail": "Email",
+      "refPhone": "Phone",
+      "refHint": "Leave empty to show \"Available upon request\" on the Australian resume."
     },
     "actions": {
       "moveUp": "Move up",
@@ -53,12 +62,14 @@
       "addSkill": "Add skill",
       "addLanguage": "Add language",
       "addProject": "Add project",
-      "addCertification": "Add certification"
+      "addCertification": "Add certification",
+      "addReferee": "Add referee"
     },
     "templates": {
       "modern": "Modern",
       "professional": "Professional",
-      "minimalist": "Minimalist"
+      "minimalist": "Minimalist",
+      "australian": "Australian"
     },
     "theme": {
       "primary": "Primary color",
