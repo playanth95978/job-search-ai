@@ -55,11 +55,17 @@ export interface JobOfferDto {
   contractType?: string;
 }
 
+/** A translatable match tag: `key` is an i18n key (jobCopilot.match.tag.*), `skill` an optional interpolation arg. */
+export interface MatchTag {
+  key: string;
+  skill?: string;
+}
+
 export interface MatchResult {
   jobOffer: JobOfferDto;
   score: number;
-  strengths: string[];
-  weaknesses: string[];
+  strengths: MatchTag[];
+  weaknesses: MatchTag[];
 }
 
 export interface JobApplication {

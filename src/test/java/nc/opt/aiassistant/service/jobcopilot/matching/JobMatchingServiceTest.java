@@ -13,6 +13,8 @@ import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.UserPreference;
 import nc.opt.aiassistant.repository.jobcopilot.UserPreferenceRepository;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.MatchTag;
+import nc.opt.aiassistant.service.jobcopilot.dto.MatchTagDto;
 import nc.opt.aiassistant.service.reranker.RerankerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,14 +103,20 @@ class JobMatchingServiceTest {
         MatchResultDto bestMatch = results.get(0);
         assertThat(bestMatch.jobOffer().title()).isEqualTo(offer1.getTitle());
         assertThat(bestMatch.score()).isGreaterThan(0.8);
-        assertThat(bestMatch.strengths()).contains("+ java", "+ Location match", "+ Salary compatible", "+ Remote");
+        assertThat(bestMatch.strengths())
+            .extracting(MatchTagDto::key)
+            .contains(MatchTag.MATCHED_SKILL.key(), MatchTag.LOCATION_MATCH.key(), MatchTag.SALARY_COMPATIBLE.key(), MatchTag.REMOTE.key());
+        assertThat(bestMatch.strengths()).anySatisfy(tag -> {
+            assertThat(tag.key()).isEqualTo(MatchTag.MATCHED_SKILL.key());
+            assertThat(tag.skill()).isIn("java", "spring boot", "angular");
+        });
 
         // Vérification du match partiel (offer2)
         MatchResultDto partialMatch = results.get(1);
         assertThat(partialMatch.jobOffer().title()).isEqualTo(offer2.getTitle());
         assertThat(partialMatch.score()).isBetween(0.4, 0.7);
-        assertThat(partialMatch.strengths()).contains("+ Preferred location");
-        assertThat(partialMatch.weaknesses()).contains("- Salary below expectations");
+        assertThat(partialMatch.strengths()).extracting(MatchTagDto::key).contains(MatchTag.PREFERRED_LOCATION.key());
+        assertThat(partialMatch.weaknesses()).extracting(MatchTagDto::key).contains(MatchTag.SALARY_BELOW.key());
 
         // Vérification du mauvais match (offer3)
         MatchResultDto poorMatch = results.get(2);

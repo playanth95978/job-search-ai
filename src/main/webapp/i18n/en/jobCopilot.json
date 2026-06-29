@@ -58,6 +58,20 @@
         "apply": "Sign in to apply and track your applications."
       }
     },
+    "match": {
+      "tag": {
+        "matchedSkill": "{{skill}}",
+        "missingSkill": "Missing {{skill}}",
+        "locationMatch": "Location match",
+        "preferredLocation": "Preferred location",
+        "locationMismatch": "Location mismatch",
+        "remote": "Remote",
+        "notRemote": "Not remote",
+        "salaryCompatible": "Salary compatible",
+        "salaryBelow": "Salary below expectations",
+        "strongMatch": "Strong match"
+      }
+    },
     "search": {
       "title": "Job Search",
       "subtitle": "Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail",

@@ -146,11 +146,13 @@
               }
             </div>
             <div class="jc-match-tags">
-              @for (s of match.strengths; track s) {
-                <span class="jc-tag jc-tag-success"><fa-icon icon="check"></fa-icon> {{ s }}</span>
+              @for (s of match.strengths; track $index) {
+                <span class="jc-tag jc-tag-success"><fa-icon icon="check"></fa-icon> {{ s.key | translate: { skill: s.skill } }}</span>
               }
-              @for (w of match.weaknesses; track w) {
-                <span class="jc-tag jc-tag-warning"><fa-icon icon="triangle-exclamation"></fa-icon> {{ w }}</span>
+              @for (w of match.weaknesses; track $index) {
+                <span class="jc-tag jc-tag-warning"
+                  ><fa-icon icon="triangle-exclamation"></fa-icon> {{ w.key | translate: { skill: w.skill } }}</span
+                >
               }
             </div>
             <div class="jc-match-actions">

@@ -14,6 +14,8 @@ import nc.opt.aiassistant.domain.UserPreference;
 import nc.opt.aiassistant.repository.jobcopilot.UserPreferenceRepository;
 import nc.opt.aiassistant.service.jobcopilot.dto.JobOfferDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.MatchTag;
+import nc.opt.aiassistant.service.jobcopilot.dto.MatchTagDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.SkillDto;
 import nc.opt.aiassistant.service.reranker.RerankerService;
 import org.springframework.ai.document.Document;
@@ -89,8 +91,8 @@ public class JobMatchingService {
         double relevance
     ) {
         Set<String> jobSkills = parseSkills(offer.getSkills());
-        List<String> strengths = new ArrayList<>();
-        List<String> weaknesses = new ArrayList<>();
+        List<MatchTagDto> strengths = new ArrayList<>();
+        List<MatchTagDto> weaknesses = new ArrayList<>();
 
         double skillScore = computeSkillScore(candidateSkills, jobSkills, strengths, weaknesses);
         double locationScore = computeLocationScore(profile, offer, prefs, strengths, weaknesses);
@@ -98,7 +100,7 @@ public class JobMatchingService {
         double salaryScore = computeSalaryScore(offer, prefs, strengths, weaknesses);
 
         if (relevance >= 0.8) {
-            strengths.add("+ Strong match");
+            strengths.add(MatchTagDto.of(MatchTag.STRONG_MATCH));
         }
 
         // Semantic relevance dominates: it is the most reliable signal when offers carry little
@@ -108,53 +110,59 @@ public class JobMatchingService {
         return new MatchResultDto(toDto(offer), Math.round(finalScore * 100.0) / 100.0, strengths, weaknesses);
     }
 
-    private double computeSkillScore(Set<String> candidate, Set<String> job, List<String> s, List<String> w) {
+    private double computeSkillScore(Set<String> candidate, Set<String> job, List<MatchTagDto> s, List<MatchTagDto> w) {
         if (job.isEmpty()) return 0.5;
         long matched = job.stream().filter(candidate::contains).count();
         job.stream()
             .filter(candidate::contains)
-            .forEach(sk -> s.add("+ " + sk));
+            .forEach(sk -> s.add(MatchTagDto.of(MatchTag.MATCHED_SKILL, sk)));
         job.stream()
             .filter(sk -> !candidate.contains(sk))
-            .forEach(sk -> w.add("- Missing " + sk));
+            .forEach(sk -> w.add(MatchTagDto.of(MatchTag.MISSING_SKILL, sk)));
         return (double) matched / job.size();
     }
 
-    private double computeLocationScore(CandidateProfile profile, JobOffer offer, UserPreference prefs, List<String> s, List<String> w) {
+    private double computeLocationScore(
+        CandidateProfile profile,
+        JobOffer offer,
+        UserPreference prefs,
+        List<MatchTagDto> s,
+        List<MatchTagDto> w
+    ) {
         if (offer.getLocation() == null || profile.getLocation() == null) return 0.5;
         if (offer.getLocation().toLowerCase().contains(profile.getLocation().toLowerCase())) {
-            s.add("+ Location match");
+            s.add(MatchTagDto.of(MatchTag.LOCATION_MATCH));
             return 1.0;
         }
         if (prefs != null && prefs.getPreferredLocations() != null) {
             List<String> locs = parseList(prefs.getPreferredLocations());
             boolean match = locs.stream().anyMatch(l -> offer.getLocation().toLowerCase().contains(l.toLowerCase()));
             if (match) {
-                s.add("+ Preferred location");
+                s.add(MatchTagDto.of(MatchTag.PREFERRED_LOCATION));
                 return 0.8;
             }
         }
-        w.add("- Location mismatch");
+        w.add(MatchTagDto.of(MatchTag.LOCATION_MISMATCH));
         return 0.2;
     }
 
-    private double computeRemoteScore(JobOffer offer, UserPreference prefs, List<String> s, List<String> w) {
+    private double computeRemoteScore(JobOffer offer, UserPreference prefs, List<MatchTagDto> s, List<MatchTagDto> w) {
         if (prefs == null || prefs.getRemoteOnly() == null || !prefs.getRemoteOnly()) return 0.5;
         if (Boolean.TRUE.equals(offer.getRemote())) {
-            s.add("+ Remote");
+            s.add(MatchTagDto.of(MatchTag.REMOTE));
             return 1.0;
         }
-        w.add("- Not remote");
+        w.add(MatchTagDto.of(MatchTag.NOT_REMOTE));
         return 0.0;
     }
 
-    private double computeSalaryScore(JobOffer offer, UserPreference prefs, List<String> s, List<String> w) {
+    private double computeSalaryScore(JobOffer offer, UserPreference prefs, List<MatchTagDto> s, List<MatchTagDto> w) {
         if (prefs == null || prefs.getSalaryMin() == null || offer.getSalaryMax() == null) return 0.5;
         if (offer.getSalaryMax() >= prefs.getSalaryMin()) {
-            s.add("+ Salary compatible");
+            s.add(MatchTagDto.of(MatchTag.SALARY_COMPATIBLE));
             return 1.0;
         }
-        w.add("- Salary below expectations");
+        w.add(MatchTagDto.of(MatchTag.SALARY_BELOW));
         return 0.2;
     }
 

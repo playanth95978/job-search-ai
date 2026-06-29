@@ -58,6 +58,20 @@
         "apply": "Connectez-vous pour postuler et suivre vos candidatures."
       }
     },
+    "match": {
+      "tag": {
+        "matchedSkill": "{{skill}}",
+        "missingSkill": "{{skill}} manquant",
+        "locationMatch": "Localisation correspondante",
+        "preferredLocation": "Localisation préférée",
+        "locationMismatch": "Localisation différente",
+        "remote": "Télétravail",
+        "notRemote": "Pas de télétravail",
+        "salaryCompatible": "Salaire compatible",
+        "salaryBelow": "Salaire sous les attentes",
+        "strongMatch": "Forte correspondance"
+      }
+    },
     "search": {
       "title": "Recherche d'emploi",
       "subtitle": "Recherchez parmi plusieurs sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail",

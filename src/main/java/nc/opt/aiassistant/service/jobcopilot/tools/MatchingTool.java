@@ -9,6 +9,7 @@ import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.MatchTagDto;
 import nc.opt.aiassistant.service.jobcopilot.matching.JobMatchingService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -38,8 +39,24 @@ public class MatchingTool {
     private String formatMatch(MatchResultDto m) {
         StringBuilder sb = new StringBuilder();
         sb.append("**%.0f%% Match** — %s at %s\n".formatted(m.score() * 100, m.jobOffer().title(), m.jobOffer().company()));
-        m.strengths().forEach(s -> sb.append(s).append("\n"));
-        m.weaknesses().forEach(w -> sb.append(w).append("\n"));
+        m.strengths().forEach(s -> sb.append(formatTag(s, "+")).append("\n"));
+        m.weaknesses().forEach(w -> sb.append(formatTag(w, "-")).append("\n"));
         return sb.toString();
+    }
+
+    /**
+     * Renders a translatable tag into readable text for the LLM context. The frontend resolves the
+     * i18n key to a localized label; here we only need it human-readable, so we humanize the key's
+     * last segment (e.g. {@code locationMatch} -> {@code Location match}) and append the skill if any.
+     */
+    private String formatTag(MatchTagDto tag, String sign) {
+        String segment = tag.key().substring(tag.key().lastIndexOf('.') + 1);
+        String label = humanize(segment);
+        return tag.skill() != null ? "%s %s: %s".formatted(sign, label, tag.skill()) : "%s %s".formatted(sign, label);
+    }
+
+    private static String humanize(String camelCase) {
+        String spaced = camelCase.replaceAll("([A-Z])", " $1").trim();
+        return spaced.isEmpty() ? spaced : Character.toUpperCase(spaced.charAt(0)) + spaced.substring(1);
     }
 }
