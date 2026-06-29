@@ -68,6 +68,9 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.GET, "/api/google-drive/oauth/login").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/google-drive/oauth/login-url").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/google-drive/oauth/google").permitAll()
+                    // Public job search: anonymous visitors can browse offers. Auth-only actions
+                    // (match, match-advanced, apply) are gated in their own endpoints below.
+                    .requestMatchers(HttpMethod.GET, "/api/job-copilot/jobs/search").permitAll()
                     .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers("/api/**").authenticated()
                     .requestMatchers("/v3/api-docs/**").hasAuthority(AuthoritiesConstants.ADMIN)

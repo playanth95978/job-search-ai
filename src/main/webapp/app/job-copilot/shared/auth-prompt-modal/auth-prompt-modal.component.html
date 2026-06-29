@@ -1,0 +1,18 @@
+<div class="modal-header">
+  <h4 class="modal-title" jhiTranslate="jobCopilot.authPrompt.title">Créez un compte pour débloquer cette fonctionnalité</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="modal-body">
+  <p jhiTranslate="{{ featureKey() }}"></p>
+  <p class="text-muted" jhiTranslate="jobCopilot.authPrompt.message">
+    Inscrivez-vous gratuitement et importez votre CV pour matcher les offres à votre profil et postuler.
+  </p>
+</div>
+<div class="modal-footer">
+  <button class="jc-btn jc-btn-outline" type="button" (click)="login()">
+    <fa-icon icon="sign-in-alt" /> <span jhiTranslate="global.menu.account.login">S'authentifier</span>
+  </button>
+  <button class="jc-btn jc-btn-primary" type="button" (click)="register()">
+    <fa-icon icon="user-plus" /> <span jhiTranslate="jobCopilot.authPrompt.register">Créer un compte gratuit</span>
+  </button>
+</div>

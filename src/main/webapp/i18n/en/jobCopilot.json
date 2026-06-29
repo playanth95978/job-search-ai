@@ -47,6 +47,17 @@
       "send": "Send",
       "answerPlaceholder": "Type your answer..."
     },
+    "authPrompt": {
+      "title": "Create an account to unlock this feature",
+      "message": "Sign up for free and import your CV to match offers to your profile and apply.",
+      "register": "Create a free account",
+      "defaultFeature": "This feature requires an account.",
+      "feature": {
+        "matchProfile": "Sign in to match offers to your profile.",
+        "matchAdvanced": "Sign in to run advanced matching on your profile.",
+        "apply": "Sign in to apply and track your applications."
+      }
+    },
     "search": {
       "title": "Job Search",
       "subtitle": "Search across multiple sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail",

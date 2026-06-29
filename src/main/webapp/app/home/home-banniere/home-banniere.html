@@ -17,7 +17,11 @@
         <span jhiTranslate="home.hero.ctaSecondary">Rechercher des offres</span>
       </a>
     } @else {
-      <button (click)="login()" class="jc-btn jc-btn-primary jc-btn-lg" type="button">
+      <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/search">
+        <fa-icon icon="search" />
+        <span jhiTranslate="home.hero.ctaSearch">Rechercher des offres</span>
+      </a>
+      <button (click)="login()" class="jc-btn jc-btn-outline jc-btn-lg" type="button">
         <fa-icon icon="sign-in-alt" />
         <span jhiTranslate="global.menu.account.login">S'authentifier</span>
       </button>

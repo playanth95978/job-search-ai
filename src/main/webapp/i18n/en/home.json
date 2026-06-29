@@ -6,7 +6,8 @@
       "title": "Land your next job faster, with AI on your side",
       "subtitle": "Upload your CV, get matched with relevant offers, generate tailored cover letters and rehearse interviews — all in one place.",
       "ctaPrimary": "Open Job Copilot",
-      "ctaSecondary": "Search for jobs"
+      "ctaSecondary": "Search for jobs",
+      "ctaSearch": "Search for jobs"
     },
     "logged": {
       "message": "You are logged in as user \"{{username}}\"."
@@ -81,7 +82,8 @@
       "cta": {
         "title": "Ready to speed up your job search?",
         "subtitle": "Create your free account and import your CV in under two minutes.",
-        "register": "Create a free account"
+        "register": "Create a free account",
+        "search": "Browse jobs"
       }
     },
     "quickAccess": {

@@ -6,7 +6,8 @@
       "title": "Décrochez votre prochain job plus vite, avec l'IA à vos côtés",
       "subtitle": "Importez votre CV, recevez des offres pertinentes, générez des lettres de motivation sur-mesure et entraînez-vous aux entretiens — le tout au même endroit.",
       "ctaPrimary": "Ouvrir Job Copilot",
-      "ctaSecondary": "Rechercher des offres"
+      "ctaSecondary": "Rechercher des offres",
+      "ctaSearch": "Rechercher des offres"
     },
     "logged": {
       "message": "Vous êtes connecté en tant que \"{{username}}\"."
@@ -81,7 +82,8 @@
       "cta": {
         "title": "Prêt à accélérer votre recherche d'emploi ?",
         "subtitle": "Créez votre compte gratuit et importez votre CV en moins de deux minutes.",
-        "register": "Créer un compte gratuit"
+        "register": "Créer un compte gratuit",
+        "search": "Parcourir les offres"
       }
     },
     "quickAccess": {

@@ -47,6 +47,17 @@
       "send": "Envoyer",
       "answerPlaceholder": "Tapez votre réponse..."
     },
+    "authPrompt": {
+      "title": "Créez un compte pour débloquer cette fonctionnalité",
+      "message": "Inscrivez-vous gratuitement et importez votre CV pour matcher les offres à votre profil et postuler.",
+      "register": "Créer un compte gratuit",
+      "defaultFeature": "Cette fonctionnalité nécessite un compte.",
+      "feature": {
+        "matchProfile": "Connectez-vous pour matcher les offres à votre profil.",
+        "matchAdvanced": "Connectez-vous pour lancer le matching avancé sur votre profil.",
+        "apply": "Connectez-vous pour postuler et suivre vos candidatures."
+      }
+    },
     "search": {
       "title": "Recherche d'emploi",
       "subtitle": "Recherchez parmi plusieurs sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail",

@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AccountService } from 'app/core/auth/account.service';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
+import { AuthPromptModalComponent } from '../shared/auth-prompt-modal/auth-prompt-modal.component';
 import {
   JobOffer,
   JobOfferPreview,
@@ -45,6 +47,7 @@ export class JobSearchComponent {
   private service = inject(JobCopilotService);
   private translateService = inject(TranslateService);
   private modalService = inject(NgbModal);
+  private accountService = inject(AccountService);
 
   search(): void {
     this.searching.set(true);
@@ -79,6 +82,7 @@ export class JobSearchComponent {
   }
 
   matchAll(): void {
+    if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
     this.matching.set(true);
     this.error.set(null);
     this.service.matchJobs(this.matchTopK).subscribe({
@@ -94,6 +98,7 @@ export class JobSearchComponent {
   }
 
   matchAdvanced(): void {
+    if (!this.requireAuth('jobCopilot.authPrompt.feature.matchAdvanced')) return;
     this.matchingAdvanced.set(true);
     this.service.matchAdvanced().subscribe({
       next: r => {
@@ -105,6 +110,7 @@ export class JobSearchComponent {
   }
 
   openApplyModal(offer: JobOfferPreview & { id?: string }): void {
+    if (!this.requireAuth('jobCopilot.authPrompt.feature.apply')) return;
     if (offer.id) {
       this.openModal(offer.id, offer);
       return;
@@ -139,6 +145,17 @@ export class JobSearchComponent {
     modalRef.componentInstance.enrichedOffer.subscribe((enriched: JobOffer) => {
       this.offers.update(list => list.map(o => (o.id === offerId ? { ...o, ...enriched } : o)));
     });
+  }
+
+  /**
+   * Gate for auth-only actions. Anonymous visitors get an invitation modal (register / login)
+   * instead of a request that would 401; returns false so the caller aborts.
+   */
+  private requireAuth(featureKey: string): boolean {
+    if (this.accountService.isAuthenticated()) return true;
+    const modalRef = this.modalService.open(AuthPromptModalComponent, { centered: true });
+    modalRef.componentInstance.featureKey.set(featureKey);
+    return false;
   }
 
   getScoreClass(score: number): string {
