@@ -222,6 +222,50 @@ public class CvRewriteService {
         }
     }
 
+    /**
+     * Translates an existing resume JSON into the target language.
+     */
+    public GeneratedResumeDto translateResume(String resumeJson, String language) {
+        String resume = resumeJson == null ? "" : resumeJson.trim();
+        if (resume.isEmpty() || language == null || language.isBlank()) {
+            return emptyGeneratedResume();
+        }
+
+        String prompt = """
+            You are an expert resume translator. Translate the RESUME (given as JSON) into %s.
+            Rules:
+            - Translate all professional content: job titles, descriptions, achievements, degrees, school names, project names, and skills.
+            - Keep personal names and contact information (emails, links, phone) as is.
+            - DO NOT invent or add any new facts.
+            - Maintain the exact same JSON structure.
+            - Skill "level" is an integer 1-5 (keep original).
+            Return ONLY valid JSON with exactly this shape (no markdown, no comments):
+            {
+              "personal": { "firstName": "", "lastName": "", "title": "", "email": "", "phone": "",
+                            "location": "", "linkedin": "", "github": "", "website": "" },
+              "summary": "",
+              "experiences": [ { "jobTitle": "", "company": "", "startDate": "", "endDate": "",
+                                 "current": false, "description": "", "achievements": [""] } ],
+              "education": [ { "degree": "", "school": "", "startDate": "", "endDate": "", "description": "" } ],
+              "projects": [ { "name": "", "description": "", "url": "", "technologies": [""] } ],
+              "certifications": [ { "name": "", "issuer": "", "date": "" } ],
+              "skills": [ { "name": "", "level": 3 } ],
+              "languages": [ { "name": "", "level": "" } ]
+            }
+
+            ===== RESUME (JSON) =====
+            %s
+            """.formatted(language, resume);
+
+        try {
+            GeneratedResumeDto result = chatClient.prompt().user(prompt).call().entity(GeneratedResumeDto.class);
+            return result == null ? emptyGeneratedResume() : result;
+        } catch (Exception e) {
+            log.error("Failed to translate resume: {}", e.getMessage());
+            return emptyGeneratedResume();
+        }
+    }
+
     private GeneratedResumeDto emptyGeneratedResume() {
         return new GeneratedResumeDto(
             new GeneratedResumeDto.GeneratedPersonalDto("", "", "", "", "", "", "", "", ""),

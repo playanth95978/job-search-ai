@@ -123,6 +123,11 @@ export class CvResumeApiService {
     return this.http.post<GeneratedResume>(`${this.url}/generate`, { source, offer: offer ?? '' });
   }
 
+  /** Translates an existing resume JSON into the target language. */
+  translateResume(source: string, language: string): Observable<GeneratedResume> {
+    return this.http.post<GeneratedResume>(`${this.url}/translate`, { source, language });
+  }
+
   /** The user's extracted candidate profile, or null when none exists yet (HTTP 204). */
   getCandidateProfile(): Observable<CandidateProfileDto | null> {
     return this.http

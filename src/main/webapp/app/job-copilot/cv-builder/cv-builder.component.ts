@@ -16,6 +16,7 @@ import { CvGenerateComponent } from './cv-generate/cv-generate.component';
 import { FONT_FAMILIES, Resume, ResumeTemplateId } from './resume.model';
 import { CvResumeApiService } from './cv-resume-api.service';
 import { candidateProfileToResume } from './candidate-profile.mapper';
+import { generatedResumeToResume } from './generated-resume.mapper';
 import { CvExportService } from './cv-export.service';
 
 @Component({
@@ -52,6 +53,15 @@ export class CvBuilderComponent {
     { id: 'minimalist', labelKey: 'cvBuilder.templates.minimalist' },
     { id: 'australian', labelKey: 'cvBuilder.templates.australian' },
   ];
+
+  readonly translateLanguages = [
+    { value: 'French', labelKey: 'jobCopilot.applyModal.languages.french' },
+    { value: 'English', labelKey: 'jobCopilot.applyModal.languages.english' },
+    { value: 'Spanish', labelKey: 'jobCopilot.applyModal.languages.spanish' },
+    { value: 'German', labelKey: 'jobCopilot.applyModal.languages.german' },
+  ];
+  readonly translationLanguage = signal('English');
+  readonly translating = signal(false);
 
   /** Becomes true once the server copy has been loaded, gating backend auto-save. */
   private readonly loaded = signal(false);
@@ -117,6 +127,19 @@ export class CvBuilderComponent {
 
   exportDocx(): void {
     void this.exportService.exportDocx(this.r(), `${this.safeName()}.docx`);
+  }
+
+  translateCv(): void {
+    const current = this.store.resume();
+    this.translating.set(true);
+    this.api.translateResume(JSON.stringify(current), this.translationLanguage()).subscribe({
+      next: dto => {
+        const translated = generatedResumeToResume(dto, current);
+        this.store.load(translated);
+        this.translating.set(false);
+      },
+      error: () => this.translating.set(false),
+    });
   }
 
   /** Prefills the editor from the user's extracted candidate profile, keeping the chosen template/theme. */

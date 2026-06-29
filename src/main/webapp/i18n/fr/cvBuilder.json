@@ -123,6 +123,10 @@
       "missingSkills": "Compétences manquantes",
       "missingKeywords": "Mots-clés manquants",
       "suggestions": "Suggestions"
+    },
+    "translate": {
+      "button": "Traduire le CV",
+      "ariaLabel": "Choisir la langue de traduction"
     }
   }
 }

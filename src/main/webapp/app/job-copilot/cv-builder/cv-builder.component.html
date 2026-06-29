@@ -68,6 +68,34 @@
           <span [jhiTranslate]="t.labelKey">{{ t.id }}</span>
         </button>
       }
+
+      <span class="cv-divider"></span>
+
+      <div class="cv-translate-group">
+        <select
+          [ngModel]="translationLanguage()"
+          (ngModelChange)="translationLanguage.set($event)"
+          class="cv-lang-select"
+          [attr.aria-label]="'cvBuilder.translate.ariaLabel' | translate"
+        >
+          @for (lang of translateLanguages; track lang.value) {
+            <option [value]="lang.value">{{ lang.labelKey | translate }}</option>
+          }
+        </select>
+        <button
+          type="button"
+          class="cv-tool"
+          (click)="translateCv()"
+          [disabled]="translating()"
+          [title]="'cvBuilder.translate.button' | translate"
+        >
+          @if (translating()) {
+            <fa-icon icon="circle-notch" [animation]="'spin'" />
+          } @else {
+            <fa-icon icon="language" />
+          }
+        </button>
+      </div>
     </div>
 
     <div class="cv-theme">

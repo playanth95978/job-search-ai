@@ -123,6 +123,10 @@
       "missingSkills": "Missing skills",
       "missingKeywords": "Missing keywords",
       "suggestions": "Suggestions"
+    },
+    "translate": {
+      "button": "Translate CV",
+      "ariaLabel": "Choose translation language"
     }
   }
 }
