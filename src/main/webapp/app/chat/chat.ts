@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -62,54 +62,31 @@ export default class Chat {
   private readonly accountService = inject(AccountService);
   draft = '';
 
-  /** Prompts offered on an empty conversation. */
-  readonly suggestions = [
+  /** Prompts offered on an empty conversation (i18n keys). */
+  readonly suggestions = signal([
     'chat.suggestions.search',
     'chat.suggestions.match',
     'chat.suggestions.applications',
     'chat.suggestions.coverLetter',
-  ];
+  ]);
 
   private readonly thread = viewChild<ElementRef<HTMLElement>>('thread');
-  /** Id whose history is already loaded, so navigating to a self-created chat doesn't wipe the thread. */
-  private loadedId: string | null = null;
-
-  constructor() {
-    effect(() => {
-      const id = this.conversationId();
-      if (id && id !== this.loadedId) {
-        this.loadedId = id;
-        this.loadHistory(id);
-      } else if (!id) {
-        this.loadedId = null;
-        this.messages().set([]);
-      }
-    });
-  }
-
-  private loadHistory(id: string): void {
-    this.loading.set(true);
-    this.service.getConversationMessages(id).subscribe({
-      next: msgs => {
-        this.messages().set(msgs.filter(m => m.type !== 'SYSTEM'));
-        this.loading.set(false);
-        this.scrollToBottom();
-      },
-      error: () => {
-        this.messages().set([]);
-        this.loading.set(false);
-      },
-    });
-  }
 
   ngOnInit(): void {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const id = params['id'];
       if (!id) {
         this.messageService.clearMessages();
-      } else {
-        this.messageService.setCurrentConversationId(id);
+        return;
       }
+      this.loading.set(true);
+      this.messageService.loadHistory(id).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.scrollToBottom();
+        },
+        error: () => this.loading.set(false),
+      });
     });
   }
 

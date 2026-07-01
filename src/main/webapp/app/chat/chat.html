@@ -3,7 +3,7 @@
     <jhi-chat-history />
   </aside>
   <jhi-chat-container-wrapper>
-    <jhi-chat-header (exportClicked)="exportConversation()" (historyClicked)="toggleHistory()" (newChatClicked)="startNewChat()" />
+    <jhi-chat-header (newChatClicked)="startNewChat()" />
 
     <jhi-chat-messages
       [hasRag]="true"
@@ -26,12 +26,7 @@
         }
       </div>
     }
-    <jhi-chat-input-area
-      (loginClicked)="login()"
-      (sendClicked)="onSendClicked()"
-      (userInputChange)="userInput = $event"
-      [account]="account()"
-    />
+    <jhi-chat-input-area (loginClicked)="login()" (userInputChange)="userInput = $event" />
 
     <!-- Panneau coulissant : historique des conversations, à côté du chat -->
   </jhi-chat-container-wrapper>

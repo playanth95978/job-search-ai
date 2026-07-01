@@ -14,7 +14,6 @@ import { Account } from '../../core/auth/account.model';
   imports: [TranslateModule, FormsModule, FontAwesomeModule, TranslateDirective, TranslateDirective],
 })
 export class ChatInputAreaComponent {
-  account = input<Account | null>(null);
   type = input<TypeChat | null>(null);
   userInput = signal<string>('');
   fileSelected = output<Event>();
