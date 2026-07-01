@@ -8,11 +8,11 @@ import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
+import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchTagDto;
 import nc.opt.aiassistant.service.jobcopilot.matching.JobMatchingService;
 import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -24,8 +24,12 @@ public class MatchingTool {
     private final CandidateProfileRepository profileRepository;
     private final JobOfferRepository jobOfferRepository;
 
-    @Tool(description = "Match the candidate profile against all available job offers. Returns ranked matches with scores.")
-    public String matchJobs(@ToolParam(description = "User ID of the candidate") String userId) {
+    @Tool(
+        description = "Match the signed-in user's candidate profile against all available job offers. Returns ranked matches with scores."
+    )
+    public String matchJobs() {
+        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+        if (userId == null) return "You must be signed in to match jobs.";
         CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         if (profile == null) return "No candidate profile found. Upload a CV first.";
 

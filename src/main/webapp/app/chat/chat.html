@@ -4,24 +4,52 @@
   </aside>
 
   <section class="chat-main">
-    @if (hasSelection()) {
-      <div class="chat-placeholder">
-        <div class="chat-placeholder-icon">
-          <fa-icon icon="comments" size="2x" />
+    <div #thread class="chat-thread">
+      @if (messages().length === 0 && !loading()) {
+        <div class="chat-welcome">
+          <div class="chat-welcome-icon"><fa-icon icon="wand-magic-sparkles" size="2x" /></div>
+          <h2 jhiTranslate="chat.empty.title">Démarrez une nouvelle conversation</h2>
+          <p class="text-secondary" jhiTranslate="chat.empty.subtitle">
+            Posez une question à votre copilote : recherche d'offres, matching, candidatures…
+          </p>
+          <div class="chat-suggestions">
+            @for (s of suggestions; track s) {
+              <button type="button" class="chat-suggestion" (click)="useSuggestion(s)">
+                <span [jhiTranslate]="s">…</span>
+              </button>
+            }
+          </div>
         </div>
-        <h2 jhiTranslate="chat.conversation.title">Conversation</h2>
-        <p class="text-secondary" jhiTranslate="chat.conversation.placeholder">Cette conversation sera bientôt disponible.</p>
-      </div>
-    } @else {
-      <div class="chat-placeholder">
-        <div class="chat-placeholder-icon">
-          <fa-icon icon="comments" size="2x" />
-        </div>
-        <h2 jhiTranslate="chat.empty.title">Démarrez une nouvelle conversation</h2>
-        <p class="text-secondary" jhiTranslate="chat.empty.subtitle">
-          Sélectionnez une conversation dans l'historique ou posez votre première question.
-        </p>
-      </div>
-    }
+      } @else {
+        @for (m of messages(); track $index) {
+          <div class="chat-msg" [class.is-user]="m.type === 'USER'">
+            <div class="chat-avatar">
+              <fa-icon [icon]="m.type === 'USER' ? 'user' : 'wand-magic-sparkles'" />
+            </div>
+            <div class="chat-bubble">{{ m.content }}</div>
+          </div>
+        }
+        @if (sending()) {
+          <div class="chat-msg">
+            <div class="chat-avatar"><fa-icon icon="wand-magic-sparkles" /></div>
+            <div class="chat-bubble chat-typing"><span></span><span></span><span></span></div>
+          </div>
+        }
+      }
+    </div>
+
+    <form class="chat-composer" (ngSubmit)="send()">
+      <textarea
+        class="chat-input"
+        rows="1"
+        [(ngModel)]="draft"
+        name="draft"
+        [placeholder]="'chat.input.placeholder' | translate"
+        (keydown.enter)="$event.preventDefault(); send()"
+      ></textarea>
+      <button type="submit" class="chat-send" [disabled]="sending() || !draft.trim()" [title]="'chat.input.send' | translate">
+        <fa-icon [icon]="sending() ? 'circle-notch' : 'paper-plane'" [animation]="sending() ? 'spin' : undefined" />
+      </button>
+    </form>
   </section>
 </div>

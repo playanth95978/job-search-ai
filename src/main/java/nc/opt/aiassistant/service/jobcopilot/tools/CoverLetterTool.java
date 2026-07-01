@@ -7,6 +7,7 @@ import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
+import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.jobcopilot.CoverLetterService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -21,11 +22,10 @@ public class CoverLetterTool {
     private final CandidateProfileRepository profileRepository;
     private final JobOfferRepository jobOfferRepository;
 
-    @Tool(description = "Generate a personalized cover letter for a specific job offer")
-    public String generateCoverLetter(
-        @ToolParam(description = "User ID") String userId,
-        @ToolParam(description = "Job offer ID (UUID)") String jobOfferId
-    ) {
+    @Tool(description = "Generate a personalized cover letter for a specific job offer, for the current signed-in user")
+    public String generateCoverLetter(@ToolParam(description = "Job offer ID (UUID)") String jobOfferId) {
+        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+        if (userId == null) return "You must be signed in.";
         CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         if (profile == null) return "No candidate profile found. Upload a CV first.";
 

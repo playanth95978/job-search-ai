@@ -2,11 +2,21 @@
   "chat": {
     "empty": {
       "title": "Start a new conversation",
-      "subtitle": "Pick a conversation from the history or ask your first question."
+      "subtitle": "Ask your copilot anything: job search, profile matching, applications, cover letters…"
     },
     "conversation": {
       "title": "Conversation",
       "placeholder": "This conversation will be available soon."
+    },
+    "input": {
+      "placeholder": "Type your message…",
+      "send": "Send"
+    },
+    "suggestions": {
+      "search": "Find me developer jobs in Nouméa",
+      "match": "Match job offers with my profile",
+      "applications": "What's the status of my applications?",
+      "coverLetter": "Help me write a cover letter"
     }
   }
 }

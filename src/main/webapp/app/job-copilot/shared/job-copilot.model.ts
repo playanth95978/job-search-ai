@@ -150,6 +150,12 @@ export interface ChatMessageHistory {
   timestamp: string;
 }
 
+/** One assistant reply, as returned by the tool-enabled agent endpoint. */
+export interface AssistantMessage {
+  conversationId: string;
+  message: string;
+}
+
 /** Minimal offer shape needed to display the apply modal — satisfied by both JobOffer and JobOfferDto. */
 export interface JobOfferPreview {
   title: string;

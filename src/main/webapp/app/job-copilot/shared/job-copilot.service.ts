@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import {
   ApplicationStats,
   ApplyOutcome,
+  AssistantMessage,
   CandidateProfile,
   CvMatchResult,
   ChatMessageHistory,
@@ -191,6 +192,13 @@ export class JobCopilotService {
   /** Loads the full message history of a conversation (USER/ASSISTANT/SYSTEM), chronological order. */
   getConversationMessages(conversationId: string): Observable<ChatMessageHistory[]> {
     return this.http.get<ChatMessageHistory[]>(`api/chat-history/history/${encodeURIComponent(conversationId)}`);
+  }
+
+  /** Sends a user message to the tool-enabled Job Copilot agent and returns its reply. */
+  sendAssistantMessage(conversationId: string, message: string): Observable<AssistantMessage> {
+    return this.http.post<AssistantMessage>(`${this.baseUrl}/assistant/${encodeURIComponent(conversationId)}/message`, message, {
+      headers: { 'Content-Type': 'text/plain' },
+    });
   }
 
   // Preferences

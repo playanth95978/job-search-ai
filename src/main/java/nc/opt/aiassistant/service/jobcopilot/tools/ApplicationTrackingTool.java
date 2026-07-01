@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobApplication;
 import nc.opt.aiassistant.domain.enumeration.ApplicationStatus;
+import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.dto.JobApplicationDTO;
 import nc.opt.aiassistant.service.jobcopilot.ApplicationTrackingService;
 import org.springframework.ai.tool.annotation.Tool;
@@ -21,29 +22,44 @@ public class ApplicationTrackingTool {
 
     private final ApplicationTrackingService trackingService;
 
-    @Tool(description = "Get all job applications for the current user with their status")
-    public String getApplications(@ToolParam(description = "User ID") String userId) {
+    @Tool(description = "Get all job applications for the current signed-in user with their status")
+    public String getApplications() {
+        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+        if (userId == null) return "You must be signed in.";
         List<JobApplicationDTO> apps = trackingService.getApplications(userId);
         if (apps.isEmpty()) return "No applications yet.";
         return apps.stream().map(this::formatApp).collect(Collectors.joining("\n"));
     }
 
-    @Tool(description = "Update the status of a job application (DRAFT, APPLIED, INTERVIEW, REJECTED, GHOSTED, OFFER, WITHDRAWN)")
+    @Tool(
+        description = "Update the status of one of the current user's job applications (DRAFT, APPLIED, INTERVIEW, REJECTED, GHOSTED, OFFER, WITHDRAWN)"
+    )
     public String updateStatus(
         @ToolParam(description = "Application ID (UUID)") String applicationId,
         @ToolParam(description = "New status") String status
     ) {
+        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+        if (userId == null) return "You must be signed in.";
         try {
+            UUID id = UUID.fromString(applicationId);
+            // Ownership guard: only let the user change their own applications.
+            boolean owned = trackingService
+                .getApplications(userId)
+                .stream()
+                .anyMatch(a -> id.equals(a.getId()));
+            if (!owned) return "Application not found for the current user.";
             ApplicationStatus s = ApplicationStatus.valueOf(status.toUpperCase());
-            trackingService.updateStatus(UUID.fromString(applicationId), s);
+            trackingService.updateStatus(id, s);
             return "Application status updated to " + s;
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
     }
 
-    @Tool(description = "Get application statistics (count by status) for the user")
-    public String getStats(@ToolParam(description = "User ID") String userId) {
+    @Tool(description = "Get application statistics (count by status) for the current signed-in user")
+    public String getStats() {
+        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+        if (userId == null) return "You must be signed in.";
         Map<ApplicationStatus, Long> stats = trackingService.getStats(userId);
         return stats
             .entrySet()
