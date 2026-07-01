@@ -63,6 +63,7 @@ export class Conversation implements OnInit {
   readonly activeId = input<string | null>(null);
   /** Visual theme: 'dark' (sidebar, default) or 'light' (embedded in a light panel). */
   readonly theme = input<'dark' | 'light'>('dark');
+  readonly collapsed = input<boolean>(false);
   readonly conversationSelected = output<IConversation>();
 
   subscription: Subscription | null = null;

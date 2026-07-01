@@ -9,7 +9,9 @@
   <form [formGroup]="conversationsFormGroupArray">
     @for (date of conversationsFormGroupByCreatedDate() | keyvalue; track date.key) {
       <div class="date-group mb-3">
-        <div class="date-separator px-3 py-2 small fw-bold">{{ date.key }}</div>
+        @if (!collapsed()) {
+          <div class="date-separator px-3 py-2 small fw-bold">{{ date.key }}</div>
+        }
         <ng-container formArrayName="conversations">
           @for (sc of date.value; track sc; let i = $index) {
             <ng-container [formGroupName]="i">
@@ -34,35 +36,39 @@
                   >
                     <div class="d-flex align-items-center flex-grow-1 overflow-hidden">
                       <fa-icon [icon]="'message'" class="me-2 opacity-50 conversation-icon"></fa-icon>
-                      <span class="last-message text-truncate small">{{
-                        sc.get('title')?.value || ('home.history.untitled' | translate)
-                      }}</span>
+                      @if (!collapsed()) {
+                        <span class="last-message text-truncate small">{{
+                          sc.get('title')?.value || ('home.history.untitled' | translate)
+                        }}</span>
+                      }
                     </div>
-                    <div class="dropdown-trigger ms-auto" container="body" ngbDropdown>
-                      <button
-                        (click)="$event.preventDefault(); $event.stopPropagation()"
-                        class="btn btn-sm btn-icon border-0 p-1 lh-1"
-                        ngbDropdownToggle
-                        type="button"
-                      >
-                        <fa-icon [icon]="'list-dots'" class="small"></fa-icon>
-                      </button>
-                      <div ngbDropdownMenu>
-                        <button (click)="rename(i)" ngbDropdownItem>
-                          <fa-icon [icon]="'pencil-alt'" class="me-2 small"></fa-icon>
-                          <span jhiTranslate="entity.action.edit">Renommer</span>
+                    @if (!collapsed()) {
+                      <div class="dropdown-trigger ms-auto" container="body" ngbDropdown>
+                        <button
+                          (click)="$event.preventDefault(); $event.stopPropagation()"
+                          class="btn btn-sm btn-icon border-0 p-1 lh-1"
+                          ngbDropdownToggle
+                          type="button"
+                        >
+                          <fa-icon [icon]="'list-dots'" class="small"></fa-icon>
                         </button>
-                        <button (click)="$event.stopPropagation()" ngbDropdownItem>
-                          <fa-icon [icon]="'copy'" class="me-2 small"></fa-icon>
-                          <span jhiTranslate="entity.action.duplicate">Dupliquer</span>
-                        </button>
-                        <div class="dropdown-divider"></div>
-                        <button (click)="delete(i); $event.stopPropagation()" class="text-danger" ngbDropdownItem>
-                          <fa-icon [icon]="'trash-alt'" class="me-2 small"></fa-icon>
-                          <span jhiTranslate="entity.action.delete">Supprimer</span>
-                        </button>
+                        <div ngbDropdownMenu>
+                          <button (click)="rename(i)" ngbDropdownItem>
+                            <fa-icon [icon]="'pencil-alt'" class="me-2 small"></fa-icon>
+                            <span jhiTranslate="entity.action.edit">Renommer</span>
+                          </button>
+                          <button (click)="$event.stopPropagation()" ngbDropdownItem>
+                            <fa-icon [icon]="'copy'" class="me-2 small"></fa-icon>
+                            <span jhiTranslate="entity.action.duplicate">Dupliquer</span>
+                          </button>
+                          <div class="dropdown-divider"></div>
+                          <button (click)="delete(i); $event.stopPropagation()" class="text-danger" ngbDropdownItem>
+                            <fa-icon [icon]="'trash-alt'" class="me-2 small"></fa-icon>
+                            <span jhiTranslate="entity.action.delete">Supprimer</span>
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    }
                   </a>
                 }
               </div>
@@ -71,9 +77,11 @@
         </ng-container>
       </div>
     } @empty {
-      <div class="no-history p-4 text-center text-muted italic small" jhiTranslate="home.history.noHistory">
-        Aucune conversation trouvée
-      </div>
+      @if (!collapsed()) {
+        <div class="no-history p-4 text-center text-muted italic small" jhiTranslate="home.history.noHistory">
+          Aucune conversation trouvée
+        </div>
+      }
     }
   </form>
 </div>

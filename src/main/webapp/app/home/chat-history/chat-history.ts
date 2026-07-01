@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import dayjs from 'dayjs/esm';
 import { Conversation } from '../../admin/conversation/list/conversation';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faBars, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import TranslateDirective from '../../shared/language/translate.directive';
 
 export interface ChatHistory {
@@ -24,4 +24,13 @@ export interface ChatHistory {
 })
 export class ChatHistoryComponent {
   protected readonly faPlus = faPlus;
+  protected readonly faBars = faBars;
+  protected readonly faChevronLeft = faChevronLeft;
+  protected readonly faChevronRight = faChevronRight;
+
+  isCollapsed = signal(false);
+
+  toggleCollapsed(): void {
+    this.isCollapsed.update(collapsed => !collapsed);
+  }
 }

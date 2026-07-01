@@ -1,6 +1,13 @@
-<div class="history-container">
+<div class="history-container" [class.collapsed]="isCollapsed()">
   <div class="history-header px-3 d-flex justify-content-between align-items-center">
-    <h5 class="mb-0" jhiTranslate="home.history.title">Historique</h5>
+    <div class="d-flex justify-content-between align-items-center w-100">
+      @if (!isCollapsed()) {
+        <h5 class="mb-0" jhiTranslate="home.history.title">Historique</h5>
+      }
+      <button class="btn btn-sm btn-icon border-0 p-1 toggle-btn" (click)="toggleCollapsed()">
+        <fa-icon [icon]="isCollapsed() ? faChevronRight : faChevronLeft"></fa-icon>
+      </button>
+    </div>
   </div>
-  <jhi-conversation class="flex-grow-1 overflow-hidden d-flex flex-column"></jhi-conversation>
+  <jhi-conversation class="flex-grow-1 overflow-hidden d-flex flex-column" [collapsed]="isCollapsed()"></jhi-conversation>
 </div>
