@@ -1,0 +1,23 @@
+<div class="chat-header">
+  <div class="header-info">
+    <fa-icon [icon]="['fas', 'robot']" class="ai-icon"></fa-icon>
+    <div class="title-wrapper">
+      <h1 jhiTranslate="home.chat.title">Assistant IA</h1>
+      <span class="status-badge" jhiTranslate="home.chat.status">En ligne</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="header-btn primary-btn" (click)="newChatClicked.emit()" title="Nouvelle conversation">
+      <fa-icon [icon]="'plus'"></fa-icon>
+      <span>Nouveau</span>
+    </button>
+    <button class="header-btn" (click)="historyClicked.emit()" title="Historique des conversations">
+      <fa-icon [icon]="'history'"></fa-icon>
+      <span>Historique</span>
+    </button>
+    <button class="header-btn" (click)="exportClicked.emit()" title="Exporter la conversation">
+      <fa-icon [icon]="'download'"></fa-icon>
+      <span>Exporter</span>
+    </button>
+  </div>
+</div>

@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobApplication;
 import nc.opt.aiassistant.domain.enumeration.ApplicationStatus;
-import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.dto.JobApplicationDTO;
 import nc.opt.aiassistant.service.jobcopilot.ApplicationTrackingService;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -23,8 +23,8 @@ public class ApplicationTrackingTool {
     private final ApplicationTrackingService trackingService;
 
     @Tool(description = "Get all job applications for the current signed-in user with their status")
-    public String getApplications() {
-        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+    public String getApplications(ToolContext toolContext) {
+        String userId = ToolSupport.currentUser(toolContext);
         if (userId == null) return "You must be signed in.";
         List<JobApplicationDTO> apps = trackingService.getApplications(userId);
         if (apps.isEmpty()) return "No applications yet.";
@@ -36,9 +36,10 @@ public class ApplicationTrackingTool {
     )
     public String updateStatus(
         @ToolParam(description = "Application ID (UUID)") String applicationId,
-        @ToolParam(description = "New status") String status
+        @ToolParam(description = "New status") String status,
+        ToolContext toolContext
     ) {
-        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+        String userId = ToolSupport.currentUser(toolContext);
         if (userId == null) return "You must be signed in.";
         try {
             UUID id = UUID.fromString(applicationId);
@@ -57,8 +58,8 @@ public class ApplicationTrackingTool {
     }
 
     @Tool(description = "Get application statistics (count by status) for the current signed-in user")
-    public String getStats() {
-        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+    public String getStats(ToolContext toolContext) {
+        String userId = ToolSupport.currentUser(toolContext);
         if (userId == null) return "You must be signed in.";
         Map<ApplicationStatus, Long> stats = trackingService.getStats(userId);
         return stats

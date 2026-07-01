@@ -2,54 +2,37 @@
   <aside class="chat-sidebar">
     <jhi-chat-history />
   </aside>
+  <jhi-chat-container-wrapper>
+    <jhi-chat-header (exportClicked)="exportConversation()" (historyClicked)="toggleHistory()" (newChatClicked)="startNewChat()" />
 
-  <section class="chat-main">
-    <div #thread class="chat-thread">
-      @if (messages().length === 0 && !loading()) {
-        <div class="chat-welcome">
-          <div class="chat-welcome-icon"><fa-icon icon="wand-magic-sparkles" size="2x" /></div>
-          <h2 jhiTranslate="chat.empty.title">Démarrez une nouvelle conversation</h2>
-          <p class="text-secondary" jhiTranslate="chat.empty.subtitle">
-            Posez une question à votre copilote : recherche d'offres, matching, candidatures…
-          </p>
-          <div class="chat-suggestions">
-            @for (s of suggestions; track s) {
-              <button type="button" class="chat-suggestion" (click)="useSuggestion(s)">
-                <span [jhiTranslate]="s">…</span>
-              </button>
-            }
-          </div>
-        </div>
-      } @else {
-        @for (m of messages(); track $index) {
-          <div class="chat-msg" [class.is-user]="m.type === 'USER'">
-            <div class="chat-avatar">
-              <fa-icon [icon]="m.type === 'USER' ? 'user' : 'wand-magic-sparkles'" />
-            </div>
-            <div class="chat-bubble">{{ m.content }}</div>
-          </div>
-        }
-        @if (sending()) {
-          <div class="chat-msg">
-            <div class="chat-avatar"><fa-icon icon="wand-magic-sparkles" /></div>
-            <div class="chat-bubble chat-typing"><span></span><span></span><span></span></div>
-          </div>
-        }
-      }
-    </div>
+    <jhi-chat-messages
+      [hasRag]="true"
+      [formatMessage]="formatMessage"
+      [isTyping]="isTyping()"
+      [messages]="messages()"
+      [streamingHtml]="streamingHtml()"
+      [streamingMessage]="streamingMessage()"
+      (feedbackClicked)="onFeedback($event)"
+    />
 
-    <form class="chat-composer" (ngSubmit)="send()">
-      <textarea
-        class="chat-input"
-        rows="1"
-        [(ngModel)]="draft"
-        name="draft"
-        [placeholder]="'chat.input.placeholder' | translate"
-        (keydown.enter)="$event.preventDefault(); send()"
-      ></textarea>
-      <button type="submit" class="chat-send" [disabled]="sending() || !draft.trim()" [title]="'chat.input.send' | translate">
-        <fa-icon [icon]="sending() ? 'circle-notch' : 'paper-plane'" [animation]="sending() ? 'spin' : undefined" />
-      </button>
-    </form>
-  </section>
+    <!-- Follow-up suggestions -->
+    @if (suggestions().length > 0 && !isTyping()) {
+      <div class="suggestions-bar">
+        @for (suggestion of suggestions(); track suggestion) {
+          <button class="suggestion-chip" (click)="onSuggestionClick(suggestion)">
+            <fa-icon [icon]="'lightbulb'"></fa-icon>
+            {{ suggestion | translate }}
+          </button>
+        }
+      </div>
+    }
+    <jhi-chat-input-area
+      (loginClicked)="login()"
+      (sendClicked)="onSendClicked()"
+      (userInputChange)="userInput = $event"
+      [account]="account()"
+    />
+
+    <!-- Panneau coulissant : historique des conversations, à côté du chat -->
+  </jhi-chat-container-wrapper>
 </div>

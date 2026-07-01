@@ -1,6 +1,10 @@
 package nc.opt.aiassistant.service.jobcopilot;
 
+import java.time.Duration;
+import java.util.Map;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import nc.opt.aiassistant.service.jobcopilot.dto.ChatEvent;
 import nc.opt.aiassistant.service.jobcopilot.tools.ApplicationTrackingTool;
 import nc.opt.aiassistant.service.jobcopilot.tools.CoverLetterTool;
 import nc.opt.aiassistant.service.jobcopilot.tools.CvParsingTool;
@@ -15,6 +19,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 /**
  * Conversational Job Copilot agent. A single tool-enabled {@link ChatClient} is wired here with all
@@ -59,13 +64,50 @@ public class JobCopilotAgentService {
             .build();
     }
 
-    /** Runs one turn of the conversation, letting the model call tools as needed. */
-    public String chat(String conversationId, String message) {
+    /** Runs one turn of the conversation (blocking), letting the model call tools as needed. */
+    public String chat(String conversationId, String userId, String message) {
         return chatClient
             .prompt()
             .user(message)
+            .toolContext(userContext(userId))
             .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
             .call()
             .content();
+    }
+
+    /**
+     * Streams one turn as Server-Sent Events (start / token* / end). The {@code userId} is captured
+     * on the request thread and passed via the tool context, because tool calls run on reactive
+     * threads where the security ThreadLocal is not available.
+     */
+    public Flux<ChatEvent> stream(String conversationId, String userId, String message) {
+        String id = UUID.randomUUID().toString();
+        Flux<String> tokens = chatClient
+            .prompt()
+            .user(message)
+            .toolContext(userContext(userId))
+            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+            .stream()
+            .content();
+        return toChunk(tokens, id);
+    }
+
+    /** Wraps a token flux into start/token/end events, batching tokens to limit SSE chatter. */
+    private Flux<ChatEvent> toChunk(Flux<String> tokenFlux, String id) {
+        return tokenFlux
+            .bufferTimeout(20, Duration.ofMillis(100))
+            .map(tokens -> String.join("", tokens))
+            .filter(content -> !content.isEmpty())
+            .map(content -> new ChatEvent(id, "token", content))
+            .startWith(new ChatEvent(id, "start", null))
+            .concatWithValues(new ChatEvent(id, "end", null))
+            .onErrorResume(e -> {
+                log.warn("Assistant stream failed for conversation {}: {}", id, e.getMessage());
+                return Flux.just(new ChatEvent(id, "error", e.getMessage()));
+            });
+    }
+
+    private Map<String, Object> userContext(String userId) {
+        return userId == null || userId.isBlank() ? Map.of() : Map.of("userId", userId);
     }
 }

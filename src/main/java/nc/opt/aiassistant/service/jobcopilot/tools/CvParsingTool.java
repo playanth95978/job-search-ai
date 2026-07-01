@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
-import nc.opt.aiassistant.security.SecurityUtils;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +16,8 @@ public class CvParsingTool {
     private final CandidateProfileRepository profileRepository;
 
     @Tool(description = "Get the candidate profile for the current signed-in user. Returns skills, experience, education, location, etc.")
-    public String getCandidateProfile() {
-        String userId = SecurityUtils.getCurrentUserLogin().orElse(null);
+    public String getCandidateProfile(ToolContext toolContext) {
+        String userId = ToolSupport.currentUser(toolContext);
         if (userId == null) return "You must be signed in.";
         return profileRepository
             .findTopByUserIdOrderByCreatedAtDesc(userId)

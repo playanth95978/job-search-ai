@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -6,13 +6,17 @@ import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
-
-import TranslateDirective from '../shared/language/translate.directive';
 import { ChatHistoryComponent } from '../home/chat-history/chat-history';
 import { JobCopilotService } from '../job-copilot/shared/job-copilot.service';
-import { ChatMessageHistory } from '../job-copilot/shared/job-copilot.model';
 import { ConversationService } from '../admin/conversation/service/conversation.service';
-import { NewConversation } from '../admin/conversation/conversation.model';
+import { StateStorageService } from '../core/auth/state-storage.service';
+import { ChatInputAreaComponent } from './chat-input-area/chat-input-area.component';
+import { ChatHeaderComponent } from './chat-header/chat-header.component';
+import { ChatMessagesComponent } from './chat-messages/chat-messages.component';
+import { ChatContainerWrapperComponent } from './chat-container-wrapper/chat-container-wrapper.component';
+import { Subject, takeUntil } from 'rxjs';
+import { AccountService } from '../core/auth/account.service';
+import { MessageService, TypeChat } from './message.service';
 
 /**
  * ChatGPT-style conversation pane for the tool-enabled Job Copilot agent. The sidebar
@@ -24,7 +28,16 @@ import { NewConversation } from '../admin/conversation/conversation.model';
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, FontAwesomeModule, TranslateModule, TranslateDirective, ChatHistoryComponent],
+  imports: [
+    FormsModule,
+    FontAwesomeModule,
+    TranslateModule,
+    ChatHistoryComponent,
+    ChatInputAreaComponent,
+    ChatHeaderComponent,
+    ChatMessagesComponent,
+    ChatContainerWrapperComponent,
+  ],
 })
 export default class Chat {
   private readonly route = inject(ActivatedRoute);
@@ -32,12 +45,21 @@ export default class Chat {
   private readonly service = inject(JobCopilotService);
   private readonly conversationService = inject(ConversationService);
   private readonly translateService = inject(TranslateService);
+  private readonly stateStorage = inject(StateStorageService);
+  private readonly messageService = inject(MessageService);
 
   readonly conversationId = toSignal(this.route.paramMap.pipe(map(params => params.get('id'))), { initialValue: null });
 
-  readonly messages = signal<ChatMessageHistory[]>([]);
   readonly loading = signal(false);
   readonly sending = signal(false);
+  readonly messages = this.messageService.messages;
+  readonly streamingMessage = this.messageService.streamingMessage;
+  readonly streamingHtml = this.messageService.streamingHtml;
+  userInput = '';
+  readonly isTyping = this.messageService.generatingInProgress;
+
+  private readonly destroy$ = new Subject<void>();
+  private readonly accountService = inject(AccountService);
   draft = '';
 
   /** Prompts offered on an empty conversation. */
@@ -60,48 +82,8 @@ export default class Chat {
         this.loadHistory(id);
       } else if (!id) {
         this.loadedId = null;
-        this.messages.set([]);
+        this.messages().set([]);
       }
-    });
-  }
-
-  send(): void {
-    const text = this.draft.trim();
-    if (!text || this.sending()) {
-      return;
-    }
-    this.draft = '';
-    this.append('USER', text);
-    this.sending.set(true);
-
-    const id = this.conversationId();
-    if (id) {
-      this.ask(id, text);
-      return;
-    }
-    // New chat: create the conversation first, adopt its id (without reloading), then ask.
-    this.conversationService.create({ id: null, title: text.slice(0, 60) } as NewConversation).subscribe({
-      next: conv => {
-        this.loadedId = conv.id;
-        void this.router.navigate(['/chat', conv.id]);
-        this.ask(conv.id, text);
-      },
-      error: () => this.fail(),
-    });
-  }
-
-  useSuggestion(key: string): void {
-    this.draft = this.translateService.instant(key);
-    this.send();
-  }
-
-  private ask(conversationId: string, text: string): void {
-    this.service.sendAssistantMessage(conversationId, text).subscribe({
-      next: res => {
-        this.append('ASSISTANT', res.message);
-        this.sending.set(false);
-      },
-      error: () => this.fail(),
     });
   }
 
@@ -109,28 +91,52 @@ export default class Chat {
     this.loading.set(true);
     this.service.getConversationMessages(id).subscribe({
       next: msgs => {
-        this.messages.set(msgs.filter(m => m.type !== 'SYSTEM'));
+        this.messages().set(msgs.filter(m => m.type !== 'SYSTEM'));
         this.loading.set(false);
         this.scrollToBottom();
       },
       error: () => {
-        this.messages.set([]);
+        this.messages().set([]);
         this.loading.set(false);
       },
     });
   }
 
-  private append(type: ChatMessageHistory['type'], content: string): void {
-    this.messages.update(list => [
-      ...list,
-      { conversationId: this.conversationId() ?? '', content, type, timestamp: new Date().toISOString() },
-    ]);
-    this.scrollToBottom();
+  ngOnInit(): void {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const id = params['id'];
+      if (!id) {
+        this.messageService.clearMessages();
+      } else {
+        this.messageService.setCurrentConversationId(id);
+      }
+    });
   }
 
-  private fail(): void {
-    this.sending.set(false);
-    this.append('ASSISTANT', '⚠️');
+  startNewChat(): void {
+    this.messageService.clearMessages();
+    this.router.navigate(['/chat']);
+  }
+
+  formatMessage = (message: string): string => {
+    return this.messageService.formatCodeBlocks(message);
+  };
+
+  onFeedback(event: { messageId: string; feedback: 'up' | 'down' }): void {
+    this.messageService.setFeedback(event.messageId, event.feedback);
+  }
+
+  onSuggestionClick(suggestion: string): void {
+    this.messageService.useSuggestion(suggestion);
+  }
+
+  login(): void {
+    this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private scrollToBottom(): void {

@@ -1,0 +1,46 @@
+jhi-chat-container-wrapper {
+  display: block;
+  min-height: 0;
+}
+
+.chat-container-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  position: relative;
+  min-height: 0;
+
+  > jhi-chat-header,
+  > header,
+  > jhi-chat-upload-error,
+  > jhi-chat-input-area,
+  > jhi-chat-text-area,
+  > .suggestions-bar {
+    flex: 0 0 auto;
+  }
+
+  > jhi-chat-messages {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  > .flex-1,
+  > .relative.flex-1 {
+    min-height: 0;
+  }
+
+  :host-context(.dark) & {
+    background: #030712;
+    border-color: #1f2937;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+}

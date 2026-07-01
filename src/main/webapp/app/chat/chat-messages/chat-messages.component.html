@@ -1,0 +1,89 @@
+<div #scrollContainer class="chat-messages">
+  @for (msg of messages(); track msg) {
+    <div [class]="'message-wrapper ' + msg.role">
+      @if (msg.role === 'user') {
+        <div class="avatar user-avatar">
+          <fa-icon [icon]="['fas', 'user-circle']"></fa-icon>
+        </div>
+      }
+      <div class="message-content">
+        <div #messageEl [class]="msg.role === 'assistant' ? 'message-assistant-plain' : 'message-bubble'">
+          @if (msg.isStreaming && streamingMessage()) {
+            <jhi-sanitizer #contentRef [html]="formatMessage()(streamingHtml())" />
+            <span class="streaming-cursor" aria-hidden="true"></span>
+          } @else {
+            <jhi-sanitizer #contentRef [html]="formatMessage()(msg.content)" />
+          }
+        </div>
+
+        <!-- Action buttons (copy + feedback) -->
+        @if (msg.role === 'assistant' && msg.id !== 'welcome' && !msg.isStreaming) {
+          <div class="message-actions">
+            <button #copyBtn (click)="copyTextToClipboard(messageEl.innerText, copyBtn)" class="action-button" title="Copier le message">
+              <fa-icon [icon]="'copy'" class="copy-icon"></fa-icon>
+              <fa-icon [icon]="'check'" class="check-icon" style="display: none; color: #28a745"></fa-icon>
+            </button>
+            <button
+              (click)="onFeedback(msg.id, 'up')"
+              [class.active]="msg.feedback === 'up'"
+              class="action-button feedback-btn"
+              title="Bonne reponse"
+            >
+              <fa-icon [icon]="'thumbs-up'"></fa-icon>
+            </button>
+            <button
+              (click)="onFeedback(msg.id, 'down')"
+              [class.active]="msg.feedback === 'down'"
+              class="action-button feedback-btn"
+              title="Mauvaise reponse"
+            >
+              <fa-icon [icon]="'thumbs-down'"></fa-icon>
+            </button>
+          </div>
+        }
+
+        <!-- Events (Tool Calls, Results) for Jira Agent specifically -->
+        @if (hasEvents() && (msg.events?.length ?? 0) > 0) {
+          <div class="mt-4 flex w-full flex-col items-start space-y-2">
+            <div class="flex items-center gap-2 px-1 mb-1">
+              <div class="flex h-5 w-5 items-center justify-center rounded-lg bg-brand-500 text-[9px] text-white">
+                <fa-icon icon="robot" />
+              </div>
+              <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Agent Jira</span>
+            </div>
+            <!--            @for (evt of msg.events; track evt.id) {-->
+            <!--              <jhi-jira-action-card [event]="evt" class="block w-full max-w-[90%] animate-slide-up" />-->
+            <!--            }-->
+          </div>
+        }
+
+        <span class="message-time">{{ msg.id === 'welcome' ? '' : (dateNow | formatMediumDatetime) }}</span>
+      </div>
+    </div>
+  }
+
+  @if (isTyping() && hasRag()) {
+    <div class="message-wrapper assistant typing">
+      <div class="message-content">
+        <div class="message-assistant-plain thinking-steps">
+          <div class="thinking-step done">
+            <fa-icon [icon]="'check-circle'" class="step-icon step-done"></fa-icon>
+            <span>Analyse de la question</span>
+          </div>
+          <div class="thinking-step done">
+            <fa-icon [icon]="'check-circle'" class="step-icon step-done"></fa-icon>
+            <span>Recherche dans les bases de connaissances</span>
+          </div>
+          <div class="thinking-step done">
+            <fa-icon [icon]="'check-circle'" class="step-icon step-done"></fa-icon>
+            <span>Reranking des documents</span>
+          </div>
+          <div class="thinking-step active">
+            <fa-icon [icon]="'circle-notch'" [animation]="'spin'" class="step-icon step-active"></fa-icon>
+            <span>Generation de la reponse...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

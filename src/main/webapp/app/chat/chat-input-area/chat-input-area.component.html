@@ -1,0 +1,44 @@
+<div class="chat-input-area">
+  @if (account() === null) {
+    <div class="login-prompt">
+      <p jhiTranslate="home.chat.loginPromptSart"></p>
+      <a (click)="loginClicked.emit()" class="login-link" jhiTranslate="home.chat.loginPromptBetween"
+        ><span jhiTranslate="home.chat.loginPromptBetween"></span
+      ></a>
+      <p jhiTranslate="home.chat.loginPromptEnd"></p>
+    </div>
+  } @else {
+    <div class="input-wrapper">
+      <input #fileInput (change)="fileSelected.emit($event)" accept=".pdf" multiple style="display: none" type="file" />
+      <div class="input-main">
+        @if (type() === 'PDF') {
+          <button (click)="triggerUploadClicked.emit(fileInput)" class="upload-trigger-btn" title="Ajouter des documents">
+            <fa-icon [icon]="'file-upload'"></fa-icon>
+          </button>
+        }
+
+        <div class="input-content">
+          <textarea
+            (keyup.enter)="sendMessage()"
+            (ngModelChange)="onUserInput($event)"
+            [disabled]="isTyping()"
+            [ngModel]="userInput()"
+            [placeholder]="'home.chat.placeholder' | translate"
+            rows="1"
+          ></textarea>
+        </div>
+        <button
+          (click)="sendMessage()"
+          [disabled]="(!userInput().trim() && selectedFiles().length === 0) || isTyping() || isUploading()"
+          class="send-button"
+        >
+          @if (isUploading()) {
+            <fa-icon [animation]="isUploading() ? 'spin' : undefined" [icon]="'sync'"></fa-icon>
+          } @else {
+            <fa-icon [icon]="['fas', 'paper-plane']"></fa-icon>
+          }
+        </button>
+      </div>
+    </div>
+  }
+</div>
