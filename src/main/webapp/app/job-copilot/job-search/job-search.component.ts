@@ -85,7 +85,7 @@ export class JobSearchComponent {
     if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
     this.matching.set(true);
     this.error.set(null);
-    this.service.matchJobs(this.matchTopK).subscribe({
+    this.service.matchJobs(this.matchTopK, this.location || undefined).subscribe({
       next: r => {
         this.matchResults.set(r);
         this.matching.set(false);
@@ -100,7 +100,7 @@ export class JobSearchComponent {
   matchAdvanced(): void {
     if (!this.requireAuth('jobCopilot.authPrompt.feature.matchAdvanced')) return;
     this.matchingAdvanced.set(true);
-    this.service.matchAdvanced().subscribe({
+    this.service.matchAdvanced(this.location || undefined).subscribe({
       next: r => {
         this.matchResults.set(r);
         this.matchingAdvanced.set(false);

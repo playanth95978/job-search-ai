@@ -90,14 +90,17 @@ export class JobCopilotService {
     }
   }
 
-  matchJobs(topK?: number): Observable<MatchResult[]> {
+  matchJobs(topK?: number, location?: string): Observable<MatchResult[]> {
     let params = new HttpParams();
     if (topK != null) params = params.set('topK', topK);
+    if (location) params = params.set('location', location);
     return this.http.get<MatchResult[]>(`${this.baseUrl}/jobs/match`, { params });
   }
 
-  matchAdvanced(): Observable<MatchResult[]> {
-    return this.http.get<MatchResult[]>(`${this.baseUrl}/jobs/match-advanced`);
+  matchAdvanced(location?: string): Observable<MatchResult[]> {
+    let params = new HttpParams();
+    if (location) params = params.set('location', location);
+    return this.http.get<MatchResult[]>(`${this.baseUrl}/jobs/match-advanced`, { params });
   }
 
   // Positioning (CV vs offer)

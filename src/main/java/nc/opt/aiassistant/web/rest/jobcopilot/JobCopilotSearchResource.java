@@ -101,7 +101,10 @@ public class JobCopilotSearchResource {
     }
 
     @GetMapping("/match")
-    public ResponseEntity<List<MatchResultDto>> matchJobs(@RequestParam(name = "topK", defaultValue = "30") int topK) {
+    public ResponseEntity<List<MatchResultDto>> matchJobs(
+        @RequestParam(name = "topK", defaultValue = "30") int topK,
+        @RequestParam(required = false) String location
+    ) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
         if (profile == null) {
@@ -111,12 +114,13 @@ public class JobCopilotSearchResource {
         // so we no longer return unrelated jobs with a low score. topK is caller-configurable.
         String query = buildSemanticQuery(profile);
         List<JobOffer> offers = jobSearchService.searchSemantic(query, Math.max(1, topK));
-        List<MatchResultDto> results = matchingService.matchJobs(profile, offers);
+        // Optional search-box location biases the location score toward where the user is looking.
+        List<MatchResultDto> results = matchingService.matchJobs(profile, offers, location);
         return ResponseEntity.ok(results);
     }
 
     @GetMapping("/match-advanced")
-    public ResponseEntity<List<MatchResultDto>> matchAdvanced() {
+    public ResponseEntity<List<MatchResultDto>> matchAdvanced(@RequestParam(required = false) String location) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         CandidateProfile profile = profileRepository.findByUserId(userId).orElse(null);
         if (profile == null) return ResponseEntity.badRequest().build();
@@ -127,8 +131,8 @@ public class JobCopilotSearchResource {
         // Perform hybrid search with limit 30
         List<JobOffer> offers = jobSearchService.searchHybrid(query, 30);
 
-        // Score the results
-        List<MatchResultDto> results = matchingService.matchJobs(profile, offers);
+        // Score the results — optional search-box location biases the location component.
+        List<MatchResultDto> results = matchingService.matchJobs(profile, offers, location);
         return ResponseEntity.ok(results);
     }
 

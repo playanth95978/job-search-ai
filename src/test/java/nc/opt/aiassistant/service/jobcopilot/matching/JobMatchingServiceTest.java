@@ -15,6 +15,7 @@ import nc.opt.aiassistant.repository.jobcopilot.UserPreferenceRepository;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchTag;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchTagDto;
+import nc.opt.aiassistant.service.jobcopilot.geo.GeoLocationService;
 import nc.opt.aiassistant.service.reranker.RerankerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,9 @@ class JobMatchingServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        jobMatchingService = new JobMatchingService(vectorStore, rerankerService, preferenceRepository, objectMapper);
+        // Deterministic geo (LLM fallback disabled) — the test locations are all known NC communes.
+        GeoLocationService geoLocationService = new GeoLocationService(null, false);
+        jobMatchingService = new JobMatchingService(vectorStore, rerankerService, preferenceRepository, objectMapper, geoLocationService);
     }
 
     @Test
@@ -115,7 +118,8 @@ class JobMatchingServiceTest {
         MatchResultDto partialMatch = results.get(1);
         assertThat(partialMatch.jobOffer().title()).isEqualTo(offer2.getTitle());
         assertThat(partialMatch.score()).isBetween(0.4, 0.7);
-        assertThat(partialMatch.strengths()).extracting(MatchTagDto::key).contains(MatchTag.PREFERRED_LOCATION.key());
+        // Païta is in the Grand Nouméa agglomeration and a preferred location -> exact location match.
+        assertThat(partialMatch.strengths()).extracting(MatchTagDto::key).contains(MatchTag.LOCATION_MATCH.key());
         assertThat(partialMatch.weaknesses()).extracting(MatchTagDto::key).contains(MatchTag.SALARY_BELOW.key());
 
         // Vérification du mauvais match (offer3)

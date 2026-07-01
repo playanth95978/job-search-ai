@@ -17,6 +17,9 @@ import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchTag;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchTagDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.SkillDto;
+import nc.opt.aiassistant.service.jobcopilot.geo.GeoLocation;
+import nc.opt.aiassistant.service.jobcopilot.geo.GeoLocationService;
+import nc.opt.aiassistant.service.jobcopilot.geo.GeoScore;
 import nc.opt.aiassistant.service.reranker.RerankerService;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -32,17 +35,20 @@ public class JobMatchingService {
     private final RerankerService rerankerService;
     private final UserPreferenceRepository preferenceRepository;
     private final ObjectMapper objectMapper;
+    private final GeoLocationService geoLocationService;
 
     public JobMatchingService(
         @Qualifier("pdfVectorStore") VectorStore pdfVectorStore,
         RerankerService rerankerService,
         UserPreferenceRepository preferenceRepository,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        GeoLocationService geoLocationService
     ) {
         this.vectorStore = pdfVectorStore;
         this.rerankerService = rerankerService;
         this.preferenceRepository = preferenceRepository;
         this.objectMapper = objectMapper;
+        this.geoLocationService = geoLocationService;
     }
 
     /**
@@ -54,16 +60,53 @@ public class JobMatchingService {
      * search modes — once structured metadata (skills/salary/…) is sparse.
      */
     public List<MatchResultDto> matchJobs(CandidateProfile profile, List<JobOffer> offers) {
+        return matchJobs(profile, offers, null);
+    }
+
+    /**
+     * Same as {@link #matchJobs(CandidateProfile, List)} but with an explicit {@code searchLocation}
+     * (e.g. from the search box): when provided and resolvable, it becomes the sole location reference,
+     * overriding the CV / preferred locations so results lean toward where the user is looking now.
+     */
+    public List<MatchResultDto> matchJobs(CandidateProfile profile, List<JobOffer> offers, String searchLocation) {
         Set<String> candidateSkills = parseSkills(profile.getSkills());
         UserPreference prefs = preferenceRepository.findByUserId(profile.getUserId()).orElse(null);
+        // Resolve the reference locations once (LLM allowed here — at most a couple of strings per
+        // request), then score each offer's location against them deterministically in the loop.
+        List<GeoLocation> referenceGeos = resolveReferenceGeos(profile, prefs, searchLocation);
 
         int total = offers.size();
         List<MatchResultDto> scored = new ArrayList<>(total);
         for (int rank = 0; rank < total; rank++) {
             double relevance = rankRelevance(rank, total);
-            scored.add(scoreOffer(profile, candidateSkills, offers.get(rank), prefs, relevance));
+            scored.add(scoreOffer(profile, candidateSkills, offers.get(rank), prefs, relevance, referenceGeos));
         }
         return scored.stream().sorted(Comparator.comparingDouble(MatchResultDto::score).reversed()).toList();
+    }
+
+    /**
+     * Resolves the location references for a match run (once). An explicit {@code searchLocation} wins
+     * outright; otherwise the candidate's CV location plus any preferred locations are used.
+     */
+    private List<GeoLocation> resolveReferenceGeos(CandidateProfile profile, UserPreference prefs, String searchLocation) {
+        if (searchLocation != null && !searchLocation.isBlank()) {
+            GeoLocation searched = geoLocationService.resolve(searchLocation, true);
+            if (searched.usable()) {
+                return List.of(searched);
+            }
+        }
+        List<GeoLocation> refs = new ArrayList<>();
+        if (profile.getLocation() != null && !profile.getLocation().isBlank()) {
+            refs.add(geoLocationService.resolve(profile.getLocation(), true));
+        }
+        if (prefs != null && prefs.getPreferredLocations() != null) {
+            for (String loc : parseList(prefs.getPreferredLocations())) {
+                if (loc != null && !loc.isBlank()) {
+                    refs.add(geoLocationService.resolve(loc, true));
+                }
+            }
+        }
+        return refs.stream().filter(GeoLocation::usable).toList();
     }
 
     /**
@@ -88,14 +131,15 @@ public class JobMatchingService {
         Set<String> candidateSkills,
         JobOffer offer,
         UserPreference prefs,
-        double relevance
+        double relevance,
+        List<GeoLocation> referenceGeos
     ) {
         Set<String> jobSkills = parseSkills(offer.getSkills());
         List<MatchTagDto> strengths = new ArrayList<>();
         List<MatchTagDto> weaknesses = new ArrayList<>();
 
         double skillScore = computeSkillScore(candidateSkills, jobSkills, strengths, weaknesses);
-        double locationScore = computeLocationScore(profile, offer, prefs, strengths, weaknesses);
+        double locationScore = computeLocationScore(referenceGeos, offer, strengths, weaknesses);
         double remoteScore = computeRemoteScore(offer, prefs, strengths, weaknesses);
         double salaryScore = computeSalaryScore(offer, prefs, strengths, weaknesses);
 
@@ -122,28 +166,24 @@ public class JobMatchingService {
         return (double) matched / job.size();
     }
 
-    private double computeLocationScore(
-        CandidateProfile profile,
-        JobOffer offer,
-        UserPreference prefs,
-        List<MatchTagDto> s,
-        List<MatchTagDto> w
-    ) {
-        if (offer.getLocation() == null || profile.getLocation() == null) return 0.5;
-        if (offer.getLocation().toLowerCase().contains(profile.getLocation().toLowerCase())) {
-            s.add(MatchTagDto.of(MatchTag.LOCATION_MATCH));
-            return 1.0;
-        }
-        if (prefs != null && prefs.getPreferredLocations() != null) {
-            List<String> locs = parseList(prefs.getPreferredLocations());
-            boolean match = locs.stream().anyMatch(l -> offer.getLocation().toLowerCase().contains(l.toLowerCase()));
-            if (match) {
-                s.add(MatchTagDto.of(MatchTag.PREFERRED_LOCATION));
-                return 0.8;
+    /**
+     * Proximity-aware location score via the GeoLocation agent: exact city 1.0, same Grand Nouméa
+     * agglomeration 0.9, same province/region 0.7, same country 0.5, remote 0.85, unknown 0.4,
+     * different country 0.15. Falls back to a neutral 0.5 when the candidate has no usable location.
+     */
+    private double computeLocationScore(List<GeoLocation> referenceGeos, JobOffer offer, List<MatchTagDto> s, List<MatchTagDto> w) {
+        if (referenceGeos.isEmpty()) return 0.5;
+        GeoLocation offerGeo = geoLocationService.resolve(offer.getLocation(), false);
+        GeoScore best = geoLocationService.bestScore(referenceGeos, offerGeo);
+        switch (best.level()) {
+            case EXACT, AGGLOMERATION -> s.add(MatchTagDto.of(MatchTag.LOCATION_MATCH));
+            case REGION -> s.add(MatchTagDto.of(MatchTag.PREFERRED_LOCATION));
+            case MISMATCH -> w.add(MatchTagDto.of(MatchTag.LOCATION_MISMATCH));
+            default -> {
+                /* COUNTRY / REMOTE / UNKNOWN: neutral, no tag */
             }
         }
-        w.add(MatchTagDto.of(MatchTag.LOCATION_MISMATCH));
-        return 0.2;
+        return best.score();
     }
 
     private double computeRemoteScore(JobOffer offer, UserPreference prefs, List<MatchTagDto> s, List<MatchTagDto> w) {
