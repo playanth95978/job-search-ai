@@ -6,6 +6,7 @@ import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.jobcopilot.cv.CvIngestionService;
+import nc.opt.aiassistant.service.jobcopilot.dto.AtsSimulationDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
 import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
@@ -43,5 +44,11 @@ public class JobCopilotCvResource {
     public ResponseEntity<CvReviewDto> review(@RequestParam(required = false) String language) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         return ResponseEntity.ok(cvIngestionService.review(userId, language));
+    }
+
+    @GetMapping("/ats-simulation")
+    public ResponseEntity<AtsSimulationDto> simulateAtsParsing(@RequestParam(required = false) String language) {
+        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return ResponseEntity.ok(cvIngestionService.simulateAtsParsing(userId, language));
     }
 }

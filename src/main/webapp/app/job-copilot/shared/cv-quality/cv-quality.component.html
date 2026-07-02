@@ -19,76 +19,182 @@
     </div>
   </div>
 
-  <div class="jc-cv-metrics">
-    @for (m of metrics(); track m.key) {
-      <div class="jc-cv-metric" [class]="'rating-' + m.rating" [title]="m.detail">
-        <span class="jc-cv-metric-label" [jhiTranslate]="'jobCopilot.cvQuality.metrics.' + m.key">{{ m.label }}</span>
-        <span class="jc-cv-metric-rating">
-          <fa-icon [icon]="iconFor(m.rating)"></fa-icon>
-          {{ 'jobCopilot.cvQuality.ratings.' + m.rating | translate }}
-        </span>
-        <span class="jc-cv-metric-detail">{{ m.detailKey ? (m.detailKey | translate: m.detailParams) : m.detail }}</span>
-      </div>
-    }
+  <!-- Tab selection -->
+  <div class="jc-cv-tabs">
+    <button class="jc-tab" [class.active]="activeTab() === 'score'" (click)="activeTab.set('score')">
+      <fa-icon icon="file-alt"></fa-icon>
+      <span jhiTranslate="jobCopilot.cvQuality.title">Qualité du CV</span>
+    </button>
+    <button class="jc-tab" [class.active]="activeTab() === 'ats'" (click)="activeTab.set('ats')">
+      <fa-icon icon="robot"></fa-icon>
+      <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.tab">Simulateur ATS</span>
+    </button>
   </div>
 
-  <!-- AI review (LLM) -->
-  <div class="jc-cv-ai">
-    @if (!review() && !reviewing()) {
-      <button class="jc-btn jc-btn-primary jc-btn-sm" (click)="runAiReview()">
-        <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.cvQuality.aiReview.button">AI Review</span>
-      </button>
-    }
-
-    @if (reviewing()) {
-      <div class="jc-cv-ai-loading">
-        <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
-        <span jhiTranslate="jobCopilot.cvQuality.aiReview.loading">Analyzing your CV with AI…</span>
-      </div>
-    }
-
-    @if (reviewError(); as err) {
-      <div class="jc-cv-ai-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ 'jobCopilot.cvQuality.aiReview.error' | translate }}</div>
-    }
-
-    @if (review(); as r) {
-      <div class="jc-cv-ai-result" [class]="'rating-' + scoreRating()">
-        <div class="jc-cv-ai-header">
-          <div class="jc-cv-ai-score">
-            <fa-icon icon="wand-magic-sparkles"></fa-icon>
-            <span>{{ r.score }}/100</span>
-          </div>
-          <p class="jc-cv-ai-summary">{{ r.summary }}</p>
-          <button class="jc-cv-ai-refresh" (click)="runAiReview()" [title]="'jobCopilot.cvQuality.aiReview.refresh' | translate">
-            <fa-icon icon="rotate"></fa-icon>
-          </button>
+  @if (activeTab() === 'score') {
+    <!-- Score & Heuristic metrics -->
+    <div class="jc-cv-metrics">
+      @for (m of metrics(); track m.key) {
+        <div class="jc-cv-metric" [class]="'rating-' + m.rating" [title]="m.detail">
+          <span class="jc-cv-metric-label" [jhiTranslate]="'jobCopilot.cvQuality.metrics.' + m.key">{{ m.label }}</span>
+          <span class="jc-cv-metric-rating">
+            <fa-icon [icon]="iconFor(m.rating)"></fa-icon>
+            {{ 'jobCopilot.cvQuality.ratings.' + m.rating | translate }}
+          </span>
+          <span class="jc-cv-metric-detail">{{ m.detailKey ? (m.detailKey | translate: m.detailParams) : m.detail }}</span>
         </div>
+      }
+    </div>
 
-        @if (r.strengths.length) {
-          <div class="jc-cv-ai-block">
-            <h5><fa-icon icon="circle-check"></fa-icon> <span jhiTranslate="jobCopilot.cvQuality.aiReview.strengths">Strengths</span></h5>
-            <ul>
-              @for (s of r.strengths; track s) {
-                <li>{{ s }}</li>
-              }
-            </ul>
+    <!-- AI review (LLM) -->
+    <div class="jc-cv-ai">
+      @if (!review() && !reviewing()) {
+        <button class="jc-btn jc-btn-primary jc-btn-sm" (click)="runAiReview()">
+          <fa-icon icon="wand-magic-sparkles"></fa-icon> <span jhiTranslate="jobCopilot.cvQuality.aiReview.button">AI Review</span>
+        </button>
+      }
+
+      @if (reviewing()) {
+        <div class="jc-cv-ai-loading">
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.cvQuality.aiReview.loading">Analyzing your CV with AI…</span>
+        </div>
+      }
+
+      @if (reviewError(); as err) {
+        <div class="jc-cv-ai-error">
+          <fa-icon icon="circle-exclamation"></fa-icon> {{ 'jobCopilot.cvQuality.aiReview.error' | translate }}
+        </div>
+      }
+
+      @if (review(); as r) {
+        <div class="jc-cv-ai-result" [class]="'rating-' + scoreRating()">
+          <div class="jc-cv-ai-header">
+            <div class="jc-cv-ai-score">
+              <fa-icon icon="wand-magic-sparkles"></fa-icon>
+              <span>{{ r.score }}/100</span>
+            </div>
+            <p class="jc-cv-ai-summary">{{ r.summary }}</p>
+            <button class="jc-cv-ai-refresh" (click)="runAiReview()" [title]="'jobCopilot.cvQuality.aiReview.refresh' | translate">
+              <fa-icon icon="rotate"></fa-icon>
+            </button>
+          </div>
+
+          @if (r.strengths.length) {
+            <div class="jc-cv-ai-block">
+              <h5><fa-icon icon="circle-check"></fa-icon> <span jhiTranslate="jobCopilot.cvQuality.aiReview.strengths">Strengths</span></h5>
+              <ul>
+                @for (s of r.strengths; track s) {
+                  <li>{{ s }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (r.improvements.length) {
+            <div class="jc-cv-ai-block">
+              <h5>
+                <fa-icon icon="triangle-exclamation"></fa-icon>
+                <span jhiTranslate="jobCopilot.cvQuality.aiReview.improvements">Improvements</span>
+              </h5>
+              <ul>
+                @for (i of r.improvements; track i) {
+                  <li>{{ i }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- ATS Simulator content -->
+    <div class="jc-cv-ats-simulation">
+      <div class="jc-cv-ats-action">
+        @if (!atsSimulation() && !simulating()) {
+          <button class="jc-btn jc-btn-primary jc-btn-sm" (click)="runAtsSimulation()">
+            <fa-icon icon="robot"></fa-icon> <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.button">Simulate ATS Parsing</span>
+          </button>
+        }
+
+        @if (simulating()) {
+          <div class="jc-cv-ai-loading">
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+            <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.loading">AI ATS parsing simulation in progress...</span>
           </div>
         }
 
-        @if (r.improvements.length) {
-          <div class="jc-cv-ai-block">
-            <h5>
-              <fa-icon icon="triangle-exclamation"></fa-icon>
-              <span jhiTranslate="jobCopilot.cvQuality.aiReview.improvements">Improvements</span>
-            </h5>
-            <ul>
-              @for (i of r.improvements; track i) {
-                <li>{{ i }}</li>
-              }
-            </ul>
+        @if (simulationError(); as err) {
+          <div class="jc-cv-ai-error">
+            <fa-icon icon="circle-exclamation"></fa-icon> {{ 'jobCopilot.cvQuality.atsSimulation.error' | translate }}
           </div>
         }
       </div>
-    }
-  </div>
+
+      @if (atsSimulation(); as sim) {
+        <div class="jc-cv-ats-layout">
+          <div class="jc-cv-ats-raw">
+            <h5>
+              <fa-icon icon="file-alt"></fa-icon>
+              <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.rawTextView">What the machine sees</span>
+            </h5>
+            <div class="jc-cv-raw-box">
+              <pre>{{ sim.rawText }}</pre>
+            </div>
+          </div>
+
+          <div class="jc-cv-ats-analysis">
+            <h5>
+              <fa-icon icon="wand-magic-sparkles"></fa-icon>
+              <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.aiAnalysis">AI Analysis</span>
+            </h5>
+
+            <div class="jc-cv-ats-warnings">
+              <h6>
+                <fa-icon icon="triangle-exclamation" class="warning-icon"></fa-icon>
+                <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.warnings">Parsing Warnings</span>
+              </h6>
+              @if (sim.warnings && sim.warnings.length) {
+                <div class="warnings-list">
+                  @for (w of sim.warnings; track w.message) {
+                    <div class="warning-item" [class]="'level-' + w.level.toLowerCase()">
+                      <div class="warning-header">
+                        <span class="warning-badge" [class]="w.level.toLowerCase()">{{ w.level }}</span>
+                        <strong class="warning-type">{{
+                          'jobCopilot.cvQuality.atsSimulation.types.' + w.type.toLowerCase() | translate
+                        }}</strong>
+                      </div>
+                      <p class="warning-message">{{ w.message }}</p>
+                      @if (w.snippet) {
+                        <div class="warning-snippet">
+                          <span class="snippet-label" jhiTranslate="jobCopilot.cvQuality.atsSimulation.snippet">Snippet:</span>
+                          <code>{{ w.snippet }}</code>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="no-warnings-p" jhiTranslate="jobCopilot.cvQuality.atsSimulation.noWarnings">No warnings detected!</p>
+              }
+            </div>
+
+            @if (sim.recommendations && sim.recommendations.length) {
+              <div class="jc-cv-ats-recommendations">
+                <h6>
+                  <fa-icon icon="circle-check" class="success-icon"></fa-icon>
+                  <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.recommendations">Layout Recommendations</span>
+                </h6>
+                <ul>
+                  @for (rec of sim.recommendations; track rec) {
+                    <li>{{ rec }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>

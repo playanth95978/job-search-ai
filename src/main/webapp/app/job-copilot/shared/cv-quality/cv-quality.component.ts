@@ -4,7 +4,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TranslateDirective } from 'app/shared/language';
 
-import { CandidateProfile, CvReview } from '../job-copilot.model';
+import { CandidateProfile, CvReview, AtsSimulation, AtsWarning } from '../job-copilot.model';
 import { JobCopilotService } from '../job-copilot.service';
 import { analyzeCv, CvMetric, CvRating, overallRating, overallScore, ratingLabel } from '../cv-quality';
 
@@ -31,6 +31,12 @@ export class CvQualityComponent {
   readonly reviewing = signal(false);
   readonly reviewError = signal<string | null>(null);
 
+  readonly activeTab = signal<'score' | 'ats'>('score');
+
+  readonly atsSimulation = signal<AtsSimulation | null>(null);
+  readonly simulating = signal(false);
+  readonly simulationError = signal<string | null>(null);
+
   readonly ratingLabel = ratingLabel;
 
   iconFor(rating: CvRating): string {
@@ -50,6 +56,21 @@ export class CvQualityComponent {
       error: err => {
         this.reviewError.set(err.error?.message || 'AI review failed');
         this.reviewing.set(false);
+      },
+    });
+  }
+
+  runAtsSimulation(): void {
+    this.simulating.set(true);
+    this.simulationError.set(null);
+    this.service.simulateAtsParsing().subscribe({
+      next: sim => {
+        this.atsSimulation.set(sim);
+        this.simulating.set(false);
+      },
+      error: err => {
+        this.simulationError.set(err.error?.message || 'ATS simulation failed');
+        this.simulating.set(false);
       },
     });
   }

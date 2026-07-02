@@ -34,6 +34,25 @@
         "good": "Bon",
         "fair": "Moyen",
         "poor": "Faible"
+      },
+      "atsSimulation": {
+        "tab": "Simulateur ATS",
+        "button": "Simuler le Parsing ATS",
+        "loading": "Simulation du parsing ATS par l'IA en cours...",
+        "error": "La simulation ATS a échoué",
+        "rawTextView": "Ce que la machine voit (Texte brut)",
+        "aiAnalysis": "Analyse IA du Parsing & de la Mise en page",
+        "warnings": "Avertissements de parsing",
+        "recommendations": "Recommandations de mise en page",
+        "noWarnings": "Aucun avertissement critique détecté. Votre CV semble très bien structuré pour les ATS !",
+        "snippet": "Extrait :",
+        "types": {
+          "formatting": "Mise en page / Format",
+          "content": "Contenu",
+          "dates": "Dates & Durée",
+          "contact": "Contact",
+          "skills": "Compétences"
+        }
       }
     },
     "interview": {

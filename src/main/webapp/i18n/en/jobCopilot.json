@@ -34,6 +34,25 @@
         "good": "Good",
         "fair": "Fair",
         "poor": "Poor"
+      },
+      "atsSimulation": {
+        "tab": "ATS Simulator",
+        "button": "Simulate ATS Parsing",
+        "loading": "AI ATS parsing simulation in progress...",
+        "error": "ATS simulation failed",
+        "rawTextView": "What the machine sees (Raw text)",
+        "aiAnalysis": "AI Parsing & Layout Analysis",
+        "warnings": "Parsing Warnings",
+        "recommendations": "Layout Recommendations",
+        "noWarnings": "No critical warnings detected. Your CV layout seems well-optimized for ATS!",
+        "snippet": "Snippet:",
+        "types": {
+          "formatting": "Layout / Format",
+          "content": "Content",
+          "dates": "Dates & Duration",
+          "contact": "Contact",
+          "skills": "Skills"
+        }
       }
     },
     "interview": {

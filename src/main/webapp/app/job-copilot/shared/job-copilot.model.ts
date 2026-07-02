@@ -234,3 +234,16 @@ export function applicationStatusIcon(status: string): string {
 export function applicationStatusColor(status: string): string {
   return APPLICATION_STATUS_COLORS[status] || '#64748b';
 }
+
+export interface AtsWarning {
+  type: string;
+  level: string;
+  message: string;
+  snippet: string | null;
+}
+
+export interface AtsSimulation {
+  rawText: string;
+  warnings: AtsWarning[];
+  recommendations: string[];
+}

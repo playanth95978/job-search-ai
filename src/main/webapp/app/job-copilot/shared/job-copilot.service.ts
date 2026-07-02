@@ -10,6 +10,7 @@ import {
   CvMatchResult,
   ChatMessageHistory,
   CvReview,
+  AtsSimulation,
   InterviewMessage,
   JobApplication,
   JobOffer,
@@ -47,6 +48,12 @@ export class JobCopilotService {
     const lang = language ?? this.translateService.getCurrentLang();
     const params = new HttpParams().set('language', lang);
     return this.http.get<CvReview>(`${this.baseUrl}/cv/review`, { params });
+  }
+
+  simulateAtsParsing(language?: string): Observable<AtsSimulation> {
+    const lang = language ?? this.translateService.getCurrentLang();
+    const params = new HttpParams().set('language', lang);
+    return this.http.get<AtsSimulation>(`${this.baseUrl}/cv/ats-simulation`, { params });
   }
 
   rewriteCv(text: string, kind: string, jobTitle?: string, company?: string, language?: string): Observable<any> {

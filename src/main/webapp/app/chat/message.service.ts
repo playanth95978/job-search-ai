@@ -462,7 +462,55 @@ export class MessageService {
     );
   }
 
-  private getChatResponseStream(prompt: string, conversationId: string | null): Observable<ChatMessage> {
+  private generateSuggestions(response: string): void {
+    if (!response || response.length < 50) {
+      this._suggestions.set([]);
+      return;
+    }
+    const suggestions: string[] = [];
+    const lower = response.toLowerCase();
+    if (lower.includes('jira') || lower.includes('ticket')) {
+      suggestions.push('Quels sont les tickets Jira lies a ce sujet ?');
+    }
+    if (lower.includes('code') || lower.includes('class') || lower.includes('service') || lower.includes('java')) {
+      suggestions.push('Montre-moi le code source associe');
+    }
+    if (lower.includes('confluence') || lower.includes('documentation') || lower.includes('page')) {
+      suggestions.push("Y a-t-il d'autres pages Confluence sur ce sujet ?");
+    }
+    if (lower.includes('etape') || lower.includes('procedure') || lower.includes('comment')) {
+      suggestions.push('Peux-tu detailler les etapes ?');
+    }
+    if (suggestions.length === 0) {
+      suggestions.push('Peux-tu approfondir ce sujet ?');
+      suggestions.push('Quelles sont les sources associees ?');
+    }
+    this._suggestions.set(suggestions.slice(0, 3));
+  }
+
+  exportConversation(): string {
+    const msgs = this._messages();
+    let md = '# Conversation\n\n';
+    for (const msg of msgs) {
+      if (msg.id === 'welcome') continue;
+      const role = msg.role === 'user' ? 'Vous' : 'Assistant IA';
+      const text = msg.role === 'assistant' ? this.stripHtml(msg.content) : msg.content;
+      md += `## ${role}\n\n${text}\n\n---\n\n`;
+    }
+    return md;
+  }
+
+  private stripHtml(html: string): string {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || '';
+  }
+
+  private getChatResponseStream(
+    prompt: string,
+    isCode: boolean,
+    conversationId: string | null,
+    ocrContext: string | null = null,
+  ): Observable<ChatMessage> {
     // Tool-enabled Job Copilot agent: the message goes in the request body (text/plain) and the
     // conversation id in the path; the reply streams back as SSE (start / token* / end).
     const url = `/api/job-copilot/assistant/${encodeURIComponent(conversationId ?? '')}/stream`;

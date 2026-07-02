@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
+import nc.opt.aiassistant.service.jobcopilot.dto.AtsSimulationDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.AtsWarningDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
 import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
@@ -109,6 +111,89 @@ public class CvIngestionService {
         } catch (JsonProcessingException e) {
             log.error("Failed to parse CV review: {}", e.getMessage());
             return new CvReviewDto(0, "The AI review could not be generated. Please try again.", List.of(), List.of());
+        }
+    }
+
+    /**
+     * Simulates ATS parsing of the stored CV: compares raw text (what the parser saw)
+     * with the structured CandidateProfile, highlights issues and provides recommendations.
+     */
+    public AtsSimulationDto simulateAtsParsing(String userId, String language) {
+        CandidateProfile profile = profileRepository
+            .findTopByUserIdOrderByCreatedAtDesc(userId)
+            .orElseThrow(() -> new IllegalStateException("No CV profile found for user " + userId));
+
+        String markdown = profile.getRawMarkdown();
+        if (markdown == null || markdown.isBlank()) {
+            return new AtsSimulationDto(
+                "",
+                List.of(new AtsWarningDto("Content", "CRITICAL", "No CV content available. Please upload a CV first.", null)),
+                List.of("Upload your CV to start the ATS parsing simulation.")
+            );
+        }
+
+        // Serialize structured profile to JSON so the LLM can compare what was extracted.
+        String structuredJson;
+        try {
+            structuredJson = objectMapper.writeValueAsString(candidateProfileMapper.toDto(profile));
+        } catch (Exception e) {
+            log.error("Failed to serialize candidate profile for ATS simulation: {}", e.getMessage());
+            structuredJson = "{}";
+        }
+
+        String lang = (language == null || language.isBlank()) ? "fr" : language.trim();
+        String prompt = """
+            You are an expert ATS (Applicant Tracking System) parser simulator.
+            We have extracted raw text from a candidate's CV (using OCR or standard text extraction), and then we extracted a structured profile JSON from it.
+
+            Compare the raw text with the structured JSON to detect layout, scanning, parsing, or extraction problems that a standard ATS parser would encounter.
+            Identify issues such as:
+            - Scrambled layout: multi-column text read in the wrong order or headers/footers merged into body text.
+            - Experience dates/duration issues: dates placed in columns that make it look like the candidate has much less experience than actual (e.g. 1 year instead of 6 years).
+            - Unextractable contact details: emails, phone numbers, or social links hidden in images or complex graphic shapes.
+            - Unreadable skills/technologies: important technical skills present in the text but missing from the structured JSON due to bad layout, images, or poor formatting.
+            - Unrecognized standard section headings.
+
+            Write all fields ("message", "recommendations") in the language with ISO 639-1 code "%s".
+            Return ONLY valid JSON matching this exact structure (do not include markdown wrapping or any other text):
+            {
+              "warnings": [
+                {
+                  "type": "Formatting | Content | Dates | Contact | Skills",
+                  "level": "CRITICAL | WARNING | INFO",
+                  "message": "Specific explanation of the layout, formatting or parsing warning",
+                  "snippet": "Raw snippet of text where the issue is located, if applicable, or null"
+                }
+              ],
+              "recommendations": [
+                "Concrete, actionable advice to restructure the CV (e.g. 'Use a single-column layout', 'Ensure dates are placed next to job titles')"
+              ]
+            }
+
+            RAW EXTRACTED CV TEXT:
+            ===
+            %s
+            ===
+
+            EXTRACTED STRUCTURED PROFILE JSON:
+            ===
+            %s
+            ===
+            """.formatted(lang, markdown, structuredJson);
+
+        String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
+
+        try {
+            AtsSimulationDto response = objectMapper.readValue(json, AtsSimulationDto.class);
+            return new AtsSimulationDto(markdown, response.warnings(), response.recommendations());
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse ATS simulation response: {}", e.getMessage());
+            log.debug("Raw JSON was: {}", json);
+            return new AtsSimulationDto(
+                markdown,
+                List.of(new AtsWarningDto("Formatting", "WARNING", "Failed to parse the detailed ATS simulation. Please try again.", null)),
+                List.of("Try re-running the ATS simulation.")
+            );
         }
     }
 
