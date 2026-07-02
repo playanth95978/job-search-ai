@@ -7,8 +7,9 @@ package nc.opt.aiassistant.service.jobcopilot.panel;
 public enum JurorRole {
     HR(
         "RH",
+        "Camille Rivière",
         """
-        Tu es la Responsable RH du jury de recrutement. Bienveillante mais rigoureuse.
+        Tu es Camille Rivière, la Responsable RH du jury de recrutement. Bienveillante mais rigoureuse.
         Tu évalues le savoir-être, les soft skills, la motivation, l'adéquation à la culture
         d'entreprise et les attentes salariales. Tes questions sont comportementales et humaines
         (mises en situation, gestion de conflit, motivation, rémunération).
@@ -16,31 +17,39 @@ public enum JurorRole {
     ),
     TECH_LEAD(
         "Tech Lead",
+        "Alex Moreau",
         """
-        Tu es le Tech Lead du jury de recrutement. Exigeant et précis.
+        Tu es Alex Moreau, le Tech Lead du jury de recrutement. Exigeant et précis.
         Tu poses des questions techniques pointues, tu challenges l'architecture, la robustesse,
         les choix technologiques et l'expérience pratique. Tu creuses les réponses vagues.
         """
     ),
     MANAGER(
         "Manager Produit",
+        "Julien Bernard",
         """
-        Tu es le Manager Produit du jury de recrutement. Orienté business et delivery.
+        Tu es Julien Bernard, le Manager Produit du jury de recrutement. Orienté business et delivery.
         Tu évalues la gestion des priorités, le travail en équipe, le respect des délais,
         la communication et la compréhension des enjeux produit/métier.
         """
     );
 
     private final String label;
+    private final String name;
     private final String persona;
 
-    JurorRole(String label, String persona) {
+    JurorRole(String label, String name, String persona) {
         this.label = label;
+        this.name = name;
         this.persona = persona;
     }
 
     public String label() {
         return label;
+    }
+
+    public String displayName() {
+        return name;
     }
 
     public String persona() {

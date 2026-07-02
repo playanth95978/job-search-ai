@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
@@ -30,6 +30,8 @@ export class JobCopilotService {
   private translateService = inject(TranslateService);
   private baseUrl = 'api/job-copilot';
 
+  lang = computed(() => this.translateService.getCurrentLang());
+
   // CV
   uploadCv(file: File): Observable<CandidateProfile> {
     const formData = new FormData();
@@ -47,29 +49,29 @@ export class JobCopilotService {
 
   reviewCv(language?: string): Observable<CvReview> {
     // Reviews the ingested CV (the profile's stored markdown), not an empty editor buffer.
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     const params = new HttpParams().set('language', lang);
     return this.http.get<CvReview>(`${this.baseUrl}/cv/review`, { params });
   }
 
   simulateAtsParsing(language?: string): Observable<AtsSimulation> {
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     const params = new HttpParams().set('language', lang);
     return this.http.get<AtsSimulation>(`${this.baseUrl}/cv/ats-simulation`, { params });
   }
 
   rewriteCv(text: string, kind: string, jobTitle?: string, company?: string, language?: string): Observable<any> {
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     return this.http.post(`api/cv-builder/rewrite`, { text, kind, jobTitle, company, language: lang });
   }
 
   matchCv(content: string, offer: string, language?: string): Observable<CvMatchResult> {
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     return this.http.post<CvMatchResult>(`api/cv-builder/match`, { content, offer, language: lang });
   }
 
   generateResume(source: string, offer?: string, language?: string): Observable<any> {
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     return this.http.post(`api/cv-builder/generate`, { source, offer, language: lang });
   }
 
@@ -118,7 +120,7 @@ export class JobCopilotService {
   getPositioning(offerId: string, refresh = false, language?: string): Observable<CvMatchResult> {
     let params = new HttpParams();
     if (refresh) params = params.set('refresh', 'true');
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     if (lang) params = params.set('language', lang);
     return this.http.get<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning`, { params });
   }
@@ -126,7 +128,7 @@ export class JobCopilotService {
   /** "What-if" re-scoring: re-evaluate the offer as if the candidate had these extra skills. */
   simulatePositioning(offerId: string, additions: string[], language?: string): Observable<CvMatchResult> {
     let params = new HttpParams();
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     if (lang) params = params.set('language', lang);
     return this.http.post<CvMatchResult>(`${this.baseUrl}/jobs/${offerId}/positioning/simulate`, { additions }, { params });
   }
@@ -149,7 +151,7 @@ export class JobCopilotService {
 
   createApplication(jobOfferId: string, generateCoverLetter = true, language?: string): Observable<JobApplication> {
     let params = new HttpParams().set('jobOfferId', jobOfferId).set('generateCoverLetter', String(generateCoverLetter));
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     if (lang) params = params.set('language', lang);
     return this.http.post<JobApplication>(`${this.baseUrl}/applications/create`, null, { params });
   }
@@ -160,7 +162,7 @@ export class JobCopilotService {
 
   generateCoverLetter(jobOfferId: string, language?: string): Observable<string> {
     let params = new HttpParams();
-    const lang = language ?? this.translateService.getCurrentLang();
+    const lang = language ?? this.lang();
     if (lang) params = params.set('language', lang);
     return this.http.post(`${this.baseUrl}/applications/${jobOfferId}/cover-letter`, null, {
       params,

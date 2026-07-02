@@ -46,12 +46,16 @@ public class ShadowPanelService {
     public PanelMessageDto startSession(CandidateProfile profile, JobOffer offer, String conversationId, String language) {
         chatMemory.clear(conversationId);
         String context = buildContext(profile, offer);
-        String opening = juror(
-            JurorRole.HR,
-            context,
-            language,
-            List.of(),
-            "Ouvre l'entretien : présente brièvement le jury (RH, Tech Lead, Manager Produit), puis pose ta première question."
+        String opening = stripLeadingLabel(
+            juror(
+                JurorRole.HR,
+                context,
+                language,
+                List.of(),
+                "Ouvre l'entretien : présente-toi par ton nom et présente brièvement le jury (" +
+                    roster() +
+                    "), puis pose ta première question."
+            )
         );
         chatMemory.add(conversationId, new AssistantMessage(tag(JurorRole.HR, opening)));
         return new PanelMessageDto(conversationId, JurorRole.HR.name(), JurorRole.HR.label(), opening);
@@ -64,12 +68,14 @@ public class ShadowPanelService {
         List<Message> history = chatMemory.get(conversationId);
 
         JurorRole speaker = route(context, history);
-        String reply = juror(
-            speaker,
-            context,
-            language,
-            history,
-            "Réagis brièvement à la dernière réponse du candidat (point fort / point à creuser), puis pose ta prochaine question, dans ton rôle."
+        String reply = stripLeadingLabel(
+            juror(
+                speaker,
+                context,
+                language,
+                history,
+                "Réagis brièvement à la dernière réponse du candidat (point fort / point à creuser), puis pose ta prochaine question, dans ton rôle."
+            )
         );
         chatMemory.add(conversationId, new AssistantMessage(tag(speaker, reply)));
         return new PanelMessageDto(conversationId, speaker.name(), speaker.label(), reply);
@@ -134,6 +140,8 @@ public class ShadowPanelService {
                     "\n" +
                     role.persona() +
                     "\nRÈGLES : une seule question à la fois, reste dans ton rôle, sois concis et professionnel. " +
+                    "N'utilise jamais de texte à compléter entre crochets (aucun placeholder du type [Prénom]) " +
+                    "et ne préfixe pas ta réponse par ton nom ou ton rôle entre crochets. " +
                     languageRule(language)
             )
             .messages(history)
@@ -200,6 +208,21 @@ public class ShadowPanelService {
     /** Prefixes a juror reply with its label so the shared transcript stays attributable. */
     private String tag(JurorRole role, String message) {
         return "[" + role.label() + "] " + message;
+    }
+
+    /** Removes a leading "[Something]" the model may echo (it sees the labelled transcript and mimics it). */
+    private String stripLeadingLabel(String reply) {
+        return reply == null ? "" : reply.replaceFirst("^\\s*\\[[^\\]]{1,40}\\]\\s*", "");
+    }
+
+    /** Nominative roster of the jury, e.g. "Camille Rivière (RH), Alex Moreau (Tech Lead), …". */
+    private String roster() {
+        StringBuilder sb = new StringBuilder();
+        for (JurorRole r : JurorRole.values()) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(r.displayName()).append(" (").append(r.label()).append(")");
+        }
+        return sb.toString();
     }
 
     private String buildContext(CandidateProfile profile, JobOffer offer) {

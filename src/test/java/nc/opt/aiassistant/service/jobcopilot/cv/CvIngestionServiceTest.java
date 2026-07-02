@@ -119,7 +119,6 @@ class CvIngestionServiceTest {
             }
             """;
 
-        when(mockMessage.getContent()).thenReturn(mockLlmJson);
         when(mockGeneration.getOutput()).thenReturn(mockMessage);
         when(mockResponse.getResult()).thenReturn(mockGeneration);
         when(chatModel.call(any(Prompt.class))).thenReturn(mockResponse);
