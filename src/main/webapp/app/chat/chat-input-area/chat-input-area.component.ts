@@ -4,14 +4,13 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
 import TranslateDirective from '../../shared/language/translate.directive';
 import { MessageService, TypeChat } from '../message.service';
-import { Account } from '../../core/auth/account.model';
 
 @Component({
   selector: 'jhi-chat-input-area',
   templateUrl: './chat-input-area.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./chat-input-area.component.scss'],
-  imports: [TranslateModule, FormsModule, FontAwesomeModule, TranslateDirective, TranslateDirective],
+  imports: [TranslateModule, FormsModule, FontAwesomeModule, TranslateDirective],
 })
 export class ChatInputAreaComponent {
   type = input<TypeChat | null>(null);

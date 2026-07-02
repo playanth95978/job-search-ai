@@ -42,10 +42,7 @@ import { MessageService, TypeChat } from './message.service';
 export default class Chat {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly service = inject(JobCopilotService);
-  private readonly conversationService = inject(ConversationService);
   private readonly translateService = inject(TranslateService);
-  private readonly stateStorage = inject(StateStorageService);
   private readonly messageService = inject(MessageService);
 
   readonly conversationId = toSignal(this.route.paramMap.pipe(map(params => params.get('id'))), { initialValue: null });
@@ -104,7 +101,7 @@ export default class Chat {
   }
 
   onSuggestionClick(suggestion: string): void {
-    this.messageService.useSuggestion(suggestion);
+    this.messageService.useSuggestion(this.translateService.instant(suggestion));
   }
 
   login(): void {
