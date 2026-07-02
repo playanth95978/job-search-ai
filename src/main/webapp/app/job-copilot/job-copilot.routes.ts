@@ -36,6 +36,11 @@ const routes: Routes = [
     loadComponent: () => import('./interview/interview.component').then(m => m.InterviewComponent),
     title: 'Interview Roleplay',
   },
+  {
+    path: 'interview-panel',
+    loadComponent: () => import('./interview-panel/interview-panel.component').then(m => m.InterviewPanelComponent),
+    title: 'Interview Panel',
+  },
 ];
 
 export default routes;

@@ -142,6 +142,33 @@ export interface InterviewMessage {
   message: string;
 }
 
+/** One turn of the Shadow Interview Panel: which juror spoke and what they said. */
+export interface PanelMessage {
+  conversationId: string;
+  role: string;
+  speaker: string;
+  message: string;
+}
+
+/** One juror's final verdict in the panel cross deliberation. */
+export interface PanelJurorReport {
+  role: string;
+  speaker: string;
+  score: number;
+  strengths: string[];
+  concerns: string[];
+  recommendation: string;
+}
+
+/** The panel's cross deliberation delivered at the end of the interview. */
+export interface PanelReport {
+  conversationId: string;
+  jurors: PanelJurorReport[];
+  overallScore: number;
+  recommendation: string;
+  synthesis: string;
+}
+
 /** A persisted chat-memory message (Spring AI), as returned by /api/chat-history/history/{id}. */
 export interface ChatMessageHistory {
   conversationId: string;

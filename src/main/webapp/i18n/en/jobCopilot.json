@@ -64,7 +64,33 @@
       "start": "Start the interview",
       "reset": "Restart",
       "send": "Send",
-      "answerPlaceholder": "Type your answer..."
+      "answerPlaceholder": "Type your answer...",
+      "tryPanel": "Switch to panel mode (3 recruiters)"
+    },
+    "panel": {
+      "title": "Interview Panel",
+      "subtitle": "Face a 3-agent AI jury with diverging goals: HR, Tech Lead and Product Manager.",
+      "selectOffer": "Job offer",
+      "language": "Language",
+      "start": "Start the interview",
+      "reset": "Restart",
+      "noOffers": "You don't have any applications yet. Apply to an offer to practice against the jury.",
+      "thinking": "The jury is deliberating…",
+      "answerPlaceholder": "Your answer to the jury…",
+      "send": "Send",
+      "finish": "Finish & deliberate",
+      "jurors": {
+        "HR": "HR",
+        "TECH_LEAD": "Tech Lead",
+        "MANAGER": "Product Manager"
+      },
+      "report": {
+        "title": "Jury report",
+        "strengths": "Strengths",
+        "concerns": "Concerns",
+        "synthesis": "President's synthesis",
+        "restart": "New interview"
+      }
     },
     "authPrompt": {
       "title": "Create an account to unlock this feature",

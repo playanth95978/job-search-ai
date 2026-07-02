@@ -64,7 +64,33 @@
       "start": "Démarrer l'entretien",
       "reset": "Recommencer",
       "send": "Envoyer",
-      "answerPlaceholder": "Tapez votre réponse..."
+      "answerPlaceholder": "Tapez votre réponse...",
+      "tryPanel": "Passer en mode jury (3 recruteurs)"
+    },
+    "panel": {
+      "title": "Jury d'entretien",
+      "subtitle": "Face à un panel de 3 recruteurs IA aux objectifs différents : RH, Tech Lead et Manager Produit.",
+      "selectOffer": "Offre d'emploi",
+      "language": "Langue",
+      "start": "Démarrer l'entretien",
+      "reset": "Recommencer",
+      "noOffers": "Vous n'avez pas encore de candidature. Postulez à une offre pour vous entraîner face au jury.",
+      "thinking": "Le jury délibère…",
+      "answerPlaceholder": "Votre réponse au jury…",
+      "send": "Envoyer",
+      "finish": "Terminer & délibérer",
+      "jurors": {
+        "HR": "RH",
+        "TECH_LEAD": "Tech Lead",
+        "MANAGER": "Manager Produit"
+      },
+      "report": {
+        "title": "Compte-rendu du jury",
+        "strengths": "Points forts",
+        "concerns": "Réserves",
+        "synthesis": "Synthèse du président",
+        "restart": "Nouvel entretien"
+      }
     },
     "authPrompt": {
       "title": "Créez un compte pour débloquer cette fonctionnalité",

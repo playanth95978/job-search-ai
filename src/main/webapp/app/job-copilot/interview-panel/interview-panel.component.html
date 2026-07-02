@@ -1,0 +1,166 @@
+<div class="panel">
+  <header class="panel-header">
+    <h1 jhiTranslate="jobCopilot.panel.title">Jury d'entretien</h1>
+    <p class="panel-subtitle" jhiTranslate="jobCopilot.panel.subtitle">
+      Face à un panel de 3 recruteurs IA aux objectifs différents : RH, Tech Lead et Manager Produit.
+    </p>
+  </header>
+
+  <!-- Jury line-up -->
+  <div class="panel-jury">
+    @for (j of ['HR', 'TECH_LEAD', 'MANAGER']; track j) {
+      <div class="panel-juror-chip" [style.border-color]="jurorColor(j)">
+        <span class="panel-juror-avatar" [style.background]="jurorColor(j)"><fa-icon [icon]="jurorIcon(j)" /></span>
+        <span jhiTranslate="jobCopilot.panel.jurors.{{ j }}">{{ j }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Setup bar -->
+  <div class="panel-setup">
+    <label class="panel-field">
+      <span jhiTranslate="jobCopilot.panel.selectOffer">Offre d'emploi</span>
+      <select [ngModel]="selectedJobOfferId()" (ngModelChange)="selectedJobOfferId.set($event)" [disabled]="started()">
+        @for (offer of jobOffers(); track offer.id) {
+          <option [value]="offer.id">{{ offer.title }}{{ offer.company ? ' — ' + offer.company : '' }}</option>
+        }
+      </select>
+    </label>
+    <label class="panel-field">
+      <span jhiTranslate="jobCopilot.panel.language">Langue</span>
+      <select [(ngModel)]="language" [disabled]="started()">
+        @for (l of languages; track l.value) {
+          <option [value]="l.value">{{ l.labelKey | translate }}</option>
+        }
+      </select>
+    </label>
+    @if (!started()) {
+      <button class="jc-btn jc-btn-primary" (click)="start()" [disabled]="loading() || !selectedJobOfferId()">
+        @if (loading()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'" />
+        } @else {
+          <fa-icon icon="paper-plane" />
+        }
+        <span jhiTranslate="jobCopilot.panel.start">Démarrer l'entretien</span>
+      </button>
+    } @else {
+      <button class="jc-btn jc-btn-outline" (click)="reset()">
+        <fa-icon icon="rotate-left" /> <span jhiTranslate="jobCopilot.panel.reset">Recommencer</span>
+      </button>
+    }
+  </div>
+
+  @if (jobOffers().length === 0) {
+    <p class="panel-empty" jhiTranslate="jobCopilot.panel.noOffers">
+      Vous n'avez pas encore de candidature. Postulez à une offre pour vous entraîner face au jury.
+    </p>
+  }
+
+  @if (error()) {
+    <div class="jc-error"><fa-icon icon="circle-exclamation" /> {{ error() }}</div>
+  }
+
+  <!-- Conversation -->
+  @if (started()) {
+    <div class="panel-thread">
+      @for (turn of turns(); track $index) {
+        <div class="panel-turn" [class.is-candidate]="turn.side === 'candidate'">
+          @if (turn.side === 'juror') {
+            <span class="panel-turn-avatar" [style.background]="jurorColor(turn.role)"><fa-icon [icon]="jurorIcon(turn.role)" /></span>
+          }
+          <div class="panel-bubble">
+            @if (turn.side === 'juror') {
+              <span class="panel-speaker" [style.color]="jurorColor(turn.role)">{{ turn.speaker }}</span>
+            }
+            <p>{{ turn.text }}</p>
+          </div>
+        </div>
+      }
+      @if (sending()) {
+        <div class="panel-turn">
+          <span class="panel-turn-avatar" style="background: #94a3b8"><fa-icon icon="circle-notch" [animation]="'spin'" /></span>
+          <div class="panel-bubble panel-bubble-muted" jhiTranslate="jobCopilot.panel.thinking">Le jury délibère…</div>
+        </div>
+      }
+    </div>
+
+    @if (!report()) {
+      <form class="panel-composer" (ngSubmit)="send()">
+        <textarea
+          rows="1"
+          [(ngModel)]="answer"
+          name="answer"
+          [placeholder]="'jobCopilot.panel.answerPlaceholder' | translate"
+          (keydown.enter)="$event.preventDefault(); send()"
+        ></textarea>
+        <button type="submit" class="jc-btn jc-btn-primary" [disabled]="sending() || !answer.trim()">
+          <fa-icon icon="paper-plane" /> <span jhiTranslate="jobCopilot.panel.send">Envoyer</span>
+        </button>
+        <button type="button" class="jc-btn jc-btn-outline" (click)="finish()" [disabled]="finishing()">
+          @if (finishing()) {
+            <fa-icon icon="circle-notch" [animation]="'spin'" />
+          } @else {
+            <fa-icon icon="clipboard-list" />
+          }
+          <span jhiTranslate="jobCopilot.panel.finish">Terminer & délibérer</span>
+        </button>
+      </form>
+    }
+  }
+
+  <!-- Cross deliberation report -->
+  @if (report(); as r) {
+    <section class="panel-report">
+      <div class="panel-report-head">
+        <h2 jhiTranslate="jobCopilot.panel.report.title">Compte-rendu du jury</h2>
+        <div class="panel-overall">
+          <span class="panel-overall-score">{{ r.overallScore }}</span
+          ><span class="panel-overall-max">/10</span>
+          <span class="panel-reco" [class]="recommendationClass(r.recommendation)">{{ r.recommendation }}</span>
+        </div>
+      </div>
+
+      <div class="panel-verdicts">
+        @for (j of r.jurors; track j.role) {
+          <div class="panel-verdict" [style.border-top-color]="jurorColor(j.role)">
+            <div class="panel-verdict-head">
+              <span class="panel-turn-avatar" [style.background]="jurorColor(j.role)"><fa-icon [icon]="jurorIcon(j.role)" /></span>
+              <strong>{{ j.speaker }}</strong>
+              <span class="panel-verdict-score">{{ j.score }}/10</span>
+              <span class="panel-reco" [class]="recommendationClass(j.recommendation)">{{ j.recommendation }}</span>
+            </div>
+            @if (j.strengths.length) {
+              <div class="panel-verdict-block">
+                <h5><fa-icon icon="circle-check" /> <span jhiTranslate="jobCopilot.panel.report.strengths">Points forts</span></h5>
+                <ul>
+                  @for (s of j.strengths; track s) {
+                    <li>{{ s }}</li>
+                  }
+                </ul>
+              </div>
+            }
+            @if (j.concerns.length) {
+              <div class="panel-verdict-block">
+                <h5><fa-icon icon="triangle-exclamation" /> <span jhiTranslate="jobCopilot.panel.report.concerns">Réserves</span></h5>
+                <ul>
+                  @for (c of j.concerns; track c) {
+                    <li>{{ c }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="panel-synthesis">
+        <h3 jhiTranslate="jobCopilot.panel.report.synthesis">Synthèse du président</h3>
+        <p>{{ r.synthesis }}</p>
+      </div>
+
+      <button class="jc-btn jc-btn-primary" (click)="reset()">
+        <fa-icon icon="rotate-left" /> <span jhiTranslate="jobCopilot.panel.report.restart">Nouvel entretien</span>
+      </button>
+    </section>
+  }
+</div>

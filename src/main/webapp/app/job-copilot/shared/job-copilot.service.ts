@@ -15,6 +15,8 @@ import {
   JobApplication,
   JobOffer,
   MatchResult,
+  PanelMessage,
+  PanelReport,
   UserPreference,
   UserPreferenceDto,
 } from './job-copilot.model';
@@ -194,6 +196,28 @@ export class JobCopilotService {
       params,
       headers: { 'Content-Type': 'text/plain' },
     });
+  }
+
+  // Shadow Interview Panel (multi-agent jury)
+  startPanel(jobOfferId: string, language?: string): Observable<PanelMessage> {
+    let params = new HttpParams().set('jobOfferId', jobOfferId);
+    if (language) params = params.set('language', language);
+    return this.http.post<PanelMessage>(`${this.baseUrl}/panel/start`, null, { params });
+  }
+
+  sendPanelAnswer(conversationId: string, jobOfferId: string, answer: string, language?: string): Observable<PanelMessage> {
+    let params = new HttpParams().set('jobOfferId', jobOfferId);
+    if (language) params = params.set('language', language);
+    return this.http.post<PanelMessage>(`${this.baseUrl}/panel/${conversationId}/message`, answer, {
+      params,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+  }
+
+  getPanelReport(conversationId: string, jobOfferId: string, language?: string): Observable<PanelReport> {
+    let params = new HttpParams().set('jobOfferId', jobOfferId);
+    if (language) params = params.set('language', language);
+    return this.http.post<PanelReport>(`${this.baseUrl}/panel/${conversationId}/report`, null, { params });
   }
 
   /** Loads the full message history of a conversation (USER/ASSISTANT/SYSTEM), chronological order. */

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateDirective } from 'app/shared/language';
 import { TranslateModule } from '@ngx-translate/core';
@@ -19,7 +20,7 @@ interface InterviewChatMessage {
 @Component({
   selector: 'jhi-job-copilot-interview',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslateDirective, TranslateModule, Conversation],
+  imports: [CommonModule, FormsModule, RouterLink, FaIconComponent, TranslateDirective, TranslateModule, Conversation],
   templateUrl: './interview.component.html',
   styleUrl: './interview.component.scss',
 })
