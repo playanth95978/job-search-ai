@@ -93,6 +93,14 @@ import {
   faWrench,
   faXmark,
   faEnvelope,
+  faArrowsRotate,
+  faCertificate,
+  faCode,
+  faGraduationCap,
+  faLanguage,
+  faLightbulb,
+  faThumbsUp,
+  faThumbsDown,
   // jhipster-needle-add-icon-import
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -191,5 +199,13 @@ export const fontAwesomeIcons = [
   faWandMagicSparkles,
   faWrench,
   faXmark,
+  faArrowsRotate,
+  faCertificate,
+  faCode,
+  faGraduationCap,
+  faLanguage,
+  faLightbulb,
+  faThumbsUp,
+  faThumbsDown,
   // jhipster-needle-add-icon-import
 ];

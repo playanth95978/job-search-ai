@@ -105,7 +105,7 @@ export class MessageService {
   }
 
   getHistory(id: string): Observable<ChatHistory[]> {
-    return this.http.get<ChatHistory[]>(`/api/chat/history/${id}`).pipe(
+    return this.http.get<ChatHistory[]>(`/api/chat-history/history/${encodeURIComponent(id)}`).pipe(
       map(history =>
         history.map(h => ({
           ...h,
@@ -511,24 +511,16 @@ export class MessageService {
     conversationId: string | null,
     ocrContext: string | null = null,
   ): Observable<ChatMessage> {
-    let url: string;
-    if (this.type() !== null) {
-      url = `/api/chat/${this.type()?.toLocaleLowerCase()}?message=${encodeURIComponent(prompt)}`;
-      if (this.type() === 'PDF' && ocrContext) {
-        url += `&ocrContext=${encodeURIComponent(ocrContext)}`;
-      }
-    } else {
-      url = `/api/chat/merge?message=${encodeURIComponent(prompt)}`;
-    }
-    if (conversationId) {
-      url += `&conversationId=${encodeURIComponent(conversationId)}`;
-    }
+    // Tool-enabled Job Copilot agent: the message goes in the request body (text/plain) and the
+    // conversation id in the path; the reply streams back as SSE (start / token* / end).
+    const url = `/api/job-copilot/assistant/${encodeURIComponent(conversationId ?? '')}/stream`;
 
     return this.http
-      .get(url, {
+      .post(url, prompt, {
         responseType: 'text',
         observe: 'events',
         reportProgress: true,
+        headers: { 'Content-Type': 'text/plain' },
       })
       .pipe(
         filter(
