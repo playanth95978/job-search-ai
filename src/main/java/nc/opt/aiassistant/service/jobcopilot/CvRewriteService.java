@@ -3,12 +3,7 @@ package nc.opt.aiassistant.service.jobcopilot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import nc.opt.aiassistant.service.jobcopilot.dto.CvMatchResultDto;
-import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
-import nc.opt.aiassistant.service.jobcopilot.dto.GenerateResumeRequestDto;
-import nc.opt.aiassistant.service.jobcopilot.dto.GeneratedResumeDto;
-import nc.opt.aiassistant.service.jobcopilot.dto.RewriteRequestDto;
-import nc.opt.aiassistant.service.jobcopilot.dto.RewriteResponseDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +23,90 @@ public class CvRewriteService {
     public CvRewriteService(@Qualifier("mistralAiChatModel") ChatModel chatModel, ObjectMapper objectMapper) {
         this.chatClient = ChatClient.builder(chatModel).build();
         this.objectMapper = objectMapper;
+    }
+
+    public CvReviewDto reviewResumeAdvanced(String content, String language) {
+        String text = content == null ? "" : content.trim();
+
+        if (text.isEmpty()) {
+            return new CvReviewDto(0, "No resume content to review.", List.of(), List.of("Add content to your resume first."));
+        }
+
+        String languageInstruction = (language == null || language.isBlank())
+            ? "Respond in the same language as the resume."
+            : "Respond only in " + language + ".";
+
+        String prompt = """
+            You are a senior technical recruiter, ATS expert and resume reviewer.
+
+            Your job is to review this resume exactly as an experienced recruiter would.
+
+            %s
+
+            ### Evaluation Rules
+
+            Evaluate ONLY what is explicitly present in the resume.
+
+            Never invent experience, skills or certifications.
+
+            Never recommend adding technologies or certifications unless they are clearly relevant to the candidate's existing profile.
+
+            Avoid generic advice.
+
+            Every strength and improvement MUST reference something actually found (or missing) in the resume.
+
+            Improvements must be actionable and specific.
+
+            If something is already good, mention it as a strength instead of suggesting it again.
+
+            ### ATS Evaluation
+
+            Base the score on these criteria:
+
+            - Resume structure and readability (20)
+            - ATS compatibility (20)
+            - Technical skills presentation (20)
+            - Experience and measurable achievements (20)
+            - Clarity and professionalism (20)
+
+            Compute the final score as the sum of those criteria.
+
+            ### Output
+
+            Return ONLY valid JSON.
+
+            Do not use markdown.
+
+            Do not wrap the JSON inside ```.
+
+            Return ONLY valid JSON with exactly these keys:
+
+            {
+              "score": 87,
+              "summary": "One or two concise sentences summarizing the resume.",
+              "strengths": [
+                "Specific strength based on the resume.",
+                "Another specific strength."
+              ],
+              "improvements": [
+                "Specific actionable recommendation based on the resume.",
+                "Another actionable recommendation."
+              ]
+            }
+
+            Resume:
+
+            %s
+            """.formatted(languageInstruction, text);
+
+        String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
+
+        try {
+            return objectMapper.readValue(json, CvReviewDto.class);
+        } catch (Exception e) {
+            log.error("Failed to parse resume review: {}", e.getMessage(), e);
+            return new CvReviewDto(0, "The AI review could not be generated. Please try again.", List.of(), List.of());
+        }
     }
 
     /** Reviews the whole resume and returns a score + strengths + actionable improvements. */
@@ -56,9 +135,9 @@ public class CvRewriteService {
             Resume:
             """.formatted(languageInstruction) + text;
 
-        String json = cleanJsonResponse(chatClient.prompt().user(prompt).call().content());
+        CvReviewDto json = chatClient.prompt().user(prompt).call().entity(CvReviewDto.class);
         try {
-            return objectMapper.readValue(json, CvReviewDto.class);
+            return json;
         } catch (Exception e) {
             log.error("Failed to parse resume review: {}", e.getMessage());
             return new CvReviewDto(0, "The AI review could not be generated. Please try again.", List.of(), List.of());

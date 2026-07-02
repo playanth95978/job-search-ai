@@ -101,6 +101,8 @@ import {
   faLightbulb,
   faThumbsUp,
   faThumbsDown,
+  faChevronDown,
+  faIdCard,
   // jhipster-needle-add-icon-import
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -108,6 +110,8 @@ export const fontAwesomeIcons = [
   faArrowLeft,
   faChevronLeft,
   faChevronRight,
+  faChevronDown,
+  faIdCard,
   faArrowRight,
   faArrowUp,
   faArrowDown,

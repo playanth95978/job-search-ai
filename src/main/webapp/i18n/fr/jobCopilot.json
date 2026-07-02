@@ -53,6 +53,88 @@
           "contact": "Contact",
           "skills": "Compétences"
         }
+      },
+      "searchability": {
+        "title": "Lisibilité ATS",
+        "subtitle": "Ce qu'un ATS standard extrait réellement de votre CV, champ par champ.",
+        "parseRate": "Taux de parsing",
+        "checksPassed": "vérifications réussies",
+        "notDetected": "Non détecté",
+        "present": "Aujourd'hui",
+        "rawText": "Ce que la machine lit (texte brut)",
+        "deepScan": "Analyse approfondie par l'IA",
+        "deepScanHint": "Lance une passe IA pour repérer les problèmes de colonnes, tableaux et ordre de lecture que les vérifications déterministes ne voient pas.",
+        "parsedTitle": "Ce que l'ATS a compris",
+        "categories": {
+          "contact": "Coordonnées",
+          "sections": "Sections détectées",
+          "formatting": "Qualité du parsing"
+        },
+        "fields": {
+          "name": "Nom",
+          "email": "Email",
+          "phone": "Téléphone",
+          "links": "Liens",
+          "experiences": "Expériences",
+          "skills": "Compétences"
+        },
+        "checks": {
+          "name": {
+            "label": "Nom du candidat",
+            "found": "Nom détecté en haut du document.",
+            "missing": "Aucun nom identifiable — placez votre nom complet en tête du CV."
+          },
+          "email": {
+            "label": "Adresse email",
+            "found": "Email extrait avec succès.",
+            "missing": "Aucun email trouvé dans le texte — évitez de le mettre dans une image ou l'en-tête."
+          },
+          "phone": {
+            "label": "Numéro de téléphone",
+            "found": "Numéro de téléphone détecté.",
+            "missing": "Aucun numéro détecté — ajoutez-le en texte brut, pas dans une icône."
+          },
+          "links": {
+            "label": "LinkedIn / GitHub / Portfolio",
+            "found": "Lien professionnel détecté.",
+            "missing": "Aucun lien détecté — ajoutez l'URL complète en texte (https://…)."
+          },
+          "location": {
+            "label": "Localisation",
+            "found": "Localisation détectée.",
+            "missing": "Aucune localisation détectée — un ATS l'utilise pour le filtrage géographique."
+          },
+          "experienceSection": {
+            "label": "Section Expérience",
+            "pass": "{{count}} expérience(s) extraite(s) sous un intitulé standard.",
+            "warn": "Expériences détectées mais l'intitulé de section n'est pas standard.",
+            "fail": "Aucune section d'expérience reconnue — utilisez l'intitulé « Expérience professionnelle »."
+          },
+          "educationSection": {
+            "label": "Section Formation",
+            "pass": "{{count}} formation(s) extraite(s) sous un intitulé standard.",
+            "warn": "Formations détectées mais l'intitulé de section n'est pas standard.",
+            "fail": "Aucune section formation reconnue — utilisez l'intitulé « Formation »."
+          },
+          "skillsSection": {
+            "label": "Section Compétences",
+            "pass": "{{count}} compétence(s) extraite(s) sous un intitulé standard.",
+            "warn": "Compétences détectées mais l'intitulé de section n'est pas standard.",
+            "fail": "Aucune section compétences reconnue — regroupez-les sous « Compétences »."
+          },
+          "dates": {
+            "label": "Dates des expériences",
+            "pass": "Toutes les expériences ({{total}}) ont des dates lisibles.",
+            "warn": "{{dated}}/{{total}} expériences ont des dates lisibles — les autres risquent d'être ignorées.",
+            "fail": "Aucune date lisible — l'ATS ne pourra pas calculer votre ancienneté."
+          },
+          "skillsCount": {
+            "label": "Compétences reconnues",
+            "pass": "{{count}} compétences extraites — bonne densité de mots-clés.",
+            "warn": "Seulement {{count}} compétence(s) extraite(s) — enrichissez votre section compétences.",
+            "fail": "Aucune compétence extraite — ajoutez une liste de compétences techniques."
+          }
+        }
       }
     },
     "interview": {

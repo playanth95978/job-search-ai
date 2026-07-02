@@ -69,7 +69,7 @@ public class CvResumeResource {
 
     @PostMapping("/review")
     public ResponseEntity<CvReviewDto> review(@RequestBody ReviewRequestDto request) {
-        return ResponseEntity.ok(cvRewriteService.reviewResume(request.content(), request.language()));
+        return ResponseEntity.ok(cvRewriteService.reviewResumeAdvanced(request.content(), request.language()));
     }
 
     @PostMapping("/match")

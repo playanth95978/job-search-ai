@@ -53,6 +53,88 @@
           "contact": "Contact",
           "skills": "Skills"
         }
+      },
+      "searchability": {
+        "title": "Searchability",
+        "subtitle": "What a standard ATS actually extracts from your resume, field by field.",
+        "parseRate": "ATS parse rate",
+        "checksPassed": "checks passed",
+        "notDetected": "Not detected",
+        "present": "Present",
+        "rawText": "What the machine reads (raw text)",
+        "deepScan": "AI layout deep-scan",
+        "deepScanHint": "Runs an AI pass to spot column, table and reading-order issues the deterministic checks can't see.",
+        "parsedTitle": "What the ATS understood",
+        "categories": {
+          "contact": "Contact information",
+          "sections": "Detected sections",
+          "formatting": "Parse quality"
+        },
+        "fields": {
+          "name": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "links": "Links",
+          "experiences": "Experiences",
+          "skills": "Skills"
+        },
+        "checks": {
+          "name": {
+            "label": "Candidate name",
+            "found": "Name detected at the top of the document.",
+            "missing": "No identifiable name — put your full name at the top of the resume."
+          },
+          "email": {
+            "label": "Email address",
+            "found": "Email extracted successfully.",
+            "missing": "No email found in the text — avoid placing it in an image or the header."
+          },
+          "phone": {
+            "label": "Phone number",
+            "found": "Phone number detected.",
+            "missing": "No number detected — add it as plain text, not inside an icon."
+          },
+          "links": {
+            "label": "LinkedIn / GitHub / Portfolio",
+            "found": "Professional link detected.",
+            "missing": "No link detected — add the full URL as text (https://…)."
+          },
+          "location": {
+            "label": "Location",
+            "found": "Location detected.",
+            "missing": "No location detected — ATS use it for geographic filtering."
+          },
+          "experienceSection": {
+            "label": "Experience section",
+            "pass": "{{count}} experience(s) extracted under a standard heading.",
+            "warn": "Experiences detected but the section heading is non-standard.",
+            "fail": "No experience section recognized — use the heading \"Work Experience\"."
+          },
+          "educationSection": {
+            "label": "Education section",
+            "pass": "{{count}} education entry(ies) extracted under a standard heading.",
+            "warn": "Education detected but the section heading is non-standard.",
+            "fail": "No education section recognized — use the heading \"Education\"."
+          },
+          "skillsSection": {
+            "label": "Skills section",
+            "pass": "{{count}} skill(s) extracted under a standard heading.",
+            "warn": "Skills detected but the section heading is non-standard.",
+            "fail": "No skills section recognized — group them under \"Skills\"."
+          },
+          "dates": {
+            "label": "Experience dates",
+            "pass": "All experiences ({{total}}) have readable dates.",
+            "warn": "{{dated}}/{{total}} experiences have readable dates — the rest may be ignored.",
+            "fail": "No readable dates — the ATS won't be able to compute your seniority."
+          },
+          "skillsCount": {
+            "label": "Recognized skills",
+            "pass": "{{count}} skills extracted — good keyword density.",
+            "warn": "Only {{count}} skill(s) extracted — enrich your skills section.",
+            "fail": "No skills extracted — add a list of technical skills."
+          }
+        }
       }
     },
     "interview": {
