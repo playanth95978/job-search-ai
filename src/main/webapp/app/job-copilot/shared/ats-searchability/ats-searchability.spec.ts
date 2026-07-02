@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { CandidateProfile } from './job-copilot.model';
+import { CandidateProfile } from '../job-copilot.model';
 import { analyzeSearchability, AtsCheck, AtsCheckStatus, parseRateRating } from './ats-searchability';
 
 function check(checks: AtsCheck[], id: string): AtsCheck {

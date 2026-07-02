@@ -1,0 +1,274 @@
+@if (searchability(); as ats) {
+  <div class="d-flex flex-column gap-4 jc-ats">
+    <!-- Parse rate gauge + summary -->
+    <div class="d-flex flex-wrap align-items-center gap-4 p-3 border rounded-4 bg-body-tertiary">
+      <div class="position-relative jc-ats-gauge">
+        <svg viewBox="0 0 120 120" class="jc-ats-gauge-svg">
+          <circle class="text-body-secondary opacity-25" cx="60" cy="60" r="52" stroke="currentColor" />
+          <circle
+            class="jc-ats-gauge-fill"
+            [class]="'text-' + ratingColor(parseRateRating())"
+            cx="60"
+            cy="60"
+            r="52"
+            stroke="currentColor"
+            [style.stroke-dasharray]="326.7"
+            [style.stroke-dashoffset]="326.7 - (326.7 * ats.parseRate) / 100"
+          />
+        </svg>
+        <div class="position-absolute top-50 start-50 translate-middle text-center">
+          <div class="fw-bold lh-1 jc-ats-gauge-num" [class]="'text-' + ratingColor(parseRateRating())">
+            {{ ats.parseRate }}<small>%</small>
+          </div>
+          <div
+            class="text-body-secondary text-uppercase fw-bold jc-ats-gauge-caption"
+            jhiTranslate="jobCopilot.cvQuality.searchability.parseRate"
+          >
+            ATS parse rate
+          </div>
+        </div>
+      </div>
+      <div class="flex-fill">
+        <h4 class="fw-bold mb-1" jhiTranslate="jobCopilot.cvQuality.searchability.title">Searchability</h4>
+        <p class="text-body-secondary small mb-2" jhiTranslate="jobCopilot.cvQuality.searchability.subtitle">
+          What a standard ATS extracts from your resume, field by field.
+        </p>
+        <div class="small text-body-secondary">
+          <span class="fs-5 fw-bold text-body">{{ ats.passed }}/{{ ats.total }}</span>
+          <span jhiTranslate="jobCopilot.cvQuality.searchability.checksPassed">checks passed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist grouped by category -->
+    @for (group of checkGroups(); track group.category) {
+      <div>
+        <h6
+          class="text-body-secondary text-uppercase fw-bold small mb-2"
+          [jhiTranslate]="'jobCopilot.cvQuality.searchability.categories.' + group.category"
+        >
+          {{ group.category }}
+        </h6>
+        <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+          @for (check of group.checks; track check.id) {
+            <li
+              class="d-flex align-items-start gap-3 p-3 border border-start border-4 rounded-3 bg-body"
+              [class]="'border-' + statusColor(check.status)"
+            >
+              <fa-icon [icon]="checkIcon(check.status)" [class]="'mt-1 text-' + statusColor(check.status)"></fa-icon>
+              <div class="d-flex flex-column min-w-0">
+                <span class="fw-semibold d-flex align-items-center flex-wrap gap-2">
+                  {{ check.labelKey | translate }}
+                  @if (check.value) {
+                    <code class="small text-truncate jc-ats-value">{{ check.value }}</code>
+                  }
+                </span>
+                <span class="small text-body-secondary">{{ check.detailKey | translate: check.detailParams }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <!-- What the ATS parsed: candidate card -->
+    <div class="p-3 border rounded-4 bg-body d-flex flex-column gap-3">
+      <h6 class="text-body-secondary text-uppercase fw-bold small mb-0 d-flex align-items-center gap-2">
+        <fa-icon icon="id-card"></fa-icon>
+        <span jhiTranslate="jobCopilot.cvQuality.searchability.parsedTitle">What the ATS understood</span>
+      </h6>
+      <div class="row g-3">
+        <div class="col-12 col-sm-6 d-flex flex-column">
+          <span
+            class="small text-body-secondary text-uppercase fw-bold jc-ats-field-label"
+            jhiTranslate="jobCopilot.cvQuality.searchability.fields.name"
+            >Name</span
+          >
+          <span class="fw-semibold text-truncate" [class.jc-ats-missing]="!ats.contact.name">{{
+            ats.contact.name || ('jobCopilot.cvQuality.searchability.notDetected' | translate)
+          }}</span>
+        </div>
+        <div class="col-12 col-sm-6 d-flex flex-column">
+          <span
+            class="small text-body-secondary text-uppercase fw-bold jc-ats-field-label"
+            jhiTranslate="jobCopilot.cvQuality.searchability.fields.email"
+            >Email</span
+          >
+          <span class="fw-semibold text-truncate" [class.jc-ats-missing]="!ats.contact.email">{{
+            ats.contact.email || ('jobCopilot.cvQuality.searchability.notDetected' | translate)
+          }}</span>
+        </div>
+        <div class="col-12 col-sm-6 d-flex flex-column">
+          <span
+            class="small text-body-secondary text-uppercase fw-bold jc-ats-field-label"
+            jhiTranslate="jobCopilot.cvQuality.searchability.fields.phone"
+            >Phone</span
+          >
+          <span class="fw-semibold text-truncate" [class.jc-ats-missing]="!ats.contact.phone">{{
+            ats.contact.phone || ('jobCopilot.cvQuality.searchability.notDetected' | translate)
+          }}</span>
+        </div>
+        <div class="col-12 col-sm-6 d-flex flex-column">
+          <span
+            class="small text-body-secondary text-uppercase fw-bold jc-ats-field-label"
+            jhiTranslate="jobCopilot.cvQuality.searchability.fields.links"
+            >Links</span
+          >
+          <span
+            class="fw-semibold text-truncate"
+            [class.jc-ats-missing]="!ats.contact.linkedin && !ats.contact.github && !ats.contact.portfolio"
+          >
+            {{
+              ats.contact.linkedin ||
+                ats.contact.github ||
+                ats.contact.portfolio ||
+                ('jobCopilot.cvQuality.searchability.notDetected' | translate)
+            }}
+          </span>
+        </div>
+      </div>
+
+      @if (profile().experiences?.length) {
+        <div class="d-flex flex-column gap-2 pt-3 border-top border-dashed">
+          <span
+            class="small text-body-secondary text-uppercase fw-bold jc-ats-field-label"
+            jhiTranslate="jobCopilot.cvQuality.searchability.fields.experiences"
+            >Experiences</span
+          >
+          @for (exp of profile().experiences; track exp.id) {
+            <div class="d-flex align-items-start gap-2">
+              <fa-icon icon="circle-check" class="text-success mt-1 small"></fa-icon>
+              <div>
+                <strong class="d-block small">{{ exp.jobTitle || ('jobCopilot.cvQuality.searchability.notDetected' | translate) }}</strong>
+                <span class="small text-body-secondary">
+                  {{ exp.company }}
+                  @if (exp.startDate || exp.current) {
+                    · {{ exp.startDate }} – {{ exp.current ? ('jobCopilot.cvQuality.searchability.present' | translate) : exp.endDate }}
+                  }
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (profile().skills?.length) {
+        <div class="d-flex flex-column gap-2 pt-3 border-top border-dashed">
+          <span
+            class="small text-body-secondary text-uppercase fw-bold jc-ats-field-label"
+            jhiTranslate="jobCopilot.cvQuality.searchability.fields.skills"
+            >Skills</span
+          >
+          <div class="d-flex flex-wrap gap-2">
+            @for (skill of profile().skills; track skill.id) {
+              <span class="badge text-body border bg-body-tertiary fw-medium">{{ skill.name }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Raw text (collapsible) -->
+    <div class="border rounded-3 overflow-hidden">
+      <button
+        class="btn w-100 d-flex align-items-center gap-2 text-start bg-body-tertiary rounded-0 border-0"
+        (click)="showRawText.set(!showRawText())"
+      >
+        <fa-icon [icon]="showRawText() ? 'chevron-down' : 'chevron-right'"></fa-icon>
+        <span class="fw-semibold small" jhiTranslate="jobCopilot.cvQuality.searchability.rawText">What the machine reads (raw text)</span>
+      </button>
+      @if (showRawText()) {
+        <div class="p-3 overflow-auto jc-ats-raw">
+          <pre class="m-0 small font-monospace jc-ats-pre">{{ profile().rawMarkdown }}</pre>
+        </div>
+      }
+    </div>
+
+    <!-- LLM deep scan (optional) -->
+    <div class="border rounded-3 overflow-hidden">
+      <button
+        class="btn w-100 d-flex align-items-center gap-2 text-start bg-body-tertiary rounded-0 border-0"
+        (click)="showDeepScan.set(!showDeepScan())"
+      >
+        <fa-icon [icon]="showDeepScan() ? 'chevron-down' : 'chevron-right'"></fa-icon>
+        <fa-icon icon="wand-magic-sparkles" class="text-primary"></fa-icon>
+        <span class="fw-semibold small" jhiTranslate="jobCopilot.cvQuality.searchability.deepScan">AI layout deep-scan</span>
+      </button>
+
+      @if (showDeepScan()) {
+        <div class="p-3 d-flex flex-column gap-3">
+          @if (!atsSimulation() && !simulating()) {
+            <div class="d-flex flex-column gap-2 align-items-start">
+              <button class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2" (click)="runAtsSimulation()">
+                <fa-icon icon="robot"></fa-icon>
+                <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.button">Simulate ATS Parsing</span>
+              </button>
+              <p class="small text-body-secondary mb-0" jhiTranslate="jobCopilot.cvQuality.searchability.deepScanHint">
+                Runs an AI pass to spot column, table and reading-order issues the deterministic checks can't see.
+              </p>
+            </div>
+          }
+
+          @if (simulating()) {
+            <div class="d-flex align-items-center justify-content-center gap-2 p-4 text-body-secondary">
+              <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+              <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.loading">AI ATS parsing simulation in progress...</span>
+            </div>
+          }
+
+          @if (simulationError()) {
+            <div class="d-flex align-items-center gap-2 p-3 text-danger border border-danger-subtle bg-danger-subtle rounded-3">
+              <fa-icon icon="circle-exclamation"></fa-icon>
+              <span>{{ 'jobCopilot.cvQuality.atsSimulation.error' | translate }}</span>
+            </div>
+          }
+
+          @if (atsSimulation(); as sim) {
+            @if (sim.warnings && sim.warnings.length) {
+              <div class="d-flex flex-column gap-2">
+                @for (w of sim.warnings; track w.message) {
+                  <div
+                    class="p-3 border border-start border-4 rounded-3 bg-body d-flex flex-column gap-2"
+                    [class]="'border-' + levelColor(w.level)"
+                  >
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="badge" [class]="'text-bg-' + levelColor(w.level)">{{ w.level }}</span>
+                      <strong class="small text-body-secondary">{{
+                        'jobCopilot.cvQuality.atsSimulation.types.' + w.type.toLowerCase() | translate
+                      }}</strong>
+                    </div>
+                    <p class="small mb-0">{{ w.message }}</p>
+                    @if (w.snippet) {
+                      <div class="p-2 rounded-2 bg-body-tertiary border small">
+                        <span class="fw-semibold text-body-secondary" jhiTranslate="jobCopilot.cvQuality.atsSimulation.snippet"
+                          >Snippet:</span
+                        >
+                        <code class="jc-ats-snippet">{{ w.snippet }}</code>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-success small mb-0" jhiTranslate="jobCopilot.cvQuality.atsSimulation.noWarnings">No warnings detected!</p>
+            }
+
+            @if (sim.recommendations && sim.recommendations.length) {
+              <div>
+                <h6 class="small fw-semibold d-flex align-items-center gap-2">
+                  <fa-icon icon="circle-check" class="text-success"></fa-icon>
+                  <span jhiTranslate="jobCopilot.cvQuality.atsSimulation.recommendations">Layout Recommendations</span>
+                </h6>
+                <ul class="small mb-0 d-flex flex-column gap-1 ps-3">
+                  @for (rec of sim.recommendations; track rec) {
+                    <li>{{ rec }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

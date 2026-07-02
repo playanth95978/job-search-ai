@@ -1,0 +1,247 @@
+<div class="jc-career">
+  <div class="jc-header">
+    <div class="jc-header-content">
+      <h1><fa-icon icon="chart-line"></fa-icon> <span jhiTranslate="jobCopilot.career.title">Career Simulator</span></h1>
+      <p class="jc-subtitle" jhiTranslate="jobCopilot.career.subtitle">
+        Plan your next move: pick a target role and see the skills to acquire, based on real job offers.
+      </p>
+      <a class="jc-btn jc-btn-outline jc-btn-sm" routerLink="/job-copilot">
+        <fa-icon icon="arrow-left" /> <span jhiTranslate="jobCopilot.career.back">Back to dashboard</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="container-fluid py-4">
+    <!-- Input form -->
+    <div class="p-3 p-md-4 border rounded-4 bg-body-tertiary mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-lg-6">
+          <label class="form-label fw-semibold small" for="targetRole" jhiTranslate="jobCopilot.career.targetRoleLabel">
+            Target role (2–5 years)
+          </label>
+          <input
+            id="targetRole"
+            type="text"
+            class="form-control"
+            [ngModel]="targetRole()"
+            (ngModelChange)="targetRole.set($event)"
+            (keyup.enter)="runSimulation()"
+            [placeholder]="'jobCopilot.career.targetRolePlaceholder' | translate"
+          />
+        </div>
+        <div class="col-8 col-lg-3">
+          <label class="form-label fw-semibold small" jhiTranslate="jobCopilot.career.horizonLabel">Horizon</label>
+          <div class="btn-group w-100" role="group">
+            <button type="button" class="btn" [class]="horizon() === 2 ? 'btn-primary' : 'btn-outline-primary'" (click)="horizon.set(2)">
+              <span jhiTranslate="jobCopilot.career.horizon2">2 years</span>
+            </button>
+            <button type="button" class="btn" [class]="horizon() === 5 ? 'btn-primary' : 'btn-outline-primary'" (click)="horizon.set(5)">
+              <span jhiTranslate="jobCopilot.career.horizon5">5 years</span>
+            </button>
+          </div>
+        </div>
+        <div class="col-4 col-lg-3">
+          <button
+            class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2"
+            [disabled]="!canSubmit()"
+            (click)="runSimulation()"
+          >
+            <fa-icon [icon]="loading() ? 'circle-notch' : 'wand-magic-sparkles'" [animation]="loading() ? 'spin' : undefined"></fa-icon>
+            <span jhiTranslate="jobCopilot.career.simulate">Simulate</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="d-flex align-items-center gap-2 p-3 text-danger border border-danger-subtle bg-danger-subtle rounded-3 mb-4">
+        <fa-icon icon="circle-exclamation"></fa-icon>
+        <span>{{ 'jobCopilot.career.error' | translate }}</span>
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="d-flex flex-column align-items-center justify-content-center gap-2 p-5 text-body-secondary">
+        <fa-icon icon="circle-notch" size="2x" [animation]="'spin'"></fa-icon>
+        <span jhiTranslate="jobCopilot.career.loading">Analyzing the market and building your roadmap…</span>
+      </div>
+    }
+
+    @if (roadmap(); as r) {
+      @if (r.offersAnalyzed === 0) {
+        <div class="d-flex align-items-center gap-2 p-4 border rounded-3 bg-body-tertiary">
+          <fa-icon icon="circle-info" class="text-info"></fa-icon>
+          <span jhiTranslate="jobCopilot.career.noOffers">No matching senior offers found in the database yet for this role.</span>
+        </div>
+      } @else {
+        <!-- Readiness header -->
+        <div class="d-flex flex-wrap align-items-center gap-4 p-3 border rounded-4 bg-body-tertiary mb-4">
+          <div class="position-relative jc-career-gauge">
+            <svg viewBox="0 0 120 120" class="jc-career-gauge-svg">
+              <circle class="text-body-secondary opacity-25" cx="60" cy="60" r="52" stroke="currentColor" />
+              <circle
+                class="jc-career-gauge-fill"
+                [class]="'text-' + readinessColor(r.readinessScore)"
+                cx="60"
+                cy="60"
+                r="52"
+                stroke="currentColor"
+                [style.stroke-dasharray]="326.7"
+                [style.stroke-dashoffset]="326.7 - (326.7 * r.readinessScore) / 100"
+              />
+            </svg>
+            <div class="position-absolute top-50 start-50 translate-middle text-center">
+              <div class="fw-bold lh-1 jc-career-gauge-num" [class]="'text-' + readinessColor(r.readinessScore)">
+                {{ r.readinessScore }}<small>%</small>
+              </div>
+              <div class="text-body-secondary text-uppercase fw-bold jc-career-gauge-caption" jhiTranslate="jobCopilot.career.readiness">
+                readiness
+              </div>
+            </div>
+          </div>
+          <div class="flex-fill">
+            <h4 class="fw-bold mb-1">{{ r.targetRole }}</h4>
+            <p class="text-body-secondary small mb-2">
+              {{ 'jobCopilot.career.basedOn' | translate: { count: r.offersAnalyzed, years: r.horizonYears } }}
+            </p>
+            @if (r.intermediateRoles.length) {
+              <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="small text-body-secondary text-uppercase fw-bold" jhiTranslate="jobCopilot.career.path">Path</span>
+                @for (role of r.intermediateRoles; track role; let last = $last) {
+                  <span class="badge text-bg-light border">{{ role }}</span>
+                  @if (!last) {
+                    <fa-icon icon="arrow-right" class="text-body-secondary small"></fa-icon>
+                  }
+                }
+                <fa-icon icon="arrow-right" class="text-body-secondary small"></fa-icon>
+                <span class="badge text-bg-primary">{{ r.targetRole }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Skill gap -->
+          <div class="col-12 col-lg-5">
+            <h5 class="fw-bold mb-3">
+              <fa-icon icon="bullseye" class="text-primary me-2"></fa-icon><span jhiTranslate="jobCopilot.career.skillGap">Skill gap</span>
+            </h5>
+
+            @if (missingSkills().length) {
+              <div class="d-flex flex-column gap-3 mb-4">
+                @for (gap of missingSkills(); track gap.skill) {
+                  <div>
+                    <div class="d-flex justify-content-between align-items-baseline mb-1">
+                      <span class="fw-semibold small">{{ gap.skill }}</span>
+                      <span class="small text-body-secondary">{{ 'jobCopilot.career.demand' | translate: { pct: gap.demandPct } }}</span>
+                    </div>
+                    <div
+                      class="progress jc-career-progress"
+                      role="progressbar"
+                      [attr.aria-valuenow]="gap.demandPct"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      <div class="progress-bar bg-danger" [style.width.%]="gap.demandPct"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (ownedSkills().length) {
+              <h6 class="small text-body-secondary text-uppercase fw-bold mb-2" jhiTranslate="jobCopilot.career.alreadyHave">
+                Skills you already have
+              </h6>
+              <div class="d-flex flex-wrap gap-2">
+                @for (gap of ownedSkills(); track gap.skill) {
+                  <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                    <fa-icon icon="circle-check" class="me-1"></fa-icon>{{ gap.skill }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Roadmap timeline -->
+          <div class="col-12 col-lg-7">
+            <h5 class="fw-bold mb-3">
+              <fa-icon icon="route" class="text-primary me-2"></fa-icon
+              ><span jhiTranslate="jobCopilot.career.roadmap">Learning roadmap</span>
+            </h5>
+
+            @if (r.steps.length) {
+              <ol class="list-unstyled jc-career-timeline mb-0">
+                @for (step of r.steps; track step.order) {
+                  <li class="jc-career-step">
+                    <span class="jc-career-step-dot"><fa-icon [icon]="stepIcon(step.type)"></fa-icon></span>
+                    <div class="jc-career-step-body">
+                      <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span
+                          class="badge bg-primary-subtle text-primary-emphasis"
+                          jhiTranslate="{{ 'jobCopilot.career.stepType.' + step.type }}"
+                          >{{ step.type }}</span
+                        >
+                        <strong>{{ step.title }}</strong>
+                      </div>
+                      <p class="small text-body-secondary mb-2 mt-1">{{ step.rationale }}</p>
+                      @if (step.relatedSkills.length) {
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                          @for (skill of step.relatedSkills; track skill) {
+                            <span class="badge text-bg-light border fw-normal">{{ skill }}</span>
+                          }
+                        </div>
+                      }
+                      @for (offer of offersForStep(step); track offer.id) {
+                        <a
+                          class="d-inline-flex align-items-center gap-1 small text-decoration-none me-2"
+                          [href]="offer.applyUrl"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <fa-icon icon="up-right-from-square"></fa-icon>{{ offer.title }}
+                        </a>
+                      }
+                    </div>
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p class="text-body-secondary small" jhiTranslate="jobCopilot.career.noRoadmap">Roadmap could not be generated. Try again.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Sample offers -->
+        @if (r.sampleOffers.length) {
+          <h5 class="fw-bold mt-4 mb-3">
+            <fa-icon icon="briefcase" class="text-primary me-2"></fa-icon
+            ><span jhiTranslate="jobCopilot.career.sampleOffers">Real offers behind this analysis</span>
+          </h5>
+          <div class="row g-3">
+            @for (offer of r.sampleOffers; track offer.id) {
+              <div class="col-12 col-md-6 col-xl-4">
+                <a
+                  class="d-block h-100 p-3 border rounded-3 bg-body text-decoration-none text-body jc-career-offer"
+                  [href]="offer.applyUrl"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <strong class="d-block mb-1">{{ offer.title }}</strong>
+                  <span class="small text-body-secondary d-block mb-2"
+                    >{{ offer.company }}<span *ngIf="offer.location"> · {{ offer.location }}</span></span
+                  >
+                  <div class="d-flex flex-wrap gap-1">
+                    @for (skill of offer.skills.slice(0, 6); track skill) {
+                      <span class="badge text-bg-light border fw-normal">{{ skill }}</span>
+                    }
+                  </div>
+                </a>
+              </div>
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

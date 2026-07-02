@@ -1,0 +1,110 @@
+/* Bootstrap utilities carry the layout; only the gradient header, circular gauge and
+   timeline (no Bootstrap equivalents) live here. */
+
+.jc-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  color: white;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .jc-subtitle {
+    margin: 0.25rem 0 1rem;
+    opacity: 0.85;
+    font-size: 0.95rem;
+  }
+}
+
+/* Circular readiness gauge */
+.jc-career-gauge {
+  width: 108px;
+  height: 108px;
+  flex-shrink: 0;
+
+  .jc-career-gauge-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  circle {
+    fill: none;
+    stroke-width: 9;
+  }
+
+  .jc-career-gauge-fill {
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+.jc-career-gauge-num {
+  font-size: 1.75rem;
+
+  small {
+    font-size: 0.9rem;
+  }
+}
+
+.jc-career-gauge-caption {
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.jc-career-progress {
+  height: 8px;
+  border-radius: 4px;
+}
+
+/* Roadmap timeline */
+.jc-career-timeline {
+  position: relative;
+  padding-left: 0.5rem;
+}
+
+.jc-career-step {
+  position: relative;
+  padding: 0 0 1.5rem 2.5rem;
+
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 2rem;
+    bottom: 0;
+    width: 2px;
+    background: var(--bs-border-color);
+  }
+}
+
+.jc-career-step-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+  font-size: 0.85rem;
+}
+
+.jc-career-offer {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  }
+}

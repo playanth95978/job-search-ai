@@ -1,4 +1,4 @@
-import { CandidateProfile } from './job-copilot.model';
+import { CandidateProfile } from '../job-copilot.model';
 
 /**
  * Deterministic ATS "searchability" analysis, in the spirit of Jobscan's parse report.

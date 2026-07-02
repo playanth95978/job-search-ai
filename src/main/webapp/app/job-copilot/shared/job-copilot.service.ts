@@ -7,6 +7,7 @@ import {
   ApplyOutcome,
   AssistantMessage,
   CandidateProfile,
+  CareerRoadmap,
   CvMatchResult,
   ChatMessageHistory,
   CvReview,
@@ -58,6 +59,12 @@ export class JobCopilotService {
     const lang = language ?? this.lang();
     const params = new HttpParams().set('language', lang);
     return this.http.get<AtsSimulation>(`${this.baseUrl}/cv/ats-simulation`, { params });
+  }
+
+  simulateCareer(targetRole: string, horizonYears: number, language?: string): Observable<CareerRoadmap> {
+    const lang = language ?? this.lang();
+    const params = new HttpParams().set('language', lang);
+    return this.http.post<CareerRoadmap>(`${this.baseUrl}/career/simulate`, { targetRole, horizonYears }, { params });
   }
 
   rewriteCv(text: string, kind: string, jobTitle?: string, company?: string, language?: string): Observable<any> {

@@ -1,0 +1,98 @@
+/* Only what Bootstrap utilities can't express. Layout, spacing, colors and
+   borders are handled by native Bootstrap classes in the template. */
+
+.jc-ats {
+  text-align: left;
+  animation: jc-ats-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes jc-ats-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Circular parse-rate gauge (no Bootstrap equivalent) */
+.jc-ats-gauge {
+  width: 108px;
+  height: 108px;
+  flex-shrink: 0;
+
+  .jc-ats-gauge-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  circle {
+    fill: none;
+    stroke-width: 9;
+  }
+
+  .jc-ats-gauge-fill {
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+.jc-ats-gauge-num {
+  font-size: 1.75rem;
+
+  small {
+    font-size: 0.9rem;
+  }
+}
+
+.jc-ats-gauge-caption {
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  max-width: 72px;
+  line-height: 1.2;
+}
+
+/* min-width:0 so flex children can truncate */
+.min-w-0 {
+  min-width: 0;
+}
+
+.jc-ats-field-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+
+.jc-ats-value {
+  max-width: 100%;
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), 0.08);
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+}
+
+.jc-ats-missing {
+  color: var(--bs-danger);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.jc-ats-raw {
+  max-height: 400px;
+}
+
+.jc-ats-pre {
+  white-space: pre-wrap;
+  color: var(--bs-body-color);
+}
+
+.jc-ats-snippet {
+  white-space: pre-wrap;
+  color: #e83e8c;
+}

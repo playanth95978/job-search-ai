@@ -137,6 +137,36 @@
         }
       }
     },
+    "career": {
+      "title": "Career Simulator",
+      "subtitle": "Plan your next move: pick a target role and see the skills to acquire, based on real job offers.",
+      "cardSubtitle": "Plan your next move and close your skill gap",
+      "back": "Back to dashboard",
+      "targetRoleLabel": "Target role (2–5 years)",
+      "targetRolePlaceholder": "e.g. Lead Cloud Architect, Engineering Manager…",
+      "horizonLabel": "Horizon",
+      "horizon2": "2 years",
+      "horizon5": "5 years",
+      "simulate": "Simulate",
+      "loading": "Analyzing the market and building your roadmap…",
+      "error": "Career simulation failed",
+      "noOffers": "No matching senior offers found in the database yet for this role.",
+      "readiness": "ready",
+      "basedOn": "Based on {{count}} real offers · {{years}}-year horizon",
+      "path": "Path",
+      "skillGap": "Skills to acquire",
+      "demand": "{{pct}}% of offers",
+      "alreadyHave": "Skills you already have",
+      "roadmap": "Learning roadmap",
+      "noRoadmap": "Roadmap could not be generated. Try again.",
+      "sampleOffers": "Real offers behind this analysis",
+      "stepType": {
+        "ROLE": "Role",
+        "CERTIFICATION": "Certification",
+        "PROJECT": "Project",
+        "SKILL": "Skill"
+      }
+    },
     "interview": {
       "title": "Interview Roleplay",
       "subtitle": "Practice job interview questions with a virtual recruiter and get personalized feedback.",

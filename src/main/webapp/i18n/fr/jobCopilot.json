@@ -137,6 +137,36 @@
         }
       }
     },
+    "career": {
+      "title": "Simulateur de carrière",
+      "subtitle": "Planifiez votre prochain coup : choisissez un poste cible et découvrez les compétences à acquérir, à partir de vraies offres.",
+      "cardSubtitle": "Planifiez votre évolution et comblez votre skill gap",
+      "back": "Retour au tableau de bord",
+      "targetRoleLabel": "Poste visé (2–5 ans)",
+      "targetRolePlaceholder": "ex. Lead Architect Cloud, Engineering Manager…",
+      "horizonLabel": "Horizon",
+      "horizon2": "2 ans",
+      "horizon5": "5 ans",
+      "simulate": "Simuler",
+      "loading": "Analyse du marché et construction de votre feuille de route…",
+      "error": "La simulation de carrière a échoué",
+      "noOffers": "Aucune offre senior correspondante dans la base pour ce poste pour le moment.",
+      "readiness": "prêt",
+      "basedOn": "Basé sur {{count}} offres réelles · horizon {{years}} ans",
+      "path": "Parcours",
+      "skillGap": "Compétences à acquérir",
+      "demand": "{{pct}}% des offres",
+      "alreadyHave": "Compétences déjà maîtrisées",
+      "roadmap": "Feuille de route",
+      "noRoadmap": "La feuille de route n'a pas pu être générée. Réessayez.",
+      "sampleOffers": "Les offres réelles derrière cette analyse",
+      "stepType": {
+        "ROLE": "Rôle",
+        "CERTIFICATION": "Certification",
+        "PROJECT": "Projet",
+        "SKILL": "Compétence"
+      }
+    },
     "interview": {
       "title": "Entretien d'entraînement",
       "subtitle": "Entraînez-vous aux questions d'entretien avec un recruteur virtuel et recevez des retours personnalisés.",

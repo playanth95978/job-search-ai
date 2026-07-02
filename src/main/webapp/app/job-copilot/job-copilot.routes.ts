@@ -32,6 +32,11 @@ const routes: Routes = [
     title: 'Preferences',
   },
   {
+    path: 'career',
+    loadComponent: () => import('./career/career-path.component').then(m => m.CareerPathComponent),
+    title: 'Career Simulator',
+  },
+  {
     path: 'interview',
     loadComponent: () => import('./interview/interview.component').then(m => m.InterviewComponent),
     title: 'Interview Roleplay',

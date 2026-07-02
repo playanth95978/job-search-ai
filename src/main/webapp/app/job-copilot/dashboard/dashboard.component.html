@@ -54,7 +54,10 @@
                 <span><fa-icon icon="location-dot"></fa-icon> {{ profile()?.location }}</span>
               }
               @if (profile()?.yearsOfExperience) {
-                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()?.yearsOfExperience }} <span jhiTranslate="jobCopilot.dashboard.profile.yearsExp">years exp.</span></span>
+                <span
+                  ><fa-icon icon="briefcase"></fa-icon> {{ profile()?.yearsOfExperience }}
+                  <span jhiTranslate="jobCopilot.dashboard.profile.yearsExp">years exp.</span></span
+                >
               }
               @if (profile()?.email) {
                 <span><fa-icon icon="envelope"></fa-icon> {{ profile()?.email }}</span>
@@ -70,11 +73,13 @@
         @if (skills) {
           <div class="jc-skills">
             @for (skill of skills.slice(0, 10); track skill) {
-              <span class="jc-skill-tag">{{ skill.name}}</span>
+              <span class="jc-skill-tag">{{ skill.name }}</span>
             }
             @if (skills?.length! > 10) {
               @let count = (skills?.length ?? 0) - 10;
-              <span class="jc-skill-more" jhiTranslate="jobCopilot.dashboard.profile.moreSkills" [translateValues]="{ count:count }">+{{ count}} more</span>
+              <span class="jc-skill-more" jhiTranslate="jobCopilot.dashboard.profile.moreSkills" [translateValues]="{ count: count }"
+                >+{{ count }} more</span
+              >
             }
           </div>
         }
@@ -130,6 +135,14 @@
           <div>
             <strong jhiTranslate="jobCopilot.interview.title">Entretien d'entraînement</strong>
             <span jhiTranslate="jobCopilot.interview.cardSubtitle">Entraînez-vous à l'entretien avec un recruteur virtuel</span>
+          </div>
+          <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
+        </a>
+        <a routerLink="/job-copilot/career" class="jc-action-card jc-action-career">
+          <fa-icon icon="chart-line" size="lg"></fa-icon>
+          <div>
+            <strong jhiTranslate="jobCopilot.career.title">Career Simulator</strong>
+            <span jhiTranslate="jobCopilot.career.cardSubtitle">Plan your next move and close your skill gap</span>
           </div>
           <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
         </a>

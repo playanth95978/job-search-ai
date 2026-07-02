@@ -274,3 +274,34 @@ export interface AtsSimulation {
   warnings: AtsWarning[];
   recommendations: string[];
 }
+
+// --- Predictive career-path simulator ---
+
+export interface SkillGap {
+  skill: string;
+  demandCount: number;
+  demandPct: number;
+  owned: boolean;
+}
+
+export type RoadmapStepType = 'ROLE' | 'CERTIFICATION' | 'PROJECT' | 'SKILL';
+
+export interface RoadmapStep {
+  order: number;
+  type: RoadmapStepType;
+  title: string;
+  rationale: string;
+  relatedSkills: string[];
+  evidenceOfferIds: string[];
+}
+
+export interface CareerRoadmap {
+  targetRole: string;
+  horizonYears: number;
+  readinessScore: number;
+  offersAnalyzed: number;
+  skillGaps: SkillGap[];
+  intermediateRoles: string[];
+  steps: RoadmapStep[];
+  sampleOffers: JobOfferDto[];
+}
