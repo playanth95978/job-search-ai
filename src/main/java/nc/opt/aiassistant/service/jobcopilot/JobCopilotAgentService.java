@@ -5,12 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.service.jobcopilot.dto.ChatEvent;
-import nc.opt.aiassistant.service.jobcopilot.tools.ApplicationTrackingTool;
-import nc.opt.aiassistant.service.jobcopilot.tools.CoverLetterTool;
-import nc.opt.aiassistant.service.jobcopilot.tools.CvParsingTool;
-import nc.opt.aiassistant.service.jobcopilot.tools.GeoLocationTool;
-import nc.opt.aiassistant.service.jobcopilot.tools.JobSearchTool;
-import nc.opt.aiassistant.service.jobcopilot.tools.MatchingTool;
+import nc.opt.aiassistant.service.jobcopilot.tools.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -49,18 +44,13 @@ public class JobCopilotAgentService {
     public JobCopilotAgentService(
         @Qualifier("mistralAiChatModel") ChatModel chatModel,
         ChatMemoryRepository chatMemoryRepository,
-        JobSearchTool jobSearchTool,
-        MatchingTool matchingTool,
-        CvParsingTool cvParsingTool,
-        ApplicationTrackingTool applicationTrackingTool,
-        CoverLetterTool coverLetterTool,
-        GeoLocationTool geoLocationTool
+        JobAgentToolbox jobAgentToolbox
     ) {
         ChatMemory chatMemory = MessageWindowChatMemory.builder().chatMemoryRepository(chatMemoryRepository).maxMessages(20).build();
         this.chatClient = ChatClient.builder(chatModel)
             .defaultSystem(SYSTEM_PROMPT)
             .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-            .defaultTools(jobSearchTool, matchingTool, cvParsingTool, applicationTrackingTool, coverLetterTool, geoLocationTool)
+            .defaultTools(jobAgentToolbox.tools())
             .build();
     }
 
