@@ -6,6 +6,7 @@ public enum JobSource {
     ASHBY,
     WORKABLE,
     REMOTEOK,
+    ADZUNA,
     WEWORKREMOTELY,
     FRANCE_TRAVAIL,
     EMPLOI_NC,

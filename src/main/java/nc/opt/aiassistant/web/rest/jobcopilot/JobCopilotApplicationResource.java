@@ -59,7 +59,8 @@ public class JobCopilotApplicationResource {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<JobApplication> updateStatus(@PathVariable UUID id, @RequestParam String status) {
-        return ResponseEntity.ok(trackingService.updateStatus(id, ApplicationStatus.valueOf(status.toUpperCase())));
+        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return ResponseEntity.ok(trackingService.updateStatus(id, userId, ApplicationStatus.valueOf(status.toUpperCase())));
     }
 
     @PutMapping("/{id}/cover-letter")

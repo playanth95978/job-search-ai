@@ -47,10 +47,10 @@ public class ApplicationTrackingService {
     }
 
     @Transactional
-    public JobApplication updateStatus(UUID applicationId, ApplicationStatus status) {
-        JobApplication app = applicationRepository
-            .findById(applicationId)
-            .orElseThrow(() -> new IllegalArgumentException("Application not found: " + applicationId));
+    public JobApplication updateStatus(UUID applicationId, String userId, ApplicationStatus status) {
+        // Scope to the owner (like updateCoverLetter / submitApplication) so a user can only change
+        // the status of their own applications, not another user's by id.
+        JobApplication app = getOwnedApplication(applicationId, userId);
         app.setStatus(status);
         if (status == ApplicationStatus.APPLIED) {
             app.setAppliedAt(Instant.now());

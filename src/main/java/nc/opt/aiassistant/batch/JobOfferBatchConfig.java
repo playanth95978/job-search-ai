@@ -4,8 +4,10 @@ import java.util.List;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferIngestionService;
+import nc.opt.aiassistant.service.jobcopilot.ats.AdzunaConnector;
 import nc.opt.aiassistant.service.jobcopilot.ats.EmploiNcConnector;
 import nc.opt.aiassistant.service.jobcopilot.ats.FranceTravailConnector;
+import nc.opt.aiassistant.service.jobcopilot.ats.RemoteOkConnector;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.EnableJdbcJobRepository;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -67,11 +69,19 @@ public class JobOfferBatchConfig {
     }
 
     @Bean
-    public Job ingestJobOffersJob(JobRepository jobRepository, Step ingestFranceTravailStep, Step ingestEmploiNcStep) {
+    public Job ingestJobOffersJob(
+        JobRepository jobRepository,
+        Step ingestFranceTravailStep,
+        Step ingestEmploiNcStep,
+        Step ingestRemoteOkStep,
+        Step ingestAdzunaStep
+    ) {
         return new JobBuilder("ingestJobOffersJob", jobRepository)
             .incrementer(new RunIdIncrementer())
             .start(ingestFranceTravailStep)
             .next(ingestEmploiNcStep)
+            .next(ingestRemoteOkStep)
+            .next(ingestAdzunaStep)
             .build();
     }
 
@@ -132,6 +142,52 @@ public class JobOfferBatchConfig {
     public AtsItemReader emploiNcReader(EmploiNcConnector connector) {
         // Step-scoped so each run gets a fresh (lazy) reader rather than reusing an exhausted iterator.
         return new AtsItemReader(connector, null, null);
+    }
+
+    // --- RemoteOK (international remote tech) ---
+
+    @Bean
+    public Step ingestRemoteOkStep(JobRepository jobRepository, AtsItemReader remoteOkReader) {
+        return new StepBuilder("ingestRemoteOkStep", jobRepository)
+            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
+            .reader(remoteOkReader)
+            .processor(statelessIngestionProcessor())
+            .writer(jobOfferBatchWriter)
+            .faultTolerant()
+            .skipLimit(SKIP_LIMIT)
+            .skip(Exception.class)
+            .listener(skipListener)
+            .build();
+    }
+
+    @Bean
+    @StepScope
+    public AtsItemReader remoteOkReader(RemoteOkConnector connector) {
+        // Null keywords → the whole RemoteOK feed (it filters by keyword only when provided).
+        return new AtsItemReader(connector, null, null);
+    }
+
+    // --- Adzuna (aggregated FR / international, seeded by configured queries) ---
+
+    @Bean
+    public Step ingestAdzunaStep(JobRepository jobRepository, AtsItemReader adzunaReader) {
+        return new StepBuilder("ingestAdzunaStep", jobRepository)
+            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
+            .reader(adzunaReader)
+            .processor(statelessIngestionProcessor())
+            .writer(jobOfferBatchWriter)
+            .faultTolerant()
+            .skipLimit(SKIP_LIMIT)
+            .skip(Exception.class)
+            .listener(skipListener)
+            .build();
+    }
+
+    @Bean
+    @StepScope
+    public AtsItemReader adzunaReader(AdzunaConnector connector) {
+        // Paginates over every configured seed query; empty (no-op) when credentials are missing.
+        return new AtsItemReader(connector.fetchConfiguredSeeds());
     }
 
     // --- Shared components ---

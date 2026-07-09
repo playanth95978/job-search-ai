@@ -295,3 +295,15 @@ application:
     france-travail:
       client-id: ${FRANCE_TRAVAIL_CLIENT_ID:PAR_test_d0cacdd0542c139ddd80e157eeb917e93d6c281f6a4d00060f45b5028a5f64c3}
       client-secret: ${FRANCE_TRAVAIL_CLIENT_SECRET:}
+    adzuna:
+      # Free credentials from https://developer.adzuna.com/ — leave blank to disable the connector.
+      app-id: ${ADZUNA_APP_ID:}
+      app-key: ${ADZUNA_APP_KEY:}
+      # Adzuna country code (fr, gb, us, de, au…). No New Caledonia endpoint — EmploiNc covers local offers.
+      country: ${ADZUNA_COUNTRY:fr}
+      # Optional location filter; blank = whole country.
+      where: ${ADZUNA_WHERE:}
+      results-per-page: 50
+      max-pages: 5
+      # Seed "what" queries paged through by the daily ingestion batch.
+      queries: ${ADZUNA_QUERIES:développeur,architecte,data engineer,devops,software engineer,cloud,cybersécurité,product manager}

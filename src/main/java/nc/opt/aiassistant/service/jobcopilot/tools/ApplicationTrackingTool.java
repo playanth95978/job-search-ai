@@ -50,7 +50,7 @@ public class ApplicationTrackingTool {
                 .anyMatch(a -> id.equals(a.getId()));
             if (!owned) return "Application not found for the current user.";
             ApplicationStatus s = ApplicationStatus.valueOf(status.toUpperCase());
-            trackingService.updateStatus(id, s);
+            trackingService.updateStatus(id, userId, s);
             return "Application status updated to " + s;
         } catch (Exception e) {
             return "Error: " + e.getMessage();
