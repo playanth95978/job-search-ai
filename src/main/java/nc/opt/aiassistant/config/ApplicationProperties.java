@@ -50,6 +50,7 @@ public class ApplicationProperties {
     public static class JobCopilot {
 
         private JobCopilotConfig franceTravail;
+        private Adzuna adzuna;
     }
 
     @Setter
@@ -58,6 +59,19 @@ public class ApplicationProperties {
 
         private String clientId;
         private String clientSecret;
+    }
+
+    @Setter
+    @Getter
+    public static class Adzuna {
+
+        private String appId;
+        private String appKey;
+        private String country;
+        private String where;
+        private int resultsPerPage;
+        private int maxPages;
+        private String queries;
     }
 
     @Getter
