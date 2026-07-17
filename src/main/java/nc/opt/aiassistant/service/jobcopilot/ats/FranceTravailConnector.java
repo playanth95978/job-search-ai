@@ -21,8 +21,23 @@ import reactor.core.publisher.Flux;
 public class FranceTravailConnector implements AtsConnector {
 
     private static final String API_BASE = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
+    /** A full page of 150 offers exceeds WebClient's default 256 KB in-memory buffer, so raise it. */
+    private static final int MAX_IN_MEMORY_BYTES = 16 * 1024 * 1024;
+
     private final ObjectMapper objectMapper;
     private final org.springframework.web.reactive.function.client.WebClient.Builder webClientBuilder;
+    private org.springframework.web.reactive.function.client.WebClient webClient;
+
+    /** Lazily builds a WebClient with an enlarged buffer; cloned so the shared builder is untouched. */
+    private org.springframework.web.reactive.function.client.WebClient webClient() {
+        if (webClient == null) {
+            webClient = webClientBuilder
+                .clone()
+                .codecs(c -> c.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_BYTES))
+                .build();
+        }
+        return webClient;
+    }
 
     @Value("${application.job-copilot.france-travail.client-id:}")
     private String clientId;
@@ -146,8 +161,7 @@ public class FranceTravailConnector implements AtsConnector {
                         uriComponentsBuilder.queryParam("codePostal", location);
                     }
                     java.net.URI uri = uriComponentsBuilder.build().toUri();
-                    String body = webClientBuilder
-                        .build()
+                    String body = webClient()
                         .get()
                         .uri(uri)
                         .header("Authorization", "Bearer " + token)
@@ -212,8 +226,7 @@ public class FranceTravailConnector implements AtsConnector {
                         uriComponentsBuilder.queryParam("departement", departement);
                     }
                     URI uri = uriComponentsBuilder.build().toUri();
-                    String body = webClientBuilder
-                        .build()
+                    String body = webClient()
                         .get()
                         .uri(uri)
                         .header("Authorization", "Bearer " + token)
