@@ -51,6 +51,8 @@ public class ApplicationProperties {
 
         private JobCopilotConfig franceTravail;
         private Adzuna adzuna;
+        private Seek seek = new Seek();
+        private Ingestion ingestion = new Ingestion();
     }
 
     @Setter
@@ -59,6 +61,25 @@ public class ApplicationProperties {
 
         private String clientId;
         private String clientSecret;
+        /** Comma-separated INSEE département codes crossed with each ROME grand domaine partition; blank = national. */
+        private String departements;
+    }
+
+    @Setter
+    @Getter
+    public static class Seek {
+
+        /** Seek is bot-protected; the connector bean is only registered when this is true. */
+        private boolean enabled = false;
+    }
+
+    @Setter
+    @Getter
+    public static class Ingestion {
+
+        private int chunkSize = 200;
+        private int concurrency = 4;
+        private int skipLimit = 100;
     }
 
     @Setter
