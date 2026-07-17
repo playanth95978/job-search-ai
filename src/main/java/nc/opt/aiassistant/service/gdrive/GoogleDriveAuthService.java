@@ -101,25 +101,31 @@ public class GoogleDriveAuthService {
     public User getOrCreateUser(GoogleUser googleUser) {
         String login = googleUser.email().toLowerCase();
 
-        return userRepository.findOneWithAuthoritiesByLogin(login).orElseGet(() -> {
-            log.info("Creating new Google user: {}", login);
-            User newUser = new User();
-            newUser.setLogin(login);
-            // Google users never sign in with a password, but the column requires a 60-char bcrypt
-            // hash (@Size(min=60,max=60), not null) — set an unguessable random one.
-            newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-            newUser.setFirstName(googleUser.given_name());
-            newUser.setLastName(googleUser.family_name());
-            newUser.setEmail(login);
-            newUser.setActivated(true);
-            newUser.setLangKey("fr");
+        // Look up by login first, then by email: a user with this email may already exist under a
+        // different login (e.g. created via classic signup), and jhi_user.email is uniquely constrained
+        // (ux_user_email), so creating a second row would violate it.
+        return userRepository
+            .findOneWithAuthoritiesByLogin(login)
+            .or(() -> userRepository.findOneWithAuthoritiesByEmailIgnoreCase(login))
+            .orElseGet(() -> {
+                log.info("Creating new Google user: {}", login);
+                User newUser = new User();
+                newUser.setLogin(login);
+                // Google users never sign in with a password, but the column requires a 60-char bcrypt
+                // hash (@Size(min=60,max=60), not null) — set an unguessable random one.
+                newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+                newUser.setFirstName(googleUser.given_name());
+                newUser.setLastName(googleUser.family_name());
+                newUser.setEmail(login);
+                newUser.setActivated(true);
+                newUser.setLangKey("fr");
 
-            authorityRepository
-                .findById(AuthoritiesConstants.USER)
-                .ifPresent(authority -> newUser.setAuthorities(Collections.singleton(authority)));
+                authorityRepository
+                    .findById(AuthoritiesConstants.USER)
+                    .ifPresent(authority -> newUser.setAuthorities(Collections.singleton(authority)));
 
-            return userRepository.save(newUser);
-        });
+                return userRepository.save(newUser);
+            });
     }
 
     private static String encode(String value) {
