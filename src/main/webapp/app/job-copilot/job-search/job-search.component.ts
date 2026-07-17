@@ -9,6 +9,7 @@ import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
 import { AuthPromptModalComponent } from '../shared/auth-prompt-modal/auth-prompt-modal.component';
 import {
+  ADZUNA_COUNTRIES,
   JobOffer,
   JobOfferPreview,
   jobSourceColor,
@@ -29,11 +30,19 @@ export class JobSearchComponent {
   keywords = '';
   location = '';
   source = '';
+  /** Adzuna market (country path segment); only used when the Adzuna source is selected. */
+  country = 'fr';
   atsUrl = '';
   /** Number of semantically closest offers to score in "Match My Profile". */
   matchTopK = 30;
 
   readonly sources = SEARCHABLE_JOB_SOURCES;
+  readonly countries = ADZUNA_COUNTRIES;
+
+  /** The metadata of the currently selected source, or undefined for "all sources". */
+  get selectedSource() {
+    return this.sources.find(s => s.value === this.source);
+  }
 
   offers = signal<JobOffer[]>([]);
   matchResults = signal<MatchResult[]>([]);
@@ -54,7 +63,8 @@ export class JobSearchComponent {
     this.searching.set(true);
     this.matchResults.set([]);
     this.error.set(null);
-    this.service.searchJobs(this.keywords || undefined, this.location || undefined, this.source || undefined).subscribe({
+    const country = this.selectedSource?.hasCountrySelect ? this.country : undefined;
+    this.service.searchJobs(this.keywords || undefined, this.location || undefined, this.source || undefined, country).subscribe({
       next: o => {
         this.offers.set(o);
         this.searching.set(false);

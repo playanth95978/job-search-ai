@@ -65,12 +65,13 @@ public class JobCopilotSearchResource {
     public ResponseEntity<List<JobOffer>> search(
         @RequestParam(required = false) String keywords,
         @RequestParam(required = false) String location,
-        @RequestParam(required = false) String source
+        @RequestParam(required = false) String source,
+        @RequestParam(required = false) String country
     ) {
         // Embeddings are not triggered here: full-description offers are queued as PENDING and
         // indexed by the background poller, while teaser-only (STUB) offers are enriched lazily
-        // on click via /{id}/enrich.
-        List<JobOffer> offers = jobSearchService.searchAll(keywords, location, source);
+        // on click via /{id}/enrich. country selects the Adzuna market (fr, gb, us, au, de, ca…).
+        List<JobOffer> offers = jobSearchService.searchAll(keywords, location, source, country);
         return ResponseEntity.ok(offers);
     }
 

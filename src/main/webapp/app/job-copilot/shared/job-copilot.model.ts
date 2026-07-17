@@ -217,17 +217,53 @@ export const JOB_SOURCE_COLORS: Record<string, string> = {
   EMPLOI_NC: '#00897b',
 };
 
+/**
+ * Metadata to guide the user on what a source actually covers, so they don't search e.g. an
+ * Australian city on a France-only source. `coverageKey` is an i18n key; `examples` are sample
+ * valid locations; `hasCountrySelect` marks sources whose market is chosen per search (Adzuna).
+ */
+export interface JobSourceInfo {
+  value: string;
+  label: string;
+  coverageKey: string;
+  examples: string[];
+  hasCountrySelect?: boolean;
+}
+
 /** Connectors that support keyword search (matches the registered backend AtsConnector beans). */
-export const SEARCHABLE_JOB_SOURCES: { value: string; label: string }[] = [
-  { value: 'EMPLOI_NC', label: JOB_SOURCE_LABELS['EMPLOI_NC'] },
-  { value: 'FRANCE_TRAVAIL', label: JOB_SOURCE_LABELS['FRANCE_TRAVAIL'] },
-  { value: 'ADZUNA', label: JOB_SOURCE_LABELS['ADZUNA'] },
-  // { value: 'REMOTEOK', label: JOB_SOURCE_LABELS['REMOTEOK'] },
-  // { value: 'HELLOWORK', label: JOB_SOURCE_LABELS['HELLOWORK'] },
-  // { value: 'GREENHOUSE', label: JOB_SOURCE_LABELS['GREENHOUSE'] },
-  // { value: 'LEVER', label: JOB_SOURCE_LABELS['LEVER'] },
+export const SEARCHABLE_JOB_SOURCES: JobSourceInfo[] = [
+  {
+    value: 'EMPLOI_NC',
+    label: JOB_SOURCE_LABELS['EMPLOI_NC'],
+    coverageKey: 'jobCopilot.search.coverage.emploiNc',
+    examples: ['Nouméa', 'Dumbéa', 'Mont-Dore'],
+  },
+  {
+    value: 'FRANCE_TRAVAIL',
+    label: JOB_SOURCE_LABELS['FRANCE_TRAVAIL'],
+    coverageKey: 'jobCopilot.search.coverage.franceTravail',
+    examples: ['Paris', 'Lyon', 'Marseille', '75', '69'],
+  },
+  {
+    value: 'ADZUNA',
+    label: JOB_SOURCE_LABELS['ADZUNA'],
+    coverageKey: 'jobCopilot.search.coverage.adzuna',
+    examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
+    hasCountrySelect: true,
+  },
+  // { value: 'REMOTEOK', ... }  // international remote tech
+  // { value: 'HELLOWORK', ... }
   // Seek is disabled by default (bot-protected); re-add when application.job-copilot.seek.enabled=true.
-  // { value: 'SEEK', label: JOB_SOURCE_LABELS['SEEK'] },
+];
+
+/** Adzuna markets exposed in the UI (the country is a path segment in the Adzuna API). */
+export const ADZUNA_COUNTRIES: { code: string; label: string }[] = [
+  { code: 'fr', label: 'France' },
+  { code: 'gb', label: 'United Kingdom' },
+  { code: 'us', label: 'United States' },
+  { code: 'au', label: 'Australia' },
+  { code: 'de', label: 'Germany' },
+  { code: 'ca', label: 'Canada' },
 ];
 
 export function jobSourceLabel(source?: string): string {

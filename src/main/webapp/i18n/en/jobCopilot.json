@@ -240,7 +240,13 @@
         "keywordsPlaceholder": "Keywords (e.g. Java Spring Boot)",
         "locationPlaceholder": "Location",
         "allSources": "All sources",
+        "country": "Country",
         "atsPlaceholder": "Paste ATS board URL (Greenhouse, Lever...)"
+      },
+      "coverage": {
+        "emploiNc": "Covers New Caledonia. Example locations:",
+        "franceTravail": "Covers France (metropolitan). City, département or postcode:",
+        "adzuna": "Pick the country first, then a city in that country:"
       },
       "actions": {
         "smartSearch": "Smart Search",

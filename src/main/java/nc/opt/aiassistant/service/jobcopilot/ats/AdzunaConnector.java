@@ -79,10 +79,20 @@ public class AdzunaConnector implements AtsConnector {
 
     @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
+        return fetchJobs(keywords, location, null);
+    }
+
+    /**
+     * Adzuna's country is a path segment (…/jobs/{country}/search/…), so the market is chosen per
+     * search: {@code country} (fr, gb, us, au, de, ca…) overrides the configured default.
+     */
+    @Override
+    public List<JobOffer> fetchJobs(String keywords, String location, String country) {
         if (!configured()) {
             return List.of();
         }
-        return fetchPage(keywords, location != null && !location.isBlank() ? location : where, 1);
+        String market = country != null && !country.isBlank() ? country.toLowerCase() : this.country;
+        return fetchPage(keywords, location != null && !location.isBlank() ? location : where, 1, market);
     }
 
     @Override
@@ -133,9 +143,13 @@ public class AdzunaConnector implements AtsConnector {
     }
 
     private List<JobOffer> fetchPage(String what, String location, int page) {
+        return fetchPage(what, location, page, country);
+    }
+
+    private List<JobOffer> fetchPage(String what, String location, int page, String market) {
         List<JobOffer> results = new ArrayList<>();
         try {
-            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_BASE + "/" + country + "/search/" + page)
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_BASE + "/" + market + "/search/" + page)
                 .queryParam("app_id", appId)
                 .queryParam("app_key", appKey)
                 .queryParam("results_per_page", resultsPerPage)

@@ -52,7 +52,24 @@
             }
           </select>
         </div>
+        @if (selectedSource?.hasCountrySelect) {
+          <div class="jc-input-wrapper">
+            <fa-icon icon="globe" class="jc-input-icon"></fa-icon>
+            <select class="jc-input jc-select" [(ngModel)]="country" [attr.aria-label]="'jobCopilot.search.form.country' | translate">
+              @for (c of countries; track c.code) {
+                <option [value]="c.code">{{ c.label }}</option>
+              }
+            </select>
+          </div>
+        }
       </div>
+      @if (selectedSource; as sel) {
+        <p class="jc-source-hint">
+          <fa-icon icon="circle-info"></fa-icon>
+          <span>{{ sel.coverageKey | translate }}</span>
+          <span class="jc-source-examples">{{ sel.examples.join(' · ') }}</span>
+        </p>
+      }
       <div class="jc-search-actions">
         <button class="jc-btn jc-btn-primary" (click)="smartSearch()" [disabled]="smartSearching()">
           @if (smartSearching()) {

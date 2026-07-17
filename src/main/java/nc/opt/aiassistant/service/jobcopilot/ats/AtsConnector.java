@@ -14,6 +14,15 @@ public interface AtsConnector {
     List<JobOffer> fetchJobs(String keywords, String location);
 
     /**
+     * Country-aware fetch. Only connectors whose API is partitioned by country (e.g. Adzuna, whose
+     * country is in the URL path) use {@code country}; all others ignore it and fall back to the
+     * two-argument form. {@code country} is an ISO-ish market code (fr, gb, us, au, de, ca…).
+     */
+    default List<JobOffer> fetchJobs(String keywords, String location, String country) {
+        return fetchJobs(keywords, location);
+    }
+
+    /**
      * Fetches jobs with pagination using Flux (useful for Spring Batch ingestion).
      */
     default Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {

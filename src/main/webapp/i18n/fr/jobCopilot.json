@@ -240,7 +240,13 @@
         "keywordsPlaceholder": "Mots-clés (ex: Java Spring Boot)",
         "locationPlaceholder": "Localisation",
         "allSources": "Toutes les sources",
+        "country": "Pays",
         "atsPlaceholder": "Coller l'URL du board ATS (Greenhouse, Lever...)"
+      },
+      "coverage": {
+        "emploiNc": "Couvre la Nouvelle-Calédonie. Exemples de lieux :",
+        "franceTravail": "Couvre la France (métropole). Ville, département ou code postal :",
+        "adzuna": "Choisissez d'abord le pays, puis la ville de ce pays :"
       },
       "actions": {
         "smartSearch": "Recherche intelligente",

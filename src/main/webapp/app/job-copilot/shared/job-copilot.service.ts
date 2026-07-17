@@ -83,11 +83,12 @@ export class JobCopilotService {
   }
 
   // Jobs
-  searchJobs(keywords?: string, location?: string, source?: string): Observable<JobOffer[]> {
+  searchJobs(keywords?: string, location?: string, source?: string, country?: string): Observable<JobOffer[]> {
     let params = new HttpParams();
     if (keywords) params = params.set('keywords', keywords);
     if (location) params = params.set('location', location);
     if (source) params = params.set('source', source);
+    if (country) params = params.set('country', country);
     return this.http.get<JobOffer[]>(`${this.baseUrl}/jobs/search`, { params });
   }
 

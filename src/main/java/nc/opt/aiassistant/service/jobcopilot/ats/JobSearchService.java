@@ -32,7 +32,12 @@ public class JobSearchService {
     /** Searches all configured connectors and persists new offers with semantic enrichment. */
     @Transactional
     public List<JobOffer> searchAll(String keywords, String location) {
-        return searchAll(keywords, location, null);
+        return searchAll(keywords, location, null, null);
+    }
+
+    @Transactional
+    public List<JobOffer> searchAll(String keywords, String location, String source) {
+        return searchAll(keywords, location, source, null);
     }
 
     /**
@@ -42,14 +47,14 @@ public class JobSearchService {
      *               to restrict the search to a single connector; when {@code null}/blank all connectors are queried.
      */
     @Transactional
-    public List<JobOffer> searchAll(String keywords, String location, String source) {
+    public List<JobOffer> searchAll(String keywords, String location, String source, String country) {
         List<JobOffer> allOffers = new ArrayList<>();
         for (AtsConnector connector : connectors) {
             if (source != null && !source.isBlank() && !connector.getSource().name().equalsIgnoreCase(source)) {
                 continue;
             }
             try {
-                List<JobOffer> offers = connector.fetchJobs(keywords, location);
+                List<JobOffer> offers = connector.fetchJobs(keywords, location, country);
                 allOffers.addAll(offers);
             } catch (Exception e) {
                 log.error("Connector {} failed: {}", connector.getSource(), e.getMessage());
