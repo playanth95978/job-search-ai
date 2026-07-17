@@ -107,6 +107,23 @@ services:
       - 'traefik.http.routers.jsa.tls.certresolver=letsencrypt'
       - 'traefik.http.services.jsa.loadbalancer.server.port=8080'
 
+  # Static portfolio site (single self-contained HTML file), served on the cv.<DOMAIN> subdomain
+  # through the same Traefik + Let's Encrypt setup. Independent of the app; edit ./portfolio/index.html
+  # and `docker restart jsa-portfolio` to update.
+  portfolio:
+    image: nginx:alpine
+    container_name: jsa-portfolio
+    restart: unless-stopped
+    volumes:
+      - ./portfolio:/usr/share/nginx/html:ro
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=job-search-ai_default'
+      - 'traefik.http.routers.portfolio.rule=Host(`cv.${DOMAIN}`)'
+      - 'traefik.http.routers.portfolio.entrypoints=websecure'
+      - 'traefik.http.routers.portfolio.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.portfolio.loadbalancer.server.port=80'
+
 volumes:
   postgres-data:
   ollama-models:
