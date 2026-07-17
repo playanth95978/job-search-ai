@@ -16,6 +16,8 @@ import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.StepExecution;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -100,8 +102,10 @@ public class BatchAdminResource {
             .map(BatchAdminResource::toDto)
             .toList();
 
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), null);
-        headers.add("X-Total-Count", String.valueOf(totalInstances));
+        // Wrap the page content in a Page so PaginationUtil can emit X-Total-Count and Link headers.
+        // Total is the instance count (the paginated unit here); executions is this page's flattened content.
+        Page<JobExecutionDTO> page = new PageImpl<>(executions, pageable, totalInstances);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
 
         return ResponseEntity.ok().headers(headers).body(executions);
     }
