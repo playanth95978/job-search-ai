@@ -91,6 +91,17 @@ export class JobCopilotService {
     return this.http.get<JobOffer[]>(`${this.baseUrl}/jobs/search`, { params });
   }
 
+  /**
+   * Semantic search over the ingested corpus (hybrid vector + BM25 + RRF + reranking).
+   * Instant and meaning-aware; does not hit external boards live.
+   */
+  searchSmart(query: string, location?: string, source?: string, limit = 30): Observable<JobOffer[]> {
+    let params = new HttpParams().set('query', query).set('limit', limit);
+    if (location) params = params.set('location', location);
+    if (source) params = params.set('source', source);
+    return this.http.get<JobOffer[]>(`${this.baseUrl}/jobs/search-smart`, { params });
+  }
+
   fetchFromUrl(url: string): Observable<JobOffer[]> {
     return this.http.post<JobOffer[]>(`${this.baseUrl}/jobs/fetch`, null, { params: { url } });
   }

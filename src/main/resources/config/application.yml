@@ -306,6 +306,10 @@ application:
       concurrency: ${INGESTION_CONCURRENCY:6}
       # Max offers a step may skip on error before failing the whole step.
       skip-limit: ${INGESTION_SKIP_LIMIT:1000}
+    seek:
+      # Seek (AU) is protected by bot mitigation (Kasada); server-side scraping is blocked (403).
+      # Disabled by default — the connector bean is only registered when this is true.
+      enabled: ${SEEK_ENABLED:false}
     adzuna:
       # Free credentials from https://developer.adzuna.com/ — leave blank to disable the connector.
       app-id: ${ADZUNA_APP_ID:}

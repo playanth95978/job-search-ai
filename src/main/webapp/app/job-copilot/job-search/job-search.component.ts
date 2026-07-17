@@ -38,6 +38,7 @@ export class JobSearchComponent {
   offers = signal<JobOffer[]>([]);
   matchResults = signal<MatchResult[]>([]);
   searching = signal(false);
+  smartSearching = signal(false);
   matching = signal(false);
   matchingAdvanced = signal(false);
   fetching = signal(false);
@@ -61,6 +62,30 @@ export class JobSearchComponent {
       error: err => {
         this.error.set(err.error?.message || 'Search failed');
         this.searching.set(false);
+      },
+    });
+  }
+
+  /**
+   * Semantic search over the ingested corpus (hybrid vector + BM25 + RRF + reranking).
+   * Instant and meaning-aware, vs. the live board scraping of {@link search}.
+   */
+  smartSearch(): void {
+    if (!this.keywords) {
+      this.search();
+      return;
+    }
+    this.smartSearching.set(true);
+    this.matchResults.set([]);
+    this.error.set(null);
+    this.service.searchSmart(this.keywords, this.location || undefined, this.source || undefined).subscribe({
+      next: o => {
+        this.offers.set(o);
+        this.smartSearching.set(false);
+      },
+      error: err => {
+        this.error.set(err.error?.message || 'Search failed');
+        this.smartSearching.set(false);
       },
     });
   }

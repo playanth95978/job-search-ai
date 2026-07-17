@@ -75,6 +75,35 @@ public class JobCopilotSearchResource {
     }
 
     /**
+     * {@code GET /jobs/search-smart} : semantic search over the already-ingested corpus using the
+     * hybrid pipeline (pgvector nearest-neighbours + BM25, fused with Reciprocal Rank Fusion, then
+     * cross-encoder reranked). Unlike {@code /search} it does not hit external boards live — it ranks
+     * the mass-ingested offers, so it is instant and understands meaning, not just keywords.
+     *
+     * @param query    the natural-language query.
+     * @param location optional location, appended to the query to bias ranking.
+     * @param source   optional {@link nc.opt.aiassistant.domain.enumeration.JobSource} name to restrict results.
+     * @param limit    maximum number of offers to return.
+     */
+    @GetMapping("/search-smart")
+    public ResponseEntity<List<JobOffer>> searchSmart(
+        @RequestParam String query,
+        @RequestParam(required = false) String location,
+        @RequestParam(required = false) String source,
+        @RequestParam(defaultValue = "30") int limit
+    ) {
+        String enriched = (location != null && !location.isBlank()) ? query + " " + location : query;
+        List<JobOffer> offers = jobSearchService.searchHybrid(enriched, Math.max(1, limit));
+        if (source != null && !source.isBlank()) {
+            offers = offers
+                .stream()
+                .filter(o -> o.getSource() != null && o.getSource().name().equalsIgnoreCase(source))
+                .toList();
+        }
+        return ResponseEntity.ok(offers);
+    }
+
+    /**
      * {@code POST /jobs/{id}/enrich} : fetches the full description of a list (STUB) offer from its
      * source detail page and queues it for embedding. Idempotent: already-enriched offers are
      * returned unchanged. Meant to be called when the user opens an offer.

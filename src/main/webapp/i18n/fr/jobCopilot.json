@@ -231,7 +231,7 @@
     },
     "search": {
       "title": "Recherche d'emploi",
-      "subtitle": "Recherchez parmi plusieurs sources — Emploi.nc, RemoteOK, Greenhouse, HelloWork, Seek AU, France Travail",
+      "subtitle": "Recherchez parmi plusieurs sources — Emploi.nc, France Travail, Adzuna, RemoteOK, Greenhouse, HelloWork",
       "tabs": {
         "keyword": "Recherche par mots-clés",
         "ats": "URL ATS / Board"
@@ -243,6 +243,8 @@
         "atsPlaceholder": "Coller l'URL du board ATS (Greenhouse, Lever...)"
       },
       "actions": {
+        "smartSearch": "Recherche intelligente",
+        "smartSearching": "Analyse sémantique...",
         "searching": "Recherche en cours...",
         "search": "Rechercher",
         "matching": "Matching en cours...",

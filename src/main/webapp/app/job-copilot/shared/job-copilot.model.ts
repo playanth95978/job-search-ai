@@ -198,6 +198,7 @@ export const JOB_SOURCE_LABELS: Record<string, string> = {
   GREENHOUSE: 'Greenhouse',
   LEVER: 'Lever',
   REMOTEOK: 'RemoteOK',
+  ADZUNA: 'Adzuna',
   HELLOWORK: 'HelloWork',
   SEEK: 'Seek AU',
   FRANCE_TRAVAIL: 'France Travail',
@@ -209,6 +210,7 @@ export const JOB_SOURCE_COLORS: Record<string, string> = {
   GREENHOUSE: '#43a047',
   LEVER: '#1565c0',
   REMOTEOK: '#ff6f00',
+  ADZUNA: '#7e57c2',
   HELLOWORK: '#e91e63',
   SEEK: '#0d47a1',
   FRANCE_TRAVAIL: '#1a237e',
@@ -219,11 +221,13 @@ export const JOB_SOURCE_COLORS: Record<string, string> = {
 export const SEARCHABLE_JOB_SOURCES: { value: string; label: string }[] = [
   { value: 'EMPLOI_NC', label: JOB_SOURCE_LABELS['EMPLOI_NC'] },
   { value: 'FRANCE_TRAVAIL', label: JOB_SOURCE_LABELS['FRANCE_TRAVAIL'] },
+  { value: 'ADZUNA', label: JOB_SOURCE_LABELS['ADZUNA'] },
   // { value: 'REMOTEOK', label: JOB_SOURCE_LABELS['REMOTEOK'] },
   // { value: 'HELLOWORK', label: JOB_SOURCE_LABELS['HELLOWORK'] },
   // { value: 'GREENHOUSE', label: JOB_SOURCE_LABELS['GREENHOUSE'] },
   // { value: 'LEVER', label: JOB_SOURCE_LABELS['LEVER'] },
-  { value: 'SEEK', label: JOB_SOURCE_LABELS['SEEK'] },
+  // Seek is disabled by default (bot-protected); re-add when application.job-copilot.seek.enabled=true.
+  // { value: 'SEEK', label: JOB_SOURCE_LABELS['SEEK'] },
 ];
 
 export function jobSourceLabel(source?: string): string {

@@ -54,7 +54,16 @@
         </div>
       </div>
       <div class="jc-search-actions">
-        <button class="jc-btn jc-btn-primary" (click)="search()" [disabled]="searching()">
+        <button class="jc-btn jc-btn-primary" (click)="smartSearch()" [disabled]="smartSearching()">
+          @if (smartSearching()) {
+            <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.actions.smartSearching">Smart search...</span>
+          } @else {
+            <fa-icon icon="wand-magic-sparkles"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.actions.smartSearch">Smart Search</span>
+          }
+        </button>
+        <button class="jc-btn jc-btn-secondary" (click)="search()" [disabled]="searching()">
           @if (searching()) {
             <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
             <span jhiTranslate="jobCopilot.search.actions.searching">Searching...</span>

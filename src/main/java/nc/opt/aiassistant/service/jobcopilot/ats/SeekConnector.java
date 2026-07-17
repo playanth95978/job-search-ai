@@ -15,10 +15,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+/**
+ * Disabled by default: Seek fronts its site with bot mitigation (Kasada) that a server-side HTML
+ * fetch cannot pass, so the connector is only registered when {@code application.job-copilot.seek.enabled=true}.
+ */
 @Slf4j
 @Component
+@ConditionalOnProperty(prefix = "application.job-copilot.seek", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class SeekConnector implements AtsConnector {
 
