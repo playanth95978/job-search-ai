@@ -40,8 +40,17 @@ public class SeekConnector implements AtsConnector {
         List<JobOffer> results = new ArrayList<>();
         try {
             results = fetchViaHtmlScraping(keywords, location);
+        } catch (org.jsoup.HttpStatusException e) {
+            // Seek fronts its site with bot mitigation (Kasada) that requires JS execution, so a
+            // server-side HTML fetch is routinely answered with 403/429. This is expected, not an
+            // outage: log it quietly and return no results rather than surfacing it as an error.
+            if (e.getStatusCode() == 403 || e.getStatusCode() == 429) {
+                log.info("Seek blocked automated access (HTTP {}) for '{}' — skipping this source", e.getStatusCode(), keywords);
+            } else {
+                log.warn("Seek fetch failed (HTTP {}): {}", e.getStatusCode(), e.getMessage());
+            }
         } catch (Exception e) {
-            log.error("Seek fetch failed: {}", e.getMessage());
+            log.warn("Seek fetch failed: {}", e.getMessage());
         }
         return results;
     }
@@ -56,6 +65,9 @@ public class SeekConnector implements AtsConnector {
 
         Document doc = Jsoup.connect(url)
             .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36")
+            .header("Accept", "text/html,application/xhtml+xml")
+            .header("Accept-Language", "en-AU,en;q=0.9")
+            .referrer(SEEK_BASE)
             .timeout(15_000)
             .get();
 
@@ -143,6 +155,9 @@ public class SeekConnector implements AtsConnector {
         try {
             Document doc = Jsoup.connect(url)
                 .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36")
+                .header("Accept", "text/html,application/xhtml+xml")
+                .header("Accept-Language", "en-AU,en;q=0.9")
+                .referrer(SEEK_BASE)
                 .timeout(15_000)
                 .get();
 

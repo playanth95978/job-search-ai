@@ -46,10 +46,19 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableJdbcJobRepository
 public class JobOfferBatchConfig {
 
-    private static final int CHUNK_SIZE = 200;
-    private static final int SKIP_LIMIT = 100;
+    @Value("${application.job-copilot.ingestion.chunk-size:200}")
+    private int chunkSize;
+
+    @Value("${application.job-copilot.ingestion.skip-limit:100}")
+    private int skipLimit;
+
     /** Concurrent France Travail partitions; bounded to stay within the API rate limits. */
-    private static final int PARTITION_CONCURRENCY = 4;
+    @Value("${application.job-copilot.ingestion.concurrency:4}")
+    private int concurrency;
+
+    /** Optional département codes crossed with each grand domaine; blank = national partitions. */
+    @Value("${application.job-copilot.france-travail.departements:}")
+    private String departementsCsv;
 
     private final JobOfferIngestionService ingestionService;
     private final JobOfferBatchWriter jobOfferBatchWriter;
@@ -90,9 +99,9 @@ public class JobOfferBatchConfig {
     @Bean
     public Step ingestFranceTravailStep(JobRepository jobRepository, Step franceTravailWorkerStep, TaskExecutor batchTaskExecutor) {
         return new StepBuilder("ingestFranceTravailStep", jobRepository)
-            .partitioner(franceTravailWorkerStep.getName(), new GrandDomainePartitioner(List.of()))
+            .partitioner(franceTravailWorkerStep.getName(), new GrandDomainePartitioner(parseDepartements()))
             .step(franceTravailWorkerStep)
-            .gridSize(RomeGrandDomaine.ALL.size())
+            .gridSize(RomeGrandDomaine.ALL.size() * Math.max(1, parseDepartements().size()))
             .taskExecutor(batchTaskExecutor)
             .build();
     }
@@ -100,12 +109,12 @@ public class JobOfferBatchConfig {
     @Bean
     public Step franceTravailWorkerStep(JobRepository jobRepository, AtsItemReader franceTravailReader) {
         return new StepBuilder("franceTravailWorkerStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
+            .<JobOffer, JobOffer>chunk(chunkSize, transactionManager)
             .reader(franceTravailReader)
             .processor(statelessIngestionProcessor())
             .writer(jobOfferBatchWriter)
             .faultTolerant()
-            .skipLimit(SKIP_LIMIT)
+            .skipLimit(skipLimit)
             .skip(Exception.class)
             .listener(skipListener)
             .build();
@@ -126,12 +135,12 @@ public class JobOfferBatchConfig {
     @Bean
     public Step ingestEmploiNcStep(JobRepository jobRepository, AtsItemReader emploiNcReader) {
         return new StepBuilder("ingestEmploiNcStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
+            .<JobOffer, JobOffer>chunk(chunkSize, transactionManager)
             .reader(emploiNcReader)
             .processor(statelessIngestionProcessor())
             .writer(jobOfferBatchWriter)
             .faultTolerant()
-            .skipLimit(SKIP_LIMIT)
+            .skipLimit(skipLimit)
             .skip(Exception.class)
             .listener(skipListener)
             .build();
@@ -149,12 +158,12 @@ public class JobOfferBatchConfig {
     @Bean
     public Step ingestRemoteOkStep(JobRepository jobRepository, AtsItemReader remoteOkReader) {
         return new StepBuilder("ingestRemoteOkStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
+            .<JobOffer, JobOffer>chunk(chunkSize, transactionManager)
             .reader(remoteOkReader)
             .processor(statelessIngestionProcessor())
             .writer(jobOfferBatchWriter)
             .faultTolerant()
-            .skipLimit(SKIP_LIMIT)
+            .skipLimit(skipLimit)
             .skip(Exception.class)
             .listener(skipListener)
             .build();
@@ -172,12 +181,12 @@ public class JobOfferBatchConfig {
     @Bean
     public Step ingestAdzunaStep(JobRepository jobRepository, AtsItemReader adzunaReader) {
         return new StepBuilder("ingestAdzunaStep", jobRepository)
-            .<JobOffer, JobOffer>chunk(CHUNK_SIZE, transactionManager)
+            .<JobOffer, JobOffer>chunk(chunkSize, transactionManager)
             .reader(adzunaReader)
             .processor(statelessIngestionProcessor())
             .writer(jobOfferBatchWriter)
             .faultTolerant()
-            .skipLimit(SKIP_LIMIT)
+            .skipLimit(skipLimit)
             .skip(Exception.class)
             .listener(skipListener)
             .build();
@@ -202,7 +211,17 @@ public class JobOfferBatchConfig {
     public TaskExecutor batchTaskExecutor() {
         SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("ft-partition-");
         executor.setVirtualThreads(true);
-        executor.setConcurrencyLimit(PARTITION_CONCURRENCY);
+        executor.setConcurrencyLimit(concurrency);
         return executor;
+    }
+
+    private List<String> parseDepartements() {
+        if (departementsCsv == null || departementsCsv.isBlank()) {
+            return List.of();
+        }
+        return java.util.Arrays.stream(departementsCsv.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .toList();
     }
 }

@@ -295,6 +295,17 @@ application:
     france-travail:
       client-id: ${FRANCE_TRAVAIL_CLIENT_ID:PAR_test_d0cacdd0542c139ddd80e157eeb917e93d6c281f6a4d00060f45b5028a5f64c3}
       client-secret: ${FRANCE_TRAVAIL_CLIENT_SECRET:}
+      # Comma-separated INSEE département codes crossed with each ROME grand domaine partition.
+      # Blank = national partitions (one per grand domaine). Add département codes to break past the
+      # API's 3150-results-per-query ceiling for very large domaines (e.g. "75,69,13,33,59,44").
+      departements: ${FRANCE_TRAVAIL_DEPARTEMENTS:}
+    ingestion:
+      # Chunk size for the mass-ingestion steps (offers dedup'd + saved per chunk).
+      chunk-size: ${INGESTION_CHUNK_SIZE:150}
+      # Number of ROME grand domaine partitions ingested in parallel (virtual threads).
+      concurrency: ${INGESTION_CONCURRENCY:6}
+      # Max offers a step may skip on error before failing the whole step.
+      skip-limit: ${INGESTION_SKIP_LIMIT:1000}
     adzuna:
       # Free credentials from https://developer.adzuna.com/ — leave blank to disable the connector.
       app-id: ${ADZUNA_APP_ID:}
