@@ -8,69 +8,47 @@
 <body>
 <style>
   :root {
-    --bg: #eaedf1;
-    --surface: #f5f7fa;
-    --surface-2: #ffffff;
-    --ink: #14181f;
-    --muted: #55606d;
-    --faint: #8b95a2;
-    --line: #d2d8e0;
-    --accent: #9a5a00;
-    --accent-line: #c67e12;
-    --glow: rgba(198, 126, 18, 0.22);
+    --bg: #020617;
+    --surface: rgba(15, 23, 42, 0.7);
+    --surface-2: rgba(30, 41, 59, 0.5);
+    --ink: #f8fafc;
+    --muted: #94a3b8;
+    --faint: #475569;
+    --line: rgba(255, 255, 255, 0.1);
+    --accent: #22d3ee;
+    --accent-2: #818cf8;
+    --accent-line: #06b6d4;
+    --glow: rgba(34, 211, 238, 0.3);
+    --glow-2: rgba(129, 140, 248, 0.2);
 
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
 
-    --fs-hero: clamp(2.6rem, 7.2vw, 5.1rem);
-    --fs-h2: clamp(1.45rem, 3.4vw, 2.15rem);
-    --fs-h3: 1.16rem;
+    --fs-hero: clamp(2.8rem, 8vw, 5.5rem);
+    --fs-h2: clamp(1.6rem, 4vw, 2.5rem);
+    --fs-h3: 1.25rem;
     --fs-body: 1.0625rem;
-    --fs-mono: 0.78rem;
+    --fs-mono: 0.82rem;
 
-    --maxw: 1080px;
-    --gutter: clamp(1.15rem, 4vw, 3rem);
-  }
+    --maxw: 1100px;
+    --gutter: clamp(1.25rem, 5vw, 3.5rem);
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0a0e14;
-      --surface: #111823;
-      --surface-2: #16202c;
-      --ink: #e9edf3;
-      --muted: #93a0b1;
-      --faint: #616d7c;
-      --line: #212b38;
-      --accent: #e8b44a;
-      --accent-line: #e8b44a;
-      --glow: rgba(232, 180, 74, 0.26);
-    }
+    --glass: blur(12px) saturate(180%);
   }
 
   :root[data-theme="light"] {
-    --bg: #eaedf1;
-    --surface: #f5f7fa;
+    --bg: #f8fafc;
+    --surface: rgba(255, 255, 255, 0.8);
     --surface-2: #ffffff;
-    --ink: #14181f;
-    --muted: #55606d;
-    --faint: #8b95a2;
-    --line: #d2d8e0;
-    --accent: #9a5a00;
-    --accent-line: #c67e12;
-    --glow: rgba(198, 126, 18, 0.22);
-  }
-
-  :root[data-theme="dark"] {
-    --bg: #0a0e14;
-    --surface: #111823;
-    --surface-2: #16202c;
-    --ink: #e9edf3;
-    --muted: #93a0b1;
-    --faint: #616d7c;
-    --line: #212b38;
-    --accent: #e8b44a;
-    --accent-line: #e8b44a;
-    --glow: rgba(232, 180, 74, 0.26);
+    --ink: #0f172a;
+    --muted: #64748b;
+    --faint: #94a3b8;
+    --line: rgba(0, 0, 0, 0.1);
+    --accent: #0891b2;
+    --accent-2: #4f46e5;
+    --accent-line: #0891b2;
+    --glow: rgba(8, 145, 178, 0.15);
+    --glow-2: rgba(79, 70, 229, 0.1);
   }
 
   * { box-sizing: border-box; }
@@ -83,10 +61,23 @@
     color: var(--ink);
     font-family: var(--sans);
     font-size: var(--fs-body);
-    line-height: 1.65;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
     transition: background 0.4s ease, color 0.4s ease;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+      radial-gradient(circle at 2px 2px, var(--line) 1px, transparent 0);
+    background-size: 40px 40px;
+    z-index: -1;
+    mask-image: radial-gradient(circle at 50% 50%, black, transparent 80%);
+    pointer-events: none;
   }
 
   .wrap {
@@ -95,77 +86,85 @@
     padding: 0 var(--gutter);
   }
 
-  a { color: inherit; }
+  a { color: inherit; transition: color 0.2s; }
 
   .eyebrow {
     font-family: var(--mono);
     font-size: var(--fs-mono);
-    letter-spacing: 0.16em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--accent);
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    margin: 0;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
   }
-  .eyebrow::before {
+  .eyebrow::after {
     content: "";
-    width: 1.6rem;
+    width: 2rem;
     height: 1px;
     background: var(--accent-line);
+    opacity: 0.5;
   }
 
   /* ---------- top nav ---------- */
   .topbar {
     position: sticky;
     top: 0;
-    z-index: 50;
-    backdrop-filter: saturate(1.4) blur(12px);
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    z-index: 100;
+    backdrop-filter: var(--glass);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
     border-bottom: 1px solid var(--line);
   }
   .topbar .wrap {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 60px;
+    height: 70px;
   }
   .brand {
     font-family: var(--mono);
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    font-weight: 800;
+    letter-spacing: 0.1em;
     text-decoration: none;
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
+    font-size: 1.2rem;
   }
-  .brand .tag { color: var(--accent); }
-  .brand .full { color: var(--faint); font-size: 0.8rem; letter-spacing: 0.1em; }
+  .brand .tag {
+    color: var(--bg);
+    background: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+  .brand .full { color: var(--muted); font-size: 0.85rem; font-weight: 500; }
   @media (max-width: 620px) { .brand .full { display: none; } }
 
   .nav {
     display: flex;
     align-items: center;
-    gap: 1.6rem;
+    gap: 2rem;
   }
   .nav a {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     text-decoration: none;
     color: var(--muted);
     position: relative;
-    padding: 2px 0;
-    transition: color 0.2s;
+    padding: 4px 0;
   }
-  .nav a:hover, .nav a.active { color: var(--ink); }
+  .nav a:hover, .nav a.active { color: var(--accent); }
   .nav a.active::after {
     content: "";
     position: absolute;
-    left: 0; right: 0; bottom: -3px;
+    left: 0; right: 0; bottom: -2px;
     height: 2px;
-    background: var(--accent-line);
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--glow);
   }
   @media (max-width: 780px) { .nav .navlink { display: none; } }
 
@@ -174,340 +173,371 @@
     border: 1px solid var(--line);
     background: var(--surface-2);
     color: var(--muted);
-    width: 34px; height: 34px;
-    border-radius: 3px;
+    width: 38px; height: 38px;
+    border-radius: 8px;
     cursor: pointer;
     display: grid;
     place-items: center;
-    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .toggle:hover { color: var(--accent); border-color: var(--accent-line); }
-  .toggle svg { width: 17px; height: 17px; }
+  .toggle:hover { color: var(--accent); border-color: var(--accent); background: var(--surface); transform: scale(1.05); }
+  .toggle svg { width: 18px; height: 18px; }
   .toggle .i-sun { display: none; }
-  @media (prefers-color-scheme: dark) { .toggle .i-sun { display: block; } .toggle .i-moon { display: none; } }
   :root[data-theme="dark"] .toggle .i-sun { display: block; }
   :root[data-theme="dark"] .toggle .i-moon { display: none; }
   :root[data-theme="light"] .toggle .i-sun { display: none; }
   :root[data-theme="light"] .toggle .i-moon { display: block; }
 
   /* ---------- hero ---------- */
-  .hero { padding: clamp(3rem, 9vw, 6.5rem) 0 clamp(2.5rem, 6vw, 4rem); }
-  .hero-grid { display: grid; gap: 1.4rem; }
-  .signal-strip { width: 100%; height: 46px; display: block; opacity: 0.9; }
+  .hero {
+    padding: clamp(4rem, 12vw, 8rem) 0 clamp(3rem, 8vw, 5rem);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: 20%; right: -10%;
+    width: 40%; height: 60%;
+    background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+    z-index: -1;
+    filter: blur(60px);
+  }
+  .hero-grid { display: grid; gap: 1.5rem; }
+  .signal-strip { width: 100%; height: 60px; display: block; margin-bottom: 1rem; }
   .hero h1 {
     font-size: var(--fs-hero);
-    line-height: 0.98;
-    letter-spacing: -0.03em;
-    font-weight: 800;
-    margin: 0.2rem 0 0;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 900;
+    margin: 0;
     text-wrap: balance;
+    background: linear-gradient(to bottom right, var(--ink) 50%, var(--muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .hero .role {
-    font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
     font-weight: 500;
     color: var(--muted);
-    margin: 0;
+    margin: 0.5rem 0;
+    max-width: 35ch;
   }
   .stream {
     font-family: var(--mono);
-    font-size: 0.86rem;
-    color: var(--accent);
-    min-height: 1.4em;
-    letter-spacing: 0.02em;
+    font-size: 0.9rem;
+    color: var(--accent-2);
+    min-height: 1.5em;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
   }
   .stream .cursor {
     display: inline-block;
-    width: 0.55ch;
-    background: var(--accent-line);
+    width: 0.6ch;
+    background: var(--accent-2);
     color: transparent;
-    margin-left: 1px;
-    animation: blink 1.05s steps(1) infinite;
+    margin-left: 2px;
+    animation: blink 1s steps(1) infinite;
+    box-shadow: 0 0 8px var(--glow-2);
   }
   @keyframes blink { 50% { opacity: 0; } }
 
   .avail {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem 1.4rem;
+    gap: 1.5rem;
     font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.06em;
+    font-size: 0.75rem;
     color: var(--muted);
-    text-transform: uppercase;
+    margin-top: 1rem;
   }
-  .avail span { display: inline-flex; align-items: center; gap: 0.45rem; }
-  .avail .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-line); box-shadow: 0 0 0 3px var(--glow); }
+  .avail span { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .avail .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+  }
 
   .contacts {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.65rem;
-    margin-top: 0.4rem;
+    gap: 1rem;
+    margin-top: 1.5rem;
   }
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
     text-decoration: none;
     font-family: var(--mono);
-    font-size: 0.76rem;
-    letter-spacing: 0.05em;
-    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: 12px;
     color: var(--ink);
     background: var(--surface-2);
-    transition: border-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+    backdrop-filter: var(--glass);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .btn svg { width: 15px; height: 15px; }
+  .btn svg { width: 18px; height: 18px; }
   .btn:hover {
-    border-color: var(--accent-line);
+    border-color: var(--accent);
     color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px -14px var(--glow);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -10px var(--glow);
+    background: var(--surface);
   }
-  .btn.primary { background: var(--accent-line); border-color: var(--accent-line); color: #14100a; }
-  :root[data-theme="dark"] .btn.primary { color: #17130a; }
-  .btn.primary:hover { color: #14100a; filter: brightness(1.06); }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 4px 14px var(--glow);
+  }
+  .btn.primary:hover {
+    background: #06b6d4;
+    color: var(--bg);
+    box-shadow: 0 6px 20px var(--glow);
+  }
 
   /* ---------- section frame ---------- */
-  section { padding: clamp(2.6rem, 7vw, 4.6rem) 0; }
+  section { padding: clamp(4rem, 10vw, 7rem) 0; }
   .sec-head {
     display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 3.5rem;
   }
   .sec-head .idx {
     font-family: var(--mono);
-    font-size: 0.78rem;
-    color: var(--faint);
-    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    font-weight: 700;
   }
   .sec-head h2 {
     font-size: var(--fs-h2);
-    letter-spacing: -0.02em;
-    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-weight: 800;
     margin: 0;
-    text-wrap: balance;
   }
-  .divider { height: 1px; background: var(--line); border: 0; margin: 0; }
 
   .lede {
-    max-width: 62ch;
-    font-size: clamp(1.1rem, 2vw, 1.28rem);
+    max-width: 70ch;
+    font-size: clamp(1.15rem, 2.5vw, 1.4rem);
     line-height: 1.6;
-    color: var(--ink);
+    color: var(--muted);
   }
-  .lede strong { color: var(--accent); font-weight: 600; }
+  .lede strong { color: var(--ink); font-weight: 600; }
 
   /* ---------- timeline ---------- */
-  .timeline { position: relative; padding-left: clamp(1.6rem, 5vw, 3rem); }
+  .timeline { position: relative; padding-left: clamp(2rem, 6vw, 4rem); }
   .spine {
     position: absolute;
-    left: 6px;
-    top: 4px;
-    bottom: 4px;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
     width: 2px;
     background: var(--line);
-    overflow: hidden;
   }
   .spine .fill {
     position: absolute;
     left: 0; top: 0;
     width: 100%;
     height: 0%;
-    background: linear-gradient(var(--accent-line), color-mix(in srgb, var(--accent-line) 30%, transparent));
-    box-shadow: 0 0 12px var(--glow);
+    background: linear-gradient(to bottom, var(--accent), var(--accent-2));
+    box-shadow: 0 0 15px var(--accent);
   }
   .node {
     position: relative;
-    padding: 0 0 2.4rem 0;
+    padding: 0 0 3.5rem 0;
     opacity: 0;
-    transform: translateY(22px);
-    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(20px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .node.in { opacity: 1; transform: none; }
-  .node:last-child { padding-bottom: 0; }
   .node::before {
     content: "";
     position: absolute;
-    left: calc(-1 * clamp(1.6rem, 5vw, 3rem) + 1px);
-    top: 6px;
-    width: 12px; height: 12px;
+    left: calc(-1 * clamp(2rem, 6vw, 4rem) + 1px);
+    top: 8px;
+    width: 14px; height: 14px;
     border-radius: 50%;
     background: var(--bg);
-    border: 2px solid var(--accent-line);
+    border: 2px solid var(--accent);
     transform: translateX(-50%);
-    transition: box-shadow 0.4s, background 0.4s;
+    z-index: 2;
   }
-  .node.in::before { background: var(--accent-line); box-shadow: 0 0 0 5px var(--glow); }
+  .node.in::before { background: var(--accent); box-shadow: 0 0 12px var(--glow); }
 
   .node .year {
     font-family: var(--mono);
-    font-size: 0.76rem;
-    letter-spacing: 0.06em;
+    font-size: 0.8rem;
     color: var(--accent);
-    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
   }
   .node h3 {
-    font-size: var(--fs-h3);
-    margin: 0.25rem 0 0.1rem;
-    letter-spacing: -0.01em;
-    font-weight: 650;
+    font-size: 1.4rem;
+    margin: 0.2rem 0;
+    font-weight: 750;
+    color: var(--ink);
   }
   .node .org {
     color: var(--muted);
-    font-size: 0.95rem;
-    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    margin: 0 0 1.2rem;
+    font-weight: 500;
   }
   .node ul {
-    margin: 0 0 0.85rem;
+    margin: 0 0 1.2rem;
     padding: 0;
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    max-width: 64ch;
+    gap: 0.6rem;
   }
   .node li {
     position: relative;
-    padding-left: 1.15rem;
-    color: var(--ink);
-    font-size: 0.98rem;
+    padding-left: 1.5rem;
+    color: var(--muted);
+    font-size: 1.05rem;
   }
   .node li::before {
-    content: "";
+    content: "→";
     position: absolute;
-    left: 0; top: 0.62em;
-    width: 6px; height: 1px;
-    background: var(--accent-line);
+    left: 0;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-weight: 700;
   }
-  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .tag {
     font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.05em;
-    padding: 0.22rem 0.5rem;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.7rem;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: 20px;
     color: var(--muted);
-    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    background: var(--surface-2);
   }
 
   /* ---------- skills ---------- */
   .skills-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1px;
-    background: var(--line);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    overflow: hidden;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
   }
   .skill-group {
     background: var(--surface);
-    padding: 1.25rem 1.3rem 1.4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
+    backdrop-filter: var(--glass);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    transition: all 0.3s ease;
   }
+  .skill-group:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 15px 30px -10px var(--glow); }
   .skill-group h3 {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
+    font-size: 0.8rem;
     text-transform: uppercase;
     color: var(--accent);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .skill-group h3 .num { color: var(--faint); }
-  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-  .chip {
-    font-size: 0.84rem;
-    padding: 0.28rem 0.6rem;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    background: var(--surface-2);
-    color: var(--ink);
-    transition: border-color 0.2s, color 0.2s, transform 0.2s;
-  }
-  .chip:hover { border-color: var(--accent-line); color: var(--accent); transform: translateY(-1px); }
-
-  /* ---------- projects ---------- */
-  .proj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.1rem; }
-  .card {
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    background: var(--surface);
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-  }
-  .card:hover { border-color: var(--accent-line); transform: translateY(-3px); box-shadow: 0 18px 40px -28px var(--glow); }
-  .card .kicker {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
+    margin: 0 0 1.5rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
   }
-  .card h3 { font-size: 1.22rem; margin: 0; letter-spacing: -0.01em; }
-  .card p { margin: 0; color: var(--muted); font-size: 0.96rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--ink); background: var(--surface); }
+
+  /* ---------- projects ---------- */
+  .proj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem; }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    backdrop-filter: var(--glass);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px var(--glow);
+  }
+  .card:hover::before { opacity: 1; }
+  .card .kicker {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .card h3 { font-size: 1.5rem; margin: 0; font-weight: 800; color: var(--ink); }
+  .card p { margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.5; }
   .card .live {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
     text-decoration: none;
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 0.76rem;
+    font-size: 0.8rem;
+    font-weight: 700;
     margin-top: auto;
-    padding-top: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--glow);
+    width: fit-content;
   }
-  .card .live[href]:hover { text-decoration: underline; }
-  .card .live svg { width: 14px; height: 14px; }
-
-  /* ---------- meta (education / languages) ---------- */
-  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem 3rem; }
-  .meta-block h3 {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin: 0 0 1rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid var(--line);
-  }
-  .meta-item { margin-bottom: 0.85rem; }
-  .meta-item .t { font-weight: 600; }
-  .meta-item .s { color: var(--muted); font-size: 0.92rem; }
-  .lang-row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--line); }
-  .lang-row:last-child { border-bottom: 0; }
-  .lang-row .lv { font-family: var(--mono); font-size: 0.74rem; color: var(--accent); letter-spacing: 0.04em; }
+  .card .live:hover { background: var(--accent); color: var(--bg); }
 
   /* ---------- footer ---------- */
-  footer { border-top: 1px solid var(--line); padding: 2.4rem 0 3rem; margin-top: 1.5rem; }
-  .foot { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; }
-  .foot .mono { color: var(--faint); font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.06em; }
-  .foot a { color: var(--accent); text-decoration: none; }
-  .foot a:hover { text-decoration: underline; }
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 4rem 0;
+    margin-top: 4rem;
+    background: var(--surface);
+  }
+  .foot { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: space-between; align-items: center; }
+  .foot .mono { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+  .foot a { color: var(--accent); text-decoration: none; font-weight: 700; }
+  .foot a:hover { color: var(--accent-2); }
 
-  :focus-visible { outline: 2px solid var(--accent-line); outline-offset: 3px; border-radius: 2px; }
+  @media (max-width: 600px) {
+    :root { --gutter: 1.25rem; }
+    .hero h1 { font-size: 3rem; }
+    .sec-head { margin-bottom: 2rem; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .node { opacity: 1; transform: none; transition: none; }
-    .stream .cursor { animation: none; }
-    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    * { animation: none !important; transition: none !important; }
   }
 </style>
 
@@ -615,7 +645,7 @@
     streamPhrases: [
       "retrieving context › ranking candidates › streaming answer…",
       "pgvector + BM25 → reciprocal-rank fusion → cross-encoder rerank",
-      "11+ years shipping enterprise systems · now building the AI layer"
+      "10+ years shipping enterprise systems · now building the AI layer"
     ],
 
     availability: [
@@ -628,76 +658,95 @@
     contacts: [
       { label: "anthony.attia1@gmail.com", href: "mailto:anthony.attia1@gmail.com", icon: "mail", primary: true },
       { label: "aicarreerfinder.com", href: "https://aicarreerfinder.com", icon: "globe" },
-      { label: "LinkedIn", href: "https://www.linkedin.com/in/anthony-attia-574a7294/", icon: "linkedin" }, // TODO: replace with your profile URL
-      { label: "GitHub", href: "https://github.com/playanth95978", icon: "github" }            // TODO: replace with your profile URL
+      { label: "LinkedIn", href: "https://www.linkedin.com/", icon: "linkedin" }, // TODO: replace with your profile URL
+      { label: "GitHub", href: "https://github.com/", icon: "github" }            // TODO: replace with your profile URL
     ],
 
     profile:
-      'Full-stack &amp; AI engineer with <strong>9+ years</strong> building enterprise-grade systems across banking, ' +
-      'telecommunications and government. Strong Java / Spring Boot + Angular background, now delivering production ' +
-      '<strong>RAG / GenAI</strong> systems — hybrid vector search, reranking and LLM streaming — on both Spring AI and ' +
-      'Python / FastAPI stacks. Comfortable leading small teams and owning architecture on high-volume platforms serving ' +
-      'up to <strong>200,000 users</strong>.',
+      'Full-stack &amp; AI engineer with <strong>10+ years</strong> building enterprise-grade systems across banking, ' +
+      'telecommunications and government in New Caledonia. Java / J2EE + Spring specialist with a backend-heavy full-stack ' +
+      'profile, now designing production <strong>RAG / GenAI</strong> systems — vectorization, semantic search (pgvector), ' +
+      'multi-source fusion (RRF) and reranking, with LLMs integrated into the backend — on both Spring AI and Python / FastAPI. ' +
+      'Focused on <strong>architecture, performance and systems integration</strong> on high-volume platforms.',
 
     experiences: [
       {
-        year: "2022 — Present",
-        title: "Technical Lead / Senior Full-Stack Developer",
-        org: "OPT Telecommunications · Contract · Nouméa",
+        year: "Apr 2025 — Present",
+        title: "Software Engineer — Spring Boot / RAG AI / Full-Stack",
+        org: "REDSTONE · Nouméa",
         bullets: [
-          "Led a team of 7–8 engineers delivering enterprise banking and telecom platforms used by up to 200,000 customers.",
-          "Designed and built scalable REST APIs and microservices in Java / Spring Boot backing high-traffic customer applications.",
-          "Owned technical architecture decisions, code reviews and performance tuning on large datasets.",
-          "Built AI / RAG capabilities — vector search, reranking, LLM-assisted document Q&A — on top of the enterprise stack."
+          "Design and build web applications and REST APIs in Java / Spring Boot.",
+          "Designed and implemented a RAG system end-to-end: data vectorization, semantic search (pgvector), multi-source fusion (RRF) and reranking via an ONNX model.",
+          "Built an intelligent search engine (Spring AI) over business content — Confluence documentation, Jira tickets and GitHub repositories.",
+          "Full-stack delivery (Angular / TypeScript) integrated with the backend services.",
+          "Project setup and engineering on GitHub — versioning, structure and industrialisation."
         ],
-        tags: ["Java / Spring Boot", "Angular", "RAG", "Architecture", "Team lead"]
+        tags: ["Spring Boot", "RAG / Spring AI", "pgvector", "ONNX reranking", "Angular / TypeScript"]
       },
       {
-        year: "2021-2021",
-        title: "Full-Stack Developer",
-        org: "Skazy",
+        year: "Apr 2022 — 2025",
+        title: "Technical Lead / Full-Stack Developer (Java 17 · Angular 14)",
+        org: "OPT · Banking division · Contract · Nouméa",
         bullets: [
-          "Developed enterprise applications with Java, Spring Boot and Angular for internal and customer platforms.",
-          "Contributed to system design and architecture improvements within an Agile team."
+          "Built OPT bank's customer reference system (référentiel bancaire) from scratch.",
+          "Front-end with Angular 12 and PrimeNG.",
+          "High data volume with a strong focus on performance.",
+          "Technical referent, Agile / Scrum delivery."
         ],
-        tags: ["Java", "Spring Boot", "Angular", "Agile"]
+        tags: ["Java 17", "Angular 14 / PrimeNG", "Banking", "High-volume", "Tech lead"]
       },
       {
-        year: "2021-2022",
-        title: "Full-Stack Developer",
-        org: "Province Sud · Government",
+        year: "Apr 2021 — Dec 2021",
+        title: "Full-Stack Developer (Java 8 · Angular)",
+        org: "Skazy · CDI · Nouméa",
         bullets: [
-          "Built and maintained internal government management systems, shipping new features and resolving production issues.",
-          "Worked directly with stakeholders across Agile delivery cycles."
+          "MyMobilis — Ionic mobile app for Caledonian customers to track their mobile-plan usage.",
+          "1012 — Ionic mobile app for the New Caledonia phone directory (yellow & white pages).",
+          "CPP — built a partner-contract and mail-merge application from scratch.",
+          "Major evolutions on a client project (Angular 8, Java 8) plus maintenance of several internal applications."
         ],
-        tags: ["Full-stack", "Public sector", "Agile"]
+        tags: ["Java 8", "Angular", "Ionic", "Mobile"]
       },
       {
-        year: "2018 — 2021",
-        title: "Full-Stack Developer",
-        org: "OPT Telecommunications · Contract · Nouméa",
+        year: "Feb 2021 — Apr 2021",
+        title: "Full-Stack Developer (ExtJS · Groovy)",
+        org: "Province Sud · Government · Contract · Nouméa",
         bullets: [
-          "Delivered customer-management and telecom applications (Java backend, Angular front-end) for a user base approaching 200,000.",
-          "Shipped cross-platform mobile apps with Ionic and improved reliability of internal enterprise systems."
+          "Developed and maintained internal and public applications for Province Sud.",
+          "Client meetings, development-effort estimation and Agile delivery."
         ],
-        tags: ["Java", "Angular", "Ionic", "Telecom"]
+        tags: ["ExtJS", "Groovy", "Public sector", "Agile"]
       },
       {
-        year: "2015 — 2018",
-        title: "Software Engineer",
+        year: "Oct 2018 — Jan 2021",
+        title: "Full-Stack Developer (Java 8 · Angular 2+)",
+        org: "OPT · Architecture division · Contract · Nouméa",
+        bullets: [
+          "REFAUTO — OPT vehicle reference system.",
+          "SOMPAT — OPT asset / patrimony reference system.",
+          "PIM V2 — rebuild of the customer purchasing-services management application.",
+          "Microservices architecture, architecture reviews and new application modules.",
+          "Agile / Scrum, plus technical mentoring of junior developers."
+        ],
+        tags: ["Java 8", "Angular 2+", "Microservices", "Referentials"]
+      },
+      {
+        year: "Oct 2015 — Oct 2018",
+        title: "Technical Referent — Portalis (Angular 6 · Java 8)",
         org: "Sopra Steria",
         bullets: [
-          "Developed Java / J2EE applications and modern web interfaces (AngularJS) for French government platforms.",
-          "Contributed to microservices architecture design and mentored junior developers."
+          "Technical referent on the Portalis platform (French government) — Angular 6 / Java 8.",
+          "Java / J2EE and modern web interfaces (AngularJS, BackBone.js, Spring MVC).",
+          "Contributed to microservices architecture and mentored junior developers."
         ],
-        tags: ["Java / J2EE", "AngularJS", "Microservices", "Mentoring"]
+        tags: ["Java / J2EE", "Angular 6 / AngularJS", "Spring MVC", "Microservices"]
       }
     ],
 
     skills: [
-      { label: "AI / GenAI", items: ["RAG pipelines", "Vector search (pgvector)", "Embeddings", "Cross-encoder reranking", "Spring AI", "FastAPI", "Ollama", "Mistral", "SSE streaming"] },
+      { label: "AI / GenAI", items: ["RAG pipelines", "Vector search (pgvector)", "Embeddings", "Multi-source fusion (RRF)", "Cross-encoder reranking", "ONNX reranker", "Spring AI", "FastAPI", "Ollama", "Mistral", "SSE streaming"] },
       { label: "Backend", items: ["Java 8–21", "Spring Boot / MVC", "JPA / Hibernate", "REST API design", "Apache Kafka", "Python / FastAPI"] },
-      { label: "Frontend", items: ["Angular", "TypeScript", "PrimeNG", "HTML5 / CSS3", "React"] },
+      { label: "Frontend", items: ["Angular", "TypeScript", "PrimeNG", "Ionic", "HTML5 / CSS3", "React"] },
       { label: "DevOps & Data", items: ["Docker", "Kubernetes", "PostgreSQL", "Elasticsearch / Kibana", "JHipster", "Git"] },
       { label: "Architecture", items: ["Microservices", "High-volume data systems", "Agile / Scrum"] }
     ],
@@ -712,14 +761,15 @@
       {
         kicker: "Spring AI & FastAPI · 2026",
         title: "Enterprise RAG Assistant",
-        desc: "Hybrid retrieval over pgvector + BM25 with reciprocal-rank fusion and cross-encoder reranking (bge-reranker-v2-m3). Streaming answers over Server-Sent Events with source attribution and multi-provider LLM. Ported the full pipeline from Java / Spring AI to Python / FastAPI to prove cross-stack delivery.",
-        note: "Hybrid RAG · RRF · reranking · SSE"
+        desc: "Intelligent search over business content — Confluence docs, Jira tickets and GitHub repos — with hybrid retrieval (pgvector + BM25), multi-source fusion (RRF) and cross-encoder / ONNX reranking. Streaming answers over Server-Sent Events with source attribution and multi-provider LLM (Mistral / Ollama). Pipeline delivered on both Java / Spring AI and Python / FastAPI.",
+        note: "Hybrid RAG · RRF · ONNX rerank · SSE"
       }
     ],
 
     education: [
-      { title: "Master’s Degree, Computer Science", school: "Université Paris 13" },
-      { title: "Bachelor’s Degree, Computer Science", school: "Université Paris 13" }
+      { title: "Master 2, Computer Science", school: "Université Paris 13 (Paris Nord) · since 2014" },
+      { title: "Bachelor’s (Licence), Computer Science", school: "Université Paris 13 (Paris Nord) · 2010–2013" },
+      { title: "Baccalauréat Scientifique", school: "Lycée Camille Saint-Saëns · 2005–2009" }
     ],
 
     languages: [
@@ -900,26 +950,49 @@
       size();
       window.addEventListener("resize", size);
       var t = 0;
-      function accent() { return getComputedStyle(root).getPropertyValue("--accent-line").trim() || "#c67e12"; }
+      function getCol(prop) { return getComputedStyle(root).getPropertyValue(prop).trim(); }
+
       function frame() {
         ctx.clearRect(0, 0, w, h);
-        var col = accent(), mid = h / 2;
-        ctx.lineWidth = 1.6; ctx.strokeStyle = col; ctx.globalAlpha = 0.85;
-        ctx.beginPath();
-        for (var x = 0; x <= w; x += 2) {
-          var k = x / w;
-          var env = Math.exp(-Math.pow((k - 0.5) * 5.5, 2)) * 0.9 + 0.06;
-          var y = mid + Math.sin(x * 0.06 + t) * 13 * env + Math.sin(x * 0.017 - t * 0.6) * 6 * env;
-          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        var mid = h / 2;
+        var col1 = getCol("--accent");
+        var col2 = getCol("--accent-2");
+
+        // Draw multiple waves for a "neural/data" feel
+        drawWave(col1, 0.8, 0.05, 12, 0);
+        drawWave(col2, 0.5, 0.03, 8, 1.5);
+        drawWave(col1, 0.3, 0.08, 15, 3);
+
+        function drawWave(color, alpha, speed, amp, offset) {
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = color;
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          for (var x = 0; x <= w; x += 4) {
+            var k = x / w;
+            var env = Math.exp(-Math.pow((k - 0.5) * 4.5, 2));
+            var y = mid + Math.sin(x * 0.04 + t * speed * 20 + offset) * amp * env +
+                          Math.sin(x * 0.01 + t * speed * 10) * (amp/2) * env;
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
         }
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-        var hx = (t * 46 % (w + 120)) - 60;
-        var henv = Math.exp(-Math.pow((hx / w - 0.5) * 5.5, 2)) * 0.9 + 0.06;
-        var hy = mid + Math.sin(hx * 0.06 + t) * 13 * henv + Math.sin(hx * 0.017 - t * 0.6) * 6 * henv;
-        ctx.fillStyle = col;
-        ctx.beginPath(); ctx.arc(hx, hy, 2.6, 0, Math.PI * 2); ctx.fill();
-        t += 0.03;
+
+        // Animated "data point"
+        var hx = (t * 60 % (w + 200)) - 100;
+        if (hx >= 0 && hx <= w) {
+            var k = hx / w;
+            var env = Math.exp(-Math.pow((k - 0.5) * 4.5, 2));
+            var hy = mid + Math.sin(hx * 0.04 + t * 0.05 * 20) * 12 * env;
+            ctx.fillStyle = col1;
+            ctx.globalAlpha = 1;
+            ctx.beginPath(); ctx.arc(hx, hy, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 10; ctx.shadowColor = col1;
+            ctx.beginPath(); ctx.arc(hx, hy, 1.5, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        t += 0.05;
         requestAnimationFrame(frame);
       }
       requestAnimationFrame(frame);
