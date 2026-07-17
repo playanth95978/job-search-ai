@@ -32,12 +32,15 @@ export default class Batch implements OnInit, OnDestroy {
 
   private readonly batchService = inject(BatchService);
   private pollSub?: Subscription;
+  /** Keep polling until this epoch-ms even if runningCount reads 0, to cover the launch → STARTED lag. */
+  private pollUntil = 0;
 
   ngOnInit(): void {
     this.loadJobs();
-    // refresh the selected job's executions every 5s so running jobs update live
+    // Refresh every 5s only while a job is actually running, so a completed/idle dashboard stops
+    // polling (and stops spamming the backend logs) instead of looping forever.
     this.pollSub = interval(5000).subscribe(() => {
-      if (this.selectedJob()) {
+      if (this.selectedJob() && (Date.now() < this.pollUntil || this.jobs().some(j => j.runningCount > 0))) {
         this.refreshExecutions();
         this.loadJobs();
       }
@@ -58,6 +61,7 @@ export default class Batch implements OnInit, OnDestroy {
 
   launch(name: string): void {
     this.launching.set(true);
+    this.pollUntil = Date.now() + 30_000; // resume polling through the launch → running transition
     this.batchService
       .execute(name)
       .pipe(finalize(() => this.launching.set(false)))
