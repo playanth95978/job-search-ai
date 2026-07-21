@@ -140,6 +140,8 @@ public class ApplicationProperties {
             private String model;
             private String token;
             private boolean enabled;
+            /** Read timeout (seconds) for Ollama calls — CPU-only hosts need a generous value for embeddings. */
+            private int timeoutSeconds = 180;
         }
 
         @Setter

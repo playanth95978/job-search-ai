@@ -63,4 +63,13 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
     @Transactional
     @Query("UPDATE JobOffer j SET j.embeddingStatus = :status")
     void updateAllStatus(@Param("status") EmbeddingStatus status);
+
+    /** Re-queues offers that previously failed embedding (e.g. Ollama was down) so they are retried. */
+    @Modifying
+    @Transactional
+    @Query(
+        "UPDATE JobOffer j SET j.embeddingStatus = nc.opt.aiassistant.domain.enumeration.EmbeddingStatus.PENDING, " +
+            "j.retryCount = 0, j.indexingError = null WHERE j.embeddingStatus = nc.opt.aiassistant.domain.enumeration.EmbeddingStatus.FAILED"
+    )
+    int requeueFailed();
 }

@@ -276,6 +276,8 @@ application:
       token: ${OLLAMA_TOKEN:500bdabb06bf48d1954498b694f30030.8BDqI18mRi5HRt0PylrqyWDJ} # set your own token here from ollama web ui if you want to use cloud model.
       model: ${OLLAMA_MODEL:nemotron-3-super:cloud} # set your own model here, you can find more models here: https://ollama.com/library
       enabled: true
+      # Read timeout for Ollama calls; raise on CPU-only hosts where embeddings are slow.
+      timeout-seconds: ${OLLAMA_TIMEOUT_SECONDS:180}
     embedding:
       docs:
         model: nomic-embed-text
