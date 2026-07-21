@@ -1,0 +1,65 @@
+<div class="jc-radar">
+  <div class="jc-radar-header">
+    <h1 jhiTranslate="jobCopilot.radar.title">Radar d'opportunités</h1>
+    <p jhiTranslate="jobCopilot.radar.subtitle">Les nouvelles offres qui vous correspondent, détectées automatiquement.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="jc-radar-center"><fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon></div>
+  } @else if (error()) {
+    <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
+  } @else if (hits().length === 0) {
+    <div class="jc-radar-empty">
+      <fa-icon icon="bell"></fa-icon>
+      <p jhiTranslate="jobCopilot.radar.empty">Aucune opportunité pour le moment — nous surveillons le marché pour vous.</p>
+    </div>
+  } @else {
+    <div class="jc-radar-list">
+      @for (hit of hits(); track hit.id) {
+        <div class="jc-radar-card" [class.unseen]="!hit.seen">
+          <div class="jc-radar-score" [class.high]="hit.score >= 0.8">
+            <span class="jc-radar-score-val">{{ scorePct(hit.score) }}</span
+            ><span class="jc-radar-score-pct">%</span>
+          </div>
+          <div class="jc-radar-body">
+            <div class="jc-radar-title">
+              <strong>{{ hit.jobOffer.title }}</strong>
+              @if (hit.jobOffer.source) {
+                <span class="jc-source-badge" [style.background]="sourceColor(hit.jobOffer.source)">{{
+                  sourceLabel(hit.jobOffer.source)
+                }}</span>
+              }
+            </div>
+            <div class="jc-radar-company">
+              <fa-icon icon="building"></fa-icon> {{ hit.jobOffer.company || ('jobCopilot.search.results.unknown' | translate) }}
+              @if (hit.jobOffer.location) {
+                <span class="jc-separator">&middot;</span>
+                <fa-icon icon="location-dot"></fa-icon> {{ hit.jobOffer.location }}
+              }
+            </div>
+            @if (hit.whyYou.length > 0) {
+              <div class="jc-radar-why">
+                @for (tag of hit.whyYou; track $index) {
+                  <span class="jc-tag"><fa-icon icon="check"></fa-icon> {{ tag.key | translate: { skill: tag.skill } }}</span>
+                }
+              </div>
+            }
+            <div class="jc-radar-actions">
+              <button class="jc-btn jc-btn-primary jc-btn-sm" (click)="apply(hit)">
+                <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
+              </button>
+              @if (hit.jobOffer.applyUrl) {
+                <a [href]="hit.jobOffer.applyUrl" target="_blank" rel="noopener" class="jc-btn jc-btn-ghost jc-btn-sm">
+                  <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.search.results.view">Voir</span>
+                </a>
+              }
+            </div>
+          </div>
+          <button class="jc-radar-dismiss" (click)="dismiss(hit, $event)" [attr.aria-label]="'jobCopilot.radar.dismiss' | translate">
+            <fa-icon icon="xmark"></fa-icon>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

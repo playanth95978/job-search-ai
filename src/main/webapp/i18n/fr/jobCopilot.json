@@ -229,6 +229,37 @@
         "strongMatch": "Forte correspondance"
       }
     },
+    "radar": {
+      "title": "Radar d'opportunités",
+      "subtitle": "Les nouvelles offres qui vous correspondent, détectées automatiquement.",
+      "empty": "Aucune opportunité pour le moment — nous surveillons le marché pour vous.",
+      "dismiss": "Écarter"
+    },
+    "insights": {
+      "title": "Autopsie de vos candidatures",
+      "subtitle": "Ce que votre parcours de candidature révèle sur pourquoi vous décrochez (ou non) des entretiens.",
+      "notEnough": "Postulez à quelques offres de plus pour débloquer l'analyse.",
+      "applicationsSoFar": "candidatures analysées (minimum 5).",
+      "funnel": {
+        "title": "Progression de vos candidatures",
+        "applied": "Postulées",
+        "interview": "Entretiens",
+        "offer": "Offres",
+        "ghosted": "sans réponse"
+      },
+      "score": {
+        "title": "Le seuil qui fait la différence",
+        "withInterview": "Avec entretien",
+        "without": "Sans réponse / refus",
+        "threshold": "Score de match seuil :"
+      },
+      "skills": {
+        "title": "Compétences qui font avancer"
+      },
+      "reco": {
+        "title": "À changer maintenant"
+      }
+    },
     "search": {
       "title": "Recherche d'emploi",
       "subtitle": "Recherchez parmi plusieurs sources — Emploi.nc, France Travail, Adzuna, RemoteOK, Greenhouse, HelloWork",
@@ -301,6 +332,14 @@
         "apps": {
           "title": "Candidatures",
           "description": "Suivez et gérez vos candidatures"
+        },
+        "insights": {
+          "title": "Autopsie des candidatures",
+          "description": "Comprenez pourquoi vous décrochez (ou non) des entretiens"
+        },
+        "radar": {
+          "title": "Radar d'opportunités",
+          "description": "Les nouvelles offres qui vous correspondent"
         },
         "prefs": {
           "title": "Préférences",

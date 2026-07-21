@@ -122,6 +122,27 @@
           </div>
           <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
         </a>
+        <a routerLink="/job-copilot/insights" class="jc-action-card jc-action-insights">
+          <fa-icon icon="bullseye" size="lg"></fa-icon>
+          <div>
+            <strong jhiTranslate="jobCopilot.dashboard.actions.insights.title">Autopsie des candidatures</strong>
+            <span jhiTranslate="jobCopilot.dashboard.actions.insights.description"
+              >Comprenez pourquoi vous décrochez (ou non) des entretiens</span
+            >
+          </div>
+          <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
+        </a>
+        <a routerLink="/job-copilot/radar" class="jc-action-card jc-action-radar">
+          <fa-icon icon="bell" size="lg"></fa-icon>
+          <div>
+            <strong jhiTranslate="jobCopilot.dashboard.actions.radar.title">Radar d'opportunités</strong>
+            <span jhiTranslate="jobCopilot.dashboard.actions.radar.description">Les nouvelles offres qui vous correspondent</span>
+          </div>
+          @if (radarUnread() > 0) {
+            <span class="jc-radar-badge">{{ radarUnread() }}</span>
+          }
+          <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
+        </a>
         <a routerLink="/job-copilot/settings" class="jc-action-card jc-action-settings">
           <fa-icon icon="gear" size="lg"></fa-icon>
           <div>

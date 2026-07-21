@@ -36,4 +36,5 @@
   <include file="config/liquibase/changelog/20260623150000_add_offer_positioning.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260623170000_add_offer_tailored_resume.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260726090000_add_candidate_profile_embedding.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260726100000_add_radar_tables.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

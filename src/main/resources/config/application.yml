@@ -306,6 +306,14 @@ application:
       concurrency: ${INGESTION_CONCURRENCY:6}
       # Max offers a step may skip on error before failing the whole step.
       skip-limit: ${INGESTION_SKIP_LIMIT:1000}
+    radar:
+      # Opportunity Radar: proactively match newly ingested offers against each user's profile.
+      enabled: ${RADAR_ENABLED:true}
+      threshold: ${RADAR_THRESHOLD:0.65}
+      candidate-limit: ${RADAR_CANDIDATE_LIMIT:100}
+      max-per-scan: ${RADAR_MAX_PER_SCAN:10}
+      initial-window-days: ${RADAR_INITIAL_WINDOW_DAYS:3}
+      scan-interval-ms: ${RADAR_SCAN_INTERVAL_MS:900000}
     seek:
       # Seek (AU) is protected by bot mitigation (Kasada); server-side scraping is blocked (403).
       # Disabled by default — the connector bean is only registered when this is true.

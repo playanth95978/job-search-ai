@@ -302,6 +302,39 @@ export function applicationStatusColor(status: string): string {
   return APPLICATION_STATUS_COLORS[status] || '#64748b';
 }
 
+// --- Opportunity Radar (proactive new-offer matching) ---
+
+export interface RadarHit {
+  id: string;
+  jobOffer: JobOfferDto;
+  score: number;
+  whyYou: MatchTag[];
+  seen: boolean;
+  dismissed: boolean;
+  createdAt: string;
+}
+
+// --- Application Autopsy (rejection feedback loop) ---
+
+export interface AutopsyReport {
+  sampleSize: number;
+  enoughData: boolean;
+  funnel: {
+    applied: number;
+    interview: number;
+    offer: number;
+    rejected: number;
+    ghosted: number;
+    interviewRate: number;
+    offerRate: number;
+    ghostRate: number;
+  };
+  score: { avgPositive: number | null; avgNegative: number | null; suggestedThreshold: number | null } | null;
+  salary: { medianPositive: number | null; medianNegative: number | null; signal: boolean } | null;
+  skillDrivers: { skill: string; positiveCount: number; negativeCount: number; lift: number }[];
+  recommendations: string[];
+}
+
 export interface AtsWarning {
   type: string;
   level: string;

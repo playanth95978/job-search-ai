@@ -1,0 +1,108 @@
+<div class="jc-insights">
+  <div class="jc-insights-header">
+    <h1 jhiTranslate="jobCopilot.insights.title">Autopsie de vos candidatures</h1>
+    <p jhiTranslate="jobCopilot.insights.subtitle">
+      Ce que votre parcours de candidature révèle sur pourquoi vous décrochez (ou non) des entretiens.
+    </p>
+  </div>
+
+  @if (loading()) {
+    <div class="jc-insights-center"><fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon></div>
+  } @else if (error()) {
+    <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
+  } @else if (report(); as r) {
+    @if (!r.enoughData) {
+      <div class="jc-insights-empty">
+        <fa-icon icon="chart-line"></fa-icon>
+        <p>
+          <span jhiTranslate="jobCopilot.insights.notEnough">Postulez à quelques offres de plus pour débloquer l'analyse.</span>
+          <br />
+          <strong>{{ r.sampleSize }}</strong>
+          <span jhiTranslate="jobCopilot.insights.applicationsSoFar">candidatures analysées (minimum 5).</span>
+        </p>
+      </div>
+    } @else {
+      <!-- Funnel -->
+      <section class="jc-card">
+        <h2 jhiTranslate="jobCopilot.insights.funnel.title">Progression de vos candidatures</h2>
+        @if (bars(); as b) {
+          <div class="jc-funnel">
+            <div class="jc-stage">
+              <span class="jc-stage-lab" jhiTranslate="jobCopilot.insights.funnel.applied">Postulées</span>
+              <span class="jc-stage-bar applied" [style.width.%]="b.applied"></span>
+              <span class="jc-stage-n">{{ r.funnel.applied }}</span>
+            </div>
+            <div class="jc-stage">
+              <span class="jc-stage-lab" jhiTranslate="jobCopilot.insights.funnel.interview">Entretiens</span>
+              <span class="jc-stage-bar interview" [style.width.%]="b.interview"></span>
+              <span class="jc-stage-n">{{ r.funnel.interview }} · {{ pct(r.funnel.interviewRate) }}%</span>
+            </div>
+            <div class="jc-stage">
+              <span class="jc-stage-lab" jhiTranslate="jobCopilot.insights.funnel.offer">Offres</span>
+              <span class="jc-stage-bar offer" [style.width.%]="b.offer"></span>
+              <span class="jc-stage-n">{{ r.funnel.offer }} · {{ pct(r.funnel.offerRate) }}%</span>
+            </div>
+          </div>
+        }
+        @if (r.funnel.ghosted > 0) {
+          <p class="jc-ghost">
+            <fa-icon icon="ghost"></fa-icon>
+            {{ r.funnel.ghosted }} <span jhiTranslate="jobCopilot.insights.funnel.ghosted">sans réponse</span> ({{
+              pct(r.funnel.ghostRate)
+            }}%)
+          </p>
+        }
+      </section>
+
+      <!-- Match-score contrast -->
+      @if (r.score?.suggestedThreshold != null) {
+        <section class="jc-card">
+          <h2 jhiTranslate="jobCopilot.insights.score.title">Le seuil qui fait la différence</h2>
+          <div class="jc-contrast">
+            <div class="jc-contrast-col positive">
+              <span class="jc-contrast-lab" jhiTranslate="jobCopilot.insights.score.withInterview">Avec entretien</span>
+              <span class="jc-contrast-val">{{ r.score!.avgPositive }}</span>
+            </div>
+            <div class="jc-contrast-col negative">
+              <span class="jc-contrast-lab" jhiTranslate="jobCopilot.insights.score.without">Sans réponse / refus</span>
+              <span class="jc-contrast-val">{{ r.score!.avgNegative }}</span>
+            </div>
+          </div>
+          <p class="jc-threshold">
+            <fa-icon icon="bullseye"></fa-icon>
+            <span jhiTranslate="jobCopilot.insights.score.threshold">Score de match seuil :</span>
+            <strong>{{ r.score!.suggestedThreshold }}</strong>
+          </p>
+        </section>
+      }
+
+      <!-- Skill drivers -->
+      @if (r.skillDrivers.length > 0) {
+        <section class="jc-card">
+          <h2 jhiTranslate="jobCopilot.insights.skills.title">Compétences qui font avancer</h2>
+          <div class="jc-drivers">
+            @for (s of r.skillDrivers; track s.skill) {
+              <div class="jc-driver">
+                <span class="jc-driver-skill">{{ s.skill }}</span>
+                <span class="jc-driver-lift">×{{ s.lift }}</span>
+                <span class="jc-driver-counts">{{ s.positiveCount }} ↑ / {{ s.negativeCount }} ↓</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Recommendations -->
+      @if (r.recommendations.length > 0) {
+        <section class="jc-card jc-reco">
+          <h2 jhiTranslate="jobCopilot.insights.reco.title">À changer maintenant</h2>
+          <ul>
+            @for (rec of r.recommendations; track rec) {
+              <li><fa-icon icon="arrow-right"></fa-icon> {{ rec }}</li>
+            }
+          </ul>
+        </section>
+      }
+    }
+  }
+</div>

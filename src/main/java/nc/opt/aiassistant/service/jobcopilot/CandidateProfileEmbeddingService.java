@@ -83,6 +83,30 @@ public class CandidateProfileEmbeddingService {
         return sb.toString().trim();
     }
 
+    /** Skill names from the profile, handling both the structured (SkillDto) and legacy string-list formats. */
+    public List<String> extractSkillNames(CandidateProfile profile) {
+        String json = profile.getSkills();
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            if (json.trim().startsWith("[{\"")) {
+                List<SkillDto> skillList = objectMapper.readValue(json, new TypeReference<>() {});
+                return skillList
+                    .stream()
+                    .map(SkillDto::name)
+                    .filter(s -> s != null && !s.isBlank())
+                    .toList();
+            }
+            List<String> list = objectMapper.readValue(json, new TypeReference<>() {});
+            return list
+                .stream()
+                .filter(s -> s != null && !s.isBlank())
+                .toList();
+        } catch (Exception e) {
+            log.debug("Could not parse profile skills: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
     private void appendJsonList(StringBuilder sb, String json, String prefix) {
         if (json == null || json.isBlank()) return;
         try {

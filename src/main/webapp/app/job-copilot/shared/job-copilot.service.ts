@@ -6,6 +6,7 @@ import {
   ApplicationStats,
   ApplyOutcome,
   AssistantMessage,
+  AutopsyReport,
   CandidateProfile,
   CareerRoadmap,
   CvMatchResult,
@@ -18,6 +19,7 @@ import {
   MatchResult,
   PanelMessage,
   PanelReport,
+  RadarHit,
   UserPreference,
   UserPreferenceDto,
 } from './job-copilot.model';
@@ -105,6 +107,28 @@ export class JobCopilotService {
 
   fetchFromUrl(url: string): Observable<JobOffer[]> {
     return this.http.post<JobOffer[]>(`${this.baseUrl}/jobs/fetch`, null, { params: { url } });
+  }
+
+  /** Application Autopsy: what the user's own funnel reveals about why they get (or miss) interviews. */
+  getAutopsy(): Observable<AutopsyReport> {
+    return this.http.get<AutopsyReport>(`${this.baseUrl}/insights/autopsy`);
+  }
+
+  // Opportunity Radar
+  getRadar(): Observable<RadarHit[]> {
+    return this.http.get<RadarHit[]>(`${this.baseUrl}/radar`);
+  }
+
+  radarUnreadCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.baseUrl}/radar/unread-count`);
+  }
+
+  markRadarSeen(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/radar/${id}/seen`, null);
+  }
+
+  dismissRadar(id: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/radar/${id}/dismiss`, null);
   }
 
   /** Lazily fetches the full description of a list (STUB) offer and queues it for embedding. */

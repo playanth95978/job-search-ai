@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="20260726100000-1" author="claude">
+    <createTable tableName="radar_hit">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="job_offer_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <column name="score" type="double precision"/>
+      <column name="why_you" type="jsonb"/>
+      <column name="seen" type="boolean" defaultValueBoolean="false"/>
+      <column name="dismissed" type="boolean" defaultValueBoolean="false"/>
+      <column name="created_at" type="timestamp"/>
+    </createTable>
+
+    <addUniqueConstraint tableName="radar_hit" columnNames="user_id, job_offer_id" constraintName="ux_radar_hit_user_offer"/>
+
+    <addForeignKeyConstraint
+      baseTableName="radar_hit"
+      baseColumnNames="job_offer_id"
+      constraintName="fk_radar_hit_job_offer"
+      referencedTableName="job_offer"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <createIndex tableName="radar_hit" indexName="idx_radar_hit_user">
+      <column name="user_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="20260726100000-2" author="claude">
+    <createTable tableName="radar_state">
+      <column name="user_id" type="varchar(255)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="last_offer_at" type="timestamp"/>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

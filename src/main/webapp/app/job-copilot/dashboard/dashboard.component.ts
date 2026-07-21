@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { applicationStatusColor, applicationStatusIcon, ApplicationStats, CandidateProfile } from '../shared/job-copilot.model';
 import { CvQualityComponent } from '../shared/cv-quality/cv-quality.component';
-import { candidateProfileToResume } from "../cv-builder/candidate-profile.mapper";
+import { candidateProfileToResume } from '../cv-builder/candidate-profile.mapper';
 
 @Component({
   selector: 'jhi-job-copilot-dashboard',
@@ -23,10 +23,14 @@ export class DashboardComponent implements OnInit {
   profile = signal<CandidateProfile | null>(null);
   stats = signal<ApplicationStats>({});
   statsEntries = signal<[string, number][]>([]);
+  radarUnread = signal(0);
   loading = signal(true);
 
   ngOnInit(): void {
-    console.log("init")
+    this.service.radarUnreadCount().subscribe({
+      next: r => this.radarUnread.set(r.count),
+      error: () => {},
+    });
     this.service.getProfile().subscribe({
       next: p => {
         this.profile.set(p);

@@ -53,6 +53,25 @@ public class ApplicationProperties {
         private Adzuna adzuna;
         private Seek seek = new Seek();
         private Ingestion ingestion = new Ingestion();
+        private Radar radar = new Radar();
+    }
+
+    @Setter
+    @Getter
+    public static class Radar {
+
+        /** Opportunity Radar scan is off by default; enable to start surfacing new-offer matches. */
+        private boolean enabled = false;
+        /** Minimum match score (0..1) for an offer to become a radar hit. */
+        private double threshold = 0.65;
+        /** Nearest recent offers evaluated per user per scan. */
+        private int candidateLimit = 100;
+        /** Max new hits created per user per scan (anti-flood). */
+        private int maxPerScan = 10;
+        /** On a user's first scan, how far back to look (days) instead of the whole corpus. */
+        private int initialWindowDays = 3;
+        /** Delay between scans, in ms. */
+        private long scanIntervalMs = 900000;
     }
 
     @Setter

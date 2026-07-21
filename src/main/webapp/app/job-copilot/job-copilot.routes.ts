@@ -27,6 +27,16 @@ const routes: Routes = [
     title: 'Applications',
   },
   {
+    path: 'insights',
+    loadComponent: () => import('./insights/insights.component').then(m => m.InsightsComponent),
+    title: 'Insights',
+  },
+  {
+    path: 'radar',
+    loadComponent: () => import('./radar/radar.component').then(m => m.RadarComponent),
+    title: 'Opportunity Radar',
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent),
     title: 'Preferences',

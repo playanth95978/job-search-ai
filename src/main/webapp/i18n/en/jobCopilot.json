@@ -229,6 +229,37 @@
         "strongMatch": "Strong match"
       }
     },
+    "radar": {
+      "title": "Opportunity Radar",
+      "subtitle": "New offers that fit you, detected automatically.",
+      "empty": "No opportunities yet — we're watching the market for you.",
+      "dismiss": "Dismiss"
+    },
+    "insights": {
+      "title": "Application Autopsy",
+      "subtitle": "What your application journey reveals about why you do — or don't — get interviews.",
+      "notEnough": "Apply to a few more offers to unlock the analysis.",
+      "applicationsSoFar": "applications analysed (minimum 5).",
+      "funnel": {
+        "title": "Your application progress",
+        "applied": "Applied",
+        "interview": "Interviews",
+        "offer": "Offers",
+        "ghosted": "no reply"
+      },
+      "score": {
+        "title": "The threshold that makes the difference",
+        "withInterview": "With interview",
+        "without": "No reply / rejected",
+        "threshold": "Match-score threshold:"
+      },
+      "skills": {
+        "title": "Skills that move you forward"
+      },
+      "reco": {
+        "title": "Change this now"
+      }
+    },
     "search": {
       "title": "Job Search",
       "subtitle": "Search across multiple sources — Emploi.nc, France Travail, Adzuna, RemoteOK, Greenhouse, HelloWork",
@@ -301,6 +332,14 @@
         "apps": {
           "title": "Applications",
           "description": "Track and manage your applications"
+        },
+        "insights": {
+          "title": "Application Autopsy",
+          "description": "Understand why you do — or don't — get interviews"
+        },
+        "radar": {
+          "title": "Opportunity Radar",
+          "description": "New offers that fit your profile"
         },
         "prefs": {
           "title": "Preferences",

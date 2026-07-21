@@ -41,6 +41,17 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
     )
     List<JobOffer> searchVector(@Param("embedding") Vector embedding, @Param("limit") int limit);
 
+    /** Nearest offers to an embedding among those ingested after {@code since} — the Opportunity Radar's candidate set. */
+    @Query(
+        value = "SELECT * FROM job_offer WHERE embedding IS NOT NULL AND created_at > :since ORDER BY embedding <=> cast(:embedding as vector) LIMIT :limit",
+        nativeQuery = true
+    )
+    List<JobOffer> searchVectorSince(
+        @Param("embedding") Vector embedding,
+        @Param("since") java.time.Instant since,
+        @Param("limit") int limit
+    );
+
     List<JobOffer> findByEmbeddingStatus(EmbeddingStatus status, Pageable pageable);
 
     @Modifying
