@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
+import nc.opt.aiassistant.service.jobcopilot.CandidateProfileEmbeddingService;
+import nc.opt.aiassistant.service.jobcopilot.OfferCacheInvalidationService;
 import nc.opt.aiassistant.service.jobcopilot.dto.AtsSimulationDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.AtsWarningDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
@@ -38,7 +40,8 @@ public class CvIngestionService {
     private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
     private final CandidateProfileMapper candidateProfileMapper;
-    private final nc.opt.aiassistant.service.jobcopilot.OfferCacheInvalidationService offerCacheInvalidationService;
+    private final OfferCacheInvalidationService offerCacheInvalidationService;
+    private final CandidateProfileEmbeddingService profileEmbeddingService;
 
     public CvIngestionService(
         MistralOCRProcessService ocrService,
@@ -47,7 +50,8 @@ public class CvIngestionService {
         @Qualifier("mistralAiChatModel") ChatModel chatModel,
         ObjectMapper objectMapper,
         CandidateProfileMapper candidateProfileMapper,
-        nc.opt.aiassistant.service.jobcopilot.OfferCacheInvalidationService offerCacheInvalidationService
+        OfferCacheInvalidationService offerCacheInvalidationService,
+        CandidateProfileEmbeddingService profileEmbeddingService
     ) {
         this.ocrService = ocrService;
         this.vectorPDFService = vectorPDFService;
@@ -56,6 +60,7 @@ public class CvIngestionService {
         this.objectMapper = objectMapper;
         this.candidateProfileMapper = candidateProfileMapper;
         this.offerCacheInvalidationService = offerCacheInvalidationService;
+        this.profileEmbeddingService = profileEmbeddingService;
     }
 
     /**
@@ -308,6 +313,8 @@ public class CvIngestionService {
         CandidateProfile saved = profileRepository.save(profile);
         // The CV changed → drop any per-offer AI results computed from the previous CV.
         offerCacheInvalidationService.evictAll(userId);
+        // Recompute the profile embedding off-thread (powers autopsy percentile + opportunity radar).
+        profileEmbeddingService.embedAsync(saved.getId());
         return saved;
     }
 }

@@ -64,7 +64,8 @@ class CvIngestionServiceTest {
             chatModel,
             objectMapper,
             candidateProfileMapper,
-            offerCacheInvalidationService
+            offerCacheInvalidationService,
+            null
         );
     }
 

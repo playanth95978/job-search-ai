@@ -73,6 +73,21 @@ public class CandidateProfile implements Serializable {
     @Column(name = "cv_filename")
     private String cvFilename;
 
+    /**
+     * Semantic embedding of the profile (roles + skills + background), 768-dim like job offers so the
+     * two live in the same vector space. Powers the corpus percentile (Application Autopsy) and the
+     * inverted offer→candidate matching (Opportunity Radar). Recomputed asynchronously on profile change.
+     */
+    @JdbcTypeCode(SqlTypes.VECTOR)
+    @Column(name = "embedding", columnDefinition = "vector(768)")
+    private float[] embedding;
+
+    @Column(name = "embedding_model")
+    private String embeddingModel;
+
+    @Column(name = "embedded_at")
+    private Instant embeddedAt;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

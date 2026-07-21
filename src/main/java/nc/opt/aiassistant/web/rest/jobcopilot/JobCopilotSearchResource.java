@@ -1,7 +1,5 @@
 package nc.opt.aiassistant.web.rest.jobcopilot;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +36,7 @@ public class JobCopilotSearchResource {
     private final JobMatchingService matchingService;
     private final CandidateProfileRepository profileRepository;
     private final JobOfferEnrichmentService jobOfferEnrichmentService;
-    private final ObjectMapper objectMapper;
+    private final nc.opt.aiassistant.service.jobcopilot.CandidateProfileEmbeddingService profileEmbeddingService;
     private final JobOfferQueryService jobOfferQueryService;
     private final JobOfferTranslationService jobOfferTranslationService;
     private final JobOfferRepository jobOfferRepository;
@@ -142,7 +140,7 @@ public class JobCopilotSearchResource {
         }
         // Pre-filter by semantic (cosine) similarity to the profile instead of scoring every offer,
         // so we no longer return unrelated jobs with a low score. topK is caller-configurable.
-        String query = buildSemanticQuery(profile);
+        String query = profileEmbeddingService.buildProfileText(profile);
         List<JobOffer> offers = jobSearchService.searchSemantic(query, Math.max(1, topK));
         // Optional search-box location biases the location score toward where the user is looking.
         List<MatchResultDto> results = matchingService.matchJobs(profile, offers, location);
@@ -156,7 +154,7 @@ public class JobCopilotSearchResource {
         if (profile == null) return ResponseEntity.badRequest().build();
 
         // Build a semantic query from profile
-        String query = buildSemanticQuery(profile);
+        String query = profileEmbeddingService.buildProfileText(profile);
 
         // Perform hybrid search with limit 30
         List<JobOffer> offers = jobSearchService.searchHybrid(query, 30);
@@ -164,55 +162,6 @@ public class JobCopilotSearchResource {
         // Score the results — optional search-box location biases the location component.
         List<MatchResultDto> results = matchingService.matchJobs(profile, offers, location);
         return ResponseEntity.ok(results);
-    }
-
-    private String buildSemanticQuery(CandidateProfile profile) {
-        StringBuilder sb = new StringBuilder();
-
-        appendJsonList(sb, profile.getPreferredRoles(), "Target Roles: ");
-        appendJsonList(sb, profile.getSkills(), "Skills: ");
-
-        if (profile.getRawMarkdown() != null && !profile.getRawMarkdown().isBlank()) {
-            String resume = profile.getRawMarkdown();
-            sb.append("Background: ").append(resume, 0, Math.min(resume.length(), 1000));
-        }
-
-        String query = sb.toString().trim();
-        if (query.isBlank()) {
-            log.warn("Semantic query is empty for user {} — profile has no roles, skills or rawMarkdown", profile.getUserId());
-        } else {
-            log.info("Semantic query built for user {}: '{}'", profile.getUserId(), query.substring(0, Math.min(query.length(), 200)));
-        }
-        return query;
-    }
-
-    private void appendJsonList(StringBuilder sb, String json, String prefix) {
-        if (json == null || json.isBlank()) return;
-        try {
-            List<String> list;
-            if (json.trim().startsWith("[{\"")) {
-                // New structured format (SkillDto, etc.)
-                if (prefix.toLowerCase().contains("skills")) {
-                    List<nc.opt.aiassistant.service.jobcopilot.dto.SkillDto> skillList = objectMapper.readValue(
-                        json,
-                        new com.fasterxml.jackson.core.type.TypeReference<>() {}
-                    );
-                    list = skillList.stream().map(nc.opt.aiassistant.service.jobcopilot.dto.SkillDto::name).toList();
-                } else {
-                    // Fallback or handle other objects if needed
-                    list = List.of();
-                }
-            } else {
-                // Old simple string list
-                list = objectMapper.readValue(json, new TypeReference<>() {});
-            }
-
-            if (!list.isEmpty()) {
-                sb.append(prefix).append(String.join(", ", list)).append(". ");
-            }
-        } catch (Exception e) {
-            // Ignore parse errors
-        }
     }
 
     @GetMapping("")

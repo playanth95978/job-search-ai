@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="20260726090000-1" author="claude">
+    <addColumn tableName="candidate_profile">
+      <column name="embedding_model" type="varchar(255)"/>
+      <column name="embedded_at" type="timestamp"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="20260726090000-2" author="claude">
+    <sql>
+      ALTER TABLE candidate_profile
+        ADD COLUMN embedding vector(768);
+      CREATE INDEX IF NOT EXISTS candidate_profile_embedding_idx
+        ON candidate_profile
+        USING HNSW (embedding vector_cosine_ops);
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>
