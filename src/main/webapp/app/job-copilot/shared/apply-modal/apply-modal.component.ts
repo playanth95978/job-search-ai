@@ -114,6 +114,48 @@ export class ApplyModalComponent implements OnInit {
 
   offerId = computed(() => this.jobOfferId() ?? this.application()?.jobOffer?.id);
 
+  /** Candidate identity used to pre-fill the source application form (copy-to-clipboard fields). */
+  candidate = computed(() => this.application()?.candidateProfile ?? this.existingApplication()?.candidateProfile);
+
+  /** Copyable identity rows shown in the assisted-prefill panel. */
+  prefillFields = computed(() => {
+    const c = this.candidate();
+    return [
+      { key: 'fullName', labelKey: 'jobCopilot.applyModal.prefill.fullName', value: c?.fullName },
+      { key: 'email', labelKey: 'jobCopilot.applyModal.prefill.email', value: c?.email },
+      { key: 'location', labelKey: 'jobCopilot.applyModal.prefill.location', value: c?.location },
+      { key: 'coverLetter', labelKey: 'jobCopilot.applyModal.prefill.coverLetter', value: this.coverLetter() },
+    ];
+  });
+
+  /** Which single prefill field was last copied, to flash a per-field "copied" check. */
+  copiedField = signal<string | null>(null);
+
+  /** Copies a value to the clipboard and briefly flashes feedback for the given field key. */
+  copyField(field: string, value?: string): void {
+    if (!value) return;
+    void navigator.clipboard.writeText(value).then(() => {
+      this.copiedField.set(field);
+      setTimeout(() => this.copiedField.set(null), 1500);
+    });
+  }
+
+  /**
+   * Assisted apply for sources without a submit API: copies the cover letter to the clipboard so the
+   * candidate can paste it on the source form, opens the offer in a new tab, and records the
+   * application as APPLIED so it is tracked.
+   */
+  applyAssisted(): void {
+    const url = this.applyUrl();
+    if (this.coverLetter()) {
+      void navigator.clipboard.writeText(this.coverLetter());
+    }
+    if (url) {
+      window.open(url, '_blank', 'noopener');
+    }
+    this.markAsApplied();
+  }
+
   submitAuto(): void {
     const app = this.application();
     if (!app?.id) return;
