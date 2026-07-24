@@ -444,6 +444,12 @@
   }
 }
 
+/* Let the detail host span the full row height so its inner position:sticky pane has room to
+   travel and stays in view while the list scrolls (instead of pinning to the top and scrolling away). */
+.jc-results-layout jhi-job-search-detail {
+  align-self: stretch;
+}
+
 .jc-clickable {
   cursor: pointer;
 }
