@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject, input, output, signal } fro
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
-import TranslateDirective from '../../shared/language/translate.directive';
 import { MessageService, TypeChat } from '../message.service';
 
 @Component({
@@ -10,7 +9,7 @@ import { MessageService, TypeChat } from '../message.service';
   templateUrl: './chat-input-area.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./chat-input-area.component.scss'],
-  imports: [TranslateModule, FormsModule, FontAwesomeModule, TranslateDirective],
+  imports: [TranslateModule, FormsModule, FontAwesomeModule],
 })
 export class ChatInputAreaComponent {
   type = input<TypeChat | null>(null);

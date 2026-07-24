@@ -292,6 +292,10 @@
         "franceTravail": "Couvre la France (métropole). Ville, département ou code postal :",
         "adzuna": "Choisissez d'abord le pays, puis la ville de ce pays :"
       },
+      "detail": {
+        "close": "Fermer le détail",
+        "noDescription": "Aucune description disponible."
+      },
       "actions": {
         "smartSearch": "Recherche intelligente",
         "smartSearching": "Analyse sémantique...",

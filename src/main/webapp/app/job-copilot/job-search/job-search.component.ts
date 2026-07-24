@@ -17,11 +17,22 @@ import {
   MatchResult,
   SEARCHABLE_JOB_SOURCES,
 } from '../shared/job-copilot.model';
+import TranslateDirective from '../../shared/language/translate.directive';
+import { JobSearchDetail } from './job-search-detail/job-search-detail';
+
+/** Shared shape of an offer shown in the detail pane — satisfied by both JobOffer and JobOfferDto. */
+export type OfferDetail = JobOfferPreview & {
+  id?: string;
+  remote?: boolean;
+  contractType?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+};
 
 @Component({
   selector: 'jhi-job-copilot-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule, TranslateDirective, JobSearchDetail],
   templateUrl: './job-search.component.html',
   styleUrl: './job-search.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +57,9 @@ export class JobSearchComponent {
 
   offers = signal<JobOffer[]>([]);
   matchResults = signal<MatchResult[]>([]);
+  /** Seek-style detail pane: the offer currently opened alongside the results list. */
+  selectedOffer = signal<OfferDetail | null>(null);
+  selectedLoading = signal(false);
   searching = signal(false);
   smartSearching = signal(false);
   matching = signal(false);
@@ -142,6 +156,25 @@ export class JobSearchComponent {
       },
       error: () => this.matchingAdvanced.set(false),
     });
+  }
+
+  /**
+   * Opens an offer in the side detail pane (Seek-style). Persisted teaser (STUB) offers only carry a
+   * short description in the list, so we lazily fetch the full one and patch both the pane and the row.
+   */
+  selectOffer(offer: OfferDetail): void {
+    this.selectedOffer.set(offer);
+    if (offer.id && (!offer.description || offer.description.length < 200)) {
+      this.selectedLoading.set(true);
+      this.service.enrichJob(offer.id).subscribe({
+        next: full => {
+          this.selectedOffer.update(cur => (cur && cur.id === offer.id ? { ...cur, ...full } : cur));
+          this.offers.update(list => list.map(o => (o.id === offer.id ? { ...o, ...full } : o)));
+          this.selectedLoading.set(false);
+        },
+        error: () => this.selectedLoading.set(false),
+      });
+    }
   }
 
   openApplyModal(offer: JobOfferPreview & { id?: string }): void {

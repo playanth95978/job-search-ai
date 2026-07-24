@@ -427,3 +427,29 @@
   color: #10b981;
   margin-top: 0.25rem;
 }
+
+/* ---- Seek-style split view (results list + detail pane) ------------------ */
+.jc-results-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* Two columns when a detail pane is open (this element lives in THIS component's template,
+   so the rule must stay here — the child component cannot style it). */
+@media (min-width: 900px) {
+  .jc-results-layout.has-detail {
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.35fr);
+  }
+}
+
+.jc-clickable {
+  cursor: pointer;
+}
+
+.jc-match-card.selected,
+.jc-job-card.selected {
+  border-color: var(--jc-accent);
+  box-shadow: var(--jc-ring);
+}

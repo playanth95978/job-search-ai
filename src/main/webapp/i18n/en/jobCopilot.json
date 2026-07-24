@@ -292,6 +292,10 @@
         "franceTravail": "Covers France (metropolitan). City, département or postcode:",
         "adzuna": "Pick the country first, then a city in that country:"
       },
+      "detail": {
+        "close": "Close detail",
+        "noDescription": "No description available."
+      },
       "actions": {
         "smartSearch": "Smart Search",
         "smartSearching": "Semantic analysis...",

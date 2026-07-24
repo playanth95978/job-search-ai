@@ -1,0 +1,143 @@
+:host {
+  display: block;
+}
+
+.jc-detail {
+  position: sticky;
+  top: 1rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--jc-radius-lg);
+  box-shadow: var(--jc-shadow-md);
+  padding: 1.5rem 1.6rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.jc-detail-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border: none;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  border-radius: 8px;
+
+  &:hover {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+  }
+}
+
+.jc-detail-head {
+  padding-right: 2rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.1rem;
+
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0 0 0.6rem;
+    text-wrap: balance;
+  }
+}
+
+.jc-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+}
+
+.jc-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+
+  .jc-salary-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--jc-good, #10b981);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+  }
+}
+
+.jc-detail-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+
+.jc-detail-loading {
+  text-align: center;
+  color: var(--jc-accent);
+  font-size: 1.4rem;
+  padding: 1.5rem 0;
+}
+
+.jc-detail-desc {
+  white-space: pre-wrap;
+  line-height: 1.65;
+  color: var(--bs-body-color);
+  font-size: 0.94rem;
+  margin: 0;
+
+  &.jc-muted {
+    color: var(--bs-secondary-color);
+    font-style: italic;
+  }
+}
+
+/* Mobile: detail becomes a full-screen drawer. */
+@media (max-width: 899.98px) {
+  .jc-detail {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    max-height: none;
+    border-radius: 0;
+    border: none;
+  }
+}
+
+/* Badges (scoped to this component since encapsulation isolates it from the parent styles). */
+.jc-source-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.jc-remote-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.jc-contract-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}

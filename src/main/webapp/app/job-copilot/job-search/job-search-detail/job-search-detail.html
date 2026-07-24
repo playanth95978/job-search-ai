@@ -1,0 +1,62 @@
+@if (sel(); as offer) {
+  <aside class="jc-detail">
+    <button class="jc-detail-close" (click)="closeDetail()" [attr.aria-label]="'jobCopilot.search.detail.close' | translate">
+      <fa-icon icon="xmark"></fa-icon>
+    </button>
+    <div class="jc-detail-head">
+      <h2>{{ offer.title }}</h2>
+      <div class="jc-detail-meta">
+        <span><fa-icon icon="building"></fa-icon> {{ offer.company || ('jobCopilot.search.results.unknown' | translate) }}</span>
+        @if (offer.location) {
+          <span><fa-icon icon="location-dot"></fa-icon> {{ offer.location }}</span>
+        }
+        @if (offer.source) {
+          <span class="jc-source-badge" [style.background]="getSourceColor(offer.source)">{{ getSourceLabel(offer.source) }}</span>
+        }
+      </div>
+      <div class="jc-detail-badges">
+        @if (offer.remote) {
+          <span class="jc-remote-badge" jhiTranslate="jobCopilot.search.results.remote">Remote</span>
+        }
+        @if (offer.contractType) {
+          <span class="jc-contract-badge">{{ offer.contractType }}</span>
+        }
+        @if (offer.salaryMin || offer.salaryMax) {
+          <span class="jc-salary-badge">
+            @if (offer.salaryMin && offer.salaryMax) {
+              {{ offer.salaryMin | number }} — {{ offer.salaryMax | number }} €
+            } @else if (offer.salaryMin) {
+              <span jhiTranslate="jobCopilot.search.results.salaryFrom">From</span> {{ offer.salaryMin | number }} €
+            } @else {
+              <span jhiTranslate="jobCopilot.search.results.salaryUpTo">Up to</span> {{ offer.salaryMax | number }} €
+            }
+          </span>
+        }
+      </div>
+      <div class="jc-detail-actions">
+        <button (click)="openApplyModal(offer)" class="jc-btn jc-btn-primary">
+          <fa-icon icon="paper-plane"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
+        </button>
+        @if (offer.applyUrl) {
+          <a [href]="offer.applyUrl" target="_blank" rel="noopener" class="jc-btn jc-btn-secondary">
+            <fa-icon icon="external-link-alt"></fa-icon>
+            <span jhiTranslate="jobCopilot.search.results.view">View</span>
+          </a>
+        }
+      </div>
+    </div>
+    <div class="jc-detail-body">
+      @if (selectedLoading()) {
+        <div class="jc-detail-loading">
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+        </div>
+      }
+      @if (offer.description) {
+        <p class="jc-detail-desc">{{ offer.description }}</p>
+      } @else if (!selectedLoading()) {
+        <p class="jc-detail-desc jc-muted" jhiTranslate="jobCopilot.search.detail.noDescription">Aucune description disponible.</p>
+      }
+    </div>
+  </aside>
+}
