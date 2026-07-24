@@ -20,11 +20,26 @@
           <strong>{{ r.sampleSize }}</strong>
           <span jhiTranslate="jobCopilot.insights.applicationsSoFar">candidatures analysées (minimum 5).</span>
         </p>
+        <p class="jc-how" jhiTranslate="jobCopilot.insights.how">
+          Cette page compare vos candidatures réussies aux autres pour vous dire quoi améliorer. Suivez le statut de chaque candidature
+          (entretien, refus, sans réponse…) pour l'alimenter.
+        </p>
       </div>
     } @else {
-      <!-- Funnel -->
+      <p class="jc-intro" jhiTranslate="jobCopilot.insights.intro">
+        À partir de vos candidatures suivies, voici ce qui distingue celles qui aboutissent des autres. Plus vous suivez vos statuts, plus
+        l'analyse est précise.
+      </p>
+
+      <!-- Progression -->
       <section class="jc-card">
         <h2 jhiTranslate="jobCopilot.insights.funnel.title">Progression de vos candidatures</h2>
+        <p class="jc-summary">
+          {{
+            'jobCopilot.insights.funnel.summary'
+              | translate: { applied: r.funnel.applied, interview: r.funnel.interview, offer: r.funnel.offer }
+          }}
+        </p>
         @if (bars(); as b) {
           <div class="jc-funnel">
             <div class="jc-stage">
@@ -55,9 +70,12 @@
       </section>
 
       <!-- Match-score contrast -->
-      @if (r.score?.suggestedThreshold != null) {
-        <section class="jc-card">
-          <h2 jhiTranslate="jobCopilot.insights.score.title">Le seuil qui fait la différence</h2>
+      <section class="jc-card">
+        <h2 jhiTranslate="jobCopilot.insights.score.title">Le seuil qui fait la différence</h2>
+        <p class="jc-help" jhiTranslate="jobCopilot.insights.score.help">
+          Le score de match des offres où vous décrochez un entretien, comparé à celles sans suite.
+        </p>
+        @if (r.score?.suggestedThreshold != null) {
           <div class="jc-contrast">
             <div class="jc-contrast-col positive">
               <span class="jc-contrast-lab" jhiTranslate="jobCopilot.insights.score.withInterview">Avec entretien</span>
@@ -73,13 +91,44 @@
             <span jhiTranslate="jobCopilot.insights.score.threshold">Score de match seuil :</span>
             <strong>{{ r.score!.suggestedThreshold }}</strong>
           </p>
-        </section>
-      }
+        } @else {
+          <p class="jc-section-empty" jhiTranslate="jobCopilot.insights.score.empty">
+            Aucun score de match sur vos candidatures. Lancez « Matcher mon profil » depuis la recherche pour l'activer.
+          </p>
+        }
+      </section>
+
+      <!-- Salary contrast -->
+      <section class="jc-card">
+        <h2 jhiTranslate="jobCopilot.insights.salary.title">Salaire visé</h2>
+        <p class="jc-help" jhiTranslate="jobCopilot.insights.salary.help">
+          Le salaire des offres où vous avancez, comparé à celles qui n'aboutissent pas.
+        </p>
+        @if (r.salary?.signal) {
+          <div class="jc-contrast">
+            <div class="jc-contrast-col positive">
+              <span class="jc-contrast-lab" jhiTranslate="jobCopilot.insights.score.withInterview">Avec entretien</span>
+              <span class="jc-contrast-val">{{ r.salary!.medianPositive | number }} €</span>
+            </div>
+            <div class="jc-contrast-col negative">
+              <span class="jc-contrast-lab" jhiTranslate="jobCopilot.insights.score.without">Sans réponse / refus</span>
+              <span class="jc-contrast-val">{{ r.salary!.medianNegative | number }} €</span>
+            </div>
+          </div>
+        } @else {
+          <p class="jc-section-empty" jhiTranslate="jobCopilot.insights.salary.empty">
+            Pas assez d'offres avec salaire renseigné pour comparer.
+          </p>
+        }
+      </section>
 
       <!-- Skill drivers -->
-      @if (r.skillDrivers.length > 0) {
-        <section class="jc-card">
-          <h2 jhiTranslate="jobCopilot.insights.skills.title">Compétences qui font avancer</h2>
+      <section class="jc-card">
+        <h2 jhiTranslate="jobCopilot.insights.skills.title">Compétences qui font avancer</h2>
+        <p class="jc-help" jhiTranslate="jobCopilot.insights.skills.help">
+          Vos compétences qui reviennent le plus dans les offres où vous progressez.
+        </p>
+        @if (r.skillDrivers.length > 0) {
           <div class="jc-drivers">
             @for (s of r.skillDrivers; track s.skill) {
               <div class="jc-driver">
@@ -89,20 +138,28 @@
               </div>
             }
           </div>
-        </section>
-      }
+        } @else {
+          <p class="jc-section-empty" jhiTranslate="jobCopilot.insights.skills.empty">
+            Pas encore de tendance nette — complétez les compétences de votre profil et suivez vos entretiens.
+          </p>
+        }
+      </section>
 
       <!-- Recommendations -->
-      @if (r.recommendations.length > 0) {
-        <section class="jc-card jc-reco">
-          <h2 jhiTranslate="jobCopilot.insights.reco.title">À changer maintenant</h2>
+      <section class="jc-card jc-reco">
+        <h2 jhiTranslate="jobCopilot.insights.reco.title">À changer maintenant</h2>
+        @if (r.recommendations.length > 0) {
           <ul>
             @for (rec of r.recommendations; track rec) {
               <li><fa-icon icon="arrow-right"></fa-icon> {{ rec }}</li>
             }
           </ul>
-        </section>
-      }
+        } @else {
+          <p class="jc-section-empty" jhiTranslate="jobCopilot.insights.reco.empty">
+            Continuez à postuler et à mettre à jour les statuts : les recommandations s'afficheront dès qu'une tendance se dégage.
+          </p>
+        }
+      </section>
     }
   }
 </div>

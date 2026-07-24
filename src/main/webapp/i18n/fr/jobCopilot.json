@@ -240,8 +240,11 @@
       "subtitle": "Ce que votre parcours de candidature révèle sur pourquoi vous décrochez (ou non) des entretiens.",
       "notEnough": "Postulez à quelques offres de plus pour débloquer l'analyse.",
       "applicationsSoFar": "candidatures analysées (minimum 5).",
+      "how": "Cette page compare vos candidatures réussies aux autres pour vous dire quoi améliorer. Suivez le statut de chaque candidature (entretien, refus, sans réponse…) pour l'alimenter.",
+      "intro": "À partir de vos candidatures suivies, voici ce qui distingue celles qui aboutissent des autres. Plus vous suivez vos statuts, plus l'analyse est précise.",
       "funnel": {
         "title": "Progression de vos candidatures",
+        "summary": "Sur {{applied}} candidatures, {{interview}} ont mené à un entretien et {{offer}} à une offre.",
         "applied": "Postulées",
         "interview": "Entretiens",
         "offer": "Offres",
@@ -249,15 +252,25 @@
       },
       "score": {
         "title": "Le seuil qui fait la différence",
+        "help": "Le score de match des offres où vous décrochez un entretien, comparé à celles sans suite.",
         "withInterview": "Avec entretien",
         "without": "Sans réponse / refus",
-        "threshold": "Score de match seuil :"
+        "threshold": "Score de match seuil :",
+        "empty": "Aucun score de match sur vos candidatures. Lancez « Matcher mon profil » depuis la recherche pour l'activer."
+      },
+      "salary": {
+        "title": "Salaire visé",
+        "help": "Le salaire des offres où vous avancez, comparé à celles qui n'aboutissent pas.",
+        "empty": "Pas assez d'offres avec salaire renseigné pour comparer."
       },
       "skills": {
-        "title": "Compétences qui font avancer"
+        "title": "Compétences qui font avancer",
+        "help": "Vos compétences qui reviennent le plus dans les offres où vous progressez.",
+        "empty": "Pas encore de tendance nette — complétez les compétences de votre profil et suivez vos entretiens."
       },
       "reco": {
-        "title": "À changer maintenant"
+        "title": "À changer maintenant",
+        "empty": "Continuez à postuler et à mettre à jour les statuts : les recommandations s'afficheront dès qu'une tendance se dégage."
       }
     },
     "search": {

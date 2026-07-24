@@ -184,3 +184,37 @@
   color: #ef4444;
   padding: 1rem;
 }
+
+.jc-intro {
+  color: var(--bs-secondary-color, #6c757d);
+  margin: 0 0 0.25rem;
+  line-height: 1.5;
+}
+
+.jc-summary {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.jc-help {
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.85rem;
+  margin: -0.5rem 0 1rem;
+}
+
+.jc-section-empty {
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.9rem;
+  background: rgba(102, 126, 234, 0.06);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  margin: 0;
+}
+
+.jc-how {
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color, #6c757d);
+  margin-top: 1rem;
+  max-width: 46ch;
+}

@@ -5,10 +5,11 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { AutopsyReport } from '../shared/job-copilot.model';
+import TranslateDirective from '../../shared/language/translate.directive';
 
 @Component({
   selector: 'jhi-job-copilot-insights',
-  imports: [CommonModule, FaIconComponent, TranslateModule],
+  imports: [CommonModule, FaIconComponent, TranslateModule, TranslateDirective],
   templateUrl: './insights.component.html',
   styleUrl: './insights.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -240,8 +240,11 @@
       "subtitle": "What your application journey reveals about why you do — or don't — get interviews.",
       "notEnough": "Apply to a few more offers to unlock the analysis.",
       "applicationsSoFar": "applications analysed (minimum 5).",
+      "how": "This page compares your successful applications with the rest to tell you what to improve. Track each application's status (interview, rejected, no reply…) to feed it.",
+      "intro": "Based on your tracked applications, here is what sets the ones that work apart from the rest. The more statuses you track, the sharper the analysis.",
       "funnel": {
         "title": "Your application progress",
+        "summary": "Of {{applied}} applications, {{interview}} led to an interview and {{offer}} to an offer.",
         "applied": "Applied",
         "interview": "Interviews",
         "offer": "Offers",
@@ -249,15 +252,25 @@
       },
       "score": {
         "title": "The threshold that makes the difference",
+        "help": "The match score of offers where you land an interview, versus those with no reply.",
         "withInterview": "With interview",
         "without": "No reply / rejected",
-        "threshold": "Match-score threshold:"
+        "threshold": "Match-score threshold:",
+        "empty": "No match score on your applications yet. Run \"Match My Profile\" from search to enable it."
+      },
+      "salary": {
+        "title": "Target salary",
+        "help": "The salary of offers where you progress, versus those that don't work out.",
+        "empty": "Not enough offers with a listed salary to compare."
       },
       "skills": {
-        "title": "Skills that move you forward"
+        "title": "Skills that move you forward",
+        "help": "Your skills that recur most in the offers where you progress.",
+        "empty": "No clear trend yet — complete your profile skills and track your interviews."
       },
       "reco": {
-        "title": "Change this now"
+        "title": "Change this now",
+        "empty": "Keep applying and updating statuses: recommendations will appear once a trend emerges."
       }
     },
     "search": {
