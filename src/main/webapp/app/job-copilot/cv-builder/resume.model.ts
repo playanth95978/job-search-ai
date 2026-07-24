@@ -117,8 +117,8 @@ export const FONT_FAMILIES = [
 ];
 
 export const DEFAULT_THEME: ResumeTheme = {
-  primaryColor: '#667eea',
-  secondaryColor: '#764ba2',
+  primaryColor: '#4f46e5',
+  secondaryColor: '#4338ca',
   fontFamily: "'Inter', sans-serif",
   fontSize: 14,
 };

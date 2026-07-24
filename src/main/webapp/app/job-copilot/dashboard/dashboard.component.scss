@@ -1,31 +1,30 @@
 @import '../../../content/scss/job-theme';
 
 .jc-dashboard {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem 3rem;
 }
 
 .jc-header {
-  background: $jc-gradient;
-  border-radius: 16px;
-  padding: 2rem 2.5rem;
   margin-bottom: 2rem;
-  color: white;
 
   h1 {
     margin: 0;
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-wrap: balance;
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
 
   .jc-subtitle {
-    margin: 0.25rem 0 0;
-    opacity: 0.85;
-    font-size: 0.95rem;
+    margin: 0.5rem 0 0;
+    color: var(--bs-secondary-color);
+    font-size: 1.02rem;
   }
 }
 
@@ -43,7 +42,7 @@
   border-radius: 16px;
 
   .jc-empty-icon {
-    color: #667eea;
+    color: #4f46e5;
     margin-bottom: 1.5rem;
   }
 

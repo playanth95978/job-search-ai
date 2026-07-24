@@ -90,7 +90,7 @@
   &:hover {
     border-color: $jc-accent;
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.18);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.18);
   }
 }
 
@@ -203,7 +203,7 @@
   &:focus {
     outline: none;
     border-color: $jc-accent;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
   }
 }
 

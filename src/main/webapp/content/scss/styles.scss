@@ -10,18 +10,22 @@
 Bootstrap tweaks
 ===============================================================*/
 
-body,
+body {
+  font-weight: 400;
+}
 h1,
 h2,
 h3,
-h4 {
-  font-weight: 300;
+h4,
+h5 {
+  font-weight: 700;
+  letter-spacing: -0.011em;
 }
 
-/* Increase contrast of links to get 100% on Lighthouse Accessibility Audit. Override this color if you want to change the link color, or use a Bootswatch theme */
+/* Links use the theme accent (theme-aware token) instead of the legacy brown. */
 a {
-  color: #533f03;
-  font-weight: bold;
+  color: var(--jc-accent);
+  font-weight: 600;
 }
 
 /* override hover color for dropdown-item forced by bootstrap to all a:not([href]):not([tabindex]) elements in _reboot.scss */
@@ -35,7 +39,7 @@ a:not([href]):not([tabindex]):hover.dropdown-item {
 }
 
 a:hover {
-  color: #533f03;
+  color: var(--jc-accent-hover);
   /* make sure browsers use the pointer cursor for anchors, even with no href */
   cursor: pointer;
 }
@@ -645,11 +649,7 @@ app uses Bootstrap var(--bs-*) tokens and flips automatically via data-bs-theme)
     background: var(--bs-body-bg);
   }
 
-  /* Global hardcoded colors that don't read well on a dark background */
-  a,
-  a:hover {
-    color: #b9a6ff;
-  }
+  /* Links already use the theme-aware --jc-accent token, which flips for dark mode. */
 
   .form-control {
     background-color: var(--bs-body-bg);

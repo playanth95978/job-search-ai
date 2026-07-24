@@ -144,7 +144,7 @@ export class InterviewPanelComponent implements OnInit {
   }
 
   jurorColor(role?: string): string {
-    return JUROR_META[role ?? '']?.color ?? '#667eea';
+    return JUROR_META[role ?? '']?.color ?? '#4f46e5';
   }
 
   recommendationClass(recommendation: string): string {

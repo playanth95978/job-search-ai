@@ -45,12 +45,12 @@
 }
 
 .jc-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
   color: white;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
   }
 }
 
@@ -82,9 +82,9 @@
 }
 
 .jc-whatif-chip {
-  border: 1px solid rgba(102, 126, 234, 0.4);
+  border: 1px solid rgba(79, 70, 229, 0.4);
   background: transparent;
-  color: #667eea;
+  color: #4f46e5;
   border-radius: 999px;
   padding: 0.2rem 0.7rem;
   font-size: 0.8rem;
@@ -92,11 +92,11 @@
   transition: all 0.15s;
 
   &:hover {
-    background: rgba(102, 126, 234, 0.08);
+    background: rgba(79, 70, 229, 0.08);
   }
 
   &.selected {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
     color: #fff;
     border-color: transparent;
   }

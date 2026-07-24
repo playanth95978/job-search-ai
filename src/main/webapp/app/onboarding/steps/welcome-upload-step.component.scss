@@ -53,18 +53,18 @@
   transition: all 0.25s ease;
 
   &:hover {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.03);
+    border-color: #4f46e5;
+    background: rgba(79, 70, 229, 0.03);
   }
 
   &.jc-dropzone-active {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.06);
+    border-color: #4f46e5;
+    background: rgba(79, 70, 229, 0.06);
     transform: scale(1.01);
   }
 
   .jc-dropzone-icon {
-    color: #667eea;
+    color: #4f46e5;
     margin-bottom: 0.5rem;
   }
 

@@ -113,10 +113,10 @@ jhi-stepper {
 /* active step */
 .step-indicator.active {
   .step-number {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
     color: #fff;
     border-color: transparent;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
     animation: pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .step-title {
@@ -178,7 +178,7 @@ jhi-stepper {
   border: 1px solid var(--bs-border-color, #e5e7eb);
   border-radius: 24px;
   padding: 2.25rem;
-  box-shadow: 0 20px 50px -25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 20px 50px -25px rgba(79, 70, 229, 0.4);
   animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

@@ -1,7 +1,7 @@
 .ob-wizard {
   min-height: calc(100vh - 64px);
   padding: 2.5rem 1rem 4rem;
-  background: radial-gradient(1200px 500px at 50% -10%, rgba(102, 126, 234, 0.12), transparent 70%), var(--bs-body-bg);
+  background: radial-gradient(1200px 500px at 50% -10%, rgba(79, 70, 229, 0.12), transparent 70%), var(--bs-body-bg);
 }
 
 .ob-wizard-inner {
@@ -29,8 +29,8 @@
   justify-content: center;
   border-radius: 12px;
   color: #fff;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 8px 18px -6px rgba(102, 126, 234, 0.7);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  box-shadow: 0 8px 18px -6px rgba(79, 70, 229, 0.7);
 }
 
 @keyframes ob-brand-in {

@@ -5,13 +5,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #667eea;
+  color: #4f46e5;
 }
 
 /* Tabs */
 /* Modern segmented-control nav (replaces Bootstrap underline tabs). */
 .jc-modal-tabs.nav-tabs {
-  --jc-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --jc-grad: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
   display: inline-flex;
   gap: 0.25rem;
   flex-wrap: wrap;
@@ -61,7 +61,7 @@
     &.active {
       color: #fff;
       background: var(--jc-grad);
-      box-shadow: 0 6px 16px -6px rgba(102, 126, 234, 0.6);
+      box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.6);
 
       fa-icon {
         opacity: 1;
@@ -114,7 +114,7 @@
 
 .jc-modal-offer {
   position: relative;
-  background: linear-gradient(180deg, rgba(102, 126, 234, 0.06), transparent), var(--bs-tertiary-bg);
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.06), transparent), var(--bs-tertiary-bg);
   border: 1px solid var(--bs-border-color);
   border-radius: 14px;
   padding: 0.85rem 1rem 0.85rem 1.15rem;
@@ -126,7 +126,7 @@
     position: absolute;
     inset: 0 auto 0 0;
     width: 4px;
-    background: linear-gradient(180deg, #667eea, #764ba2);
+    background: linear-gradient(180deg, #4f46e5, #4338ca);
   }
 }
 
@@ -211,23 +211,23 @@
 }
 
 .jc-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
   color: white;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
   }
 }
 
 .jc-btn-accent {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
   color: #fff;
   border: none;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+    box-shadow: 0 4px 12px rgba(67, 56, 202, 0.4);
   }
 }
 
@@ -237,8 +237,8 @@
   border: 1px solid var(--bs-border-color);
 
   &:hover {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #4f46e5;
+    color: #4f46e5;
   }
 }
 

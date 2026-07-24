@@ -40,7 +40,7 @@
     content: '';
     width: 4px;
     height: 24px;
-    background: #667eea;
+    background: #4f46e5;
     border-radius: 4px;
   }
 }
@@ -113,8 +113,8 @@
 
   &:hover {
     transform: scale(1.02) translateY(-4px) !important;
-    border-color: #667eea !important;
-    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.1) !important;
+    border-color: #4f46e5 !important;
+    box-shadow: 0 15px 30px rgba(79, 70, 229, 0.1) !important;
   }
 
   > fa-icon:first-child {

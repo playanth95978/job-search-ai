@@ -271,7 +271,7 @@ export function jobSourceLabel(source?: string): string {
 }
 
 export function jobSourceColor(source?: string): string {
-  return JOB_SOURCE_COLORS[source || ''] || '#667eea';
+  return JOB_SOURCE_COLORS[source || ''] || '#4f46e5';
 }
 
 export const APPLICATION_STATUS_ICONS: Record<string, string> = {

@@ -3,7 +3,7 @@
 }
 
 .jc-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
   border-radius: 16px;
   padding: 2rem 2.5rem;
   margin-bottom: 2rem;
@@ -34,7 +34,7 @@
   color: var(--bs-secondary-color);
 
   fa-icon {
-    color: #667eea;
+    color: #4f46e5;
     margin-bottom: 1rem;
   }
 }
@@ -91,12 +91,12 @@
 }
 
 .jc-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
   color: white;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
   }
 }
 
@@ -140,7 +140,7 @@
     flex-direction: row-reverse;
 
     .jc-chat-bubble {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
       color: white;
     }
   }
@@ -155,7 +155,7 @@
   align-items: center;
   justify-content: center;
   background: var(--bs-tertiary-bg);
-  color: #667eea;
+  color: #4f46e5;
 }
 
 .jc-chat-bubble {
@@ -191,7 +191,7 @@
 
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #4f46e5;
   }
 }
 
@@ -218,7 +218,7 @@
   font-size: 0.95rem;
 
   fa-icon {
-    color: #667eea;
+    color: #4f46e5;
   }
 }
 

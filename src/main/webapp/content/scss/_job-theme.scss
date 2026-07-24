@@ -1,70 +1,171 @@
 /* ==========================================================================
-Shared "Job Copilot" design tokens & components
-Reused by the home page and the Job Copilot dashboard so the job-search
-look & feel stays consistent without duplicating styles.
+Job Copilot — modern design system
+Token layer (CSS custom properties, theme-aware) + shared primitives reused by
+the home page and the Job Copilot product surface. Direction: clean SaaS.
 ========================================================================== */
 
-$jc-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-$jc-accent: #667eea;
 $jc-navbar-height: 64px;
+/* Legacy SCSS vars kept for components that import them (chat, navbar, dashboard…), now indigo. */
+$jc-accent: #4f46e5;
+$jc-gradient: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
 
+:root {
+  --jc-accent: #4f46e5;
+  --jc-accent-hover: #4338ca;
+  --jc-accent-contrast: #ffffff;
+  --jc-accent-soft: rgba(79, 70, 229, 0.1);
+  --jc-accent-softer: rgba(79, 70, 229, 0.06);
+
+  --jc-radius-sm: 10px;
+  --jc-radius: 14px;
+  --jc-radius-lg: 20px;
+
+  --jc-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --jc-shadow-md: 0 6px 16px rgba(16, 24, 40, 0.08);
+  --jc-shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.14);
+  --jc-ring: 0 0 0 3px rgba(79, 70, 229, 0.18);
+
+  /* semantic surface tints (funnel / status colours stay separate from the accent) */
+  --jc-good: #10b981;
+  --jc-warn: #f59e0b;
+  --jc-bad: #ef4444;
+}
+
+[data-bs-theme='dark'] {
+  --jc-accent: #7c83ff;
+  --jc-accent-hover: #969bff;
+  --jc-accent-contrast: #0b0d12;
+  --jc-accent-soft: rgba(124, 131, 255, 0.16);
+  --jc-accent-softer: rgba(124, 131, 255, 0.09);
+
+  --jc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --jc-shadow-md: 0 8px 20px rgba(0, 0, 0, 0.45);
+  --jc-shadow-lg: 0 20px 44px rgba(0, 0, 0, 0.55);
+  --jc-ring: 0 0 0 3px rgba(124, 131, 255, 0.28);
+}
+
+/* ---- Buttons ------------------------------------------------------------- */
 .jc-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 10px;
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--jc-radius-sm);
   font-weight: 600;
   font-size: 0.9rem;
+  line-height: 1.2;
   text-decoration: none;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    color 0.18s ease;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--jc-ring);
+  }
 }
 
 .jc-btn-primary {
-  background: $jc-gradient;
-  color: white;
+  background: var(--jc-accent);
+  color: var(--jc-accent-contrast);
 
   &:hover {
+    background: var(--jc-accent-hover);
+    color: var(--jc-accent-contrast);
+    box-shadow: var(--jc-shadow-md);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    color: white;
+  }
+}
+
+.jc-btn-accent {
+  background: var(--jc-accent-soft);
+  color: var(--jc-accent);
+  border-color: transparent;
+
+  &:hover {
+    background: var(--jc-accent);
+    color: var(--jc-accent-contrast);
+  }
+}
+
+.jc-btn-secondary {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+
+  &:hover {
+    border-color: var(--jc-accent);
+    color: var(--jc-accent);
   }
 }
 
 .jc-btn-outline {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.4);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.2);
     color: white;
   }
-}
-
-.jc-btn-lg {
-  padding: 0.875rem 2rem;
-  font-size: 1rem;
-}
-
-.jc-btn-sm {
-  padding: 0.4rem 0.9rem;
-  font-size: 0.82rem;
-  border-radius: 999px;
 }
 
 .jc-btn-ghost {
   background: transparent;
   color: var(--bs-secondary-color);
-  padding: 0.5rem;
-  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--jc-radius-sm);
 
   &:hover {
     background: var(--bs-tertiary-bg);
     color: var(--bs-body-color);
   }
+}
+
+.jc-btn-lg {
+  padding: 0.8rem 1.75rem;
+  font-size: 1rem;
+  border-radius: var(--jc-radius);
+}
+
+.jc-btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+/* ---- Inputs -------------------------------------------------------------- */
+.jc-input,
+.jc-select {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--jc-radius-sm);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-size: 0.92rem;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--jc-accent);
+    box-shadow: var(--jc-ring);
+  }
+}
+
+/* ---- Cards & surfaces ---------------------------------------------------- */
+.jc-surface {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--jc-radius);
+  box-shadow: var(--jc-shadow-sm);
 }
 
 /* Feature pills (used in empty states) */
@@ -84,17 +185,17 @@ $jc-navbar-height: 64px;
   font-size: 0.9rem;
 
   fa-icon {
-    color: $jc-accent;
+    color: var(--jc-accent);
   }
 }
 
-/* Skill tags */
+/* Skill / source tags */
 .jc-skill-tag {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: rgba(102, 126, 234, 0.1);
-  color: $jc-accent;
-  border-radius: 20px;
+  padding: 0.25rem 0.7rem;
+  background: var(--jc-accent-soft);
+  color: var(--jc-accent);
+  border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 500;
 }
@@ -117,12 +218,13 @@ $jc-navbar-height: 64px;
 .jc-stat-card {
   background: var(--bs-body-bg);
   border: 1px solid var(--bs-border-color);
-  border-left: 4px solid;
-  border-radius: 12px;
+  border-left: 3px solid;
+  border-radius: var(--jc-radius);
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  box-shadow: var(--jc-shadow-sm);
 }
 
 .jc-stat-icon {
@@ -134,6 +236,7 @@ $jc-navbar-height: 64px;
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .jc-stat-label {
@@ -144,34 +247,38 @@ $jc-navbar-height: 64px;
 
 /* Action / navigation cards */
 .jc-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.85rem;
 }
 
 .jc-action-card {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1.15rem 1.35rem;
   background: var(--bs-body-bg);
   border: 1px solid var(--bs-border-color);
-  border-radius: 12px;
+  border-radius: var(--jc-radius);
   text-decoration: none;
   color: var(--bs-body-color);
-  transition: all 0.2s;
+  box-shadow: var(--jc-shadow-sm);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
 
   &:hover {
-    border-color: $jc-accent;
-    transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-color: var(--jc-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--jc-shadow-md);
     color: var(--bs-body-color);
   }
 
   > fa-icon:first-child {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--jc-radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -183,7 +290,7 @@ $jc-navbar-height: 64px;
 
     strong {
       display: block;
-      font-weight: 600;
+      font-weight: 650;
     }
 
     span {
@@ -194,41 +301,48 @@ $jc-navbar-height: 64px;
 
   .jc-action-arrow {
     color: var(--bs-secondary-color);
-    transition: transform 0.2s;
+    transition: transform 0.18s ease;
   }
 
   &:hover .jc-action-arrow {
     transform: translateX(4px);
-    color: $jc-accent;
+    color: var(--jc-accent);
   }
 }
 
 .jc-action-search > fa-icon:first-child {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.12);
   color: #3b82f6;
 }
-
 .jc-action-apps > fa-icon:first-child {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.12);
   color: #8b5cf6;
 }
-
+.jc-action-insights > fa-icon:first-child {
+  background: rgba(236, 72, 153, 0.12);
+  color: #ec4899;
+}
+.jc-action-radar > fa-icon:first-child {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0ea5e9;
+}
 .jc-action-settings > fa-icon:first-child {
-  background: rgba(107, 114, 128, 0.1);
+  background: rgba(107, 114, 128, 0.12);
   color: #6b7280;
 }
-
 .jc-action-interview > fa-icon:first-child {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.12);
   color: #10b981;
 }
-
-.jc-action-chat > fa-icon:first-child {
-  background: rgba(245, 158, 11, 0.1);
+.jc-action-career > fa-icon:first-child {
+  background: rgba(245, 158, 11, 0.12);
   color: #f59e0b;
 }
-
+.jc-action-chat > fa-icon:first-child {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
 .jc-action-onboarding > fa-icon:first-child {
-  background: rgba(102, 126, 234, 0.1);
-  color: $jc-accent;
+  background: var(--jc-accent-soft);
+  color: var(--jc-accent);
 }
