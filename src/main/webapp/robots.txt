@@ -1,10 +1,21 @@
-# robotstxt.org/
+# https://www.robotstxt.org/
 
 User-agent: *
-Disallow: /api/account
-Disallow: /api/account/change-password
-Disallow: /api/account/sessions
-Disallow: /api/logs/
-Disallow: /api/users/
+Allow: /
+
+# Private / app area (auth-gated, no SEO value)
+Disallow: /account
+Disallow: /admin
+Disallow: /login
+Disallow: /onboarding
+Disallow: /chat
+Disallow: /job-copilot/
+# The public job search lives at /search (top-level, crawlable) and is covered by "Allow: /".
+
+# API & infrastructure (not indexable content)
+Disallow: /api/
 Disallow: /management/
 Disallow: /v3/api-docs/
+Disallow: /swagger-ui/
+
+Sitemap: https://aicarreerfinder.com/sitemap.xml

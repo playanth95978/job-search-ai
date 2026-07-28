@@ -270,6 +270,9 @@ jhipster:
 
 # application:
 application:
+  seo:
+    # Public base URL (scheme + host, no trailing slash) used to build absolute URLs in sitemap.xml.
+    base-url: ${SEO_BASE_URL:https://aicarreerfinder.com}
   ai:
     ollama:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}

@@ -55,7 +55,7 @@ public class SecurityConfiguration {
                 // prettier-ignore
                 authz
                     .requestMatchers("/index.html", "/*.js", "/*.txt", "/*.json", "/*.map", "/*.css").permitAll()
-                    .requestMatchers("/*.ico", "/*.png", "/*.svg", "/*.webapp").permitAll()
+                    .requestMatchers("/*.ico", "/*.png", "/*.svg", "/*.webapp", "/*.xml").permitAll()
                     .requestMatchers("/content/**").permitAll()
                     .requestMatchers("/resources/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()

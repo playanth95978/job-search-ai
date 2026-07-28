@@ -5,6 +5,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AccountService } from 'app/core/auth/account.service';
+import { SeoService } from 'app/pages/shared/seo.service';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
 import { AuthPromptModalComponent } from '../shared/auth-prompt-modal/auth-prompt-modal.component';
@@ -72,6 +73,19 @@ export class JobSearchComponent {
   private translateService = inject(TranslateService);
   private modalService = inject(NgbModal);
   private accountService = inject(AccountService);
+  private seo = inject(SeoService);
+
+  constructor() {
+    // This component backs both the public /search route (crawlable) and the auth-gated
+    // /job-copilot/search route. Pin the canonical to the public /search URL so search
+    // engines index a single, reachable page and never a login redirect.
+    this.seo.update({
+      title: "Recherche d'emploi IA — Trouvez les offres qui matchent votre profil | Job Search AI",
+      description:
+        "Recherchez des offres d'emploi et laissez l'IA les faire correspondre à votre CV. Matching sémantique, multi-sources, candidature assistée.",
+      path: '/search',
+    });
+  }
 
   search(): void {
     this.searching.set(true);

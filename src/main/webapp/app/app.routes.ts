@@ -31,7 +31,7 @@ const routes: Routes = [
     // actions (match my profile, match advanced, apply) behind an invitation modal.
     path: 'search',
     loadComponent: () => import('./job-copilot/job-search/job-search.component').then(m => m.JobSearchComponent),
-    title: 'Job Search',
+    title: 'home.searchTitle',
   },
   {
     path: '',

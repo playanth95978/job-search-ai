@@ -1,13 +1,13 @@
 package nc.opt.aiassistant.service.jobcopilot.cv;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.service.jobcopilot.OfferCacheInvalidationService;
@@ -160,5 +160,115 @@ class CvIngestionServiceTest {
         assertThat(result.warnings()).hasSize(1);
         assertThat(result.warnings().get(0).level()).isEqualTo("CRITICAL");
         assertThat(result.recommendations()).hasSize(1);
+    }
+
+    @Test
+    void testIsPalindrome() {
+        assertThat(isPalindrome(121)).isTrue();
+        assertThat(isPalindrome(-121)).isFalse();
+        assertThat(isPalindrome(10)).isFalse();
+        assertThat(isPalindrome(0)).isTrue();
+    }
+
+    public boolean isPalindrome(int x) {
+        if (x < 0) return false;
+        String stringValue = String.valueOf(x);
+        int n = stringValue.length();
+        for (int i = 0; i < n / 2; i++) {
+            if (stringValue.charAt(i) != stringValue.charAt(n - 1 - i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Test
+    void testRomanToInt() {
+        assertThat(romanToInt("III")).isEqualTo(3);
+        assertThat(romanToInt("LVIII")).isEqualTo(58);
+        assertThat(romanToInt("MCMXCIV")).isEqualTo(1994);
+    }
+
+    public int romanToInt(String s) {
+        Map<Character, Integer> map = new HashMap<>();
+        map.put('I', 1);
+        map.put('V', 5);
+        map.put('X', 10);
+        map.put('L', 50);
+        map.put('C', 100);
+        map.put('D', 500);
+        map.put('M', 1000);
+
+        int result = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int currentVal = map.get(s.charAt(i));
+            if (i + 1 < s.length()) {
+                int nextVal = map.get(s.charAt(i + 1));
+                if (currentVal < nextVal) {
+                    result -= currentVal;
+                } else {
+                    result += currentVal;
+                }
+            } else {
+                result += currentVal;
+            }
+        }
+        return result;
+    }
+
+    public int strStr(String haystack, String needle) {
+        if (haystack.length() < needle.length()) {
+            return -1;
+        } else if (haystack.equals(needle)) {
+            return 0;
+        } else if (haystack.contains(needle)) {
+            return haystack.indexOf(needle);
+        }
+        return -1;
+    }
+
+    public int lengthOfLastWord(String s) {
+        String[] words = s.split(" ");
+        return words[words.length - 1].length();
+    }
+
+    @Test
+    void sort() {
+        int[] nums1 = { 2, 0, 2, 1, 1, 0 };
+        sortColors(nums1);
+        assertArrayEquals(new int[] { 0, 0, 1, 1, 2, 2 }, nums1);
+
+        int[] nums2 = { 2, 0, 1 };
+        sortColors(nums2);
+        assertArrayEquals(new int[] { 0, 1, 2 }, nums2);
+    }
+
+    public void sortColors(int[] nums) {
+        int low = 0;
+        int mid = 0;
+        int high = nums.length - 1;
+
+        while (mid <= high) {
+            if (nums[mid] == 0) {
+                swap(nums, low, mid);
+                low++;
+                mid++;
+            } else if (nums[mid] == 1) {
+                mid++;
+            } else {
+                swap(nums, mid, high);
+                high--;
+            }
+        }
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+
+    public String multiply(String num1, String num2) {
+        return Integer.valueOf(new BigDecimal(num1).multiply(new BigDecimal(num2)).intValue()).toString();
     }
 }

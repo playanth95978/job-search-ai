@@ -6,6 +6,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AccountService } from 'app/core/auth/account.service';
+import { SeoService } from 'app/pages/shared/seo.service';
 import { TranslateDirective } from 'app/shared/language';
 import { RevealOnScrollDirective } from 'app/shared/reveal/reveal-on-scroll.directive';
 import { applicationStatusColor, applicationStatusIcon, ApplicationStats } from 'app/job-copilot/shared/job-copilot.model';
@@ -93,14 +94,24 @@ export default class Home {
   public readonly account = inject(AccountService).account;
 
   protected readonly quickAccessItems = QUICK_ACCESS_ITEMS;
+  protected readonly statsEntries = computed(() => Object.entries(this.stats()).filter(([, value]) => value > 0));
 
   private readonly router = inject(Router);
   private readonly jobCopilotService = inject(JobCopilotService);
+  private readonly seo = inject(SeoService);
 
   private readonly stats = signal<ApplicationStats>({});
-  protected readonly statsEntries = computed(() => Object.entries(this.stats()).filter(([, value]) => value > 0));
 
   constructor() {
+    this.seo.update({
+      title: 'Job Search AI — Recherche d’emploi et copilote de carrière IA',
+      description:
+        "Importez votre CV, recevez des offres d'emploi pertinentes grâce à l'IA, générez des lettres de motivation sur-mesure et préparez vos entretiens.",
+      path: '/',
+      keywords: "recherche d'emploi, offres d'emploi, IA, matching CV, lettre de motivation, préparation entretien, copilote carrière",
+    });
+    this.injectStructuredData();
+
     if (this.account() !== null) {
       this.jobCopilotService.getApplicationStats().subscribe({
         next: stats => this.stats.set(stats),
@@ -119,5 +130,31 @@ export default class Home {
 
   statusColor(status: string): string {
     return applicationStatusColor(status);
+  }
+
+  /** Organization + WebSite structured data so Google can build a Knowledge Panel / brand entity. */
+  private injectStructuredData(): void {
+    const origin = SeoService.ORIGIN;
+    this.seo.setJsonLd('home-jsonld', {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Organization',
+          '@id': `${origin}/#organization`,
+          name: 'Job Search AI',
+          url: origin,
+          logo: `${origin}/content/images/og-default.png`,
+          description: "Plateforme de recherche d'emploi et copilote de carrière propulsés par l'intelligence artificielle.",
+        },
+        {
+          '@type': 'WebSite',
+          '@id': `${origin}/#website`,
+          name: 'Job Search AI',
+          url: origin,
+          inLanguage: 'fr-FR',
+          publisher: { '@id': `${origin}/#organization` },
+        },
+      ],
+    });
   }
 }

@@ -40,10 +40,19 @@ public class ApplicationProperties {
 
     private final Ai ai = new Ai();
     private final JobCopilot jobCopilot = new JobCopilot();
+    private final Seo seo = new Seo();
 
     // jhipster-needle-application-properties-property
 
     // jhipster-needle-application-properties-property-getter
+
+    @Setter
+    @Getter
+    public static class Seo {
+
+        /** Public base URL (scheme + host, no trailing slash) used to build absolute URLs in sitemap.xml. */
+        private String baseUrl = "https://aicarreerfinder.com";
+    }
 
     @Setter
     @Getter

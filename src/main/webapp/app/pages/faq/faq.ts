@@ -1,4 +1,3 @@
-import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -47,10 +46,10 @@ const FAQ_ITEMS: readonly FaqItem[] = [
 export default class Faq {
   protected readonly items = FAQ_ITEMS;
 
-  private readonly document = inject(DOCUMENT);
+  private readonly seo = inject(SeoService);
 
   constructor() {
-    inject(SeoService).update({
+    this.seo.update({
       title: 'FAQ | Job Search AI',
       description:
         'Questions fréquentes sur Job Search AI : matching CV/offres, sécurité des données, formats acceptés et préparation aux entretiens.',
@@ -61,9 +60,7 @@ export default class Faq {
 
   /** Adds FAQPage JSON-LD so Google can surface rich results. */
   private injectStructuredData(): void {
-    const id = 'faq-jsonld';
-    this.document.getElementById(id)?.remove();
-    const schema = {
+    this.seo.setJsonLd('faq-jsonld', {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
       mainEntity: this.items.map(item => ({
@@ -71,11 +68,6 @@ export default class Faq {
         name: item.question,
         acceptedAnswer: { '@type': 'Answer', text: item.answer },
       })),
-    };
-    const script = this.document.createElement('script');
-    script.id = id;
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify(schema);
-    this.document.head.appendChild(script);
+    });
   }
 }
