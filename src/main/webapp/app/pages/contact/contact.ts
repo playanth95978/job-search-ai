@@ -11,8 +11,8 @@ import { SeoService } from '../shared/seo.service';
   imports: [RouterLink],
 })
 export default class Contact {
-  /** Replace with the real support inbox. */
-  protected readonly email = 'contact@job-search-ai.com';
+  /** Public support/contact inbox. */
+  protected readonly email = 'anthony.attia1@gmail.com';
 
   constructor() {
     inject(SeoService).update({
