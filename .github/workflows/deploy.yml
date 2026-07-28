@@ -45,10 +45,6 @@ jobs:
       - name: npm ci
         run: npm ci
 
-      - name: Build & push image (Jib)
-        run: |
-          ./mvnw compile
-
       # ── 5. Build prod JAR + image Docker (Jib → GHCR) ────────────────────
       # Jib construit l'image sans Docker démon et la pousse directement sur GHCR.
       # Le profil -Pprod déclenche le build Angular via le plugin frontend-maven.
@@ -78,13 +74,24 @@ jobs:
           GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
           OLLAMA_BASE_URL: ${{ secrets.OLLAMA_BASE_URL }}
           OLLAMA_MODEL: ${{ secrets.OLLAMA_MODEL }}
+          OLLAMA_TOKEN: ${{ secrets.OLLAMA_TOKEN }}
           FRANCE_TRAVAIL_CLIENT_ID: ${{ secrets.FRANCE_TRAVAIL_CLIENT_ID }}
           FRANCE_TRAVAIL_CLIENT_SECRET: ${{ secrets.FRANCE_TRAVAIL_CLIENT_SECRET }}
+          # --- Adzuna job source (optional; source disabled if left unset) ---
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          # --- Mail (registration / password-reset emails) ---
+          SPRING_MAIL_HOST: ${{ secrets.SPRING_MAIL_HOST }}
+          SPRING_MAIL_PORT: ${{ secrets.SPRING_MAIL_PORT }}
+          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
+          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          JHIPSTER_MAIL_FROM: ${{ secrets.JHIPSTER_MAIL_FROM || 'no-reply@aicarreerfinder.com' }}
+          JHIPSTER_MAIL_BASE_URL: https://aicarreerfinder.com
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: IMAGE,GHCR_USER,GHCR_TOKEN,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,JWT_BASE64_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,OLLAMA_BASE_URL,OLLAMA_MODEL,FRANCE_TRAVAIL_CLIENT_ID,FRANCE_TRAVAIL_CLIENT_SECRET
+          envs: IMAGE,GHCR_USER,GHCR_TOKEN,SPRING_PROFILES_ACTIVE,SPRING_DATASOURCE_URL,SPRING_DATASOURCE_USERNAME,SPRING_DATASOURCE_PASSWORD,JWT_BASE64_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,OLLAMA_BASE_URL,OLLAMA_MODEL,OLLAMA_TOKEN,FRANCE_TRAVAIL_CLIENT_ID,FRANCE_TRAVAIL_CLIENT_SECRET,ADZUNA_APP_ID,ADZUNA_APP_KEY,SPRING_MAIL_HOST,SPRING_MAIL_PORT,SPRING_MAIL_USERNAME,SPRING_MAIL_PASSWORD,JHIPSTER_MAIL_FROM,JHIPSTER_MAIL_BASE_URL
           script: |
             set -e
 
@@ -97,6 +104,15 @@ jobs:
             echo "==> Stop & remove old container"
             docker stop job-search-ai 2>/dev/null || true
             docker rm   job-search-ai 2>/dev/null || true
+
+            # Only pass optional vars that are actually set, so an undefined secret
+            # never overrides the app's built-in default with an empty value.
+            echo "==> Assemble optional env vars"
+            RUN_OPTS=""
+            for v in OLLAMA_TOKEN ADZUNA_APP_ID ADZUNA_APP_KEY SPRING_MAIL_HOST SPRING_MAIL_PORT SPRING_MAIL_USERNAME SPRING_MAIL_PASSWORD JHIPSTER_MAIL_FROM JHIPSTER_MAIL_BASE_URL; do
+              eval "val=\$$v"
+              [ -n "$val" ] && RUN_OPTS="$RUN_OPTS -e $v=$val"
+            done
 
             echo "==> Start container"
             docker run -d \
@@ -116,6 +132,7 @@ jobs:
               -e OLLAMA_MODEL="$OLLAMA_MODEL" \
               -e FRANCE_TRAVAIL_CLIENT_ID="$FRANCE_TRAVAIL_CLIENT_ID" \
               -e FRANCE_TRAVAIL_CLIENT_SECRET="$FRANCE_TRAVAIL_CLIENT_SECRET" \
+              $RUN_OPTS \
               "$IMAGE"
 
             echo "==> Nettoyage images obsolètes"
