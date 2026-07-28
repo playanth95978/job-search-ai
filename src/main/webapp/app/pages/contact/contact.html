@@ -3,12 +3,14 @@
     <div class="container py-4 py-lg-5">
       <nav aria-label="Fil d'Ariane" class="mb-3">
         <ol class="breadcrumb mb-0 small">
-          <li class="breadcrumb-item"><a class="link-light" routerLink="/">Accueil</a></li>
-          <li class="breadcrumb-item active text-white-50" aria-current="page">Contact</li>
+          <li class="breadcrumb-item">
+            <a class="link-light" routerLink="/" jhiTranslate="pages.contact.breadcrumb.home">Accueil</a>
+          </li>
+          <li class="breadcrumb-item active text-white-50" aria-current="page" jhiTranslate="pages.contact.breadcrumb.current">Contact</li>
         </ol>
       </nav>
-      <h1 class="display-5 fw-bold mb-3">Contactez-nous</h1>
-      <p class="lead mb-0 col-lg-8">
+      <h1 class="display-5 fw-bold mb-3" jhiTranslate="pages.contact.hero.title">Contactez-nous</h1>
+      <p class="lead mb-0 col-lg-8" jhiTranslate="pages.contact.hero.subtitle">
         Une question, une suggestion ou un partenariat&nbsp;? Notre équipe vous répond sous 48&nbsp;heures ouvrées.
       </p>
     </div>
@@ -25,8 +27,8 @@
             >
               <i class="bi bi-envelope-fill fs-5" aria-hidden="true">@</i>
             </span>
-            <h2 class="h5">Par e-mail</h2>
-            <p class="text-secondary small mb-4">Le moyen le plus rapide de nous joindre.</p>
+            <h2 class="h5" jhiTranslate="pages.contact.email.title">Par e-mail</h2>
+            <p class="text-secondary small mb-4" jhiTranslate="pages.contact.email.text">Le moyen le plus rapide de nous joindre.</p>
             <a class="btn btn-primary mt-auto" [href]="'mailto:' + email">{{ email }}</a>
           </div>
         </div>
@@ -41,9 +43,11 @@
             >
               <i class="bi bi-question-circle-fill fs-5" aria-hidden="true">?</i>
             </span>
-            <h2 class="h5">Besoin d'aide&nbsp;?</h2>
-            <p class="text-secondary small mb-4">Consultez d'abord notre foire aux questions, la réponse y est peut-être déjà.</p>
-            <a class="btn btn-outline-secondary mt-auto" routerLink="/faq">Voir la FAQ</a>
+            <h2 class="h5" jhiTranslate="pages.contact.help.title">Besoin d'aide&nbsp;?</h2>
+            <p class="text-secondary small mb-4" jhiTranslate="pages.contact.help.text">
+              Consultez d'abord notre foire aux questions, la réponse y est peut-être déjà.
+            </p>
+            <a class="btn btn-outline-secondary mt-auto" routerLink="/faq" jhiTranslate="pages.contact.help.button">Voir la FAQ</a>
           </div>
         </div>
       </div>

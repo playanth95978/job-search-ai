@@ -1,11 +1,285 @@
 {
   "pages": {
-    "about": { "title": "À propos | Job Search AI" },
-    "contact": { "title": "Contact | Job Search AI" },
-    "faq": { "title": "FAQ | Job Search AI" },
-    "terms": { "title": "Conditions d'utilisation | Job Search AI" },
-    "privacy": { "title": "Politique de confidentialité | Job Search AI" },
-    "cookies": { "title": "Politique de cookies | Job Search AI" },
-    "notice": { "title": "Mentions légales | Job Search AI" }
+    "about": {
+      "title": "À propos | Job Search AI",
+      "breadcrumb": {
+        "home": "Accueil",
+        "current": "À propos"
+      },
+      "hero": {
+        "title": "À propos de Job Search AI",
+        "subtitle": "Nous mettons l'intelligence artificielle au service des candidats pour rendre la recherche d'emploi plus rapide, plus juste et moins stressante."
+      },
+      "mission": {
+        "title": "Notre mission",
+        "text": "Chercher un emploi est chronophage et souvent décourageant. Job Search AI automatise les tâches répétitives — lecture d'offres, tri, personnalisation des candidatures — pour que vous puissiez vous concentrer sur ce qui compte vraiment : décrocher les bons entretiens."
+      },
+      "whatWeDo": {
+        "title": "Ce que nous faisons",
+        "text": "Notre plateforme analyse votre CV, le confronte sémantiquement à des milliers d'offres et fait remonter celles qui correspondent réellement à votre profil. Elle vous aide ensuite à préparer vos entretiens et à suivre vos candidatures au même endroit."
+      },
+      "values": {
+        "title": "Nos valeurs",
+        "transparency": {
+          "title": "Transparence",
+          "text": "vous gardez le contrôle de vos données et de vos candidatures."
+        },
+        "relevance": {
+          "title": "Pertinence",
+          "text": "un matching basé sur le sens, pas seulement sur des mots-clés."
+        },
+        "privacy": {
+          "title": "Respect de la vie privée",
+          "text": "vos données ne sont jamais revendues."
+        }
+      },
+      "cta": {
+        "title": "Commencer maintenant",
+        "text": "Importez votre CV et laissez l'IA trouver les offres faites pour vous.",
+        "button": {
+          "upload": "Importer mon CV",
+          "contact": "Nous contacter"
+        }
+      }
+    },
+    "contact": {
+      "title": "Contact | Job Search AI",
+      "breadcrumb": {
+        "home": "Accueil",
+        "current": "Contact"
+      },
+      "hero": {
+        "title": "Contactez-nous",
+        "subtitle": "Une question, une suggestion ou un partenariat ? Notre équipe vous répond sous 48 heures ouvrées."
+      },
+      "email": {
+        "title": "Par e-mail",
+        "text": "Le moyen le plus rapide de nous joindre."
+      },
+      "help": {
+        "title": "Besoin d'aide ?",
+        "text": "Consultez d'abord notre foire aux questions, la réponse y est peut-être déjà.",
+        "button": "Voir la FAQ"
+      }
+    },
+    "faq": {
+      "title": "FAQ | Job Search AI",
+      "breadcrumb": {
+        "home": "Accueil",
+        "current": "FAQ"
+      },
+      "hero": {
+        "title": "Foire aux questions",
+        "subtitle": "Les réponses aux questions les plus fréquentes sur Job Search AI."
+      },
+      "items": {
+        "matching": {
+          "question": "Comment fonctionne le matching entre mon CV et les offres ?",
+          "answer": "Nous analysons le contenu de votre CV et le comparons sémantiquement aux offres : l'IA évalue le sens, pas seulement les mots-clés, pour faire remonter les postes réellement adaptés à votre profil."
+        },
+        "security": {
+          "question": "Mes données sont-elles en sécurité ?",
+          "answer": "Vos données ne sont jamais revendues. Elles servent uniquement à vous fournir le service (analyse de CV, matching, suivi de candidatures) et vous pouvez demander leur suppression à tout moment."
+        },
+        "price": {
+          "question": "Le service est-il gratuit ?",
+          "answer": "Vous pouvez importer votre CV et lancer vos premières recherches gratuitement. Des fonctionnalités avancées pourront être proposées ultérieurement."
+        },
+        "formats": {
+          "question": "Quels formats de CV puis-je importer ?",
+          "answer": "Vous pouvez importer un CV au format PDF. Le texte est analysé automatiquement pour en extraire vos compétences et votre expérience."
+        },
+        "interview": {
+          "question": "Comment l'assistant m'aide-t-il à préparer un entretien ?",
+          "answer": "L'assistant simule des questions adaptées à l'offre visée et à votre parcours, puis vous donne un retour pour améliorer vos réponses avant le vrai entretien."
+        }
+      },
+      "contact": {
+        "text": "Vous ne trouvez pas votre réponse ?",
+        "button": "Contactez-nous"
+      }
+    },
+    "terms": {
+      "title": "Conditions d'utilisation | Job Search AI",
+      "breadcrumb": {
+        "home": "Accueil",
+        "current": "Conditions d'utilisation"
+      },
+      "hero": {
+        "title": "Conditions générales d'utilisation"
+      },
+      "lastUpdate": "Dernière mise à jour : 29 juillet 2026",
+      "sections": {
+        "1": {
+          "title": "1. Objet",
+          "text": "Les présentes conditions générales d'utilisation (CGU) encadrent l'accès et l'utilisation du service Job Search AI (ci-après « le Service »). En accédant au Service, vous acceptez sans réserve les présentes CGU."
+        },
+        "2": {
+          "title": "2. Accès au service",
+          "text": "Le Service est accessible gratuitement pour ses fonctionnalités de base. Certaines fonctionnalités requièrent la création d'un compte. Vous êtes responsable de l'exactitude des informations fournies et de la confidentialité de vos identifiants."
+        },
+        "3": {
+          "title": "3. Utilisation du compte",
+          "li1": "Vous vous engagez à ne pas usurper l'identité d'un tiers ;",
+          "li2": "Vous êtes seul responsable de l'usage fait de votre compte ;",
+          "li3": "Tout usage frauduleux ou contraire aux présentes CGU peut entraîner la suspension du compte."
+        },
+        "4": {
+          "title": "4. Contenu et données du candidat",
+          "text": "Vous conservez la propriété des contenus que vous importez (CV, informations de profil). Vous concédez au Service une licence limitée nécessaire à leur traitement aux seules fins de vous fournir les fonctionnalités (analyse, matching, suivi)."
+        },
+        "5": {
+          "title": "5. Responsabilité",
+          "text": "Le Service met en relation des candidats avec des offres d'emploi à titre d'outil d'aide à la décision. Il ne garantit ni l'obtention d'un entretien, ni d'un emploi. Les offres proviennent de sources tierces dont nous ne maîtrisons pas le contenu."
+        },
+        "6": {
+          "title": "6. Propriété intellectuelle",
+          "text": "L'ensemble des éléments du Service est protégé. Toute reproduction non autorisée est interdite."
+        },
+        "7": {
+          "title": "7. Modification des CGU",
+          "text": "Nous pouvons modifier les présentes CGU à tout moment. La version applicable est celle en vigueur lors de votre utilisation."
+        },
+        "8": {
+          "title": "8. Droit applicable",
+          "text": "Les présentes CGU sont soumises au droit français. Pour en savoir plus, consultez notre ",
+          "link": "politique de confidentialité"
+        }
+      }
+    },
+    "privacy": {
+      "title": "Politique de confidentialité | Job Search AI",
+      "breadcrumb": {
+        "home": "Accueil",
+        "current": "Politique de confidentialité"
+      },
+      "hero": {
+        "title": "Politique de confidentialité"
+      },
+      "lastUpdate": "Dernière mise à jour : 29 juillet 2026",
+      "intro": "La présente politique décrit comment Job Search AI collecte, utilise et protège vos données personnelles, conformément au Règlement général sur la protection des données (RGPD).",
+      "sections": {
+        "1": {
+          "title": "1. Responsable du traitement",
+          "text": "Anthony Attia (personne physique), dont les coordonnées figurent dans les ",
+          "link": "mentions légales"
+        },
+        "2": {
+          "title": "2. Données collectées",
+          "li1": "Données de compte : adresse e-mail, nom, identifiants de connexion ;",
+          "li2": "Données de profil : CV, compétences, expériences, préférences de recherche ;",
+          "li3": "Données d'usage : candidatures suivies, interactions avec le Service."
+        },
+        "3": {
+          "title": "3. Finalités",
+          "text": "Vos données sont traitées pour : analyser votre CV, vous proposer des offres pertinentes, gérer votre compte et améliorer le Service."
+        },
+        "4": {
+          "title": "4. Base légale",
+          "text": "Le traitement repose sur l'exécution du service que vous avez demandé et, le cas échéant, sur votre consentement."
+        },
+        "5": {
+          "title": "5. Durée de conservation",
+          "text": "Vos données sont conservées le temps de votre utilisation du Service, puis supprimées ou anonymisées dans un délai raisonnable après la clôture de votre compte."
+        },
+        "6": {
+          "title": "6. Partage des données",
+          "text": "Vos données ne sont jamais revendues. Elles peuvent être traitées par des sous-traitants techniques (hébergement, traitement IA) agissant pour notre compte et tenus à la confidentialité."
+        },
+        "7": {
+          "title": "7. Vos droits",
+          "text": "Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité. Pour les exercer, écrivez-nous à anthony.attia1@gmail.com. Vous pouvez également introduire une réclamation auprès de la CNIL."
+        },
+        "8": {
+          "title": "8. Cookies",
+          "text": "L'utilisation des cookies est détaillée dans notre ",
+          "link": "politique de cookies"
+        }
+      }
+    },
+    "cookies": {
+      "title": "Politique de cookies | Job Search AI",
+      "breadcrumb": {
+        "home": "Accueil",
+        "current": "Cookies"
+      },
+      "hero": {
+        "title": "Politique de cookies"
+      },
+      "lastUpdate": "Dernière mise à jour : 29 juillet 2026",
+      "whatIs": {
+        "title": "Qu'est-ce qu'un cookie ?",
+        "text": "Un cookie est un petit fichier déposé sur votre terminal lors de la visite d'un site. Il permet notamment de vous authentifier, de mémoriser vos préférences et de mesurer l'audience."
+      },
+      "used": {
+        "title": "Cookies que nous utilisons",
+        "table": {
+          "header": {
+            "type": "Type",
+            "purpose": "Finalité",
+            "duration": "Durée"
+          },
+          "essential": {
+            "type": "Essentiels",
+            "purpose": "Authentification et sécurité de la session. Indispensables au fonctionnement du Service.",
+            "duration": "Session"
+          },
+          "preferences": {
+            "type": "Préférences",
+            "purpose": "Mémorisation de la langue et de vos choix d'affichage.",
+            "duration": "12 mois"
+          },
+          "audience": {
+            "type": "Mesure d'audience",
+            "purpose": "Aucun outil de mesure d'audience tiers n'est utilisé actuellement.",
+            "duration": "Non applicable"
+          }
+        }
+      },
+      "manage": {
+        "title": "Gérer vos préférences",
+        "text": "Vous pouvez à tout moment configurer votre navigateur pour refuser les cookies non essentiels. Le refus de certains cookies peut toutefois dégrader votre expérience."
+      },
+      "learnMore": {
+        "title": "En savoir plus",
+        "text": "Pour le traitement de vos données personnelles, consultez notre ",
+        "link": "politique de confidentialité"
+      }
+    },
+    "notice": {
+      "title": "Mentions légales | Job Search AI",
+      "breadcrumb": {
+        "home": "Accueil",
+        "current": "Mentions légales"
+      },
+      "hero": {
+        "title": "Mentions légales"
+      },
+      "lastUpdate": "Dernière mise à jour : 29 juillet 2026",
+      "sections": {
+        "editor": {
+          "title": "Éditeur du site",
+          "text": "Le site Job Search AI (aicarreerfinder.com) est édité par Anthony Attia, personne physique.",
+          "address": "Adresse : 22 rue Édouard Sphar, 98800 Nouméa, Nouvelle-Calédonie."
+        },
+        "director": {
+          "title": "Directeur de la publication",
+          "name": "Anthony Attia."
+        },
+        "contact": {
+          "title": "Contact",
+          "text": "Par e-mail : "
+        },
+        "host": {
+          "title": "Hébergeur",
+          "text": "Le site est hébergé par Hostinger International Ltd, 61 Lordou Vironos str., 6023 Larnaca, Chypre.",
+          "link": "Site web : "
+        },
+        "property": {
+          "title": "Propriété intellectuelle",
+          "text": "L'ensemble des contenus présents sur ce site (textes, logos, interface, code) est protégé par le droit de la propriété intellectuelle. Toute reproduction sans autorisation est interdite."
+        }
+      }
+    }
   }
 }

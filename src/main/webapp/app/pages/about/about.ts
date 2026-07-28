@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslateDirective } from 'app/shared/language';
 
 import { SeoService } from '../shared/seo.service';
 
@@ -8,7 +9,7 @@ import { SeoService } from '../shared/seo.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './about.html',
   styleUrl: '../pages.scss',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslateDirective],
 })
 export default class About {
   constructor() {

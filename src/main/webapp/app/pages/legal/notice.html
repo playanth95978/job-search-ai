@@ -3,39 +3,54 @@
     <div class="container py-4 py-lg-5">
       <nav aria-label="Fil d'Ariane" class="mb-3">
         <ol class="breadcrumb mb-0 small">
-          <li class="breadcrumb-item"><a class="link-light" routerLink="/">Accueil</a></li>
-          <li class="breadcrumb-item active text-white-50" aria-current="page">Mentions légales</li>
+          <li class="breadcrumb-item">
+            <a class="link-light" routerLink="/" jhiTranslate="pages.notice.breadcrumb.home">Accueil</a>
+          </li>
+          <li class="breadcrumb-item active text-white-50" aria-current="page" jhiTranslate="pages.notice.breadcrumb.current">
+            Mentions légales
+          </li>
         </ol>
       </nav>
-      <h1 class="display-6 fw-bold mb-0">Mentions légales</h1>
+      <h1 class="display-6 fw-bold mb-0" jhiTranslate="pages.notice.hero.title">Mentions légales</h1>
     </div>
   </header>
 
   <div class="container py-5">
     <article class="page-prose mx-auto">
-      <p class="text-secondary"><em>Dernière mise à jour : 29 juillet 2026</em></p>
-
-      <h2>Éditeur du site</h2>
-      <p>
-        Le site Job Search AI (<a href="https://aicarreerfinder.com">aicarreerfinder.com</a>) est édité par <strong>Anthony Attia</strong>,
-        personne physique.<br />
-        Adresse&nbsp;: 22 rue Édouard Sphar, 98800 Nouméa, Nouvelle-Calédonie.
+      <p class="text-secondary">
+        <em jhiTranslate="pages.notice.lastUpdate">Dernière mise à jour : 29 juillet 2026</em>
       </p>
 
-      <h2>Directeur de la publication</h2>
-      <p>Anthony Attia.</p>
-
-      <h2>Contact</h2>
-      <p>Par e-mail&nbsp;: <a href="mailto:anthony.attia1@gmail.com">anthony.attia1@gmail.com</a>.</p>
-
-      <h2>Hébergeur</h2>
+      <h2 jhiTranslate="pages.notice.sections.editor.title">Éditeur du site</h2>
       <p>
-        Le site est hébergé par <strong>Hostinger International Ltd</strong>, 61 Lordou Vironos str., 6023 Larnaca, Chypre.<br />
-        Site web&nbsp;: <a href="https://www.hostinger.fr" target="_blank" rel="noopener noreferrer">www.hostinger.fr</a>.
+        <span jhiTranslate="pages.notice.sections.editor.text"
+          >Le site Job Search AI (aicarreerfinder.com) est édité par <strong>Anthony Attia</strong>, personne physique.</span
+        ><br />
+        <span jhiTranslate="pages.notice.sections.editor.address"
+          >Adresse&nbsp;: 22 rue Édouard Sphar, 98800 Nouméa, Nouvelle-Calédonie.</span
+        >
       </p>
 
-      <h2>Propriété intellectuelle</h2>
+      <h2 jhiTranslate="pages.notice.sections.director.title">Directeur de la publication</h2>
+      <p jhiTranslate="pages.notice.sections.director.name">Anthony Attia.</p>
+
+      <h2 jhiTranslate="pages.notice.sections.contact.title">Contact</h2>
       <p>
+        <span jhiTranslate="pages.notice.sections.contact.text">Par e-mail&nbsp;: </span>
+        <a href="mailto:anthony.attia1&#64;gmail.com">anthony.attia1&#64;gmail.com</a>.
+      </p>
+
+      <h2 jhiTranslate="pages.notice.sections.host.title">Hébergeur</h2>
+      <p>
+        <span jhiTranslate="pages.notice.sections.host.text"
+          >Le site est hébergé par <strong>Hostinger International Ltd</strong>, 61 Lordou Vironos str., 6023 Larnaca, Chypre.</span
+        ><br />
+        <span jhiTranslate="pages.notice.sections.host.link">Site web&nbsp;: </span>
+        <a href="https://www.hostinger.fr" target="_blank" rel="noopener noreferrer">www.hostinger.fr</a>.
+      </p>
+
+      <h2 jhiTranslate="pages.notice.sections.property.title">Propriété intellectuelle</h2>
+      <p jhiTranslate="pages.notice.sections.property.text">
         L'ensemble des contenus présents sur ce site (textes, logos, interface, code) est protégé par le droit de la propriété
         intellectuelle. Toute reproduction sans autorisation est interdite.
       </p>

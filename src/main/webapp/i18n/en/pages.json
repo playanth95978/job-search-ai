@@ -1,11 +1,285 @@
 {
   "pages": {
-    "about": { "title": "About | Job Search AI" },
-    "contact": { "title": "Contact | Job Search AI" },
-    "faq": { "title": "FAQ | Job Search AI" },
-    "terms": { "title": "Terms of Use | Job Search AI" },
-    "privacy": { "title": "Privacy Policy | Job Search AI" },
-    "cookies": { "title": "Cookie Policy | Job Search AI" },
-    "notice": { "title": "Legal Notice | Job Search AI" }
+    "about": {
+      "title": "About | Job Search AI",
+      "breadcrumb": {
+        "home": "Home",
+        "current": "About"
+      },
+      "hero": {
+        "title": "About Job Search AI",
+        "subtitle": "We put artificial intelligence at the service of candidates to make job searching faster, fairer and less stressful."
+      },
+      "mission": {
+        "title": "Our Mission",
+        "text": "Searching for a job is time-consuming and often discouraging. Job Search AI automates repetitive tasks — reading offers, sorting, personalizing applications — so you can focus on what really matters: getting the right interviews."
+      },
+      "whatWeDo": {
+        "title": "What We Do",
+        "text": "Our platform analyzes your resume, semantically compares it to thousands of offers and highlights those that actually match your profile. It then helps you prepare for your interviews and track your applications in one place."
+      },
+      "values": {
+        "title": "Our Values",
+        "transparency": {
+          "title": "Transparency",
+          "text": "you stay in control of your data and your applications."
+        },
+        "relevance": {
+          "title": "Relevance",
+          "text": "matching based on meaning, not just keywords."
+        },
+        "privacy": {
+          "title": "Privacy",
+          "text": "your data is never sold."
+        }
+      },
+      "cta": {
+        "title": "Start Now",
+        "text": "Upload your resume and let AI find the offers made for you.",
+        "button": {
+          "upload": "Upload my resume",
+          "contact": "Contact us"
+        }
+      }
+    },
+    "contact": {
+      "title": "Contact | Job Search AI",
+      "breadcrumb": {
+        "home": "Home",
+        "current": "Contact"
+      },
+      "hero": {
+        "title": "Contact Us",
+        "subtitle": "A question, a suggestion or a partnership? Our team will get back to you within 48 business hours."
+      },
+      "email": {
+        "title": "By Email",
+        "text": "The fastest way to reach us."
+      },
+      "help": {
+        "title": "Need Help?",
+        "text": "Check our frequently asked questions first, the answer might already be there.",
+        "button": "View FAQ"
+      }
+    },
+    "faq": {
+      "title": "FAQ | Job Search AI",
+      "breadcrumb": {
+        "home": "Home",
+        "current": "FAQ"
+      },
+      "hero": {
+        "title": "Frequently Asked Questions",
+        "subtitle": "Answers to the most common questions about Job Search AI."
+      },
+      "items": {
+        "matching": {
+          "question": "How does matching between my resume and job offers work?",
+          "answer": "We analyze the content of your resume and compare it semantically to the offers: the AI evaluates the meaning, not just keywords, to highlight positions truly adapted to your profile."
+        },
+        "security": {
+          "question": "Is my data safe?",
+          "answer": "Your data is never sold. It is only used to provide you with the service (resume analysis, matching, application tracking) and you can request its deletion at any time."
+        },
+        "price": {
+          "question": "Is the service free?",
+          "answer": "You can upload your resume and run your first searches for free. Advanced features may be offered later."
+        },
+        "formats": {
+          "question": "What resume formats can I upload?",
+          "answer": "You can upload a resume in PDF format. The text is automatically analyzed to extract your skills and experience."
+        },
+        "interview": {
+          "question": "How does the assistant help me prepare for an interview?",
+          "answer": "The assistant simulates questions adapted to the target offer and your background, then gives you feedback to improve your answers before the real interview."
+        }
+      },
+      "contact": {
+        "text": "Can't find your answer?",
+        "button": "Contact Us"
+      }
+    },
+    "terms": {
+      "title": "Terms of Use | Job Search AI",
+      "breadcrumb": {
+        "home": "Home",
+        "current": "Terms of Use"
+      },
+      "hero": {
+        "title": "General Terms of Use"
+      },
+      "lastUpdate": "Last updated: July 29, 2026",
+      "sections": {
+        "1": {
+          "title": "1. Purpose",
+          "text": "These general terms of use (GTU) govern the access and use of the Job Search AI service (hereinafter \"the Service\"). By accessing the Service, you accept these GTU without reservation."
+        },
+        "2": {
+          "title": "2. Access to Service",
+          "text": "The Service is accessible free of charge for its basic features. Some features require the creation of an account. You are responsible for the accuracy of the information provided and the confidentiality of your credentials."
+        },
+        "3": {
+          "title": "3. Account Use",
+          "li1": "You agree not to impersonate a third party;",
+          "li2": "You are solely responsible for the use made of your account;",
+          "li3": "Any fraudulent use or use contrary to these GTU may lead to account suspension."
+        },
+        "4": {
+          "title": "4. Content and Candidate Data",
+          "text": "You retain ownership of the content you upload (CV, profile information). You grant the Service a limited license necessary for its processing solely for the purpose of providing you with the features (analysis, matching, tracking)."
+        },
+        "5": {
+          "title": "5. Liability",
+          "text": "The Service connects candidates with job offers as a decision-making aid tool. It guarantees neither obtaining an interview nor a job. The offers come from third-party sources whose content we do not control."
+        },
+        "6": {
+          "title": "6. Intellectual Property",
+          "text": "All elements of the Service are protected. Any unauthorized reproduction is prohibited."
+        },
+        "7": {
+          "title": "7. Modification of GTU",
+          "text": "We may modify these GTU at any time. The applicable version is the one in effect at the time of your use."
+        },
+        "8": {
+          "title": "8. Governing Law",
+          "text": "These GTU are subject to French law. To learn more, see our ",
+          "link": "privacy policy"
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy | Job Search AI",
+      "breadcrumb": {
+        "home": "Home",
+        "current": "Privacy Policy"
+      },
+      "hero": {
+        "title": "Privacy Policy"
+      },
+      "lastUpdate": "Last updated: July 29, 2026",
+      "intro": "This policy describes how Job Search AI collects, uses and protects your personal data, in accordance with the General Data Protection Regulation (GDPR).",
+      "sections": {
+        "1": {
+          "title": "1. Data Controller",
+          "text": "Anthony Attia (natural person), whose contact details appear in the ",
+          "link": "legal notice"
+        },
+        "2": {
+          "title": "2. Collected Data",
+          "li1": "Account data: email address, name, login credentials;",
+          "li2": "Profile data: CV, skills, experiences, search preferences;",
+          "li3": "Usage data: tracked applications, interactions with the Service."
+        },
+        "3": {
+          "title": "3. Purposes",
+          "text": "Your data is processed to: analyze your CV, offer you relevant offers, manage your account and improve the Service."
+        },
+        "4": {
+          "title": "4. Legal Basis",
+          "text": "The processing is based on the execution of the service you have requested and, where applicable, on your consent."
+        },
+        "5": {
+          "title": "5. Retention Period",
+          "text": "Your data is kept for the time of your use of the Service, then deleted or anonymized within a reasonable time after the closure of your account."
+        },
+        "6": {
+          "title": "6. Data Sharing",
+          "text": "Your data is never sold. It may be processed by technical subcontractors (hosting, AI processing) acting on our behalf and bound by confidentiality."
+        },
+        "7": {
+          "title": "7. Your Rights",
+          "text": "You have a right of access, rectification, erasure, limitation, opposition and portability. To exercise them, write to us at anthony.attia1@gmail.com. You can also lodge a complaint with the CNIL."
+        },
+        "8": {
+          "title": "8. Cookies",
+          "text": "The use of cookies is detailed in our ",
+          "link": "cookie policy"
+        }
+      }
+    },
+    "cookies": {
+      "title": "Cookie Policy | Job Search AI",
+      "breadcrumb": {
+        "home": "Home",
+        "current": "Cookies"
+      },
+      "hero": {
+        "title": "Cookie Policy"
+      },
+      "lastUpdate": "Last updated: July 29, 2026",
+      "whatIs": {
+        "title": "What is a cookie?",
+        "text": "A cookie is a small file placed on your device when you visit a site. It notably allows you to authenticate, remember your preferences and measure the audience."
+      },
+      "used": {
+        "title": "Cookies we use",
+        "table": {
+          "header": {
+            "type": "Type",
+            "purpose": "Purpose",
+            "duration": "Duration"
+          },
+          "essential": {
+            "type": "Essential",
+            "purpose": "Authentication and session security. Indispensable for the operation of the Service.",
+            "duration": "Session"
+          },
+          "preferences": {
+            "type": "Preferences",
+            "purpose": "Memorization of language and display choices.",
+            "duration": "12 months"
+          },
+          "audience": {
+            "type": "Audience measurement",
+            "purpose": "No third-party audience measurement tools are currently used.",
+            "duration": "Not applicable"
+          }
+        }
+      },
+      "manage": {
+        "title": "Manage your preferences",
+        "text": "You can configure your browser at any time to refuse non-essential cookies. Refusing some cookies may however degrade your experience."
+      },
+      "learnMore": {
+        "title": "Learn more",
+        "text": "For the processing of your personal data, see our ",
+        "link": "privacy policy"
+      }
+    },
+    "notice": {
+      "title": "Legal Notice | Job Search AI",
+      "breadcrumb": {
+        "home": "Home",
+        "current": "Legal Notice"
+      },
+      "hero": {
+        "title": "Legal Notice"
+      },
+      "lastUpdate": "Last updated: July 29, 2026",
+      "sections": {
+        "editor": {
+          "title": "Site Publisher",
+          "text": "The Job Search AI site (aicarreerfinder.com) is published by Anthony Attia, a natural person.",
+          "address": "Address: 22 rue Édouard Sphar, 98800 Nouméa, New Caledonia."
+        },
+        "director": {
+          "title": "Publication Director",
+          "name": "Anthony Attia."
+        },
+        "contact": {
+          "title": "Contact",
+          "text": "By email: "
+        },
+        "host": {
+          "title": "Hosting Provider",
+          "text": "The site is hosted by Hostinger International Ltd, 61 Lordou Vironos str., 6023 Larnaca, Cyprus.",
+          "link": "Website: "
+        },
+        "property": {
+          "title": "Intellectual Property",
+          "text": "All content present on this site (text, logos, interface, code) is protected by intellectual property law. Any reproduction without authorization is prohibited."
+        }
+      }
+    }
   }
 }

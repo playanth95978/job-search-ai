@@ -154,7 +154,8 @@
       "cvAnalysis": "Resume analysis",
       "matching": "Resume ↔ Job matching",
       "coverLetter": "Cover letter generator",
-      "interviewSimulator": "Interview simulator"
+      "interviewSimulator": "Interview simulator",
+      "interviewSimulatorShort": "Interview simulator"
     },
     "navigation": {
       "title": "Navigation",

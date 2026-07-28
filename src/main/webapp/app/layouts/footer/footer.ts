@@ -61,7 +61,7 @@ const AI_SEARCH_LINKS: readonly FooterLink[] = [
   { labelKey: 'footer.aiSearch.cvAnalysis', label: 'Analyse de CV', routerLink: '/job-copilot/onboarding' },
   { labelKey: 'footer.aiSearch.matching', label: 'Matching CV ↔ Offres', routerLink: '/search' },
   { labelKey: 'footer.aiSearch.coverLetter', label: 'Générateur de lettres de motivation', routerLink: '/job-copilot/cv-builder' },
-  { labelKey: 'footer.aiSearch.interviewSimulator', label: "Simulateur d'entretien", routerLink: '/job-copilot/interview' },
+  { labelKey: 'footer.aiSearch.interviewSimulatorShort', label: "Simulateur d'entretien", routerLink: '/job-copilot/interview' },
 ];
 
 @Component({

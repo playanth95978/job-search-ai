@@ -154,7 +154,8 @@
       "cvAnalysis": "Analyse de CV",
       "matching": "Matching CV ↔ Offres",
       "coverLetter": "Générateur de lettres de motivation",
-      "interviewSimulator": "Simulateur d'entretien"
+      "interviewSimulator": "Simulateur d'entretien",
+      "interviewSimulatorShort": "Simu Entretien"
     },
     "navigation": {
       "title": "Navigation",

@@ -3,64 +3,72 @@
     <div class="container py-4 py-lg-5">
       <nav aria-label="Fil d'Ariane" class="mb-3">
         <ol class="breadcrumb mb-0 small">
-          <li class="breadcrumb-item"><a class="link-light" routerLink="/">Accueil</a></li>
-          <li class="breadcrumb-item active text-white-50" aria-current="page">Cookies</li>
+          <li class="breadcrumb-item">
+            <a class="link-light" routerLink="/" jhiTranslate="pages.cookies.breadcrumb.home">Accueil</a>
+          </li>
+          <li class="breadcrumb-item active text-white-50" aria-current="page" jhiTranslate="pages.cookies.breadcrumb.current">Cookies</li>
         </ol>
       </nav>
-      <h1 class="display-6 fw-bold mb-0">Politique de cookies</h1>
+      <h1 class="display-6 fw-bold mb-0" jhiTranslate="pages.cookies.hero.title">Politique de cookies</h1>
     </div>
   </header>
 
   <div class="container py-5">
     <article class="page-prose mx-auto">
-      <p class="text-secondary"><em>Dernière mise à jour : 29 juillet 2026</em></p>
+      <p class="text-secondary">
+        <em jhiTranslate="pages.cookies.lastUpdate">Dernière mise à jour : 29 juillet 2026</em>
+      </p>
 
-      <h2>Qu'est-ce qu'un cookie&nbsp;?</h2>
-      <p>
+      <h2 jhiTranslate="pages.cookies.whatIs.title">Qu'est-ce qu'un cookie&nbsp;?</h2>
+      <p jhiTranslate="pages.cookies.whatIs.text">
         Un cookie est un petit fichier déposé sur votre terminal lors de la visite d'un site. Il permet notamment de vous authentifier, de
         mémoriser vos préférences et de mesurer l'audience.
       </p>
 
-      <h2>Cookies que nous utilisons</h2>
+      <h2 jhiTranslate="pages.cookies.used.title">Cookies que nous utilisons</h2>
       <div class="table-responsive">
         <table class="table table-bordered align-middle">
           <thead class="table-light">
             <tr>
-              <th scope="col">Type</th>
-              <th scope="col">Finalité</th>
-              <th scope="col">Durée</th>
+              <th scope="col" jhiTranslate="pages.cookies.used.table.header.type">Type</th>
+              <th scope="col" jhiTranslate="pages.cookies.used.table.header.purpose">Finalité</th>
+              <th scope="col" jhiTranslate="pages.cookies.used.table.header.duration">Durée</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Essentiels</td>
-              <td>Authentification et sécurité de la session. Indispensables au fonctionnement du Service.</td>
-              <td>Session</td>
+              <td jhiTranslate="pages.cookies.used.table.essential.type">Essentiels</td>
+              <td jhiTranslate="pages.cookies.used.table.essential.purpose">
+                Authentification et sécurité de la session. Indispensables au fonctionnement du Service.
+              </td>
+              <td jhiTranslate="pages.cookies.used.table.essential.duration">Session</td>
             </tr>
             <tr>
-              <td>Préférences</td>
-              <td>Mémorisation de la langue et de vos choix d'affichage.</td>
-              <td>12 mois</td>
+              <td jhiTranslate="pages.cookies.used.table.preferences.type">Préférences</td>
+              <td jhiTranslate="pages.cookies.used.table.preferences.purpose">Mémorisation de la langue et de vos choix d'affichage.</td>
+              <td jhiTranslate="pages.cookies.used.table.preferences.duration">12 mois</td>
             </tr>
             <tr>
-              <td>Mesure d'audience</td>
-              <td>Aucun outil de mesure d'audience tiers n'est utilisé actuellement.</td>
-              <td>Non applicable</td>
+              <td jhiTranslate="pages.cookies.used.table.audience.type">Mesure d'audience</td>
+              <td jhiTranslate="pages.cookies.used.table.audience.purpose">
+                Aucun outil de mesure d'audience tiers n'est utilisé actuellement.
+              </td>
+              <td jhiTranslate="pages.cookies.used.table.audience.duration">Non applicable</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h2>Gérer vos préférences</h2>
-      <p>
+      <h2 jhiTranslate="pages.cookies.manage.title">Gérer vos préférences</h2>
+      <p jhiTranslate="pages.cookies.manage.text">
         Vous pouvez à tout moment configurer votre navigateur pour refuser les cookies non essentiels. Le refus de certains cookies peut
         toutefois dégrader votre expérience.
       </p>
 
-      <h2>En savoir plus</h2>
+      <h2 jhiTranslate="pages.cookies.learnMore.title">En savoir plus</h2>
       <p>
-        Pour le traitement de vos données personnelles, consultez notre
-        <a routerLink="/legal/confidentialite">politique de confidentialité</a>.
+        <span jhiTranslate="pages.cookies.learnMore.text">Pour le traitement de vos données personnelles, consultez notre </span>
+        <a routerLink="/legal/confidentialite" jhiTranslate="pages.cookies.learnMore.link">politique de confidentialité</a>.
       </p>
     </article>
   </div>
