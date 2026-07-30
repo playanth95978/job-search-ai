@@ -37,7 +37,7 @@ export class ApplyOfferComponent {
         const offer = this.offer();
         if (lang && offer) {
           this.translating.set(true);
-          this.jobOfferService.translateJob(offer as JobOffer, lang).subscribe({
+          this.jobOfferService.translateJob(offer, lang).subscribe({
             next: translated => {
               this.translatedOffer.set(translated);
               this.translating.set(false);

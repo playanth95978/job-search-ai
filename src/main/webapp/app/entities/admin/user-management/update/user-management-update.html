@@ -2,7 +2,12 @@
   <div class="col-md-8">
     <div class="card shadow border-0 mt-4">
       <div class="card-header bg-primary text-white p-3">
-        <h2 id="myUserLabel" data-cy="UserManagementCreateUpdateHeading" class="m-0 h4" jhiTranslate="userManagement.home.createOrEditLabel">
+        <h2
+          id="myUserLabel"
+          data-cy="UserManagementCreateUpdateHeading"
+          class="m-0 h4"
+          jhiTranslate="userManagement.home.createOrEditLabel"
+        >
           Créer ou éditer un utilisateur
         </h2>
       </div>
@@ -23,7 +28,15 @@
               <label class="form-label fw-bold" for="field_login" jhiTranslate="userManagement.login">Login</label>
               <div class="input-group">
                 <span class="input-group-text"><fa-icon icon="user" /></span>
-                <input type="text" id="field_login" class="form-control" name="login" formControlName="login" data-cy="login" placeholder="Ex: johndoe" />
+                <input
+                  type="text"
+                  id="field_login"
+                  class="form-control"
+                  name="login"
+                  formControlName="login"
+                  data-cy="login"
+                  placeholder="Ex: johndoe"
+                />
               </div>
 
               @let loginRef = editForm.get('login')!;
@@ -33,10 +46,14 @@
                     <div jhiTranslate="entity.validation.required">Ce champ est obligatoire.</div>
                   }
                   @if (loginRef?.errors?.maxlength) {
-                    <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '50' }">Ce champ doit faire au maximum 50 caractères.</div>
+                    <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '50' }">
+                      Ce champ doit faire au maximum 50 caractères.
+                    </div>
                   }
                   @if (loginRef?.errors?.pattern) {
-                    <div jhiTranslate="entity.validation.patternLogin">Ce champ ne peut contenir que des lettres, des chiffres ou des adresses e-mail.</div>
+                    <div jhiTranslate="entity.validation.patternLogin">
+                      Ce champ ne peut contenir que des lettres, des chiffres ou des adresses e-mail.
+                    </div>
                   }
                 </div>
               }
@@ -46,13 +63,23 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label fw-bold" for="field_firstName" jhiTranslate="userManagement.firstName">Prénom</label>
-              <input type="text" id="field_firstName" class="form-control" name="firstName" formControlName="firstName" data-cy="firstName" placeholder="John" />
+              <input
+                type="text"
+                id="field_firstName"
+                class="form-control"
+                name="firstName"
+                formControlName="firstName"
+                data-cy="firstName"
+                placeholder="John"
+              />
 
               @let firstNameRef = editForm.get('firstName')!;
               @if (firstNameRef.invalid && (firstNameRef.dirty || firstNameRef.touched)) {
                 <div class="text-danger small mt-1">
                   @if (firstNameRef?.errors?.maxlength) {
-                    <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '50' }">Ce champ doit faire au maximum 50 caractères.</div>
+                    <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '50' }">
+                      Ce champ doit faire au maximum 50 caractères.
+                    </div>
                   }
                 </div>
               }
@@ -60,13 +87,23 @@
 
             <div class="col-md-6 mb-3">
               <label class="form-label fw-bold" for="field_lastName" jhiTranslate="userManagement.lastName">Nom</label>
-              <input type="text" id="field_lastName" class="form-control" name="lastName" formControlName="lastName" data-cy="lastName" placeholder="Doe" />
+              <input
+                type="text"
+                id="field_lastName"
+                class="form-control"
+                name="lastName"
+                formControlName="lastName"
+                data-cy="lastName"
+                placeholder="Doe"
+              />
 
               @let lastNameRef = editForm.get('lastName')!;
               @if (lastNameRef.invalid && (lastNameRef.dirty || lastNameRef.touched)) {
                 <div class="text-danger small mt-1">
                   @if (lastNameRef?.errors?.maxlength) {
-                    <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '50' }">Ce champ doit faire au maximum 50 caractères.</div>
+                    <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '50' }">
+                      Ce champ doit faire au maximum 50 caractères.
+                    </div>
                   }
                 </div>
               }
@@ -77,7 +114,15 @@
             <label class="form-label fw-bold" for="field_email" jhiTranslate="userManagement.email">Email</label>
             <div class="input-group">
               <span class="input-group-text"><fa-icon icon="envelope" /></span>
-              <input type="email" id="field_email" class="form-control" name="email" formControlName="email" data-cy="email" placeholder="john.doe@example.com" />
+              <input
+                type="email"
+                id="field_email"
+                class="form-control"
+                name="email"
+                formControlName="email"
+                data-cy="email"
+                placeholder="john.doe@example.com"
+              />
             </div>
 
             @let emailRef = editForm.get('email')!;
@@ -87,10 +132,14 @@
                   <div jhiTranslate="entity.validation.required">Ce champ est obligatoire.</div>
                 }
                 @if (emailRef?.errors?.maxlength) {
-                  <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '100' }">Ce champ doit faire au maximum 100 caractères.</div>
+                  <div jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '100' }">
+                    Ce champ doit faire au maximum 100 caractères.
+                  </div>
                 }
                 @if (emailRef?.errors?.minlength) {
-                  <div jhiTranslate="entity.validation.minlength" [translateValues]="{ min: '5' }">Ce champ doit faire au moins 5 caractères.</div>
+                  <div jhiTranslate="entity.validation.minlength" [translateValues]="{ min: '5' }">
+                    Ce champ doit faire au moins 5 caractères.
+                  </div>
                 }
                 @if (emailRef?.errors?.email) {
                   <div jhiTranslate="global.messages.validate.email.invalid">Votre email n&apos;est pas valide.</div>
@@ -103,7 +152,15 @@
             <label class="form-label fw-bold" for="field_password">Mot de passe</label>
             <div class="input-group">
               <span class="input-group-text"><fa-icon icon="lock" /></span>
-              <input type="password" id="field_password" class="form-control" name="password" formControlName="password" data-cy="password" placeholder="••••••••" />
+              <input
+                type="password"
+                id="field_password"
+                class="form-control"
+                name="password"
+                formControlName="password"
+                data-cy="password"
+                placeholder="••••••••"
+              />
             </div>
             <div class="form-text small">
               @if (editForm.value.id) {
@@ -171,7 +228,7 @@
 
             <button type="submit" [disabled]="editForm.invalid || isSaving()" class="btn btn-primary px-4" data-cy="entityCreateSaveButton">
               @if (isSaving()) {
-                <fa-icon icon="sync" [animation]="isSaving() ? 'spin' : undefined"/>
+                <fa-icon icon="sync" [animation]="isSaving() ? 'spin' : undefined" />
               } @else {
                 <fa-icon icon="save" />
               }

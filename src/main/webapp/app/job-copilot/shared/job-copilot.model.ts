@@ -106,9 +106,7 @@ export interface UserPreferenceDto {
   preferredLocations: string[];
 }
 
-export interface ApplicationStats {
-  [key: string]: number;
-}
+export type ApplicationStats = Record<string, number>;
 
 export interface CvReview {
   score: number;

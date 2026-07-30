@@ -49,7 +49,10 @@
                 <span><fa-icon icon="location-dot"></fa-icon> {{ profile()!.location }}</span>
               }
               @if (profile()!.yearsOfExperience) {
-                <span><fa-icon icon="briefcase"></fa-icon> {{ profile()!.yearsOfExperience }} <span jhiTranslate="jobCopilot.onboarding.success.years">years</span></span>
+                <span
+                  ><fa-icon icon="briefcase"></fa-icon> {{ profile()!.yearsOfExperience }}
+                  <span jhiTranslate="jobCopilot.onboarding.success.years">years</span></span
+                >
               }
             </div>
           </div>
@@ -72,7 +75,8 @@
             <div class="jc-items-list">
               @for (edu of profile()!.education ?? []; track edu.id) {
                 <div class="jc-item">
-                  <strong>{{ edu.degree }}</strong> @if (edu.school) {
+                  <strong>{{ edu.degree }}</strong>
+                  @if (edu.school) {
                     <span><span jhiTranslate="jobCopilot.onboarding.success.at">at</span> {{ edu.school }}</span>
                   }
                 </div>
@@ -87,7 +91,8 @@
             <div class="jc-items-list">
               @for (cert of profile()!.certifications ?? []; track cert.id) {
                 <div class="jc-item">
-                  <strong>{{ cert.name }}</strong> @if (cert.issuer) {
+                  <strong>{{ cert.name }}</strong>
+                  @if (cert.issuer) {
                     <span><span jhiTranslate="jobCopilot.onboarding.success.from">from</span> {{ cert.issuer }}</span>
                   }
                 </div>
@@ -116,7 +121,9 @@
         <h3 jhiTranslate="jobCopilot.onboarding.dropzone.title">Drag & drop your CV here</h3>
         <p jhiTranslate="jobCopilot.onboarding.dropzone.or">or</p>
         <input type="file" #fileInput accept=".pdf,.docx" (change)="onFileSelected($event)" hidden />
-        <button class="jc-btn jc-btn-primary" (click)="fileInput.click()"><fa-icon icon="folder-open"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.dropzone.browse">Browse files</span></button>
+        <button class="jc-btn jc-btn-primary" (click)="fileInput.click()">
+          <fa-icon icon="folder-open"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.dropzone.browse">Browse files</span>
+        </button>
         <p class="jc-dropzone-hint" jhiTranslate="jobCopilot.onboarding.dropzone.hint">Supports PDF and DOCX formats</p>
       </div>
     </div>

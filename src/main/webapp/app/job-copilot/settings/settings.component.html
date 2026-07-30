@@ -44,17 +44,35 @@
       <h3 jhiTranslate="jobCopilot.settings.preferences.title"><fa-icon icon="star"></fa-icon> Preferences</h3>
       <div class="jc-form-row">
         <label class="jc-label" jhiTranslate="jobCopilot.settings.preferences.roles">Preferred Roles</label>
-        <input type="text" class="jc-input" [(ngModel)]="rolesInput" name="roles" [placeholder]="'jobCopilot.settings.preferences.roles' | translate" />
+        <input
+          type="text"
+          class="jc-input"
+          [(ngModel)]="rolesInput"
+          name="roles"
+          [placeholder]="'jobCopilot.settings.preferences.roles' | translate"
+        />
         <span class="jc-hint" jhiTranslate="jobCopilot.settings.preferences.rolesHint">Comma separated</span>
       </div>
       <div class="jc-form-row">
         <label class="jc-label" jhiTranslate="jobCopilot.settings.preferences.excluded">Excluded Technologies</label>
-        <input type="text" class="jc-input" [(ngModel)]="excludedInput" name="excluded" [placeholder]="'jobCopilot.settings.preferences.excluded' | translate" />
+        <input
+          type="text"
+          class="jc-input"
+          [(ngModel)]="excludedInput"
+          name="excluded"
+          [placeholder]="'jobCopilot.settings.preferences.excluded' | translate"
+        />
         <span class="jc-hint" jhiTranslate="jobCopilot.settings.preferences.excludedHint">Technologies you want to avoid</span>
       </div>
       <div class="jc-form-row">
         <label class="jc-label" jhiTranslate="jobCopilot.settings.preferences.locations">Preferred Locations</label>
-        <input type="text" class="jc-input" [(ngModel)]="locationsInput" name="locations" [placeholder]="'jobCopilot.settings.preferences.locations' | translate" />
+        <input
+          type="text"
+          class="jc-input"
+          [(ngModel)]="locationsInput"
+          name="locations"
+          [placeholder]="'jobCopilot.settings.preferences.locations' | translate"
+        />
         <span class="jc-hint" jhiTranslate="jobCopilot.settings.preferences.locationsHint">Comma separated</span>
       </div>
     </div>
@@ -62,13 +80,16 @@
     <div class="jc-form-actions">
       <button type="submit" class="jc-btn jc-btn-primary" [disabled]="saving()">
         @if (saving()) {
-          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon> <span jhiTranslate="jobCopilot.settings.actions.saving">Saving...</span>
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.settings.actions.saving">Saving...</span>
         } @else {
           <fa-icon icon="save"></fa-icon> <span jhiTranslate="jobCopilot.settings.actions.save">Save Preferences</span>
         }
       </button>
       @if (saved()) {
-        <span class="jc-saved"><fa-icon icon="circle-check"></fa-icon> <span jhiTranslate="jobCopilot.settings.actions.saved">Saved!</span></span>
+        <span class="jc-saved"
+          ><fa-icon icon="circle-check"></fa-icon> <span jhiTranslate="jobCopilot.settings.actions.saved">Saved!</span></span
+        >
       }
     </div>
   </form>

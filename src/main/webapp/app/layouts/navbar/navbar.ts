@@ -40,7 +40,6 @@ export default class Navbar implements OnInit {
   isNavbarCollapsed = signal(true);
   readonly languages = LANGUAGES;
   openAPIEnabled = signal(false);
-  readonly version: string;
   account = inject(AccountService).account;
 
   private readonly themeService = inject(ThemeService);
@@ -51,15 +50,6 @@ export default class Navbar implements OnInit {
   private readonly stateStorageService = inject(StateStorageService);
   private readonly profileService = inject(ProfileService);
   private readonly router = inject(Router);
-
-  constructor() {
-    const { VERSION } = environment;
-    if (VERSION) {
-      this.version = VERSION.toLowerCase().startsWith('v') ? VERSION : `v${VERSION}`;
-    } else {
-      this.version = '';
-    }
-  }
 
   ngOnInit(): void {
     this.profileService.getProfileInfo().subscribe(profileInfo => {

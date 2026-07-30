@@ -78,7 +78,7 @@ export class ConversationFormService {
   }
 
   getConversation(form: ConversationFormGroup): IConversation | NewConversation {
-    return this.convertConversationRawValueToConversation(form.getRawValue() as ConversationFormRawValue | NewConversationFormRawValue);
+    return this.convertConversationRawValueToConversation(form.getRawValue());
   }
 
   resetForm(form: ConversationFormGroup, conversation: ConversationFormGroupInput): void {

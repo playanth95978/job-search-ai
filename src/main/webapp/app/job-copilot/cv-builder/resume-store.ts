@@ -175,21 +175,18 @@ export class ResumeStore {
   // ---- generic list helpers ----------------------------------------------
 
   private addItem<K extends keyof Resume>(key: K, item: Resume[K] extends (infer T)[] ? T : never): void {
-    this.mutate(r => ({ ...r, [key]: [...(r[key] as unknown[]), item] }) as Resume);
+    this.mutate(r => ({ ...r, [key]: [...(r[key] as unknown[]), item] }));
   }
 
   private removeItem(key: keyof Resume, id: string): void {
-    this.mutate(r => ({ ...r, [key]: (r[key] as { id: string }[]).filter(it => it.id !== id) }) as Resume);
+    this.mutate(r => ({ ...r, [key]: (r[key] as { id: string }[]).filter(it => it.id !== id) }));
   }
 
   private patchItem(key: keyof Resume, id: string, patch: Record<string, unknown>): void {
-    this.mutate(
-      r =>
-        ({
-          ...r,
-          [key]: (r[key] as { id: string }[]).map(it => (it.id === id ? { ...it, ...patch } : it)),
-        }) as Resume,
-    );
+    this.mutate(r => ({
+      ...r,
+      [key]: (r[key] as { id: string }[]).map(it => (it.id === id ? { ...it, ...patch } : it)),
+    }));
   }
 
   private moveItem(key: keyof Resume, id: string, dir: -1 | 1): void {
@@ -199,7 +196,7 @@ export class ResumeStore {
       const j = i + dir;
       if (i < 0 || j < 0 || j >= list.length) return r;
       [list[i], list[j]] = [list[j], list[i]];
-      return { ...r, [key]: list } as Resume;
+      return { ...r, [key]: list };
     });
   }
 

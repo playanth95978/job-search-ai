@@ -40,7 +40,6 @@ export class GoogleLoginCallbackComponent implements OnInit {
           });
         },
         error: err => {
-          // eslint-disable-next-line no-console
           console.error('Google login exchange failed', err);
           this.router.navigate(['/login'], { queryParams: { error: true } });
         },

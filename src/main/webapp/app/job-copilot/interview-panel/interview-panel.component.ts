@@ -66,7 +66,7 @@ export class InterviewPanelComponent implements OnInit {
           this.selectedJobOfferId.set(offers[0].id!);
         }
       },
-      error: () => {},
+      error() {},
     });
   }
 

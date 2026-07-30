@@ -3,9 +3,6 @@
     <a (click)="collapseNavbar()" class="navbar-brand jc-navbar-brand d-flex align-items-center" routerLink="/">
       <span class="logo-img me-2"></span>
       <span class="navbar-title fw-bold" jhiTranslate="global.title">Aiassistant</span>
-      @if (version) {
-        <span class="navbar-version small ms-2 d-none d-md-inline">{{ version }}</span>
-      }
     </a>
 
     <button (click)="toggleNavbar()" aria-label="Toggle navigation" class="navbar-toggler" type="button">

@@ -29,7 +29,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.service.radarUnreadCount().subscribe({
       next: r => this.radarUnread.set(r.count),
-      error: () => {},
+      error() {},
     });
     this.service.getProfile().subscribe({
       next: p => {
@@ -46,7 +46,7 @@ export class DashboardComponent implements OnInit {
         this.stats.set(s);
         this.statsEntries.set(Object.entries(s).filter(([, v]) => v > 0));
       },
-      error: () => {},
+      error() {},
     });
   }
 

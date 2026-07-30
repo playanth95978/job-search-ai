@@ -1,13 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  signal,
-  viewChild
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -23,6 +15,7 @@ import { RegisterService } from './register.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslateDirective, TranslateModule, ReactiveFormsModule, PasswordStrengthBar],
   templateUrl: './register.html',
+  styleUrl: './register.scss',
 })
 export default class Register implements AfterViewInit {
   login = viewChild.required<ElementRef>('login');

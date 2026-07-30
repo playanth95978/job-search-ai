@@ -48,7 +48,7 @@ export class InterviewComponent implements OnInit {
           this.selectedJobOfferId.set(offers[0].id!);
         }
       },
-      error: () => {},
+      error() {},
     });
   }
 
@@ -116,9 +116,9 @@ export class InterviewComponent implements OnInit {
         this.messages.set(
           history
             .filter(m => m.type === 'USER' || m.type === 'ASSISTANT')
-            .map(m => ({ role: m.type === 'USER' ? 'candidate' : 'recruiter', text: m.content }) as InterviewChatMessage),
+            .map(m => ({ role: m.type === 'USER' ? 'candidate' : 'recruiter', text: m.content })),
         );
-        this.conversationId.set(conversation.id!);
+        this.conversationId.set(conversation.id);
         this.loading.set(false);
       },
       error: err => {

@@ -57,7 +57,7 @@ describe('Main', () => {
     const defaultPageTitle = 'global.title';
     const parentRoutePageTitle = 'parentTitle';
     const childRoutePageTitle = 'childTitle';
-    const langChangeEvent: LangChangeEvent = { lang: 'fr', translations: {} as InterpolatableTranslationObject };
+    const langChangeEvent: LangChangeEvent = { lang: 'fr', translations: {} };
 
     beforeEach(() => {
       routerState.snapshot.root = { data: {} };
@@ -212,13 +212,13 @@ describe('Main', () => {
       comp.ngOnInit();
 
       // WHEN
-      langChangeSubject.next({ lang: 'lang1', translations: {} as InterpolatableTranslationObject });
+      langChangeSubject.next({ lang: 'lang1', translations: {} });
 
       // THEN
       expect(document.querySelector('html')?.getAttribute('lang')).toEqual('lang1');
 
       // WHEN
-      langChangeSubject.next({ lang: 'lang2', translations: {} as InterpolatableTranslationObject });
+      langChangeSubject.next({ lang: 'lang2', translations: {} });
 
       // THEN
       expect(document.querySelector('html')?.getAttribute('lang')).toEqual('lang2');

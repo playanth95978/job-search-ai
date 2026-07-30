@@ -63,10 +63,10 @@ export default class LoginComponent implements OnInit, AfterViewInit {
 
   loginWithGoogle(): void {
     this.http.get<{ url: string }>('/api/google-drive/oauth/login-url').subscribe({
-      next: ({ url }) => {
+      next({ url }) {
         window.location.href = url;
       },
-      error: () => {
+      error() {
         // fallback direct redirect si l'endpoint échoue
         window.location.href = '/api/google-drive/oauth/login';
       },
