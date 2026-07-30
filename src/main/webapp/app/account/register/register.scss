@@ -1,0 +1,141 @@
+.register-container {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top right, rgba(var(--bs-primary-rgb), 0.1), transparent),
+    radial-gradient(circle at bottom left, rgba(var(--bs-info-rgb), 0.1), transparent);
+  padding: 2rem 1rem;
+}
+
+.register-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  padding: 3rem;
+  width: 100%;
+  max-width: 500px;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.15);
+  }
+}
+
+.register-title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form-floating {
+  margin-bottom: 1.5rem;
+
+  .form-control {
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+    padding-left: 2.5rem;
+
+    &:focus {
+      border-color: var(--bs-primary);
+      box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), 0.1);
+      background-color: #fff;
+    }
+  }
+
+  label {
+    padding-left: 2.5rem;
+  }
+
+  i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    color: var(--bs-gray-500);
+    transition: color 0.2s ease;
+  }
+
+  .form-control:focus ~ i {
+    color: var(--bs-primary);
+  }
+}
+
+.btn-register {
+  border-radius: 12px;
+  padding: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
+  border: none;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(var(--bs-primary-rgb), 0.4);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.alert {
+  border-radius: 16px;
+  border: none;
+  backdrop-filter: blur(5px);
+}
+
+.validation-messages {
+  min-height: 20px;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.password-strength-container {
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+// Animation for appearance
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-card {
+  animation: fadeInUp 0.6s ease-out;
+}

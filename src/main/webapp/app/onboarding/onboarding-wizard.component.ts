@@ -111,10 +111,10 @@ export class OnboardingWizardComponent implements OnInit {
     const first = parts.shift() ?? '';
     const profileFormsControls = this.profileForm.controls;
     this.profileForm.patchValue({
-      firstName: profileFormsControls.firstName.value || first,
-      lastName: profileFormsControls.lastName.value || parts.join(' '),
-      title: profileFormsControls.title.value || (p.preferredRoles?.[0] ?? ''),
-      location: profileFormsControls.location.value || (p.location ?? ''),
+      firstName: profileFormsControls.firstName.value ?? first,
+      lastName: profileFormsControls.lastName.value ?? parts.join(' '),
+      title: profileFormsControls.title.value ?? p.preferredRoles?.[0] ?? '',
+      location: profileFormsControls.location.value ?? p.location ?? '',
     });
   }
 
@@ -141,7 +141,7 @@ export class OnboardingWizardComponent implements OnInit {
     const v = this.prefsForm.getRawValue();
     return {
       remoteOnly: v.remoteOnly ?? false,
-      contractType: v.contractType || undefined,
+      contractType: v.contractType ?? undefined,
       salaryMin: v.salaryMin ?? undefined,
       salaryMax: v.salaryMax ?? undefined,
       preferredRoles: v.preferredRoles ?? [],
