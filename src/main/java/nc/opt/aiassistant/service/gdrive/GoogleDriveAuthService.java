@@ -29,8 +29,7 @@ public class GoogleDriveAuthService {
     private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
     private static final String USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
-    private static final String SCOPES =
-        "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
+    private static final String SCOPES = " https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile";
 
     private final ApplicationProperties.GoogleDrive config;
     private final WebClient webClient;
