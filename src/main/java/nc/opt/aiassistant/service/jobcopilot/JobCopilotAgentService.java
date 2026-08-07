@@ -1,6 +1,9 @@
 package nc.opt.aiassistant.service.jobcopilot;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +15,8 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -34,6 +39,10 @@ public class JobCopilotAgentService {
         Use the available tools whenever they can answer the request with real data instead of guessing:
         - search job offers, match the user's profile, read their CV profile, list/update their applications,
           generate a cover letter, or compare two locations.
+        - for job offers that are NOT in the internal database (external companies, roles posted only online,
+          international/remote listings), use the web search tool to look them up on the internet, then
+          summarize the findings with their source links. Prefer the internal job-search tool first; fall
+          back to web search when it returns nothing relevant.
         The tools already act on behalf of the signed-in user — never ask for or invent a user id.
         Be concise and practical. Answer in the user's language (French by default for local queries).
         If the user has no CV/profile yet, invite them to upload one before profile-based actions.
@@ -44,13 +53,27 @@ public class JobCopilotAgentService {
     public JobCopilotAgentService(
         @Qualifier("mistralAiChatModel") ChatModel chatModel,
         ChatMemoryRepository chatMemoryRepository,
-        JobAgentToolbox jobAgentToolbox
+        JobAgentToolbox jobAgentToolbox,
+        ObjectProvider<ToolCallbackProvider> mcpToolCallbackProviders
     ) {
         ChatMemory chatMemory = MessageWindowChatMemory.builder().chatMemoryRepository(chatMemoryRepository).maxMessages(20).build();
+
+        // Outils par défaut = outils internes (@Tool) + fournisseurs d'outils MCP externes (recherche web).
+        // defaultTools(Object...) accepte un mélange hétérogène (beans @Tool, ToolCallbackProvider, collections)
+        // et reste la seule API non dépréciée en Spring AI 2.0. Les serveurs MCP sont optionnels : si aucun
+        // n'est configuré/joignable, l'agent démarre quand même avec ses seuls outils internes.
+        List<Object> defaultTools = new ArrayList<>(Arrays.asList(jobAgentToolbox.tools()));
+        mcpToolCallbackProviders.forEach(defaultTools::add);
+        long mcpToolCount = mcpToolCallbackProviders
+            .stream()
+            .flatMap(provider -> Arrays.stream(provider.getToolCallbacks()))
+            .count();
+        log.info("Job Copilot : {} outil(s) MCP externe(s) chargé(s)", mcpToolCount);
+
         this.chatClient = ChatClient.builder(chatModel)
             .defaultSystem(SYSTEM_PROMPT)
             .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-            .defaultTools(jobAgentToolbox.tools())
+            .defaultTools(defaultTools)
             .build();
     }
 

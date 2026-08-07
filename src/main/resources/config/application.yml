@@ -122,6 +122,18 @@ spring:
             - mxbai-embed-large
             - nomic-embed-text
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    mcp:
+      client:
+        enabled: true
+        # Outils MCP externes exposés à l'agent Job Copilot : recherche web d'offres d'emploi.
+        # Serveur open-websearch (aas-ee/open-websearch) : multi-moteurs (duckduckgo, bing, brave...),
+        # gratuit, sans clé API, sans Python. Lancé comme conteneur sidecar en HTTP -> on s'y connecte
+        # en Streamable HTTP (endpoint /mcp par défaut ; SSE est déprécié en Spring AI 2.0).
+        # URL surchargeable par env. Dev : http://localhost:3000. Prod : http://open-websearch:3000.
+        streamable-http:
+          connections:
+            web-search:
+              url: ${WEB_SEARCH_MCP_URL:http://localhost:3000}
   batch:
     jdbc:
       initialize-schema: never

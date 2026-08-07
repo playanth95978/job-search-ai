@@ -2,6 +2,101 @@
   display: block;
   height: 100%;
   min-height: 0;
+  // Ancre le bouton « revenir en bas », positionné en absolu par-dessus le fil.
+  position: relative;
+}
+
+// Indicateur de réflexion affiché avant le premier token (trois points qui respirent).
+.thinking-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.thinking-dots {
+  display: inline-flex;
+  gap: 4px;
+
+  span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.35;
+    animation: thinkingDot 1.4s ease-in-out infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+.thinking-label {
+  animation: thinkingLabel 2s ease-in-out infinite;
+}
+
+@keyframes thinkingDot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 0.9;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes thinkingLabel {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+// Bouton flottant de retour en bas (n'apparaît que si l'utilisateur a remonté le fil).
+.scroll-to-bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e0e3e7;
+  background: #fff;
+  color: #495057;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 12%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 18%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-dots span,
+  .thinking-label {
+    animation: none;
+  }
 }
 
 .chat-messages {

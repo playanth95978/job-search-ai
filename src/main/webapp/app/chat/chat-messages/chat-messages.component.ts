@@ -8,6 +8,7 @@ import {
   output,
   QueryList,
   Renderer2,
+  signal,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
@@ -40,6 +41,15 @@ export class ChatMessagesComponent implements AfterViewChecked {
 
   expandedSources: Record<string, boolean> = {};
 
+  /** Affiche le bouton « revenir en bas » quand l'utilisateur a remonté le fil. */
+  readonly showScrollToBottom = signal(false);
+
+  /** Vrai tant que l'utilisateur suit le bas du fil (auto-scroll actif). */
+  private stickToBottom = true;
+
+  /** Tolérance en px pour considérer qu'on est « en bas » (marge d'arrondi / inertie). */
+  private static readonly STICK_THRESHOLD_PX = 80;
+
   @ViewChildren('messageEl') messageElements!: QueryList<ElementRef>;
   @ViewChildren('contentRef') contentRefs!: QueryList<ElementRef>;
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
@@ -52,7 +62,33 @@ export class ChatMessagesComponent implements AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    // On ne recolle en bas que si l'utilisateur y était déjà : sinon on le ramènerait de force
+    // pendant qu'il relit un message plus haut (comportement ChatGPT/Gemini).
+    if (this.stickToBottom) {
+      this.scrollToBottom();
+    }
+  }
+
+  /**
+   * Suivi de la position de lecture. Dès que l'utilisateur remonte, on cesse de suivre le flux ;
+   * on réactive le suivi dès qu'il revient au ras du bas.
+   */
+  onScroll(): void {
+    const el = this.scrollContainer?.nativeElement;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const atBottom = distanceFromBottom <= ChatMessagesComponent.STICK_THRESHOLD_PX;
+    this.stickToBottom = atBottom;
+    this.showScrollToBottom.set(!atBottom);
+  }
+
+  /** Bouton « revenir en bas » : réactive le suivi automatique du flux. */
+  scrollToBottomSmooth(): void {
+    const el = this.scrollContainer?.nativeElement;
+    if (!el) return;
+    this.stickToBottom = true;
+    this.showScrollToBottom.set(false);
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }
 
   toggleSources(messageId: string): void {
