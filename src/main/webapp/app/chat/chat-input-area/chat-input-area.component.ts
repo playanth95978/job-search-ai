@@ -22,6 +22,10 @@ export class ChatInputAreaComponent {
   triggerUploadClicked = output<HTMLInputElement>();
 
   readonly isUploading = input<boolean>(false);
+
+  /** Hauteur max du textarea avant scroll interne (~8 lignes). */
+  private static readonly MAX_INPUT_HEIGHT_PX = 200;
+
   private readonly messageService = inject(MessageService);
   // @ts-ignore
   readonly isTyping = this.messageService.generatingInProgress;
@@ -31,6 +35,20 @@ export class ChatInputAreaComponent {
     this.userInputChange.emit(value);
   }
 
+  /** Entrée envoie le message ; Maj+Entrée insère un saut de ligne. */
+  onEnter(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.shiftKey) return;
+    keyboardEvent.preventDefault();
+    this.sendMessage();
+  }
+
+  /** Le textarea grandit avec le contenu, jusqu'à une hauteur max (au-delà : scroll interne). */
+  autoGrow(textarea: HTMLTextAreaElement): void {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, ChatInputAreaComponent.MAX_INPUT_HEIGHT_PX)}px`;
+  }
+
   sendMessage(): void {
     if (this.isTyping()) return;
 
@@ -38,5 +56,10 @@ export class ChatInputAreaComponent {
 
     this.messageService.sendMessage(this.userInput(), false);
     this.userInput.set('');
+  }
+
+  /** Interrompt la génération en conservant le texte déjà affiché. */
+  stopGeneration(): void {
+    this.messageService.stopGeneration();
   }
 }

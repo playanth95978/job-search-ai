@@ -9,22 +9,31 @@
       }
 
       <div class="input-content">
+        <!-- Entrée = envoyer, Maj+Entrée = nouvelle ligne (convention ChatGPT/Gemini).
+             La saisie reste active pendant la génération : on peut préparer la question suivante. -->
         <textarea
-          (keyup.enter)="sendMessage()"
+          #promptInput
+          (keydown.enter)="onEnter($event)"
           (ngModelChange)="onUserInput($event)"
-          [disabled]="isTyping()"
+          (input)="autoGrow(promptInput)"
           [ngModel]="userInput()"
           [placeholder]="'home.chat.placeholder' | translate"
           rows="1"
         ></textarea>
       </div>
-      <button (click)="sendMessage()" [disabled]="!userInput().trim() || isTyping() || isUploading()" class="send-button">
-        @if (isUploading()) {
-          <fa-icon [animation]="isUploading() ? 'spin' : undefined" [icon]="'sync'"></fa-icon>
-        } @else {
-          <fa-icon [icon]="['fas', 'paper-plane']"></fa-icon>
-        }
-      </button>
+      @if (isTyping()) {
+        <button (click)="stopGeneration()" class="send-button stop-button" title="Arrêter la génération" aria-label="Arrêter la génération">
+          <fa-icon [icon]="'stop'"></fa-icon>
+        </button>
+      } @else {
+        <button (click)="sendMessage()" [disabled]="!userInput().trim() || isUploading()" class="send-button">
+          @if (isUploading()) {
+            <fa-icon [animation]="'spin'" [icon]="'sync'"></fa-icon>
+          } @else {
+            <fa-icon [icon]="['fas', 'paper-plane']"></fa-icon>
+          }
+        </button>
+      }
     </div>
   </div>
 </div>

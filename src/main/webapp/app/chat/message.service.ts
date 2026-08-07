@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { auditTime, filter, map, Observable, startWith, tap } from 'rxjs';
+import { auditTime, filter, map, Observable, startWith, Subscription, tap } from 'rxjs';
 import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 import dayjs from 'dayjs/esm';
 import { marked } from 'marked';
@@ -81,6 +81,24 @@ export class MessageService {
   readonly suggestions = this._suggestions.asReadonly();
   private streamBuffer = '';
   private readonly conversationService = inject(ConversationService);
+
+  // --- Moteur de révélation progressive ("goutte à goutte") ---------------------------------
+  // Le réseau livre le texte par paquets irréguliers (SSE + auditTime), ce qui donne un rendu
+  // saccadé. On découple donc l'affichage de l'arrivée réseau : le flux remplit `targetText`,
+  // et une boucle rAF fait avancer le texte affiché caractère par caractère à cadence régulière,
+  // comme ChatGPT/Gemini. La vitesse s'adapte au retard accumulé pour ne jamais décrocher.
+  private targetText = '';
+  private revealedChars = 0;
+  private revealHandle: number | null = null;
+  private streamEnded = false;
+  private onRevealComplete: (() => void) | null = null;
+  private lastMarkdownRender = 0;
+  private streamSubscription: Subscription | null = null;
+
+  /** Nombre de caractères révélés par frame, proportionnel au retard (min 1). */
+  private static readonly REVEAL_DIVISOR = 8;
+  /** Le markdown est re-parsé au plus toutes les 33 ms (~30 fps) : inutile de le faire à 60 fps. */
+  private static readonly MARKDOWN_RENDER_INTERVAL_MS = 33;
 
   constructor() {
     marked.setOptions({
@@ -187,7 +205,9 @@ export class MessageService {
     this._pendingSources.set([]);
     this._suggestions.set([]);
 
-    stream$.subscribe({
+    this.resetReveal();
+
+    this.streamSubscription = stream$.subscribe({
       next: message => {
         const parseResult = this.parseSSEWithMeta(message.content);
         this.streamBuffer = parseResult.text;
@@ -196,46 +216,142 @@ export class MessageService {
           this._pendingSources.set(parseResult.sources);
         }
 
-        this._streamingMessage.set(this.streamBuffer);
-        this._streamingHtml.set(this.renderStreamingMarkdown(this.streamBuffer));
+        // On alimente la cible ; c'est la boucle rAF qui décide du rythme d'affichage.
+        this.targetText = this.streamBuffer;
+        this.startReveal();
       },
 
       complete: () => {
-        const html = marked.parse(this.streamBuffer, { async: false });
-        const sources = this._pendingSources();
+        // On ne finalise pas tout de suite : on laisse la révélation rattraper son retard,
+        // sinon la fin du message apparaîtrait d'un bloc.
+        this.streamEnded = true;
+        this.onRevealComplete = () => {
+          this.finalizeAssistantMessage(this.streamBuffer, this._pendingSources());
+          if (this.isNewMessage()) {
+            this.createNewConversation(this.currentConversationId()!, prompt);
+            // Sans ce reset, chaque message suivant recréait la même conversation :
+            // le flag restait à true pour toute la durée du fil.
+            this._isNewMessage.set(false);
+          }
+          this.generateSuggestions(this.streamBuffer);
+          this.streamBuffer = '';
+          this.streamSubscription = null;
+          this.resetReveal();
+          this._streamingMessage.set('');
+          this._streamingHtml.set('');
+          this._pendingSources.set([]);
+          this._generatingInProgress.set(false);
+        };
+        this.startReveal();
+      },
 
-        this._messages.update(msgs => {
-          const copy = [...msgs];
-          const lastIndex = copy.length - 1;
-
-          copy[lastIndex] = {
-            ...copy[lastIndex],
-            content: html,
-            id: this.currentConversationId() ?? '',
-            isStreaming: false,
-            role: 'assistant',
-            sources: sources.length > 0 ? sources : undefined,
-          };
-
-          return copy;
-        });
-        if (this.isNewMessage()) {
-          this.createNewConversation(this.currentConversationId()!, prompt);
-        }
-        this.generateSuggestions(this.streamBuffer);
+      error: () => {
+        this.resetReveal();
+        this.streamSubscription = null;
         this.streamBuffer = '';
         this._streamingMessage.set('');
         this._streamingHtml.set('');
         this._pendingSources.set([]);
         this._generatingInProgress.set(false);
       },
+    });
+  }
 
-      error: () => {
-        this._streamingMessage.set('');
-        this._streamingHtml.set('');
-        this._pendingSources.set([]);
-        this._generatingInProgress.set(false);
-      },
+  /**
+   * Démarre la boucle de révélation. À chaque frame, on avance de quelques caractères vers le
+   * texte reçu : plus le retard est grand, plus on avance vite, de sorte que l'affichage reste
+   * fluide sans jamais décrocher du flux réseau.
+   */
+  private startReveal(): void {
+    if (this.revealHandle !== null) return;
+
+    const tick = (): void => {
+      const backlog = this.targetText.length - this.revealedChars;
+
+      if (backlog > 0) {
+        const step = Math.max(1, Math.ceil(backlog / MessageService.REVEAL_DIVISOR));
+        this.revealedChars = Math.min(this.targetText.length, this.revealedChars + step);
+        const shown = this.targetText.slice(0, this.revealedChars);
+        this._streamingMessage.set(shown);
+
+        // Le parse markdown est throttlé : c'est l'opération coûteuse, et 30 fps suffisent
+        // largement à l'œil. On force le rendu final quand tout est révélé.
+        const now = performance.now();
+        const caughtUp = this.revealedChars >= this.targetText.length;
+        if (caughtUp || now - this.lastMarkdownRender >= MessageService.MARKDOWN_RENDER_INTERVAL_MS) {
+          this.lastMarkdownRender = now;
+          this._streamingHtml.set(this.renderStreamingMarkdown(shown));
+        }
+      }
+
+      // Le flux est terminé ET tout le texte est affiché : on peut finaliser le message.
+      if (this.streamEnded && this.revealedChars >= this.targetText.length) {
+        this.stopReveal();
+        const done = this.onRevealComplete;
+        this.onRevealComplete = null;
+        done?.();
+        return;
+      }
+
+      this.revealHandle = requestAnimationFrame(tick);
+    };
+
+    this.revealHandle = requestAnimationFrame(tick);
+  }
+
+  private stopReveal(): void {
+    if (this.revealHandle !== null) {
+      cancelAnimationFrame(this.revealHandle);
+      this.revealHandle = null;
+    }
+  }
+
+  private resetReveal(): void {
+    this.stopReveal();
+    this.targetText = '';
+    this.revealedChars = 0;
+    this.streamEnded = false;
+    this.onRevealComplete = null;
+    this.lastMarkdownRender = 0;
+  }
+
+  /**
+   * Interrompt la génération en cours (bouton « Stop », comme ChatGPT). Le texte déjà révélé
+   * est conservé et figé dans la conversation — on ne perd pas la réponse partielle.
+   */
+  stopGeneration(): void {
+    if (!this._generatingInProgress()) return;
+
+    this.streamSubscription?.unsubscribe();
+    this.streamSubscription = null;
+    this.stopReveal();
+
+    // On fige ce qui a été effectivement affiché, pas ce qui a été reçu.
+    const partial = this.targetText.slice(0, this.revealedChars);
+    this.finalizeAssistantMessage(partial, this._pendingSources());
+    this.resetReveal();
+    this.streamBuffer = '';
+    this._streamingMessage.set('');
+    this._streamingHtml.set('');
+    this._pendingSources.set([]);
+    this._generatingInProgress.set(false);
+  }
+
+  /** Remplace le placeholder assistant en cours par le message final rendu en HTML. */
+  private finalizeAssistantMessage(text: string, sources: SourceInfo[]): void {
+    const html = marked.parse(text, { async: false });
+    this._messages.update(msgs => {
+      const copy = [...msgs];
+      const lastIndex = copy.length - 1;
+      copy[lastIndex] = {
+        ...copy[lastIndex],
+        content: html,
+        id: this.currentConversationId() ?? '',
+        isStreaming: false,
+        role: 'assistant',
+        sources: sources.length > 0 ? sources : undefined,
+      };
+      return copy;
     });
   }
 
