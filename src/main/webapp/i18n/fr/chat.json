@@ -18,7 +18,8 @@
     "input": {
       "placeholder": "Écrivez votre message…",
       "send": "Envoyer",
-      "attachDocuments": "Ajouter des documents"
+      "attachDocuments": "Ajouter des documents",
+      "stopGeneration": "Arrêter la génération"
     },
     "message": {
       "copy": "Copier le message",
@@ -27,11 +28,9 @@
       "jiraAgent": "Agent Jira"
     },
     "thinking": {
-      "analyze": "Analyse de la question",
-      "search": "Recherche dans les bases de connaissances",
-      "rerank": "Reranking des documents",
-      "generate": "Génération de la réponse…"
+      "label": "Réflexion en cours…"
     },
+    "scrollToBottom": "Revenir en bas",
     "suggestions": {
       "search": "Trouve-moi des offres de développeur à Nouméa",
       "match": "Matche les offres avec mon profil",
