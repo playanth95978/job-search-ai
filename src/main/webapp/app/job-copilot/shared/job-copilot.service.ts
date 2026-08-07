@@ -223,6 +223,11 @@ export class JobCopilotService {
     return this.http.get<string[]>(`${this.baseUrl}/applications/auto-apply-sources`);
   }
 
+  /** Whether a given offer can be auto-applied (matched by source or by its apply URL). */
+  autoApplyCapable(jobOfferId: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/applications/auto-apply-capable/${jobOfferId}`);
+  }
+
   applyToJob(applicationId: string): Observable<ApplyOutcome> {
     return this.http.post<ApplyOutcome>(`${this.baseUrl}/applications/${applicationId}/apply`, null);
   }

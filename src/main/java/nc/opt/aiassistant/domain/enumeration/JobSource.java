@@ -3,6 +3,7 @@ package nc.opt.aiassistant.domain.enumeration;
 public enum JobSource {
     GREENHOUSE,
     LEVER,
+    SMARTRECRUITERS,
     ASHBY,
     WORKABLE,
     REMOTEOK,

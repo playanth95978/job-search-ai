@@ -75,6 +75,15 @@ public class ApplicationTrackingService {
     }
 
     /**
+     * Whether any connector can auto-apply to this offer — matched by source OR by apply URL
+     * (an aggregator offer whose applyUrl points to a Lever/Greenhouse/SmartRecruiters board).
+     */
+    @Transactional(readOnly = true)
+    public boolean canAutoApply(JobOffer offer) {
+        return offer != null && connectors.stream().anyMatch(c -> c.canAutoApply(offer));
+    }
+
+    /**
      * Attempts to submit the application directly through the source ATS API.
      * Falls back to {@code autoApplied = false} when the source has no auto-apply connector,
      * letting the caller fall back to opening the offer's apply link instead.
@@ -83,16 +92,17 @@ public class ApplicationTrackingService {
     public ApplyOutcomeDto submitApplication(UUID applicationId, String userId) {
         JobApplication app = getOwnedApplication(applicationId, userId);
         JobOffer offer = app.getJobOffer();
+        // Route by URL first (unlocks aggregator offers that link to an ATS board), then by source.
         AtsConnector connector =
             offer == null
                 ? null
                 : connectors
                       .stream()
-                      .filter(c -> c.getSource() == offer.getSource())
+                      .filter(c -> c.canAutoApply(offer))
                       .findFirst()
                       .orElse(null);
 
-        if (connector == null || !connector.supportsAutoApply()) {
+        if (connector == null) {
             return new ApplyOutcomeDto(false, false, "Auto-apply not available for this offer. Apply manually via the offer link.", app);
         }
 
