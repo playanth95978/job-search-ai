@@ -124,7 +124,12 @@ spring:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
     mcp:
       client:
-        enabled: true
+        # ATTENTION : si le serveur MCP est injoignable au démarrage, l'auto-configuration Spring AI
+        # fait échouer TOUT le contexte ("Client failed to initialize by explicit API call").
+        # D'où ce commutateur : en local, laisser à false tant que le conteneur open-websearch
+        # n'est pas lancé avec son port publié (docker run -p 3000:3000 ...).
+        # En prod, le sidecar fait partie du compose : la variable y est mise à true.
+        enabled: ${MCP_WEB_SEARCH_ENABLED:false}
         # Outils MCP externes exposés à l'agent Job Copilot : recherche web d'offres d'emploi.
         # Serveur open-websearch (aas-ee/open-websearch) : multi-moteurs (duckduckgo, bing, brave...),
         # gratuit, sans clé API, sans Python. Lancé comme conteneur sidecar en HTTP -> on s'y connecte

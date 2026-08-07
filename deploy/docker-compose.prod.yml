@@ -80,6 +80,8 @@ services:
       OLLAMA_BASE_URL: http://ollama:11434
       SPRING_LIQUIBASE_URL: ${SPRING_DATASOURCE_URL}
       # Serveur MCP de recherche web (sidecar) exposé à l'agent Job Copilot.
+      # Le sidecar fait partie de la stack (depends_on) : on peut activer le client MCP.
+      MCP_WEB_SEARCH_ENABLED: 'true'
       WEB_SEARCH_MCP_URL: http://open-websearch:3000
     volumes:
       # Persist the ~570 MB ONNX reranker model (downloaded on first boot).

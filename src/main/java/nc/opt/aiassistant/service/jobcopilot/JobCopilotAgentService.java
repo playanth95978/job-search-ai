@@ -63,11 +63,17 @@ public class JobCopilotAgentService {
         // et reste la seule API non dépréciée en Spring AI 2.0. Les serveurs MCP sont optionnels : si aucun
         // n'est configuré/joignable, l'agent démarre quand même avec ses seuls outils internes.
         List<Object> defaultTools = new ArrayList<>(Arrays.asList(jobAgentToolbox.tools()));
-        mcpToolCallbackProviders.forEach(defaultTools::add);
-        long mcpToolCount = mcpToolCallbackProviders
-            .stream()
-            .flatMap(provider -> Arrays.stream(provider.getToolCallbacks()))
-            .count();
+        int mcpToolCount = 0;
+        for (ToolCallbackProvider provider : mcpToolCallbackProviders) {
+            try {
+                mcpToolCount += provider.getToolCallbacks().length;
+                defaultTools.add(provider);
+            } catch (RuntimeException e) {
+                // Serveur MCP injoignable ou en erreur : on dégrade proprement plutôt que d'empêcher
+                // l'agent de démarrer. La recherche web sera simplement indisponible.
+                log.warn("Job Copilot : fournisseur d'outils MCP ignoré ({})", e.getMessage());
+            }
+        }
         log.info("Job Copilot : {} outil(s) MCP externe(s) chargé(s)", mcpToolCount);
 
         this.chatClient = ChatClient.builder(chatModel)
