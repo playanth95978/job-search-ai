@@ -75,10 +75,15 @@ export class ApplyModalComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit(): void {
-    this.service.getAutoApplySources().subscribe({
-      next: sources => this.autoApplySupported.set(sources.includes(this.offer()?.source ?? '')),
-      error() {},
-    });
+    // Capability is per-offer: an aggregator offer whose applyUrl points to a Lever/SmartRecruiters
+    // board is auto-appliable even though its source is France Travail/Adzuna.
+    const offerId = this.jobOfferId() ?? this.existingApplication()?.jobOffer?.id;
+    if (offerId) {
+      this.service.autoApplyCapable(offerId).subscribe({
+        next: capable => this.autoApplySupported.set(capable),
+        error: () => this.autoApplySupported.set(false),
+      });
+    }
 
     this.enrichOffer();
 

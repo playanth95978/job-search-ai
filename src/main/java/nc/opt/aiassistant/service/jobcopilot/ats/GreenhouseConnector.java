@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
@@ -18,6 +20,10 @@ import org.springframework.web.client.RestClient;
 public class GreenhouseConnector implements AtsConnector {
 
     private static final String API_BASE = "https://boards-api.greenhouse.io/v1/boards";
+    /** Greenhouse posting URL: (job-)boards.greenhouse.io/{board}/jobs/{id}, or ?gh_jid={id}. */
+    private static final Pattern URL_REF = Pattern.compile("greenhouse\\.io/([^/]+)/jobs/(\\d+)");
+    private static final Pattern GH_JID = Pattern.compile("[?&]gh_jid=(\\d+)");
+
     private final ObjectMapper objectMapper;
 
     @Override
@@ -29,6 +35,24 @@ public class GreenhouseConnector implements AtsConnector {
     public JobSource getSource() {
         return JobSource.GREENHOUSE;
     }
+
+    @Override
+    public PostingRef parseRef(String url) {
+        if (url == null) {
+            return null;
+        }
+        Matcher m = URL_REF.matcher(url);
+        if (m.find()) {
+            return new PostingRef(m.group(1), m.group(2));
+        }
+        Matcher j = GH_JID.matcher(url);
+        return j.find() ? new PostingRef(null, j.group(1)) : null;
+    }
+
+    // NOTE: Greenhouse auto-apply is intentionally NOT enabled. Submitting an application
+    // (POST /v1/boards/{board}/jobs/{id}) requires the *company's* Job Board API key (Basic auth),
+    // which is per-employer and not publicly available. Greenhouse offers therefore fall back to
+    // assisted-apply. Real API auto-apply is provided by Lever and SmartRecruiters (public endpoints).
 
     @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {

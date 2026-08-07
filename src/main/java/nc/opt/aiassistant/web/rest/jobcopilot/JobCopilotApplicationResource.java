@@ -75,6 +75,17 @@ public class JobCopilotApplicationResource {
         return ResponseEntity.ok(trackingService.getAutoApplySources());
     }
 
+    /**
+     * Whether a given offer can be auto-applied — matched by source OR by apply URL (an aggregator
+     * offer whose applyUrl points to a Lever/Greenhouse/SmartRecruiters board). Drives the modal's
+     * "auto-apply" vs "assisted apply" choice per offer.
+     */
+    @GetMapping("/auto-apply-capable/{jobOfferId}")
+    public ResponseEntity<Boolean> autoApplyCapable(@PathVariable UUID jobOfferId) {
+        JobOffer offer = jobOfferRepository.findById(jobOfferId).orElse(null);
+        return ResponseEntity.ok(offer != null && trackingService.canAutoApply(offer));
+    }
+
     /** Submits the application directly via the source ATS API when supported, else leaves it for manual submission. */
     @PostMapping("/{id}/apply")
     public ResponseEntity<ApplyOutcomeDto> apply(@PathVariable UUID id) {

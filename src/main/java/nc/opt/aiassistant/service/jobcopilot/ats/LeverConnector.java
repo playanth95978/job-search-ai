@@ -2,14 +2,16 @@ package nc.opt.aiassistant.service.jobcopilot.ats;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
+import nc.opt.aiassistant.service.pdf.ResumePdfService;
 import org.jsoup.Jsoup;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -24,11 +26,24 @@ import org.springframework.web.client.RestClientResponseException;
 public class LeverConnector implements AtsConnector {
 
     private static final String API_BASE = "https://api.lever.co/v0/postings";
+    /** Lever posting URL: jobs.lever.co/{site}/{postingId} (postingId is a UUID), optionally /apply. */
+    private static final Pattern URL_REF = Pattern.compile("lever\\.co/([^/]+)/([0-9a-fA-F-]{36})");
+
     private final ObjectMapper objectMapper;
+    private final ResumePdfService resumePdfService;
 
     @Override
     public boolean supports(String url) {
         return url != null && url.contains("lever.co");
+    }
+
+    @Override
+    public PostingRef parseRef(String url) {
+        if (url == null) {
+            return null;
+        }
+        Matcher m = URL_REF.matcher(url);
+        return m.find() ? new PostingRef(m.group(1), m.group(2)) : null;
     }
 
     @Override
@@ -55,40 +70,43 @@ public class LeverConnector implements AtsConnector {
 
     @Override
     public ApplyResult applyTo(JobOffer offer, CandidateProfile profile, String coverLetter) {
-        if (offer.getCompany() == null || offer.getSourceId() == null) {
+        // Prefer the ids captured at fetch time; fall back to parsing the offer's apply URL
+        // (aggregator offers that link to a Lever board).
+        PostingRef ref = parseRef(offer.getApplyUrl());
+        String site = offer.getCompany() != null ? offer.getCompany() : ref != null ? ref.site() : null;
+        String postingId = offer.getSourceId() != null ? offer.getSourceId() : ref != null ? ref.postingId() : null;
+        if (site == null || postingId == null) {
             return new ApplyResult(false, "Missing Lever posting reference");
         }
-        String url = API_BASE + "/" + offer.getCompany() + "/" + offer.getSourceId() + "/apply";
+        if (profile == null || profile.getFullName() == null || profile.getEmail() == null) {
+            return new ApplyResult(false, "Champs obligatoires manquants (nom, e-mail). Complétez votre profil, puis réessayez.");
+        }
+        String url = API_BASE + "/" + site + "/" + postingId + "/apply";
         try {
             MultipartBodyBuilder form = new MultipartBodyBuilder();
-            form.part("name", profile.getFullName() != null ? profile.getFullName() : "");
-            form.part("email", profile.getEmail() != null ? profile.getEmail() : "");
-            form.part("comments", coverLetter != null ? coverLetter : "");
-            if (profile.getRawMarkdown() != null && !profile.getRawMarkdown().isBlank()) {
-                ByteArrayResource resume = new ByteArrayResource(profile.getRawMarkdown().getBytes(StandardCharsets.UTF_8)) {
-                    @Override
-                    public String getFilename() {
-                        return "cv.md";
-                    }
-                };
-                form.part("resume", resume);
+            form.part("name", profile.getFullName());
+            form.part("email", profile.getEmail());
+            if (coverLetter != null && !coverLetter.isBlank()) {
+                form.part("comments", coverLetter);
             }
+            byte[] pdf = resumePdfService.fromProfile(profile);
+            ByteArrayResource resume = new ByteArrayResource(pdf) {
+                @Override
+                public String getFilename() {
+                    return "cv.pdf";
+                }
+            };
+            form.part("resume", resume).contentType(MediaType.APPLICATION_PDF);
 
             RestClient client = RestClient.create();
             client.post().uri(url).contentType(MediaType.MULTIPART_FORM_DATA).body(form.build()).retrieve().toBodilessEntity();
 
             return new ApplyResult(true, "Application submitted via Lever");
         } catch (RestClientResponseException e) {
-            log.warn(
-                "Lever auto-apply rejected for {}/{}: {} {}",
-                offer.getCompany(),
-                offer.getSourceId(),
-                e.getStatusCode(),
-                e.getMessage()
-            );
+            log.warn("Lever auto-apply rejected for {}/{}: {} {}", site, postingId, e.getStatusCode(), e.getMessage());
             return new ApplyResult(false, "Lever rejected the application (" + e.getStatusCode() + "). Apply manually instead.");
         } catch (Exception e) {
-            log.error("Lever auto-apply failed for {}/{}: {}", offer.getCompany(), offer.getSourceId(), e.getMessage());
+            log.error("Lever auto-apply failed for {}/{}: {}", site, postingId, e.getMessage());
             return new ApplyResult(false, "Lever auto-apply failed: " + e.getMessage());
         }
     }

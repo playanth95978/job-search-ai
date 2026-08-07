@@ -44,10 +44,34 @@ public interface AtsConnector {
         return false;
     }
 
+    /**
+     * Extracts the ATS-specific posting reference from an offer/apply URL, or {@code null} if this
+     * connector can't parse it. Lets aggregator-sourced offers (France Travail, Adzuna…) whose
+     * {@code applyUrl} points to an ATS board be auto-applied even though their {@code source}
+     * isn't this connector's.
+     */
+    default PostingRef parseRef(String url) {
+        return null;
+    }
+
+    /**
+     * Whether this connector can auto-apply to the given offer — either because the offer's source is
+     * this ATS, or because its apply URL points to a board this connector understands.
+     */
+    default boolean canAutoApply(JobOffer offer) {
+        if (!supportsAutoApply() || offer == null) {
+            return false;
+        }
+        return getSource() == offer.getSource() || (offer.getApplyUrl() != null && supports(offer.getApplyUrl()));
+    }
+
     /** Submits the application to the ATS. Only called when {@link #supportsAutoApply()} is true. */
     default ApplyResult applyTo(JobOffer offer, CandidateProfile profile, String coverLetter) {
         throw new UnsupportedOperationException("Auto-apply not supported for " + getSource());
     }
+
+    /** A parsed reference to a specific posting on an ATS: {@code site} (company/board slug) + {@code postingId}. */
+    record PostingRef(String site, String postingId) {}
 
     record ApplyResult(boolean success, String message) {}
 }

@@ -61,8 +61,20 @@ public class ApplicationProperties {
         private JobCopilotConfig franceTravail;
         private Adzuna adzuna;
         private Seek seek = new Seek();
+        private SmartRecruiters smartRecruiters = new SmartRecruiters();
         private Ingestion ingestion = new Ingestion();
         private Radar radar = new Radar();
+    }
+
+    @Setter
+    @Getter
+    public static class SmartRecruiters {
+
+        /**
+         * Auto-apply via the public SmartRecruiters Posting API. Off by default: enable only after
+         * validating the request payload against a posting you control (avoid junk applications).
+         */
+        private boolean autoApplyEnabled = false;
     }
 
     @Setter
