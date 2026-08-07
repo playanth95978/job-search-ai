@@ -3,7 +3,11 @@
     <input #fileInput (change)="fileSelected.emit($event)" accept=".pdf" multiple style="display: none" type="file" />
     <div class="input-main">
       @if (type() === 'PDF') {
-        <button (click)="triggerUploadClicked.emit(fileInput)" class="upload-trigger-btn" title="Ajouter des documents">
+        <button
+          (click)="triggerUploadClicked.emit(fileInput)"
+          class="upload-trigger-btn"
+          [title]="'chat.input.attachDocuments' | translate"
+        >
           <fa-icon [icon]="'file-arrow-up'"></fa-icon>
         </button>
       }
@@ -14,7 +18,7 @@
           (ngModelChange)="onUserInput($event)"
           [disabled]="isTyping()"
           [ngModel]="userInput()"
-          [placeholder]="'home.chat.placeholder' | translate"
+          [placeholder]="'chat.input.placeholder' | translate"
           rows="1"
         ></textarea>
       </div>

@@ -71,6 +71,8 @@ public class SecurityConfiguration {
                     // Public job search: anonymous visitors can browse offers. Auth-only actions
                     // (match, match-advanced, apply) are gated in their own endpoints below.
                     .requestMatchers(HttpMethod.GET, "/api/job-copilot/jobs/search").permitAll()
+                    // Public corpus-size stat shown on the landing page (no personal data).
+                    .requestMatchers(HttpMethod.GET, "/api/job-copilot/jobs/indexed-count").permitAll()
                     .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers("/api/**").authenticated()
                     .requestMatchers("/v3/api-docs/**").hasAuthority(AuthoritiesConstants.ADMIN)

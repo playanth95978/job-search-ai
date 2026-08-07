@@ -8,7 +8,8 @@
       "subtitle": "Upload your CV, get matched with relevant offers, generate tailored cover letters and rehearse interviews — all in one place.",
       "ctaPrimary": "Open Job Copilot",
       "ctaSecondary": "Search for jobs",
-      "ctaSearch": "Search for jobs"
+      "ctaSearch": "Search for jobs",
+      "indexedJobs": "job offers indexed by AI"
     },
     "logged": {
       "message": "You are logged in as user \"{{username}}\"."

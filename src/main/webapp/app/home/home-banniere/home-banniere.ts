@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
@@ -8,13 +9,15 @@ import { Account } from 'app/core/auth/account.model';
 @Component({
   selector: 'jhi-home-banniere',
   standalone: true,
-  imports: [TranslateDirective, TranslateModule, RouterLink, FaIconComponent],
+  imports: [TranslateDirective, TranslateModule, RouterLink, FaIconComponent, DecimalPipe],
   templateUrl: './home-banniere.html',
   styleUrl: './home-banniere.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeBanniere {
   account = input<Account | null>(null);
+  /** Number of AI-indexed offers; null while loading or on error (stat hidden). */
+  indexedJobCount = input<number | null>(null);
   loginAction = output<void>();
 
   login(): void {

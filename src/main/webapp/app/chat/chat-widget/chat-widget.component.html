@@ -1,0 +1,59 @@
+<!-- Lanceur flottant : ouvre/ferme le panneau de chat -->
+<button
+  type="button"
+  class="chat-widget-fab"
+  [class.is-open]="open()"
+  (click)="toggle()"
+  [attr.aria-expanded]="open()"
+  aria-controls="chat-widget-panel"
+  [attr.aria-label]="'chatWidget.toggle' | translate"
+>
+  <fa-icon [icon]="open() ? 'xmark' : 'comments'" size="lg" />
+</button>
+
+@if (open()) {
+  <!-- Panneau ancré (desktop) / bottom-sheet (mobile) -->
+  <div id="chat-widget-panel" class="chat-widget-panel" role="dialog" aria-modal="false" cdkTrapFocus>
+    <header class="chat-widget-header">
+      <div class="chat-widget-title">
+        <fa-icon icon="robot" />
+        <span jhiTranslate="chatWidget.title">Assistant IA</span>
+      </div>
+      <div class="chat-widget-header-actions">
+        <button
+          [ngbTooltip]="'chatWidget.newChat' | translate"
+          type="button"
+          class="chat-widget-icon-btn"
+          (click)="startNewChat()"
+          [attr.aria-label]="'chatWidget.newChat' | translate"
+          [title]="'chatWidget.newChat' | translate"
+        >
+          <fa-icon icon="plus" />
+        </button>
+        <button
+          [ngbTooltip]="'chatWidget.close' | translate"
+          type="button"
+          class="chat-widget-icon-btn"
+          (click)="close()"
+          [attr.aria-label]="'chatWidget.close' | translate"
+          [title]="'chatWidget.close' | translate"
+        >
+          <fa-icon icon="xmark" />
+        </button>
+      </div>
+    </header>
+
+    <div class="chat-widget-body">
+      <jhi-chat-messages
+        [hasRag]="true"
+        [formatMessage]="formatMessage"
+        [isTyping]="isTyping()"
+        [messages]="messages()"
+        [streamingHtml]="streamingHtml()"
+        [streamingMessage]="streamingMessage()"
+      />
+    </div>
+
+    <jhi-chat-input-area />
+  </div>
+}

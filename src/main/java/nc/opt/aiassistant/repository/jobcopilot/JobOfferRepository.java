@@ -54,6 +54,9 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
 
     List<JobOffer> findByEmbeddingStatus(EmbeddingStatus status, Pageable pageable);
 
+    /** Number of offers whose embedding is COMPLETED, i.e. actually indexed and searchable by the AI. */
+    long countByEmbeddingStatus(EmbeddingStatus status);
+
     @Modifying
     @Transactional
     @Query("UPDATE JobOffer j SET j.embeddingStatus = :status WHERE j.id IN :ids")

@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { auditTime, filter, map, Observable, startWith, tap } from 'rxjs';
 import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 import dayjs from 'dayjs/esm';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
@@ -42,6 +43,16 @@ export interface ChatMessage {
 export class MessageService {
   type = signal<TypeChat | null>(null);
   private readonly http = inject(HttpClient);
+  private readonly translate = inject(TranslateService);
+
+  /** Localized greeting shown as the first assistant message of an empty conversation. */
+  private welcomeMessage(): ChatMessage {
+    return {
+      id: 'welcome',
+      role: 'assistant',
+      content: this.translate.instant('chat.welcome'),
+    };
+  }
 
   private readonly _ocrContext = signal<string | null>(null);
 
@@ -53,13 +64,7 @@ export class MessageService {
     this._ocrContext.set(context);
   }
 
-  private readonly _completeMessages = signal<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
-    },
-  ]);
+  private readonly _completeMessages = signal<ChatMessage[]>([this.welcomeMessage()]);
 
   private readonly _messages = signal<ChatMessage[]>(this._completeMessages());
   private readonly _generatingInProgress = signal<boolean>(false);
@@ -142,13 +147,7 @@ export class MessageService {
   }
 
   clearMessages(): void {
-    this._completeMessages.set([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
-      },
-    ]);
+    this._completeMessages.set([this.welcomeMessage()]);
     this._messages.set(this._completeMessages());
     this._currentConversationId.set(null);
   }

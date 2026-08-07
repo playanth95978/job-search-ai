@@ -8,7 +8,8 @@
       "subtitle": "Importez votre CV, recevez des offres pertinentes, générez des lettres de motivation sur-mesure et entraînez-vous aux entretiens — le tout au même endroit.",
       "ctaPrimary": "Ouvrir Job Copilot",
       "ctaSecondary": "Rechercher des offres",
-      "ctaSearch": "Rechercher des offres"
+      "ctaSearch": "Rechercher des offres",
+      "indexedJobs": "offres d'emploi indexées par l'IA"
     },
     "logged": {
       "message": "Vous êtes connecté en tant que \"{{username}}\"."

@@ -9,4 +9,8 @@
     </div>
     <jhi-footer />
   </main>
+
+  @if (account() !== null) {
+    <jhi-chat-widget />
+  }
 </div>

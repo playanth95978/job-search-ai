@@ -14,16 +14,18 @@ import {
 import dayjs from 'dayjs/esm';
 import { HttpClient } from '@angular/common/http';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { TranslateModule } from '@ngx-translate/core';
 import { SanitizerComponent } from '../../shared/sanitizer/sanitizer/sanitizer.component';
 import { ChatMessage } from '../message.service';
 import { FormatMediumDatetimePipe } from '../../shared/date';
+import TranslateDirective from '../../shared/language/translate.directive';
 
 @Component({
   selector: 'jhi-chat-messages',
   templateUrl: './chat-messages.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./chat-messages.component.scss'],
-  imports: [FontAwesomeModule, FormatMediumDatetimePipe, SanitizerComponent],
+  imports: [FontAwesomeModule, FormatMediumDatetimePipe, SanitizerComponent, TranslateModule, TranslateDirective],
 })
 export class ChatMessagesComponent implements AfterViewChecked {
   messages = input.required<ChatMessage[]>();

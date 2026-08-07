@@ -1,4 +1,10 @@
 {
+  "chatWidget": {
+    "title": "AI Assistant",
+    "toggle": "Toggle AI assistant",
+    "newChat": "New conversation",
+    "close": "Close"
+  },
   "global": {
     "title": "Job-search-ai",
     "browsehappy": "You are using an <strong>outdated</strong> browser. Please <a href=\"https://browsehappy.com/?locale=en\">upgrade your browser</a> to improve your experience.",

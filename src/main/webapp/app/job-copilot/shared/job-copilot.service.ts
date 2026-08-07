@@ -105,6 +105,11 @@ export class JobCopilotService {
     return this.http.get<JobOffer[]>(`${this.baseUrl}/jobs/search-smart`, { params });
   }
 
+  /** Public count of offers actually indexed (embedding COMPLETED), for the home "corpus size" stat. */
+  getIndexedJobCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.baseUrl}/jobs/indexed-count`);
+  }
+
   fetchFromUrl(url: string): Observable<JobOffer[]> {
     return this.http.post<JobOffer[]>(`${this.baseUrl}/jobs/fetch`, null, { params: { url } });
   }

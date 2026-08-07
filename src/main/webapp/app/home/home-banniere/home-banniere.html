@@ -6,6 +6,14 @@
     tout au même endroit.
   </p>
 
+  @if (indexedJobCount(); as count) {
+    <p class="home-hero-count">
+      <fa-icon icon="database" />
+      <span class="home-hero-count-value">{{ count | number }}</span>
+      <span jhiTranslate="home.hero.indexedJobs">offres d'emploi indexées par l'IA</span>
+    </p>
+  }
+
   <div class="home-hero-actions">
     @if (account() !== null) {
       <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/job-copilot">

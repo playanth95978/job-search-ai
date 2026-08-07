@@ -102,6 +102,9 @@ export default class Home {
 
   private readonly stats = signal<ApplicationStats>({});
 
+  /** Public count of AI-indexed offers, shown as a corpus-size stat in the banner. */
+  protected readonly indexedJobCount = signal<number | null>(null);
+
   constructor() {
     this.seo.update({
       title: 'Job Search AI — Recherche d’emploi et copilote de carrière IA',
@@ -111,6 +114,12 @@ export default class Home {
       keywords: "recherche d'emploi, offres d'emploi, IA, matching CV, lettre de motivation, préparation entretien, copilote carrière",
     });
     this.injectStructuredData();
+
+    // Public stat: works for anonymous visitors too, so it fills the landing hero.
+    this.jobCopilotService.getIndexedJobCount().subscribe({
+      next: ({ count }) => this.indexedJobCount.set(count),
+      error: () => this.indexedJobCount.set(null),
+    });
 
     if (this.account() !== null) {
       this.jobCopilotService.getApplicationStats().subscribe({

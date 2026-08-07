@@ -164,6 +164,21 @@ public class JobCopilotSearchResource {
         return ResponseEntity.ok(results);
     }
 
+    /**
+     * {@code GET /jobs/indexed-count} : public count of offers actually indexed (embedding COMPLETED),
+     * i.e. searchable by the AI. Used by the public home page as a "corpus size" stat.
+     *
+     * @return the {@link ResponseEntity} with a body {@code { "count": <long> }}.
+     */
+    @GetMapping("/indexed-count")
+    public ResponseEntity<IndexedCount> indexedCount() {
+        long count = jobOfferRepository.countByEmbeddingStatus(nc.opt.aiassistant.domain.enumeration.EmbeddingStatus.COMPLETED);
+        return ResponseEntity.ok(new IndexedCount(count));
+    }
+
+    /** Lightweight response for {@link #indexedCount()}. */
+    public record IndexedCount(long count) {}
+
     @GetMapping("")
     public ResponseEntity<List<JobOfferDTO>> getAllJobOffers(
         JobOfferCriteria criteria,

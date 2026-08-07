@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, output } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { TranslateModule } from '@ngx-translate/core';
 import TranslateDirective from '../../shared/language/translate.directive';
 
 @Component({
@@ -7,7 +8,7 @@ import TranslateDirective from '../../shared/language/translate.directive';
   templateUrl: './chat-header.component.html',
   styleUrls: ['./chat-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FontAwesomeModule, TranslateDirective],
+  imports: [FontAwesomeModule, TranslateDirective, TranslateModule],
 })
 export class ChatHeaderComponent {
   exportClicked = output();

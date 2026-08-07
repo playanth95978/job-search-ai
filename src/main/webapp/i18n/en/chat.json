@@ -1,5 +1,12 @@
 {
   "chat": {
+    "welcome": "Hello! How can I help you today?",
+    "header": {
+      "title": "AI Assistant",
+      "status": "Online",
+      "newChat": "New conversation",
+      "newChatShort": "New"
+    },
     "empty": {
       "title": "Start a new conversation",
       "subtitle": "Ask your copilot anything: job search, profile matching, applications, cover letters…"
@@ -10,7 +17,20 @@
     },
     "input": {
       "placeholder": "Type your message…",
-      "send": "Send"
+      "send": "Send",
+      "attachDocuments": "Attach documents"
+    },
+    "message": {
+      "copy": "Copy message",
+      "goodResponse": "Good response",
+      "badResponse": "Bad response",
+      "jiraAgent": "Jira Agent"
+    },
+    "thinking": {
+      "analyze": "Analyzing the question",
+      "search": "Searching the knowledge bases",
+      "rerank": "Reranking documents",
+      "generate": "Generating the response…"
     },
     "suggestions": {
       "search": "Find me developer jobs in Nouméa",

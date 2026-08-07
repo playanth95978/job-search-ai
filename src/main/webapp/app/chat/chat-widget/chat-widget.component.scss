@@ -1,0 +1,131 @@
+$fab-size: 3.5rem;
+$panel-width: 400px;
+$panel-height: 560px;
+$accent: #4f46e5;
+$accent-dark: #4338ca;
+
+@keyframes chatWidgetPop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-widget-fab {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 1050;
+  width: $fab-size;
+  height: $fab-size;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  background: linear-gradient(135deg, $accent, $accent-dark);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 14px 30px rgba(79, 70, 229, 0.5);
+  }
+
+  &.is-open {
+    background: #64748b;
+  }
+}
+
+.chat-widget-panel {
+  position: fixed;
+  right: 1.5rem;
+  bottom: calc(1.5rem + #{$fab-size} + 0.75rem);
+  z-index: 1050;
+  width: $panel-width;
+  max-width: calc(100vw - 3rem);
+  height: $panel-height;
+  max-height: calc(100vh - #{$fab-size} - 4rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  animation: chatWidgetPop 0.22s ease-out;
+}
+
+.chat-widget-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  color: white;
+  background: linear-gradient(135deg, $accent, $accent-dark);
+}
+
+.chat-widget-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.chat-widget-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.chat-widget-icon-btn {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.chat-widget-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+// Mobile : bottom-sheet plein largeur ancré au bas de l'écran.
+@media (max-width: 576px) {
+  .chat-widget-fab {
+    right: 1rem;
+    bottom: 1rem;
+  }
+
+  .chat-widget-panel {
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 85vh;
+    max-height: 85vh;
+    border-radius: 20px 20px 0 0;
+  }
+}

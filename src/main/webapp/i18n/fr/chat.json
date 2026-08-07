@@ -1,5 +1,12 @@
 {
   "chat": {
+    "welcome": "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
+    "header": {
+      "title": "Assistant IA",
+      "status": "En ligne",
+      "newChat": "Nouvelle conversation",
+      "newChatShort": "Nouveau"
+    },
     "empty": {
       "title": "Démarrez une nouvelle conversation",
       "subtitle": "Posez une question à votre copilote : recherche d'offres, matching, candidatures, lettre de motivation…"
@@ -10,7 +17,20 @@
     },
     "input": {
       "placeholder": "Écrivez votre message…",
-      "send": "Envoyer"
+      "send": "Envoyer",
+      "attachDocuments": "Ajouter des documents"
+    },
+    "message": {
+      "copy": "Copier le message",
+      "goodResponse": "Bonne réponse",
+      "badResponse": "Mauvaise réponse",
+      "jiraAgent": "Agent Jira"
+    },
+    "thinking": {
+      "analyze": "Analyse de la question",
+      "search": "Recherche dans les bases de connaissances",
+      "rerank": "Reranking des documents",
+      "generate": "Génération de la réponse…"
     },
     "suggestions": {
       "search": "Trouve-moi des offres de développeur à Nouméa",

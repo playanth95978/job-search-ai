@@ -1,5 +1,5 @@
 <div class="home">
-  <jhi-home-banniere [account]="account()" (loginAction)="login()" />
+  <jhi-home-banniere [account]="account()" [indexedJobCount]="indexedJobCount()" (loginAction)="login()" />
 
   @if (account() !== null) {
     @if (statsEntries().length > 0) {

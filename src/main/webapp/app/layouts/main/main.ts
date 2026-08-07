@@ -8,17 +8,21 @@ import dayjs from 'dayjs/esm';
 import { AppPageTitleStrategy } from 'app/app-page-title-strategy';
 import { AccountService } from 'app/core/auth/account.service';
 import Footer from 'app/layouts/footer/footer';
+import { ChatWidgetComponent } from 'app/chat/chat-widget/chat-widget.component';
 
 @Component({
   selector: 'jhi-main',
   templateUrl: './main.html',
   providers: [AppPageTitleStrategy],
-  imports: [RouterOutlet, CommonModule, Footer],
+  imports: [RouterOutlet, CommonModule, Footer, ChatWidgetComponent],
 })
 export default class Main implements OnInit {
   private readonly router = inject(Router);
   private readonly appPageTitleStrategy = inject(AppPageTitleStrategy);
   private readonly accountService = inject(AccountService);
+
+  /** Drives the global floating chat widget: only authenticated users can chat. */
+  protected readonly account = this.accountService.account;
   private readonly translateService = inject(TranslateService);
   private readonly renderer: Renderer2;
 
