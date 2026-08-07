@@ -18,7 +18,8 @@
     "input": {
       "placeholder": "Type your message…",
       "send": "Send",
-      "attachDocuments": "Attach documents"
+      "attachDocuments": "Attach documents",
+      "stopGeneration": "Stop generating"
     },
     "message": {
       "copy": "Copy message",
@@ -27,11 +28,9 @@
       "jiraAgent": "Jira Agent"
     },
     "thinking": {
-      "analyze": "Analyzing the question",
-      "search": "Searching the knowledge bases",
-      "rerank": "Reranking documents",
-      "generate": "Generating the response…"
+      "label": "Thinking…"
     },
+    "scrollToBottom": "Back to bottom",
     "suggestions": {
       "search": "Find me developer jobs in Nouméa",
       "match": "Match job offers with my profile",

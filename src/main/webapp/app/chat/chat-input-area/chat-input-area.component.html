@@ -26,7 +26,12 @@
         ></textarea>
       </div>
       @if (isTyping()) {
-        <button (click)="stopGeneration()" class="send-button stop-button" title="Arrêter la génération" aria-label="Arrêter la génération">
+        <button
+          (click)="stopGeneration()"
+          class="send-button stop-button"
+          [title]="'chat.input.stopGeneration' | translate"
+          [attr.aria-label]="'chat.input.stopGeneration' | translate"
+        >
           <fa-icon [icon]="'stop'"></fa-icon>
         </button>
       } @else {

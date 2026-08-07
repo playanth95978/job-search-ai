@@ -21,7 +21,12 @@
         <!-- Action buttons (copy + feedback) -->
         @if (msg.role === 'assistant' && msg.id !== 'welcome' && !msg.isStreaming) {
           <div class="message-actions">
-            <button #copyBtn (click)="copyTextToClipboard(messageEl.innerText, copyBtn)" class="action-button" title="Copier le message">
+            <button
+              #copyBtn
+              (click)="copyTextToClipboard(messageEl.innerText, copyBtn)"
+              class="action-button"
+              [title]="'chat.message.copy' | translate"
+            >
               <fa-icon [icon]="'copy'" class="copy-icon"></fa-icon>
               <fa-icon [icon]="'check'" class="check-icon" style="display: none; color: #28a745"></fa-icon>
             </button>
@@ -29,7 +34,7 @@
               (click)="onFeedback(msg.id, 'up')"
               [class.active]="msg.feedback === 'up'"
               class="action-button feedback-btn"
-              title="Bonne reponse"
+              [title]="'chat.message.goodResponse' | translate"
             >
               <fa-icon [icon]="'thumbs-up'"></fa-icon>
             </button>
@@ -37,7 +42,7 @@
               (click)="onFeedback(msg.id, 'down')"
               [class.active]="msg.feedback === 'down'"
               class="action-button feedback-btn"
-              title="Mauvaise reponse"
+              [title]="'chat.message.badResponse' | translate"
             >
               <fa-icon [icon]="'thumbs-down'"></fa-icon>
             </button>
@@ -51,7 +56,11 @@
               <div class="flex h-5 w-5 items-center justify-center rounded-lg bg-brand-500 text-[9px] text-white">
                 <fa-icon icon="robot" />
               </div>
-              <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Agent Jira</span>
+              <span
+                class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500"
+                jhiTranslate="chat.message.jiraAgent"
+                >Agent Jira</span
+              >
             </div>
             <!--            @for (evt of msg.events; track evt.id) {-->
             <!--              <jhi-jira-action-card [event]="evt" class="block w-full max-w-[90%] animate-slide-up" />-->
@@ -75,7 +84,7 @@
             <span></span>
             <span></span>
           </span>
-          <span class="thinking-label">Réflexion en cours…</span>
+          <span class="thinking-label" jhiTranslate="chat.thinking.label">Réflexion en cours…</span>
         </div>
       </div>
     </div>
@@ -84,7 +93,12 @@
 
 <!-- Retour en bas : apparaît dès que l'utilisateur remonte le fil pendant la génération. -->
 @if (showScrollToBottom()) {
-  <button class="scroll-to-bottom" (click)="scrollToBottomSmooth()" title="Revenir en bas" aria-label="Revenir en bas">
+  <button
+    class="scroll-to-bottom"
+    (click)="scrollToBottomSmooth()"
+    [title]="'chat.scrollToBottom' | translate"
+    [attr.aria-label]="'chat.scrollToBottom' | translate"
+  >
     <fa-icon [icon]="'arrow-down'"></fa-icon>
   </button>
 }
