@@ -107,6 +107,22 @@ public class CandidateProfileEmbeddingService {
         }
     }
 
+    /** Preferred/target role names from the profile (stored as a plain JSON string list). */
+    public List<String> extractPreferredRoles(CandidateProfile profile) {
+        String json = profile.getPreferredRoles();
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            List<String> list = objectMapper.readValue(json, new TypeReference<>() {});
+            return list
+                .stream()
+                .filter(s -> s != null && !s.isBlank())
+                .toList();
+        } catch (Exception e) {
+            log.debug("Could not parse profile preferred roles: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
     private void appendJsonList(StringBuilder sb, String json, String prefix) {
         if (json == null || json.isBlank()) return;
         try {

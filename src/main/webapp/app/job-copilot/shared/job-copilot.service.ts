@@ -110,6 +110,16 @@ export class JobCopilotService {
     return this.http.get<{ count: number }>(`${this.baseUrl}/jobs/indexed-count`);
   }
 
+  /**
+   * Latest live board opportunities (Adzuna / France Travail) matched to the signed-in user's
+   * profile, for the home feed. Cached server-side per user; pass refresh to bypass that cache.
+   */
+  getLiveOpportunities(refresh = false): Observable<JobOffer[]> {
+    let params = new HttpParams();
+    if (refresh) params = params.set('refresh', 'true');
+    return this.http.get<JobOffer[]>(`${this.baseUrl}/opportunities/live`, { params });
+  }
+
   fetchFromUrl(url: string): Observable<JobOffer[]> {
     return this.http.post<JobOffer[]>(`${this.baseUrl}/jobs/fetch`, null, { params: { url } });
   }

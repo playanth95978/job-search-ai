@@ -9,7 +9,7 @@ import { AccountService } from 'app/core/auth/account.service';
 import { SeoService } from 'app/pages/shared/seo.service';
 import { TranslateDirective } from 'app/shared/language';
 import { RevealOnScrollDirective } from 'app/shared/reveal/reveal-on-scroll.directive';
-import { applicationStatusColor, applicationStatusIcon, ApplicationStats } from 'app/job-copilot/shared/job-copilot.model';
+import { applicationStatusColor, applicationStatusIcon, ApplicationStats, JobOffer } from 'app/job-copilot/shared/job-copilot.model';
 import { JobCopilotService } from 'app/job-copilot/shared/job-copilot.service';
 import { HomeBanniere } from './home-banniere/home-banniere';
 import { HomeLanding } from './home-landing/home-landing';
@@ -105,6 +105,11 @@ export default class Home {
   /** Public count of AI-indexed offers, shown as a corpus-size stat in the banner. */
   protected readonly indexedJobCount = signal<number | null>(null);
 
+  /** Live board opportunities matched to the user's profile (logged-in home feed). */
+  protected readonly liveOpportunities = signal<JobOffer[]>([]);
+  protected readonly liveLoading = signal(false);
+  protected readonly liveLoaded = signal(false);
+
   constructor() {
     this.seo.update({
       title: 'Job Search AI — Recherche d’emploi et copilote de carrière IA',
@@ -126,7 +131,26 @@ export default class Home {
         next: stats => this.stats.set(stats),
         error: () => this.stats.set({}),
       });
+      this.loadLiveOpportunities();
     }
+  }
+
+  /** Loads the live opportunity feed asynchronously so it never blocks the initial home render. */
+  loadLiveOpportunities(refresh = false): void {
+    if (this.liveLoading()) return;
+    this.liveLoading.set(true);
+    this.jobCopilotService.getLiveOpportunities(refresh).subscribe({
+      next: offers => {
+        this.liveOpportunities.set(offers);
+        this.liveLoading.set(false);
+        this.liveLoaded.set(true);
+      },
+      error: () => {
+        this.liveOpportunities.set([]);
+        this.liveLoading.set(false);
+        this.liveLoaded.set(true);
+      },
+    });
   }
 
   login(): void {

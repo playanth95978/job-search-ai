@@ -9,12 +9,13 @@ import { AppPageTitleStrategy } from 'app/app-page-title-strategy';
 import { AccountService } from 'app/core/auth/account.service';
 import Footer from 'app/layouts/footer/footer';
 import { ChatWidgetComponent } from 'app/chat/chat-widget/chat-widget.component';
+import { NgxSpinnerComponent } from 'ngx-spinner';
 
 @Component({
   selector: 'jhi-main',
   templateUrl: './main.html',
   providers: [AppPageTitleStrategy],
-  imports: [RouterOutlet, CommonModule, Footer, ChatWidgetComponent],
+  imports: [RouterOutlet, CommonModule, Footer, ChatWidgetComponent, NgxSpinnerComponent],
 })
 export default class Main implements OnInit {
   private readonly router = inject(Router);

@@ -122,6 +122,15 @@
     "stats": {
       "title": "Your application overview"
     },
+    "opportunities": {
+      "title": "Latest opportunities for you",
+      "subtitle": "Jobs posted right now, matched to your profile.",
+      "refresh": "Refresh",
+      "loading": "Searching for the latest offers…",
+      "view": "View offer",
+      "empty": "No opportunities right now. Complete your profile for better suggestions.",
+      "completeProfile": "Complete my profile"
+    },
     "history": {
       "title": "History",
       "noHistory": "No conversation found",

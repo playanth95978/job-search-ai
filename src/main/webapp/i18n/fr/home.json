@@ -122,6 +122,15 @@
     "stats": {
       "title": "Aperçu de vos candidatures"
     },
+    "opportunities": {
+      "title": "Dernières opportunités pour vous",
+      "subtitle": "Offres publiées en ce moment, en lien avec votre profil.",
+      "refresh": "Rafraîchir",
+      "loading": "Recherche des dernières offres…",
+      "view": "Voir l'offre",
+      "empty": "Aucune opportunité pour le moment. Complétez votre profil pour de meilleures suggestions.",
+      "completeProfile": "Compléter mon profil"
+    },
     "history": {
       "title": "Historique",
       "noHistory": "Aucune conversation trouvée",

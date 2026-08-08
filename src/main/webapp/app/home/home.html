@@ -53,6 +53,72 @@
         }
       </div>
     </section>
+
+    <section class="home-section home-opportunities-section">
+      <div class="home-section-header">
+        <h2 class="home-section-title" appReveal="up" jhiTranslate="home.opportunities.title">Dernières opportunités pour vous</h2>
+        <button
+          type="button"
+          class="jc-refresh-btn"
+          (click)="loadLiveOpportunities(true)"
+          [disabled]="liveLoading()"
+          [title]="'home.opportunities.refresh' | translate"
+        >
+          <fa-icon icon="sync" [animation]="liveLoading() ? 'spin' : undefined" />
+          <span jhiTranslate="home.opportunities.refresh">Rafraîchir</span>
+        </button>
+      </div>
+      <p class="home-section-subtitle" jhiTranslate="home.opportunities.subtitle">
+        Offres publiées en ce moment, en lien avec votre profil.
+      </p>
+
+      @if (liveLoading() && liveOpportunities().length === 0) {
+        <div class="jc-opportunities-loading">
+          <fa-icon icon="circle-notch" animation="spin" />
+          <span jhiTranslate="home.opportunities.loading">Recherche des dernières offres…</span>
+        </div>
+      } @else if (liveOpportunities().length > 0) {
+        <div class="jc-opportunities-grid">
+          @for (offer of liveOpportunities(); track offer.applyUrl ?? offer.title; let i = $index) {
+            <a
+              class="jc-opportunity-card"
+              [href]="offer.applyUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              [appReveal]="'up'"
+              [revealDelay]="i * 50"
+            >
+              <div class="jc-opportunity-head">
+                <span class="jc-opportunity-title">{{ offer.title }}</span>
+                @if (offer.source) {
+                  <span class="jc-opportunity-source">{{ offer.source }}</span>
+                }
+              </div>
+              @if (offer.company) {
+                <span class="jc-opportunity-meta"><fa-icon icon="building" /> {{ offer.company }}</span>
+              }
+              @if (offer.location) {
+                <span class="jc-opportunity-meta"><fa-icon icon="location-dot" /> {{ offer.location }}</span>
+              }
+              <span class="jc-opportunity-cta">
+                <span jhiTranslate="home.opportunities.view">Voir l'offre</span>
+                <fa-icon icon="arrow-right" />
+              </span>
+            </a>
+          }
+        </div>
+      } @else if (liveLoaded()) {
+        <div class="jc-opportunities-empty">
+          <fa-icon icon="briefcase" size="2x" />
+          <span jhiTranslate="home.opportunities.empty"
+            >Aucune opportunité pour le moment. Complétez votre profil pour de meilleures suggestions.</span
+          >
+          <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/onboarding" jhiTranslate="home.opportunities.completeProfile"
+            >Compléter mon profil</a
+          >
+        </div>
+      }
+    </section>
   } @else {
     <jhi-home-landing (loginAction)="login()" />
   }
