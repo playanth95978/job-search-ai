@@ -101,7 +101,9 @@ services:
       onnx-init:
         condition: service_completed_successfully
       open-websearch:
-        condition: service_started
+        # service_healthy (et non service_started) : le client MCP de Spring AI se connecte au
+        # démarrage et fait échouer tout le contexte si le serveur ne répond pas encore.
+        condition: service_healthy
     restart: unless-stopped
     # Exposed through the existing Traefik (no public port). Traefik runs in host network
     # mode, so it reaches this container on the project's default bridge network.
@@ -127,6 +129,15 @@ services:
       # Décommente pour router la recherche via un proxy sortant (utile si l'IP du VPS est bloquée) :
       # USE_PROXY: 'true'
       # PROXY_URL: http://mon-proxy:8080
+    healthcheck:
+      # Sonde la route /mcp : un GET y répond 400 (requête MCP malformée), ce qui prouve que le
+      # serveur HTTP écoute ET que la route MCP est montée. On ne fait pas de vrai handshake
+      # `initialize` exprès : il ouvrirait une session MCP à chaque sonde (fuite mémoire).
+      test: ['CMD-SHELL', 'wget -q -S --spider http://127.0.0.1:3000/mcp 2>&1 | grep -q "HTTP/"']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     restart: unless-stopped
 
   # Static portfolio site (single self-contained HTML file), served on the cv.<DOMAIN> subdomain
