@@ -126,6 +126,7 @@ import { Resume, SectionKey } from '../resume.model';
     .x-cv {
       color: #2b2b2b;
       font-family: var(--cv-font);
+      padding: 15px;
     }
     .x-head {
       margin-bottom: 22px;

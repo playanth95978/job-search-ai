@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
@@ -41,11 +41,13 @@ const EMPTY_PREFERENCES: UserPreferenceDto = {
   templateUrl: './onboarding.component.html',
   styleUrl: './onboarding.component.scss',
 })
-export class OnboardingComponent {
+export class OnboardingComponent implements OnInit {
   private readonly service = inject(JobCopilotService);
   private readonly router = inject(Router);
 
   readonly uploading = signal(false);
+  readonly hasUploadSuccess = signal(false);
+
   readonly profile = signal<CandidateProfile | null>(null);
   readonly error = signal<string | null>(null);
 
@@ -56,6 +58,11 @@ export class OnboardingComponent {
   readonly editProfile = signal<CandidateProfile>({});
   readonly prefs = signal<UserPreferenceDto>(EMPTY_PREFERENCES);
 
+  ngOnInit(): void {
+    this.service.getProfile().subscribe(profile => {
+      this.profile.set(profile);
+    });
+  }
   upload(file: File): void {
     this.uploading.set(true);
     this.error.set(null);
@@ -64,6 +71,7 @@ export class OnboardingComponent {
         this.profile.set(p);
         this.editProfile.set(structuredClone(p));
         this.loadPreferences();
+        this.hasUploadSuccess.set(true);
         this.uploading.set(false);
       },
       error: err => {
@@ -125,7 +133,7 @@ export class OnboardingComponent {
           this.goToDashboard();
         },
         error: err => {
-          this.saveError.set(err.error?.message || 'Failed to save profile');
+          this.saveError.set(err.error?.message ?? 'Failed to save profile');
           this.saving.set(false);
         },
       });

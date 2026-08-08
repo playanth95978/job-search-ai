@@ -30,6 +30,7 @@ import { ThemeService } from 'app/core/theme/theme.service';
 import { AppPageTitleStrategy } from './app-page-title-strategy';
 import routes from './app.routes';
 import { NgbDateDayjsAdapter } from './config/datepicker-adapter';
+import { NgxSpinnerModule } from 'ngx-spinner';
 
 const routerFeatures: RouterFeatures[] = [
   withComponentInputBinding(),
@@ -56,6 +57,7 @@ export const appConfig: ApplicationConfig = {
     // Set this to true to enable service worker (PWA)
     provideServiceWorker('ngsw-worker.js', { enabled: false }),
     importProvidersFrom(TranslationModule),
+    importProvidersFrom(NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' })),
     provideHttpClient(
       withInterceptors([loadingInterceptor, authInterceptor, authExpiredInterceptor, errorHandlerInterceptor, notificationInterceptor]),
     ),

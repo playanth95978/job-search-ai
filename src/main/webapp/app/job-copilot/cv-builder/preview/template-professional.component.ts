@@ -132,6 +132,7 @@ import { Resume, SectionKey } from '../resume.model';
     .p-cv {
       color: #222;
       font-family: var(--cv-font);
+      padding: 15px;
     }
     .p-head {
       text-align: center;

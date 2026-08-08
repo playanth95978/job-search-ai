@@ -30,21 +30,25 @@
     </div>
   } @else if (profile()) {
     <div class="jc-success">
-      <div class="jc-success-icon">
-        <fa-icon icon="circle-check" size="3x"></fa-icon>
-      </div>
-      <h2 jhiTranslate="jobCopilot.onboarding.success.title">Profile extracted successfully!</h2>
+      @if (hasUploadSuccess()) {
+        <div class="jc-success-icon">
+          <fa-icon icon="circle-check" size="3x"></fa-icon>
+        </div>
+        <h2 jhiTranslate="jobCopilot.onboarding.success.title">Profile extracted successfully!</h2>
+      }
       <p class="jc-edit-hint" jhiTranslate="jobCopilot.onboarding.edit.hint">
         Review and adjust your profile below, then set your preferences.
       </p>
-
       <jhi-cv-quality [profile]="profile()!" />
 
       <jhi-profile-editor [profile]="editProfile()" (profileChange)="editProfile.set($event)" />
       <jhi-preferences-editor [preferences]="prefs()" (preferencesChange)="prefs.set($event)" />
 
       @if (saveError()) {
-        <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ saveError() }}</div>
+        <div class="jc-error">
+          <fa-icon icon="circle-exclamation"></fa-icon>
+          {{ saveError() }}
+        </div>
       }
 
       <div class="jc-actions-row">
