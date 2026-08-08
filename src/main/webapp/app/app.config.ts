@@ -19,6 +19,7 @@ import { environment } from 'environments/environment';
 import { authExpiredInterceptor } from 'app/core/interceptor/auth-expired.interceptor';
 import { authInterceptor } from 'app/core/interceptor/auth.interceptor';
 import { errorHandlerInterceptor } from 'app/core/interceptor/error-handler.interceptor';
+import { loadingInterceptor } from 'app/core/interceptor/loading.interceptor';
 import { notificationInterceptor } from 'app/core/interceptor/notification.interceptor';
 
 import './config/dayjs';
@@ -55,7 +56,9 @@ export const appConfig: ApplicationConfig = {
     // Set this to true to enable service worker (PWA)
     provideServiceWorker('ngsw-worker.js', { enabled: false }),
     importProvidersFrom(TranslationModule),
-    provideHttpClient(withInterceptors([authInterceptor, authExpiredInterceptor, errorHandlerInterceptor, notificationInterceptor])),
+    provideHttpClient(
+      withInterceptors([loadingInterceptor, authInterceptor, authExpiredInterceptor, errorHandlerInterceptor, notificationInterceptor]),
+    ),
     Title,
     { provide: LOCALE_ID, useValue: 'fr' },
     { provide: NgbDateAdapter, useClass: NgbDateDayjsAdapter },

@@ -68,6 +68,34 @@
           </div>
         }
 
+        @if (msg.sources && msg.sources.length > 0) {
+          <div class="message-sources mt-3">
+            <button
+              class="btn btn-link btn-sm p-0 d-flex align-items-center gap-1 text-decoration-none source-toggle"
+              (click)="toggleSources(msg.id)"
+            >
+              <fa-icon [icon]="expandedSources()[msg.id] ? 'chevron-down' : 'chevron-right'"></fa-icon>
+              <span class="source-count">{{ msg.sources.length }} {{ 'chat.sources.label' | translate }}</span>
+            </button>
+
+            @if (expandedSources()[msg.id]) {
+              <div class="sources-list mt-2 d-flex flex-wrap gap-2 animate-fade-in">
+                @for (source of msg.sources; track $index) {
+                  <a
+                    [href]="source.url"
+                    target="_blank"
+                    class="source-card d-flex align-items-center gap-2 px-3 py-2 rounded-3 text-decoration-none"
+                    [title]="source.title"
+                  >
+                    <fa-icon [icon]="isDownloadable(source.url) ? 'file-download' : 'external-link-alt'"></fa-icon>
+                    <span class="source-title text-truncate">{{ source.title }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        }
+
         <span class="message-time">{{ msg.id === 'welcome' ? '' : (dateNow | formatMediumDatetime) }}</span>
       </div>
     </div>

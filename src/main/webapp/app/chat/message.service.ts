@@ -45,13 +45,24 @@ export class MessageService {
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
 
+  /** Fallback greeting, shown only if the i18n bundle isn't loaded yet when this root service is built. */
+  private static readonly WELCOME_FALLBACK = "Bonjour ! Comment puis-je vous aider aujourd'hui ?";
+
   /** Localized greeting shown as the first assistant message of an empty conversation. */
   private welcomeMessage(): ChatMessage {
     return {
       id: 'welcome',
       role: 'assistant',
-      content: this.translate.instant('chat.welcome'),
+      content: this.resolveWelcome(),
     };
+  }
+
+  /** Resolves the welcome text, guarding against the raw key when translations aren't loaded yet. */
+  private resolveWelcome(): string {
+    const text = this.translate.instant('chat.welcome');
+    return typeof text === 'string' && text && text !== 'chat.welcome' && !text.startsWith('translation-not-found')
+      ? text
+      : MessageService.WELCOME_FALLBACK;
   }
 
   private readonly _ocrContext = signal<string | null>(null);
@@ -92,10 +103,10 @@ export class MessageService {
   // saccadé. On découple donc l'affichage de l'arrivée réseau : le flux remplit `targetText`,
   // et une boucle rAF fait avancer le texte affiché caractère par caractère à cadence régulière,
   // comme ChatGPT/Gemini. La vitesse s'adapte au retard accumulé pour ne jamais décrocher.
-  private targetText = '';
-  private revealedChars = 0;
+  private readonly _targetText = signal<string>('');
+  private readonly _revealedChars = signal<number>(0);
   private revealHandle: number | null = null;
-  private streamEnded = false;
+  private readonly _streamEnded = signal<boolean>(false);
   private onRevealComplete: (() => void) | null = null;
   private lastMarkdownRender = 0;
   private streamSubscription: Subscription | null = null;
@@ -109,6 +120,17 @@ export class MessageService {
     marked.setOptions({
       gfm: true,
       breaks: true,
+    });
+
+    // This root service can be constructed before the i18n bundle is loaded, so translate.instant()
+    // at field-init may miss and render the raw key. Keep the welcome message in sync once the
+    // translation becomes available and on every language change, while the conversation is empty.
+    this.translate.stream('chat.welcome').subscribe((text: string) => {
+      if (!text || text === 'chat.welcome' || text.startsWith('translation-not-found')) return;
+      const patch = (msgs: ChatMessage[]): ChatMessage[] =>
+        msgs.length === 1 && msgs[0].id === 'welcome' ? [{ ...msgs[0], content: text }] : msgs;
+      this._completeMessages.update(patch);
+      this._messages.update(patch);
     });
   }
 
@@ -216,14 +238,14 @@ export class MessageService {
         }
 
         // On alimente la cible ; c'est la boucle rAF qui décide du rythme d'affichage.
-        this.targetText = this.streamBuffer;
+        this._targetText.set(this.streamBuffer);
         this.startReveal();
       },
 
       complete: () => {
         // On ne finalise pas tout de suite : on laisse la révélation rattraper son retard,
         // sinon la fin du message apparaîtrait d'un bloc.
-        this.streamEnded = true;
+        this._streamEnded.set(true);
         this.onRevealComplete = () => {
           this.finalizeAssistantMessage(this.streamBuffer, this._pendingSources());
           if (this.isNewMessage()) {
@@ -265,18 +287,21 @@ export class MessageService {
     if (this.revealHandle !== null) return;
 
     const tick = (): void => {
-      const backlog = this.targetText.length - this.revealedChars;
+      const targetText = this._targetText();
+      const revealedChars = this._revealedChars();
+      const backlog = targetText.length - revealedChars;
 
       if (backlog > 0) {
         const step = Math.max(1, Math.ceil(backlog / MessageService.REVEAL_DIVISOR));
-        this.revealedChars = Math.min(this.targetText.length, this.revealedChars + step);
-        const shown = this.targetText.slice(0, this.revealedChars);
+        const newRevealed = Math.min(targetText.length, revealedChars + step);
+        this._revealedChars.set(newRevealed);
+        const shown = targetText.slice(0, newRevealed);
         this._streamingMessage.set(shown);
 
         // Le parse markdown est throttlé : c'est l'opération coûteuse, et 30 fps suffisent
         // largement à l'œil. On force le rendu final quand tout est révélé.
         const now = performance.now();
-        const caughtUp = this.revealedChars >= this.targetText.length;
+        const caughtUp = newRevealed >= targetText.length;
         if (caughtUp || now - this.lastMarkdownRender >= MessageService.MARKDOWN_RENDER_INTERVAL_MS) {
           this.lastMarkdownRender = now;
           this._streamingHtml.set(this.renderStreamingMarkdown(shown));
@@ -284,7 +309,7 @@ export class MessageService {
       }
 
       // Le flux est terminé ET tout le texte est affiché : on peut finaliser le message.
-      if (this.streamEnded && this.revealedChars >= this.targetText.length) {
+      if (this._streamEnded() && this._revealedChars() >= this._targetText().length) {
         this.stopReveal();
         const done = this.onRevealComplete;
         this.onRevealComplete = null;
@@ -307,9 +332,9 @@ export class MessageService {
 
   private resetReveal(): void {
     this.stopReveal();
-    this.targetText = '';
-    this.revealedChars = 0;
-    this.streamEnded = false;
+    this._targetText.set('');
+    this._revealedChars.set(0);
+    this._streamEnded.set(false);
     this.onRevealComplete = null;
     this.lastMarkdownRender = 0;
   }
@@ -326,7 +351,7 @@ export class MessageService {
     this.stopReveal();
 
     // On fige ce qui a été effectivement affiché, pas ce qui a été reçu.
-    const partial = this.targetText.slice(0, this.revealedChars);
+    const partial = this._targetText().slice(0, this._revealedChars());
     this.finalizeAssistantMessage(partial, this._pendingSources());
     this.resetReveal();
     this.streamBuffer = '';

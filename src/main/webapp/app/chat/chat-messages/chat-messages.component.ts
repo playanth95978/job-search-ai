@@ -39,13 +39,13 @@ export class ChatMessagesComponent implements AfterViewChecked {
   formatMessage = input.required<(message: string) => string>();
   feedbackClicked = output<{ messageId: string; feedback: 'up' | 'down' }>();
 
-  expandedSources: Record<string, boolean> = {};
+  expandedSources = signal<Record<string, boolean>>({});
 
   /** Affiche le bouton « revenir en bas » quand l'utilisateur a remonté le fil. */
   readonly showScrollToBottom = signal(false);
 
   /** Vrai tant que l'utilisateur suit le bas du fil (auto-scroll actif). */
-  private stickToBottom = true;
+  private stickToBottom = signal(true);
 
   /** Tolérance en px pour considérer qu'on est « en bas » (marge d'arrondi / inertie). */
   private static readonly STICK_THRESHOLD_PX = 80;
@@ -64,7 +64,7 @@ export class ChatMessagesComponent implements AfterViewChecked {
   ngAfterViewChecked(): void {
     // On ne recolle en bas que si l'utilisateur y était déjà : sinon on le ramènerait de force
     // pendant qu'il relit un message plus haut (comportement ChatGPT/Gemini).
-    if (this.stickToBottom) {
+    if (this.stickToBottom()) {
       this.scrollToBottom();
     }
   }
@@ -78,7 +78,7 @@ export class ChatMessagesComponent implements AfterViewChecked {
     if (!el) return;
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
     const atBottom = distanceFromBottom <= ChatMessagesComponent.STICK_THRESHOLD_PX;
-    this.stickToBottom = atBottom;
+    this.stickToBottom.set(atBottom);
     this.showScrollToBottom.set(!atBottom);
   }
 
@@ -86,13 +86,16 @@ export class ChatMessagesComponent implements AfterViewChecked {
   scrollToBottomSmooth(): void {
     const el = this.scrollContainer?.nativeElement;
     if (!el) return;
-    this.stickToBottom = true;
+    this.stickToBottom.set(true);
     this.showScrollToBottom.set(false);
     el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }
 
   toggleSources(messageId: string): void {
-    this.expandedSources[messageId] = !this.expandedSources[messageId];
+    this.expandedSources.update(sources => ({
+      ...sources,
+      [messageId]: !sources[messageId],
+    }));
   }
 
   /** Une source pointant vers un fichier uploadé interne (vs une URL externe Confluence/GitHub). */
