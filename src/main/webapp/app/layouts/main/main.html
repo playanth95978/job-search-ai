@@ -1,9 +1,13 @@
-<div class="app-layout">
+<div class="app-layout" [class.has-sidenav]="account() !== null" [class.nav-collapsed]="jobNav.collapsed()">
   <ngx-spinner bdColor="rgba(0, 0, 0, 0.5)" size="medium" color="#fff" type="ball-scale-multiple" />
 
   <header class="navbar-wrapper">
     <router-outlet name="navbar" />
   </header>
+
+  @if (account() !== null) {
+    <jhi-job-nav />
+  }
 
   <main class="content-wrapper">
     <div class="main-content">

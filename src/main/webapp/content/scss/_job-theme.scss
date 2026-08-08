@@ -5,6 +5,9 @@ the home page and the Job Copilot product surface. Direction: clean SaaS.
 ========================================================================== */
 
 $jc-navbar-height: 64px;
+/* Left rail (JobNav) widths, shared between the rail component and the content shift in styles.scss. */
+$job-nav-width: 248px;
+$job-nav-collapsed-width: 76px;
 /* Legacy SCSS vars kept for components that import them (chat, navbar, dashboard…), now indigo. */
 $jc-accent: #4f46e5;
 $jc-gradient: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);

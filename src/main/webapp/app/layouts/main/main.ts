@@ -9,21 +9,25 @@ import { AppPageTitleStrategy } from 'app/app-page-title-strategy';
 import { AccountService } from 'app/core/auth/account.service';
 import Footer from 'app/layouts/footer/footer';
 import { ChatWidgetComponent } from 'app/chat/chat-widget/chat-widget.component';
+import { JobNavComponent } from 'app/layouts/job-nav/job-nav.component';
+import { JobNavService } from 'app/layouts/job-nav/job-nav.service';
 import { NgxSpinnerComponent } from 'ngx-spinner';
 
 @Component({
   selector: 'jhi-main',
   templateUrl: './main.html',
   providers: [AppPageTitleStrategy],
-  imports: [RouterOutlet, CommonModule, Footer, ChatWidgetComponent, NgxSpinnerComponent],
+  imports: [RouterOutlet, CommonModule, Footer, ChatWidgetComponent, JobNavComponent, NgxSpinnerComponent],
 })
 export default class Main implements OnInit {
   private readonly router = inject(Router);
   private readonly appPageTitleStrategy = inject(AppPageTitleStrategy);
   private readonly accountService = inject(AccountService);
 
-  /** Drives the global floating chat widget: only authenticated users can chat. */
+  /** Drives the global floating chat widget and left rail: only authenticated users see them. */
   protected readonly account = this.accountService.account;
+  /** Left rail UI state — the layout shifts its content to match the rail width. */
+  protected readonly jobNav = inject(JobNavService);
   private readonly translateService = inject(TranslateService);
   private readonly renderer: Renderer2;
 

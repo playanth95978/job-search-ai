@@ -5,6 +5,10 @@
     "newChat": "New conversation",
     "close": "Close"
   },
+  "jobNav": {
+    "open": "Open menu",
+    "collapse": "Collapse"
+  },
   "global": {
     "title": "Job-search-ai",
     "browsehappy": "You are using an <strong>outdated</strong> browser. Please <a href=\"https://browsehappy.com/?locale=en\">upgrade your browser</a> to improve your experience.",

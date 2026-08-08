@@ -484,6 +484,19 @@
         "hint": "Prend en charge les formats PDF et DOCX"
       }
     },
+    "matches": {
+      "title": "Toutes les correspondances",
+      "subtitle": "Les offres classées pour votre profil, avec reranking IA.",
+      "refresh": "Rafraîchir",
+      "loading": "Classement des meilleures offres pour vous…",
+      "count": "correspondances",
+      "unknown": "Entreprise inconnue",
+      "remote": "Télétravail",
+      "view": "Voir l'offre",
+      "apply": "Postuler",
+      "empty": "Aucune correspondance pour l'instant. Importez votre CV pour obtenir des offres classées.",
+      "completeProfile": "Compléter mon profil"
+    },
     "settings": {
       "title": "Préférences de Job",
       "subtitle": "Configurez vos critères de recherche pour obtenir de meilleurs matchs",

@@ -106,6 +106,10 @@
         "title": "Applications",
         "subtitle": "Track and manage your applications"
       },
+      "allMatches": {
+        "title": "All matches",
+        "subtitle": "Offers ranked for your profile by AI"
+      },
       "interview": {
         "title": "Interview practice",
         "subtitle": "Train with an AI recruiter"

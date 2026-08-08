@@ -484,6 +484,19 @@
         "hint": "Supports PDF and DOCX formats"
       }
     },
+    "matches": {
+      "title": "All matches",
+      "subtitle": "Offers ranked against your profile, with AI reranking.",
+      "refresh": "Refresh",
+      "loading": "Ranking the best offers for you…",
+      "count": "matches",
+      "unknown": "Unknown company",
+      "remote": "Remote",
+      "view": "View offer",
+      "apply": "Apply",
+      "empty": "No matches yet. Import your CV to get ranked offers.",
+      "completeProfile": "Complete my profile"
+    },
     "settings": {
       "title": "Job Preferences",
       "subtitle": "Configure your job search criteria to get better matches",

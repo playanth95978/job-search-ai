@@ -1,0 +1,159 @@
+@import '../../../content/scss/job-theme';
+
+:host {
+  display: contents;
+}
+
+.job-nav {
+  position: fixed;
+  top: $jc-navbar-height;
+  left: 0;
+  bottom: 0;
+  width: $job-nav-width;
+  z-index: 1025;
+  display: flex;
+  flex-direction: column;
+  background: var(--bs-body-bg);
+  border-right: 1px solid var(--bs-border-color);
+  padding: 1rem 0.75rem;
+  transition:
+    width 0.2s ease,
+    transform 0.2s ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  &.collapsed {
+    width: $job-nav-collapsed-width;
+  }
+}
+
+.job-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1 1 auto;
+}
+
+.job-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: var(--bs-tertiary-bg);
+  }
+
+  &.active {
+    background: rgba(79, 70, 229, 0.12);
+    color: #4f46e5;
+  }
+}
+
+.job-nav-icon {
+  font-size: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.job-nav-collapse {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.25rem;
+  padding: 0.7rem 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+  }
+}
+
+// Collapsed (desktop): icons only, centered.
+.job-nav.collapsed {
+  .job-nav-label {
+    display: none;
+  }
+
+  .job-nav-link,
+  .job-nav-collapse {
+    justify-content: center;
+    gap: 0;
+  }
+}
+
+.job-nav-backdrop,
+.job-nav-mobile-toggle {
+  display: none;
+}
+
+// Mobile: off-canvas drawer.
+@media (max-width: 768px) {
+  .job-nav {
+    transform: translateX(-100%);
+    width: $job-nav-width;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+
+    &.mobile-open {
+      transform: translateX(0);
+    }
+
+    // Collapse is a desktop-only affordance: always show full labels in the drawer.
+    &.collapsed {
+      width: $job-nav-width;
+
+      .job-nav-label {
+        display: inline;
+      }
+
+      .job-nav-link {
+        justify-content: flex-start;
+        gap: 0.85rem;
+      }
+    }
+  }
+
+  .job-nav-collapse {
+    display: none;
+  }
+
+  .job-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: $jc-navbar-height 0 0 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1024;
+  }
+
+  .job-nav-mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: calc(#{$jc-navbar-height} + 0.5rem);
+    left: 0.5rem;
+    z-index: 1026;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    cursor: pointer;
+  }
+}

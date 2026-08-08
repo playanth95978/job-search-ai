@@ -1,0 +1,91 @@
+<div class="jc-matches">
+  <div class="jc-matches-header">
+    <div>
+      <h1 class="jc-matches-title"><fa-icon icon="bullseye"></fa-icon> <span jhiTranslate="jobCopilot.matches.title">All matches</span></h1>
+      <p class="jc-matches-subtitle" jhiTranslate="jobCopilot.matches.subtitle">Offers ranked against your profile with AI reranking.</p>
+    </div>
+    <button type="button" class="jc-btn jc-btn-outline" (click)="load()" [disabled]="loading()">
+      <fa-icon icon="sync" [animation]="loading() ? 'spin' : undefined"></fa-icon>
+      <span jhiTranslate="jobCopilot.matches.refresh">Refresh</span>
+    </button>
+  </div>
+
+  @if (loading() && matches().length === 0) {
+    <div class="jc-matches-state">
+      <fa-icon icon="circle-notch" animation="spin" size="2x"></fa-icon>
+      <span jhiTranslate="jobCopilot.matches.loading">Ranking the best offers for you…</span>
+    </div>
+  } @else if (error()) {
+    <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
+  } @else if (matches().length > 0) {
+    <div class="jc-results-count">{{ matches().length }} <span jhiTranslate="jobCopilot.matches.count">matches</span></div>
+
+    <div class="jc-results">
+      @for (match of matches(); track match.jobOffer.id ?? $index) {
+        <div class="jc-match-card">
+          <div class="jc-match-score" [class]="'score-' + scoreClass(match.score)">
+            <span class="jc-score-value">{{ match.score * 100 | number: '1.0-0' }}</span>
+            <span class="jc-score-label">%</span>
+          </div>
+          <div class="jc-match-info">
+            <div class="jc-match-title">
+              <strong>{{ match.jobOffer.title }}</strong>
+              @if (match.jobOffer.source) {
+                <span class="jc-source-badge">{{ match.jobOffer.source }}</span>
+              }
+            </div>
+            <div class="jc-match-company">
+              <fa-icon icon="building"></fa-icon>
+              {{ match.jobOffer.company || ('jobCopilot.matches.unknown' | translate) }}
+              @if (match.jobOffer.location) {
+                <span class="jc-separator">&middot;</span>
+                <fa-icon icon="location-dot"></fa-icon> {{ match.jobOffer.location }}
+              }
+              @if (match.jobOffer.remote) {
+                <span class="jc-remote-badge" jhiTranslate="jobCopilot.matches.remote">Remote</span>
+              }
+            </div>
+            <div class="jc-match-tags">
+              @for (s of match.strengths; track $index) {
+                <span class="jc-tag jc-tag-success"><fa-icon icon="check"></fa-icon> {{ s.key | translate: { skill: s.skill } }}</span>
+              }
+              @for (w of match.weaknesses; track $index) {
+                <span class="jc-tag jc-tag-warning">
+                  <fa-icon icon="triangle-exclamation"></fa-icon> {{ w.key | translate: { skill: w.skill } }}
+                </span>
+              }
+            </div>
+            <div class="jc-match-actions">
+              @if (match.jobOffer.applyUrl) {
+                <a [href]="match.jobOffer.applyUrl" target="_blank" rel="noopener noreferrer" class="jc-btn jc-btn-ghost">
+                  <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.matches.view">View</span>
+                </a>
+              }
+              <button
+                type="button"
+                class="jc-btn jc-btn-primary jc-btn-sm"
+                (click)="apply(match.jobOffer)"
+                [disabled]="applyingId() !== null"
+              >
+                @if (applyingId() === match.jobOffer.id) {
+                  <fa-icon icon="circle-notch" animation="spin"></fa-icon>
+                } @else {
+                  <fa-icon icon="paper-plane"></fa-icon>
+                }
+                <span jhiTranslate="jobCopilot.matches.apply">Apply</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (loaded()) {
+    <div class="jc-matches-state">
+      <fa-icon icon="bullseye" size="2x"></fa-icon>
+      <span jhiTranslate="jobCopilot.matches.empty">No matches yet. Import your CV to get ranked offers.</span>
+      <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/onboarding" jhiTranslate="jobCopilot.matches.completeProfile"
+        >Complete my profile</a
+      >
+    </div>
+  }
+</div>

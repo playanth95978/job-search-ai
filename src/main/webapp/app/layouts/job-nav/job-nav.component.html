@@ -1,0 +1,30 @@
+<!-- Mobile: bouton d'ouverture du drawer -->
+<button type="button" class="job-nav-mobile-toggle" (click)="nav.toggleMobile()" [attr.aria-label]="'jobNav.open' | translate">
+  <fa-icon icon="bars" />
+</button>
+
+@if (nav.mobileOpen()) {
+  <div class="job-nav-backdrop" (click)="nav.closeMobile()"></div>
+}
+
+<aside class="job-nav" [class.collapsed]="nav.collapsed()" [class.mobile-open]="nav.mobileOpen()">
+  <nav class="job-nav-list">
+    @for (item of items; track item.routerLink) {
+      <a
+        class="job-nav-link"
+        [routerLink]="item.routerLink"
+        routerLinkActive="active"
+        (click)="nav.closeMobile()"
+        [title]="item.titleKey | translate"
+      >
+        <fa-icon class="job-nav-icon" [icon]="item.icon" [fixedWidth]="true" />
+        <span class="job-nav-label" jhiTranslate="{{ item.titleKey }}"></span>
+      </a>
+    }
+  </nav>
+
+  <button type="button" class="job-nav-collapse" (click)="nav.toggleCollapsed()" [attr.aria-label]="'jobNav.collapse' | translate">
+    <fa-icon class="job-nav-icon" [icon]="nav.collapsed() ? 'chevron-right' : 'chevron-left'" [fixedWidth]="true" />
+    <span class="job-nav-label" jhiTranslate="jobNav.collapse">Réduire</span>
+  </button>
+</aside>

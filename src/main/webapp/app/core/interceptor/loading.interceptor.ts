@@ -15,7 +15,16 @@ export const SKIP_LOADING = new HttpContextToken<boolean>(() => false);
  * feeds. Showing a full-screen overlay for these would either never dismiss (open SSE streams)
  * or block the whole page while a background feed loads (the home has its own inline loader).
  */
-const SILENT_URL_FRAGMENTS = ['/assistant/', '/stream', '/opportunities/live', '/interview/', '/panel/', '/mistral-ocr/', '/management/'];
+const SILENT_URL_FRAGMENTS = [
+  '/assistant/',
+  '/stream',
+  '/opportunities/live',
+  '/jobs/match',
+  '/interview/',
+  '/panel/',
+  '/mistral-ocr/',
+  '/management/',
+];
 
 /**
  * Global loading interceptor. Shows the shared {@code <ngx-spinner>} while foreground requests are

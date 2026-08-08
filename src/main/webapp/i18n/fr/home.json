@@ -106,6 +106,10 @@
         "title": "Candidatures",
         "subtitle": "Suivez et gérez vos candidatures"
       },
+      "allMatches": {
+        "title": "Toutes les correspondances",
+        "subtitle": "Les offres classées pour votre profil par l'IA"
+      },
       "interview": {
         "title": "Entraînement entretien",
         "subtitle": "Entraînez-vous avec un recruteur virtuel"

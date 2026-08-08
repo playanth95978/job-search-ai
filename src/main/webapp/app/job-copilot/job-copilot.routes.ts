@@ -17,6 +17,11 @@ const routes: Routes = [
     title: 'cvBuilder.title',
   },
   {
+    path: 'matches',
+    loadComponent: () => import('./matches/matches.component').then(m => m.MatchesComponent),
+    title: 'jobCopilot.matches.title',
+  },
+  {
     path: 'search',
     loadComponent: () => import('./job-search/job-search.component').then(m => m.JobSearchComponent),
     title: 'Job Search',
