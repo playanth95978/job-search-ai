@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * One opportunity surfaced by the Opportunity Radar: a freshly ingested offer that matched a user's
@@ -34,6 +36,7 @@ public class RadarHit implements Serializable {
     private double score;
 
     /** Serialized list of MatchTagDto — the "why you" strengths behind the match. */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "why_you", columnDefinition = "jsonb")
     private String whyYou;
 
