@@ -46,6 +46,11 @@ export class JobCopilotService {
     return this.http.get<CandidateProfile>(`${this.baseUrl}/cv/profile`);
   }
 
+  /** Persists user edits to the extracted profile (identity, skills, roles, experiences…). */
+  updateProfile(profile: CandidateProfile): Observable<CandidateProfile> {
+    return this.http.put<CandidateProfile>(`${this.baseUrl}/cv/profile`, profile);
+  }
+
   geResumeProfile(): Observable<Resume> {
     return this.http.get<Resume>(`${this.baseUrl}/cv/profile`);
   }

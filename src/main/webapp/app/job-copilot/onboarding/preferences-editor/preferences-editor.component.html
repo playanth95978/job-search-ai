@@ -1,0 +1,53 @@
+<div class="jc-edit-card">
+  <h3 class="jc-edit-card-title">
+    <fa-icon icon="filter"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.preferences.title">Search preferences</span>
+  </h3>
+  <p class="jc-edit-hint" jhiTranslate="jobCopilot.onboarding.preferences.subtitle">
+    These refine your matches, radar and live opportunities.
+  </p>
+
+  <div class="jc-field-grid">
+    <label class="jc-field jc-field-check">
+      <input type="checkbox" [ngModel]="preferences().remoteOnly" (ngModelChange)="patch({ remoteOnly: $event })" />
+      <span jhiTranslate="jobCopilot.onboarding.preferences.remoteOnly">Remote only</span>
+    </label>
+    <label class="jc-field">
+      <span jhiTranslate="jobCopilot.onboarding.preferences.contractType">Contract type</span>
+      <select [ngModel]="preferences().contractType" (ngModelChange)="patch({ contractType: $event })">
+        <option [ngValue]="undefined" jhiTranslate="jobCopilot.onboarding.preferences.anyContract">Any</option>
+        @for (type of contractTypes; track type) {
+          <option [ngValue]="type">{{ 'jobCopilot.onboarding.preferences.contract.' + type | translate }}</option>
+        }
+      </select>
+    </label>
+    <label class="jc-field">
+      <span jhiTranslate="jobCopilot.onboarding.preferences.salaryMin">Min salary</span>
+      <input type="number" min="0" [ngModel]="preferences().salaryMin" (ngModelChange)="patch({ salaryMin: $event })" />
+    </label>
+    <label class="jc-field">
+      <span jhiTranslate="jobCopilot.onboarding.preferences.salaryMax">Max salary</span>
+      <input type="number" min="0" [ngModel]="preferences().salaryMax" (ngModelChange)="patch({ salaryMax: $event })" />
+    </label>
+  </div>
+
+  <!-- Preferred locations -->
+  <div class="jc-ep-section">
+    <h4 jhiTranslate="jobCopilot.onboarding.preferences.locations"><fa-icon icon="location-dot"></fa-icon> Preferred locations</h4>
+    <jhi-chips-input
+      [values]="locations()"
+      (valuesChange)="patch({ preferredLocations: $event })"
+      [placeholder]="'jobCopilot.onboarding.preferences.addLocation' | translate"
+    />
+  </div>
+
+  <!-- Excluded technologies -->
+  <div class="jc-ep-section">
+    <h4 jhiTranslate="jobCopilot.onboarding.preferences.excluded"><fa-icon icon="ban"></fa-icon> Excluded technologies</h4>
+    <jhi-chips-input
+      [values]="excluded()"
+      (valuesChange)="patch({ excludedTechnologies: $event })"
+      [danger]="true"
+      [placeholder]="'jobCopilot.onboarding.preferences.addExcluded' | translate"
+    />
+  </div>
+</div>

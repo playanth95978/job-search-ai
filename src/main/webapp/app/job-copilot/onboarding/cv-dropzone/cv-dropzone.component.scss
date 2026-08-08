@@ -1,0 +1,69 @@
+.jc-dropzone {
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 20px;
+  padding: 4rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: var(--bs-body-bg);
+
+  &:hover {
+    border-color: #4f46e5;
+    background: rgba(79, 70, 229, 0.02);
+  }
+}
+
+.jc-dropzone-active {
+  border-color: #4f46e5;
+  background: rgba(79, 70, 229, 0.05);
+  transform: scale(1.01);
+}
+
+.jc-dropzone-icon {
+  color: #4f46e5;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+}
+
+.jc-dropzone-content {
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--bs-secondary-color);
+    margin-bottom: 1rem;
+  }
+}
+
+.jc-dropzone-hint {
+  font-size: 0.85rem;
+  margin-top: 1.5rem !important;
+  opacity: 0.6;
+}
+
+.jc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.jc-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  color: white;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  }
+}

@@ -1,0 +1,74 @@
+.jc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.jc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.jc-chip-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.jc-chip-remove {
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.jc-chip-add {
+  display: flex;
+  gap: 0.5rem;
+
+  input {
+    flex: 1 1 auto;
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+
+    &:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+  }
+}
+
+.jc-chip-add-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  border-radius: 10px;
+  border: 1px solid var(--bs-border-color);
+  background: transparent;
+  color: #4f46e5;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #4f46e5;
+    background: rgba(79, 70, 229, 0.08);
+  }
+}

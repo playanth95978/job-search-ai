@@ -1,0 +1,121 @@
+<div class="jc-edit-card">
+  <h3 class="jc-edit-card-title">
+    <fa-icon icon="user-circle"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.edit.identity">Your profile</span>
+  </h3>
+
+  <div class="jc-field-grid">
+    <label class="jc-field">
+      <span jhiTranslate="jobCopilot.onboarding.edit.fullName">Full name</span>
+      <input type="text" [ngModel]="profile().fullName" (ngModelChange)="patch({ fullName: $event })" />
+    </label>
+    <label class="jc-field">
+      <span jhiTranslate="jobCopilot.onboarding.edit.location">Location</span>
+      <input type="text" [ngModel]="profile().location" (ngModelChange)="patch({ location: $event })" />
+    </label>
+    <label class="jc-field">
+      <span jhiTranslate="jobCopilot.onboarding.edit.years">Years of experience</span>
+      <input type="number" min="0" [ngModel]="profile().yearsOfExperience" (ngModelChange)="patch({ yearsOfExperience: $event })" />
+    </label>
+  </div>
+
+  <!-- Skills -->
+  <div class="jc-ep-section">
+    <h4 jhiTranslate="jobCopilot.onboarding.success.skills"><fa-icon icon="code"></fa-icon> Skills</h4>
+    <jhi-chips-input
+      [values]="skillNames()"
+      (valuesChange)="onSkillsChange($event)"
+      [placeholder]="'jobCopilot.onboarding.edit.addSkill' | translate"
+    />
+  </div>
+
+  <!-- Target roles -->
+  <div class="jc-ep-section">
+    <h4 jhiTranslate="jobCopilot.onboarding.edit.roles"><fa-icon icon="briefcase"></fa-icon> Target roles</h4>
+    <jhi-chips-input
+      [values]="roles()"
+      (valuesChange)="onRolesChange($event)"
+      [placeholder]="'jobCopilot.onboarding.edit.addRole' | translate"
+    />
+  </div>
+
+  <!-- Experiences -->
+  <div class="jc-ep-section">
+    <h4 jhiTranslate="jobCopilot.onboarding.edit.experiences"><fa-icon icon="briefcase"></fa-icon> Experience</h4>
+    @for (exp of experiences(); track $index) {
+      <div class="jc-row">
+        <input
+          type="text"
+          [ngModel]="exp.jobTitle"
+          (ngModelChange)="patchExperience($index, { jobTitle: $event })"
+          [placeholder]="'jobCopilot.onboarding.edit.jobTitle' | translate"
+        />
+        <input
+          type="text"
+          [ngModel]="exp.company"
+          (ngModelChange)="patchExperience($index, { company: $event })"
+          [placeholder]="'jobCopilot.onboarding.edit.company' | translate"
+        />
+        <button type="button" class="jc-row-remove" (click)="removeExperience($index)" aria-label="remove">
+          <fa-icon icon="trash" />
+        </button>
+      </div>
+    }
+    <button type="button" class="jc-add-link" (click)="addExperience()">
+      <fa-icon icon="plus" /> <span jhiTranslate="jobCopilot.onboarding.edit.addExperience">Add experience</span>
+    </button>
+  </div>
+
+  <!-- Education -->
+  <div class="jc-ep-section">
+    <h4 jhiTranslate="jobCopilot.onboarding.success.education"><fa-icon icon="graduation-cap"></fa-icon> Education</h4>
+    @for (edu of education(); track $index) {
+      <div class="jc-row">
+        <input
+          type="text"
+          [ngModel]="edu.degree"
+          (ngModelChange)="patchEducation($index, { degree: $event })"
+          [placeholder]="'jobCopilot.onboarding.edit.degree' | translate"
+        />
+        <input
+          type="text"
+          [ngModel]="edu.school"
+          (ngModelChange)="patchEducation($index, { school: $event })"
+          [placeholder]="'jobCopilot.onboarding.edit.school' | translate"
+        />
+        <button type="button" class="jc-row-remove" (click)="removeEducation($index)" aria-label="remove">
+          <fa-icon icon="trash" />
+        </button>
+      </div>
+    }
+    <button type="button" class="jc-add-link" (click)="addEducation()">
+      <fa-icon icon="plus" /> <span jhiTranslate="jobCopilot.onboarding.edit.addEducation">Add education</span>
+    </button>
+  </div>
+
+  <!-- Certifications -->
+  <div class="jc-ep-section">
+    <h4 jhiTranslate="jobCopilot.onboarding.success.certifications"><fa-icon icon="certificate"></fa-icon> Certifications</h4>
+    @for (cert of certifications(); track $index) {
+      <div class="jc-row">
+        <input
+          type="text"
+          [ngModel]="cert.name"
+          (ngModelChange)="patchCertification($index, { name: $event })"
+          [placeholder]="'jobCopilot.onboarding.edit.certName' | translate"
+        />
+        <input
+          type="text"
+          [ngModel]="cert.issuer"
+          (ngModelChange)="patchCertification($index, { issuer: $event })"
+          [placeholder]="'jobCopilot.onboarding.edit.certIssuer' | translate"
+        />
+        <button type="button" class="jc-row-remove" (click)="removeCertification($index)" aria-label="remove">
+          <fa-icon icon="trash" />
+        </button>
+      </div>
+    }
+    <button type="button" class="jc-add-link" (click)="addCertification()">
+      <fa-icon icon="plus" /> <span jhiTranslate="jobCopilot.onboarding.edit.addCertification">Add certification</span>
+    </button>
+  </div>
+</div>

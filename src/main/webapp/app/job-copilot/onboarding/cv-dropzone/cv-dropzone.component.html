@@ -1,0 +1,20 @@
+<div
+  class="jc-dropzone"
+  [class.jc-dropzone-active]="isDragOver()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="isDragOver.set(false)"
+  (drop)="onDrop($event)"
+>
+  <div class="jc-dropzone-content">
+    <div class="jc-dropzone-icon">
+      <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
+    </div>
+    <h3 jhiTranslate="jobCopilot.onboarding.dropzone.title">Drag & drop your CV here</h3>
+    <p jhiTranslate="jobCopilot.onboarding.dropzone.or">or</p>
+    <input type="file" #fileInput accept=".pdf,.docx" (change)="onFileInput($event)" hidden />
+    <button class="jc-btn jc-btn-primary" (click)="fileInput.click()">
+      <fa-icon icon="folder-open"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.dropzone.browse">Browse files</span>
+    </button>
+    <p class="jc-dropzone-hint" jhiTranslate="jobCopilot.onboarding.dropzone.hint">Supports PDF and DOCX formats</p>
+  </div>
+</div>

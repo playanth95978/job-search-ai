@@ -1,0 +1,18 @@
+@if (values().length > 0) {
+  <div class="jc-chips">
+    @for (chip of values(); track chip) {
+      <span class="jc-chip" [class.jc-chip-danger]="danger()">
+        {{ chip }}
+        <button type="button" class="jc-chip-remove" (click)="remove($index)" aria-label="remove">
+          <fa-icon icon="xmark" />
+        </button>
+      </span>
+    }
+  </div>
+}
+<div class="jc-chip-add">
+  <input type="text" [ngModel]="draft()" (ngModelChange)="draft.set($event)" (keyup.enter)="add()" [placeholder]="placeholder()" />
+  <button type="button" class="jc-chip-add-btn" (click)="add()" aria-label="add">
+    <fa-icon icon="plus" />
+  </button>
+</div>

@@ -1,0 +1,129 @@
+// Shared form styles for the onboarding editors (profile + preferences).
+// Imported into each editor component's stylesheet (Emulated encapsulation scopes them per host).
+
+.jc-edit-card {
+  width: 100%;
+  text-align: left;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.jc-edit-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.jc-edit-hint {
+  color: var(--bs-secondary-color);
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0;
+}
+
+.jc-ep-section {
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--bs-secondary-color);
+  }
+}
+
+.jc-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.jc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+
+  input,
+  select {
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+
+    &:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+  }
+}
+
+.jc-field-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+
+  input {
+    width: auto;
+  }
+}
+
+.jc-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  input {
+    flex: 1 1 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+
+    &:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+  }
+}
+
+.jc-row-remove {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  padding: 0 0.5rem;
+
+  &:hover {
+    color: #ef4444;
+  }
+}
+
+.jc-add-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  background: transparent;
+  color: #4f46e5;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}

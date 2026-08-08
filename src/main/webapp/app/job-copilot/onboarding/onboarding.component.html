@@ -34,99 +34,35 @@
         <fa-icon icon="circle-check" size="3x"></fa-icon>
       </div>
       <h2 jhiTranslate="jobCopilot.onboarding.success.title">Profile extracted successfully!</h2>
+      <p class="jc-edit-hint" jhiTranslate="jobCopilot.onboarding.edit.hint">
+        Review and adjust your profile below, then set your preferences.
+      </p>
 
       <jhi-cv-quality [profile]="profile()!" />
 
-      <div class="jc-extracted-profile">
-        <div class="jc-ep-header">
-          <div class="jc-ep-avatar">
-            <fa-icon icon="user-circle" size="2x"></fa-icon>
-          </div>
-          <div>
-            <h3>{{ profile()!.fullName }}</h3>
-            <div class="jc-ep-meta">
-              @if (profile()!.location) {
-                <span><fa-icon icon="location-dot"></fa-icon> {{ profile()!.location }}</span>
-              }
-              @if (profile()!.yearsOfExperience) {
-                <span
-                  ><fa-icon icon="briefcase"></fa-icon> {{ profile()!.yearsOfExperience }}
-                  <span jhiTranslate="jobCopilot.onboarding.success.years">years</span></span
-                >
-              }
-            </div>
-          </div>
-        </div>
+      <jhi-profile-editor [profile]="editProfile()" (profileChange)="editProfile.set($event)" />
+      <jhi-preferences-editor [preferences]="prefs()" (preferencesChange)="prefs.set($event)" />
 
-        @if (profile()!.skills) {
-          <div class="jc-ep-section">
-            <h4 jhiTranslate="jobCopilot.onboarding.success.skills"><fa-icon icon="code"></fa-icon> Skills</h4>
-            <div class="jc-skill-tags">
-              @for (skill of profile()!.skills ?? []; track skill.name) {
-                <span class="jc-skill-tag">{{ skill.name }}</span>
-              }
-            </div>
-          </div>
-        }
+      @if (saveError()) {
+        <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ saveError() }}</div>
+      }
 
-        @if (profile()!.education) {
-          <div class="jc-ep-section">
-            <h4 jhiTranslate="jobCopilot.onboarding.success.education"><fa-icon icon="graduation-cap"></fa-icon> Education</h4>
-            <div class="jc-items-list">
-              @for (edu of profile()!.education ?? []; track edu.id) {
-                <div class="jc-item">
-                  <strong>{{ edu.degree }}</strong>
-                  @if (edu.school) {
-                    <span><span jhiTranslate="jobCopilot.onboarding.success.at">at</span> {{ edu.school }}</span>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        }
-
-        @if (profile()!.certifications) {
-          <div class="jc-ep-section">
-            <h4 jhiTranslate="jobCopilot.onboarding.success.certifications"><fa-icon icon="certificate"></fa-icon> Certifications</h4>
-            <div class="jc-items-list">
-              @for (cert of profile()!.certifications ?? []; track cert.id) {
-                <div class="jc-item">
-                  <strong>{{ cert.name }}</strong>
-                  @if (cert.issuer) {
-                    <span><span jhiTranslate="jobCopilot.onboarding.success.from">from</span> {{ cert.issuer }}</span>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        }
+      <div class="jc-actions-row">
+        <button class="jc-btn jc-btn-ghost" (click)="goToDashboard()" [disabled]="saving()">
+          <span jhiTranslate="jobCopilot.onboarding.edit.skip">Skip</span>
+        </button>
+        <button class="jc-btn jc-btn-primary jc-btn-lg" (click)="saveAndContinue()" [disabled]="saving()">
+          @if (saving()) {
+            <fa-icon icon="circle-notch" animation="spin"></fa-icon>
+          } @else {
+            <fa-icon icon="arrow-right"></fa-icon>
+          }
+          <span jhiTranslate="jobCopilot.onboarding.edit.saveContinue">Save & continue</span>
+        </button>
       </div>
-
-      <button class="jc-btn jc-btn-primary jc-btn-lg" (click)="goToDashboard()">
-        <fa-icon icon="arrow-right"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.success.goDashboard">Go to Dashboard</span>
-      </button>
     </div>
   } @else {
-    <div
-      class="jc-dropzone"
-      [class.jc-dropzone-active]="isDragOver()"
-      (dragover)="onDragOver($event)"
-      (dragleave)="isDragOver.set(false)"
-      (drop)="onDrop($event)"
-    >
-      <div class="jc-dropzone-content">
-        <div class="jc-dropzone-icon">
-          <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
-        </div>
-        <h3 jhiTranslate="jobCopilot.onboarding.dropzone.title">Drag & drop your CV here</h3>
-        <p jhiTranslate="jobCopilot.onboarding.dropzone.or">or</p>
-        <input type="file" #fileInput accept=".pdf,.docx" (change)="onFileSelected($event)" hidden />
-        <button class="jc-btn jc-btn-primary" (click)="fileInput.click()">
-          <fa-icon icon="folder-open"></fa-icon> <span jhiTranslate="jobCopilot.onboarding.dropzone.browse">Browse files</span>
-        </button>
-        <p class="jc-dropzone-hint" jhiTranslate="jobCopilot.onboarding.dropzone.hint">Supports PDF and DOCX formats</p>
-      </div>
-    </div>
+    <jhi-cv-dropzone (fileSelected)="upload($event)" />
   }
 
   @if (error()) {

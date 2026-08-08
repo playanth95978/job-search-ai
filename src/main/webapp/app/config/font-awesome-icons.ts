@@ -107,6 +107,7 @@ import {
   faRoute,
   faDiagramProject,
   faUpRightFromSquare,
+  faTrash,
   // jhipster-needle-add-icon-import
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -219,5 +220,6 @@ export const fontAwesomeIcons = [
   faLightbulb,
   faThumbsUp,
   faThumbsDown,
+  faTrash,
   // jhipster-needle-add-icon-import
 ];
