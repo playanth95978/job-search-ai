@@ -22,6 +22,11 @@ const routes: Routes = [
     title: 'jobCopilot.matches.title',
   },
   {
+    path: 'auto-apply',
+    loadComponent: () => import('./auto-apply/auto-apply.component').then(m => m.AutoApplyComponent),
+    title: 'jobCopilot.autoApply.title',
+  },
+  {
     path: 'search',
     loadComponent: () => import('./job-search/job-search.component').then(m => m.JobSearchComponent),
     title: 'Job Search',

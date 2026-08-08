@@ -13,7 +13,9 @@
     <div class="main-content">
       <router-outlet />
     </div>
-    <jhi-footer />
+    @if (account() === null) {
+      <jhi-footer />
+    }
   </main>
 
   @if (account() !== null) {

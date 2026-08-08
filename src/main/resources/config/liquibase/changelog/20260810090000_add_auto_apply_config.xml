@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="20260810090000-1" author="claude">
+    <createTable tableName="auto_apply_config">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="varchar(255)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="ux_auto_apply_config_user"/>
+      </column>
+      <column name="mode" type="varchar(20)" defaultValue="VALIDATION"/>
+      <column name="min_score" type="double precision" defaultValueNumeric="0.7"/>
+      <column name="max_per_day" type="integer" defaultValueNumeric="5"/>
+      <column name="sources" type="jsonb"/>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,148 @@
+<div class="jc-autoapply">
+  <div class="jc-autoapply-header">
+    <h1 class="jc-autoapply-title"><fa-icon icon="robot"></fa-icon> <span jhiTranslate="jobCopilot.autoApply.title">Auto-apply</span></h1>
+    <p class="jc-autoapply-subtitle" jhiTranslate="jobCopilot.autoApply.subtitle">
+      The agent scores offers against your profile and applies through supported ATS APIs.
+    </p>
+  </div>
+
+  <!-- ===== Configuration ===== -->
+  <div class="jc-card">
+    <h2 class="jc-card-title" jhiTranslate="jobCopilot.autoApply.config">Configuration</h2>
+
+    <!-- Mode -->
+    <div class="jc-field">
+      <span class="jc-field-label" jhiTranslate="jobCopilot.autoApply.mode">Mode</span>
+      <div class="jc-mode-choices">
+        <button type="button" class="jc-mode-choice" [class.selected]="!isAuto()" (click)="setMode('VALIDATION')">
+          <fa-icon icon="list-check"></fa-icon>
+          <strong jhiTranslate="jobCopilot.autoApply.modeValidation">Validation</strong>
+          <span jhiTranslate="jobCopilot.autoApply.modeValidationHint">Prepare drafts for your approval</span>
+        </button>
+        <button type="button" class="jc-mode-choice" [class.selected]="isAuto()" (click)="setMode('AUTO')">
+          <fa-icon icon="wand-magic-sparkles"></fa-icon>
+          <strong jhiTranslate="jobCopilot.autoApply.modeAuto">Automatic</strong>
+          <span jhiTranslate="jobCopilot.autoApply.modeAutoHint">Submit automatically within limits</span>
+        </button>
+      </div>
+    </div>
+
+    @if (isAuto()) {
+      <div class="jc-warning">
+        <fa-icon icon="triangle-exclamation"></fa-icon>
+        <span jhiTranslate="jobCopilot.autoApply.autoWarning"
+          >Automatic mode submits real applications on your behalf. Use tight guardrails.</span
+        >
+      </div>
+    }
+
+    <div class="jc-field-grid">
+      <label class="jc-field">
+        <span class="jc-field-label" jhiTranslate="jobCopilot.autoApply.minScore">Minimum match score (0–1)</span>
+        <input type="number" min="0" max="1" step="0.05" [ngModel]="config().minScore" (ngModelChange)="patch({ minScore: $event })" />
+      </label>
+      <label class="jc-field">
+        <span class="jc-field-label" jhiTranslate="jobCopilot.autoApply.maxPerDay">Max applications per day</span>
+        <input type="number" min="1" max="50" [ngModel]="config().maxPerDay" (ngModelChange)="patch({ maxPerDay: $event })" />
+      </label>
+    </div>
+
+    <div class="jc-field">
+      <span class="jc-field-label" jhiTranslate="jobCopilot.autoApply.sources">Allowed sources (empty = all supported)</span>
+      <jhi-chips-input
+        [values]="config().sources"
+        (valuesChange)="patch({ sources: $event })"
+        [placeholder]="'jobCopilot.autoApply.addSource' | translate"
+      />
+    </div>
+
+    <div class="jc-actions">
+      <button type="button" class="jc-btn jc-btn-outline" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <fa-icon icon="circle-notch" animation="spin"></fa-icon>
+        } @else {
+          <fa-icon icon="save"></fa-icon>
+        }
+        <span jhiTranslate="jobCopilot.autoApply.save">Save</span>
+      </button>
+      @if (savedOk()) {
+        <span class="jc-saved"><fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.autoApply.saved">Saved</span></span>
+      }
+    </div>
+  </div>
+
+  <!-- ===== Run ===== -->
+  <div class="jc-card">
+    <h2 class="jc-card-title" jhiTranslate="jobCopilot.autoApply.runTitle">Run now</h2>
+    <p class="jc-autoapply-subtitle" jhiTranslate="jobCopilot.autoApply.runHint">
+      Scores your matches and prepares (or submits) applications according to the mode above.
+    </p>
+    <button type="button" class="jc-btn jc-btn-primary jc-btn-lg" (click)="run()" [disabled]="running()">
+      @if (running()) {
+        <fa-icon icon="circle-notch" animation="spin"></fa-icon>
+      } @else {
+        <fa-icon icon="paper-plane"></fa-icon>
+      }
+      <span jhiTranslate="jobCopilot.autoApply.run">Launch auto-apply</span>
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ error() }}</div>
+  }
+
+  <!-- ===== Result ===== -->
+  @if (result(); as r) {
+    <div class="jc-card">
+      <h2 class="jc-card-title" jhiTranslate="jobCopilot.autoApply.resultTitle">Run summary</h2>
+
+      @if (r.mode === 'NO_PROFILE') {
+        <div class="jc-warning">
+          <fa-icon icon="triangle-exclamation"></fa-icon>
+          <span jhiTranslate="jobCopilot.autoApply.noProfile">No CV profile yet — import your CV first.</span>
+          <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/onboarding" jhiTranslate="jobCopilot.autoApply.completeProfile"
+            >Import CV</a
+          >
+        </div>
+      } @else {
+        <div class="jc-stats">
+          <div class="jc-stat">
+            <span class="jc-stat-value">{{ r.submitted }}</span>
+            <span class="jc-stat-label" jhiTranslate="jobCopilot.autoApply.submitted">submitted</span>
+          </div>
+          <div class="jc-stat">
+            <span class="jc-stat-value">{{ r.prepared }}</span>
+            <span class="jc-stat-label" jhiTranslate="jobCopilot.autoApply.prepared">prepared</span>
+          </div>
+          <div class="jc-stat">
+            <span class="jc-stat-value">{{ r.skipped }}</span>
+            <span class="jc-stat-label" jhiTranslate="jobCopilot.autoApply.skipped">skipped</span>
+          </div>
+        </div>
+
+        @if (r.items.length > 0) {
+          <ul class="jc-run-items">
+            @for (item of r.items; track $index) {
+              <li class="jc-run-item">
+                <span class="jc-run-status" [class.submitted]="item.status === 'SUBMITTED'">{{ item.status }}</span>
+                <span class="jc-run-score">{{ item.score * 100 | number: '1.0-0' }}%</span>
+                <span class="jc-run-title">{{ item.title }}</span>
+                @if (item.company) {
+                  <span class="jc-run-company">· {{ item.company }}</span>
+                }
+                @if (item.message) {
+                  <span class="jc-run-message">— {{ item.message }}</span>
+                }
+              </li>
+            }
+          </ul>
+          <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/applications">
+            <fa-icon icon="clipboard-list"></fa-icon> <span jhiTranslate="jobCopilot.autoApply.viewApplications">View applications</span>
+          </a>
+        } @else {
+          <p class="jc-autoapply-subtitle" jhiTranslate="jobCopilot.autoApply.nothing">No offer matched your guardrails this time.</p>
+        }
+      }
+    </div>
+  }
+</div>

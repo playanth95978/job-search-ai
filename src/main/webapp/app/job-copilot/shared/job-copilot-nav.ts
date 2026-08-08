@@ -48,6 +48,13 @@ export const JOB_COPILOT_NAV: readonly JobCopilotNavItem[] = [
     subtitleKey: 'home.quickAccess.allMatches.subtitle',
   },
   {
+    routerLink: '/job-copilot/auto-apply',
+    icon: 'robot',
+    cssClass: 'jc-action-apps',
+    titleKey: 'home.quickAccess.autoApply.title',
+    subtitleKey: 'home.quickAccess.autoApply.subtitle',
+  },
+  {
     routerLink: '/job-copilot/interview',
     icon: 'user-tie',
     cssClass: 'jc-action-interview',

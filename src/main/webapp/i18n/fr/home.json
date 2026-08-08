@@ -110,6 +110,10 @@
         "title": "Toutes les correspondances",
         "subtitle": "Les offres classées pour votre profil par l'IA"
       },
+      "autoApply": {
+        "title": "Auto-candidature",
+        "subtitle": "L'IA postule pour vous, sous vos garde-fous"
+      },
       "interview": {
         "title": "Entraînement entretien",
         "subtitle": "Entraînez-vous avec un recruteur virtuel"
