@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-  } @else if (profile()) {
+  } @else if (profile() && !forceUpload()) {
     <div class="jc-success">
       @if (hasUploadSuccess()) {
         <div class="jc-success-icon">

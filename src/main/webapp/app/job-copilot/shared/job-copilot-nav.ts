@@ -13,8 +13,8 @@ export interface JobCopilotNavItem {
 
 export const JOB_COPILOT_NAV: readonly JobCopilotNavItem[] = [
   {
-    routerLink: '/job-copilot/onboarding',
-    icon: 'file-arrow-up',
+    routerLink: '/job-copilot/profile',
+    icon: 'user-circle',
     cssClass: 'jc-action-onboarding',
     titleKey: 'home.quickAccess.onboarding.title',
     subtitleKey: 'home.quickAccess.onboarding.subtitle',

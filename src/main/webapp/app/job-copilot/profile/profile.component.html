@@ -1,0 +1,156 @@
+<div class="jc-profile">
+  @if (loading()) {
+    <div class="jc-profile-state">
+      <fa-icon icon="circle-notch" animation="spin" size="2x"></fa-icon>
+    </div>
+  } @else if (!hasCv()) {
+    <!-- First login / no CV on file yet -->
+    <div class="jc-profile-empty">
+      <div class="jc-profile-empty-icon"><fa-icon icon="cloud-arrow-up" size="3x"></fa-icon></div>
+      <h2 jhiTranslate="jobCopilot.profile.noCvTitle">No CV yet</h2>
+      <p jhiTranslate="jobCopilot.profile.noCvText">Import your CV and the AI will build your candidate profile automatically.</p>
+      <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/job-copilot/onboarding">
+        <fa-icon icon="cloud-arrow-up"></fa-icon> <span jhiTranslate="jobCopilot.profile.uploadCv">Import my CV</span>
+      </a>
+    </div>
+  } @else if (editing()) {
+    <!-- Edit mode (reuses the onboarding profile editor) -->
+    <div class="jc-profile-header">
+      <h1 class="jc-profile-title">
+        <fa-icon icon="user-circle"></fa-icon> <span jhiTranslate="jobCopilot.profile.editTitle">Edit my profile</span>
+      </h1>
+    </div>
+    <jhi-profile-editor [profile]="editProfile()" (profileChange)="editProfile.set($event)" />
+    @if (saveError()) {
+      <div class="jc-error"><fa-icon icon="circle-exclamation"></fa-icon> {{ saveError() }}</div>
+    }
+    <div class="jc-actions-row">
+      <button class="jc-btn jc-btn-ghost" (click)="cancelEdit()" [disabled]="saving()">
+        <span jhiTranslate="jobCopilot.profile.cancel">Cancel</span>
+      </button>
+      <button class="jc-btn jc-btn-primary jc-btn-lg" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <fa-icon icon="circle-notch" animation="spin"></fa-icon>
+        } @else {
+          <fa-icon icon="save"></fa-icon>
+        }
+        <span jhiTranslate="jobCopilot.profile.save">Save</span>
+      </button>
+    </div>
+  } @else if (profile(); as p) {
+    <!-- Detail view -->
+    <div class="jc-profile-header">
+      <div>
+        <h1 class="jc-profile-title">
+          <fa-icon icon="user-circle"></fa-icon> {{ p.fullName || ('jobCopilot.profile.title' | translate) }}
+        </h1>
+        <div class="jc-profile-meta">
+          @if (p.location) {
+            <span><fa-icon icon="location-dot"></fa-icon> {{ p.location }}</span>
+          }
+          @if (p.yearsOfExperience) {
+            <span
+              ><fa-icon icon="briefcase"></fa-icon> {{ p.yearsOfExperience }}
+              <span jhiTranslate="jobCopilot.onboarding.success.years">years</span></span
+            >
+          }
+          @if (p.email) {
+            <span><fa-icon icon="envelope"></fa-icon> {{ p.email }}</span>
+          }
+        </div>
+      </div>
+      <div class="jc-profile-actions">
+        <button class="jc-btn jc-btn-primary" (click)="startEdit()">
+          <fa-icon icon="pen"></fa-icon> <span jhiTranslate="jobCopilot.profile.edit">Edit</span>
+        </button>
+        <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/onboarding" [queryParams]="{ mode: 'upload' }">
+          <fa-icon icon="cloud-arrow-up"></fa-icon> <span jhiTranslate="jobCopilot.profile.replaceCv">Replace CV</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- CV quality + ATS score -->
+    <jhi-cv-quality [profile]="p" />
+    <jhi-ats-searchability [profile]="p" />
+
+    <!-- Skills -->
+    @if (p.skills && p.skills.length > 0) {
+      <div class="jc-detail-card">
+        <h3 jhiTranslate="jobCopilot.onboarding.success.skills"><fa-icon icon="code"></fa-icon> Skills</h3>
+        <div class="jc-tags">
+          @for (skill of p.skills; track $index) {
+            <span class="jc-tag">{{ skill.name }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Experiences -->
+    @if (p.experiences && p.experiences.length > 0) {
+      <div class="jc-detail-card">
+        <h3 jhiTranslate="jobCopilot.onboarding.edit.experiences"><fa-icon icon="briefcase"></fa-icon> Experience</h3>
+        <ul class="jc-detail-list">
+          @for (exp of p.experiences; track $index) {
+            <li>
+              <strong>{{ exp.jobTitle }}</strong>
+              @if (exp.company) {
+                <span>· {{ exp.company }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <!-- Education -->
+    @if (p.education && p.education.length > 0) {
+      <div class="jc-detail-card">
+        <h3 jhiTranslate="jobCopilot.onboarding.success.education"><fa-icon icon="graduation-cap"></fa-icon> Education</h3>
+        <ul class="jc-detail-list">
+          @for (edu of p.education; track $index) {
+            <li>
+              <strong>{{ edu.degree }}</strong>
+              @if (edu.school) {
+                <span>· {{ edu.school }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <!-- Certifications -->
+    @if (p.certifications && p.certifications.length > 0) {
+      <div class="jc-detail-card">
+        <h3 jhiTranslate="jobCopilot.onboarding.success.certifications"><fa-icon icon="certificate"></fa-icon> Certifications</h3>
+        <ul class="jc-detail-list">
+          @for (cert of p.certifications; track $index) {
+            <li>
+              <strong>{{ cert.name }}</strong>
+              @if (cert.issuer) {
+                <span>· {{ cert.issuer }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <!-- Languages -->
+    @if (p.languages && p.languages.length > 0) {
+      <div class="jc-detail-card">
+        <h3 jhiTranslate="jobCopilot.profile.languages"><fa-icon icon="language"></fa-icon> Languages</h3>
+        <div class="jc-tags">
+          @for (lang of p.languages; track $index) {
+            <span class="jc-tag"
+              >{{ lang.name }}
+              @if (lang.level) {
+                ({{ lang.level }})
+              }
+            </span>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

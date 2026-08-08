@@ -12,6 +12,11 @@ const routes: Routes = [
     title: 'Upload CV',
   },
   {
+    path: 'profile',
+    loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
+    title: 'jobCopilot.profile.title',
+  },
+  {
     path: 'cv-builder',
     loadComponent: () => import('./cv-builder/cv-builder.component').then(m => m.CvBuilderComponent),
     title: 'cvBuilder.title',

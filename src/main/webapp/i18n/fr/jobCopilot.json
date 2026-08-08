@@ -525,6 +525,18 @@
       "viewApplications": "Voir les candidatures",
       "nothing": "Aucune offre ne correspondait à vos garde-fous cette fois."
     },
+    "profile": {
+      "title": "Mon profil",
+      "noCvTitle": "Aucun CV pour l'instant",
+      "noCvText": "Importez votre CV et l'IA construira automatiquement votre profil candidat.",
+      "uploadCv": "Importer mon CV",
+      "editTitle": "Modifier mon profil",
+      "edit": "Modifier",
+      "replaceCv": "Remplacer le CV",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "languages": "Langues"
+    },
     "settings": {
       "title": "Préférences de Job",
       "subtitle": "Configurez vos critères de recherche pour obtenir de meilleurs matchs",

@@ -525,6 +525,18 @@
       "viewApplications": "View applications",
       "nothing": "No offer matched your guardrails this time."
     },
+    "profile": {
+      "title": "My profile",
+      "noCvTitle": "No CV yet",
+      "noCvText": "Import your CV and the AI will build your candidate profile automatically.",
+      "uploadCv": "Import my CV",
+      "editTitle": "Edit my profile",
+      "edit": "Edit",
+      "replaceCv": "Replace CV",
+      "cancel": "Cancel",
+      "save": "Save",
+      "languages": "Languages"
+    },
     "settings": {
       "title": "Job Preferences",
       "subtitle": "Configure your job search criteria to get better matches",

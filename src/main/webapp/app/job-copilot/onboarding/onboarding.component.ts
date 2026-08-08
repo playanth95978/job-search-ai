@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
 import { switchMap } from 'rxjs/operators';
@@ -44,9 +44,12 @@ const EMPTY_PREFERENCES: UserPreferenceDto = {
 export class OnboardingComponent implements OnInit {
   private readonly service = inject(JobCopilotService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly uploading = signal(false);
   readonly hasUploadSuccess = signal(false);
+  /** When true, always show the dropzone even if a CV already exists (from "Replace CV"). */
+  readonly forceUpload = signal(false);
 
   readonly profile = signal<CandidateProfile | null>(null);
   readonly error = signal<string | null>(null);
@@ -59,10 +62,22 @@ export class OnboardingComponent implements OnInit {
   readonly prefs = signal<UserPreferenceDto>(EMPTY_PREFERENCES);
 
   ngOnInit(): void {
-    this.service.getProfile().subscribe(profile => {
-      this.profile.set(profile);
+    // "Replace CV" (?mode=upload) forces the dropzone even if a CV already exists.
+    if (this.route.snapshot.queryParamMap.get('mode') === 'upload') {
+      this.forceUpload.set(true);
+      return;
+    }
+    // Otherwise load the existing profile so the editor is pre-filled (404 = no CV yet → dropzone).
+    this.service.getProfile().subscribe({
+      next: profile => {
+        this.profile.set(profile);
+        this.editProfile.set(structuredClone(profile));
+        this.loadPreferences();
+      },
+      error: () => this.profile.set(null),
     });
   }
+
   upload(file: File): void {
     this.uploading.set(true);
     this.error.set(null);
@@ -72,6 +87,7 @@ export class OnboardingComponent implements OnInit {
         this.editProfile.set(structuredClone(p));
         this.loadPreferences();
         this.hasUploadSuccess.set(true);
+        this.forceUpload.set(false);
         this.uploading.set(false);
       },
       error: err => {
