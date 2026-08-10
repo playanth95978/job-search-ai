@@ -14,6 +14,7 @@ import { ApplyPositionComponent } from './components/apply-position/apply-positi
 import { ApplyTailoredComponent } from './components/apply-tailored/apply-tailored.component';
 import { ApplyOfferComponent } from './components/apply-offer/apply-offer.component';
 import { ApplyCoverComponent } from './components/apply-cover/apply-cover.component';
+import { ApplyPrefillComponent } from './components/apply-prefill/apply-prefill.component';
 
 /** Languages the cover letter can be generated in. The value is sent to the LLM as part of its prompt. */
 export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: string }[] = [
@@ -37,6 +38,7 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: s
     ApplyTailoredComponent,
     ApplyOfferComponent,
     ApplyCoverComponent,
+    ApplyPrefillComponent,
   ],
   templateUrl: './apply-modal.component.html',
   styleUrl: './apply-modal.component.scss',
@@ -56,7 +58,6 @@ export class ApplyModalComponent implements OnInit {
   coverLetter = signal('');
   loading = signal(true);
   submitting = signal(false);
-  copied = signal(false);
   error = signal<string | null>(null);
   autoApplySupported = signal(false);
   resultMessage = signal<string | null>(null);
@@ -121,29 +122,6 @@ export class ApplyModalComponent implements OnInit {
 
   /** Candidate identity used to pre-fill the source application form (copy-to-clipboard fields). */
   candidate = computed(() => this.application()?.candidateProfile ?? this.existingApplication()?.candidateProfile);
-
-  /** Copyable identity rows shown in the assisted-prefill panel. */
-  prefillFields = computed(() => {
-    const c = this.candidate();
-    return [
-      { key: 'fullName', labelKey: 'jobCopilot.applyModal.prefill.fullName', value: c?.fullName },
-      { key: 'email', labelKey: 'jobCopilot.applyModal.prefill.email', value: c?.email },
-      { key: 'location', labelKey: 'jobCopilot.applyModal.prefill.location', value: c?.location },
-      { key: 'coverLetter', labelKey: 'jobCopilot.applyModal.prefill.coverLetter', value: this.coverLetter() },
-    ];
-  });
-
-  /** Which single prefill field was last copied, to flash a per-field "copied" check. */
-  copiedField = signal<string | null>(null);
-
-  /** Copies a value to the clipboard and briefly flashes feedback for the given field key. */
-  copyField(field: string, value?: string): void {
-    if (!value) return;
-    void navigator.clipboard.writeText(value).then(() => {
-      this.copiedField.set(field);
-      setTimeout(() => this.copiedField.set(null), 1500);
-    });
-  }
 
   /**
    * Assisted apply for sources without a submit API: copies the cover letter to the clipboard so the

@@ -1,0 +1,25 @@
+<div class="jc-card jc-prefill">
+  <div class="jc-card-header">
+    <fa-icon icon="wand-magic-sparkles"></fa-icon>
+    <span jhiTranslate="jobCopilot.applyModal.prefill.title">Pré-remplissage assisté</span>
+  </div>
+  <p class="jc-prefill-hint" jhiTranslate="jobCopilot.applyModal.prefill.hint">
+    Cette source ne permet pas la candidature en 1 clic. Copiez vos informations puis collez-les sur le formulaire de l'offre.
+  </p>
+
+  <div class="jc-prefill-grid">
+    @for (f of fields(); track f.key) {
+      @if (f.value) {
+        <button type="button" class="jc-prefill-item" (click)="$event.stopPropagation(); copyField(f.key, f.value)">
+          <div class="jc-prefill-content">
+            <span class="jc-prefill-label">{{ f.labelKey | translate }}</span>
+            <span class="jc-prefill-value">{{ f.value }}</span>
+          </div>
+          <div class="jc-prefill-action" [class.copied]="copiedField() === f.key">
+            <fa-icon [icon]="copiedField() === f.key ? 'check' : 'copy'"></fa-icon>
+          </div>
+        </button>
+      }
+    }
+  </div>
+</div>

@@ -58,26 +58,7 @@
 
     <!-- Assisted pre-fill: for sources without a submit API, help the candidate fill the source form fast. -->
     @if (application() && applyUrl() && !autoApplySupported()) {
-      <div class="jc-prefill">
-        <div class="jc-prefill-head">
-          <fa-icon icon="wand-magic-sparkles"></fa-icon>
-          <span jhiTranslate="jobCopilot.applyModal.prefill.title">Pré-remplissage assisté</span>
-        </div>
-        <p class="jc-prefill-hint" jhiTranslate="jobCopilot.applyModal.prefill.hint">
-          Cette source ne permet pas la candidature en 1 clic. Copiez vos informations puis collez-les sur le formulaire de l'offre.
-        </p>
-        <div class="jc-prefill-fields">
-          @for (f of prefillFields(); track f.key) {
-            @if (f.value) {
-              <button type="button" class="jc-prefill-field" (click)="copyField(f.key, f.value)">
-                <span class="jc-prefill-label">{{ f.labelKey | translate }}</span>
-                <span class="jc-prefill-value">{{ f.value }}</span>
-                <fa-icon [icon]="copiedField() === f.key ? 'check' : 'copy'"></fa-icon>
-              </button>
-            }
-          }
-        </div>
-      </div>
+      <jhi-apply-prefill [candidateProfile]="candidate()" [coverLetter]="coverLetter()" />
     }
   }
 
