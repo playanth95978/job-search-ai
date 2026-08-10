@@ -2,17 +2,23 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title th:text="${cv.title} ?: 'CV'">CV</title>
-  <style th:replace="~{cv/_base :: pageCss}" />
-  <style th:if="${pageNumbers}" th:replace="~{cv/_base :: pageNumberCss}" />
+  <style th:replace="~{_base :: pageCss}" />
+  <!-- th:replace (precedence 100) runs before th:if (300), so the condition has to sit on an outer
+       element or the footer would be inlined unconditionally. -->
+  <th:block th:if="${pageNumbers}"><style th:replace="~{_base :: pageNumberCss}" /></th:block>
   <style type="text/css">
-    /* Full-bleed banner: the negative margins cancel the @page margins so the colour reaches the paper
-       edge, the padding puts the text back where the margin box would have placed it. The preview's
-       linear-gradient degrades to the flat primary — openhtmltopdf has no gradient support. */
+    /* The banner stays inside the page margins. Bleeding it to the paper edge with negative margins was
+       tried and rejected: openhtmltopdf clamps the box back to the page content origin but still shifts
+       the heading up, which left the candidate's name half outside the coloured block. The preview's
+       linear-gradient likewise degrades to the flat primary — there is no gradient support. */
     .m-head {
       background-color: [(${theme.primary})];
       color: #ffffff;
-      margin: -13mm -14mm 7mm;
-      padding: 9mm 14mm 7mm;
+      margin-bottom: 7mm;
+      padding-top: 6mm;
+      padding-bottom: 6mm;
+      padding-left: 7mm;
+      padding-right: 7mm;
     }
     .m-head h1 { font-size: 1.9em; }
     .m-title { margin: 2mm 0 0; color: #eef0fb; }

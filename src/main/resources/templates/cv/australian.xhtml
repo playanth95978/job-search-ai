@@ -2,8 +2,10 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title th:text="${cv.title} ?: 'Resume'">Resume</title>
-  <style th:replace="~{cv/_base :: pageCss}" />
-  <style th:if="${pageNumbers}" th:replace="~{cv/_base :: pageNumberCss}" />
+  <style th:replace="~{_base :: pageCss}" />
+  <!-- th:replace (precedence 100) runs before th:if (300), so the condition has to sit on an outer
+       element or the footer would be inlined unconditionally. -->
+  <th:block th:if="${pageNumbers}"><style th:replace="~{_base :: pageNumberCss}" /></th:block>
   <style type="text/css">
     body { color: #2b2b2b; line-height: 1.5; }
 
@@ -26,13 +28,14 @@
     .row .dates { color: #777777; font-size: 0.8em; }
     .au-org { margin: 0.5mm 0 1mm; font-style: italic; color: #444444; }
 
-    /* Two even columns without CSS grid. These blocks are short enough to stay on one page, so plain
-       floats are safe here — unlike the modern template's full-height sidebar, which needs a table. */
-    .au-skills { list-style: none; margin: 0; padding: 0; }
-    .au-skills li { float: left; width: 48%; margin-right: 2%; padding-left: 4mm; font-size: 0.9em; }
-    .au-skills li:before { content: "\25AA"; float: left; margin-left: -4mm; color: [(${theme.primary})]; }
+    /* Two even columns without CSS grid. Spans, not a `ul`: openhtmltopdf keeps `li` at list-item
+       display and stacks it full width whatever float or inline-block you set on it. The bullet is
+       U+2022 because the base-14 fonts only cover WinAnsi — U+25AA, which the on-screen template uses,
+       has no glyph and prints as a placeholder box. */
+    .au-skills span { display: inline-block; width: 48%; padding-left: 4mm; font-size: 0.9em; }
+    .au-skills span:before { content: "\2022"; margin-left: -4mm; padding-right: 2mm; color: [(${theme.primary})]; }
 
-    .au-ref { float: left; width: 48%; margin-right: 2%; margin-bottom: 3mm; page-break-inside: avoid; }
+    .au-ref { display: inline-block; width: 48%; vertical-align: top; margin-bottom: 3mm; page-break-inside: avoid; }
     .au-ref-contact { font-size: 0.8em; color: #777777; }
     .au-ref-none { color: #555555; font-style: italic; }
   </style>

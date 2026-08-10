@@ -2,8 +2,10 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title th:text="${cv.title} ?: 'CV'">CV</title>
-  <style th:replace="~{cv/_base :: pageCss}" />
-  <style th:if="${pageNumbers}" th:replace="~{cv/_base :: pageNumberCss}" />
+  <style th:replace="~{_base :: pageCss}" />
+  <!-- th:replace (precedence 100) runs before th:if (300), so the condition has to sit on an outer
+       element or the footer would be inlined unconditionally. -->
+  <th:block th:if="${pageNumbers}"><style th:replace="~{_base :: pageNumberCss}" /></th:block>
   <style type="text/css">
     body { color: #2b2b2b; line-height: 1.55; }
 

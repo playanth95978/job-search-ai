@@ -7,7 +7,7 @@ import nc.opt.aiassistant.service.jobcopilot.CvTailoringService;
 import nc.opt.aiassistant.service.jobcopilot.JobPositioningService;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvMatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.GeneratedResumeDto;
-import nc.opt.aiassistant.service.pdf.ResumeExportService;
+import nc.opt.aiassistant.service.pdf.TailoredResumeExportService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ public class JobPositioningResource {
 
     private final JobPositioningService jobPositioningService;
     private final CvTailoringService cvTailoringService;
-    private final ResumeExportService resumeExportService;
+    private final TailoredResumeExportService tailoredResumeExportService;
 
     @GetMapping("/positioning")
     public ResponseEntity<CvMatchResultDto> positioning(
@@ -57,7 +57,7 @@ public class JobPositioningResource {
         @PathVariable UUID id,
         @RequestParam(name = "refresh", defaultValue = "false") boolean refresh
     ) {
-        return CvResumeResource.pdfResponse(resumeExportService.renderTailored(id, refresh), "cv-" + id);
+        return CvResumeResource.pdfResponse(tailoredResumeExportService.renderTailored(id, refresh), "cv-" + id);
     }
 
     /** What-if payload: skills/experience the candidate would add. */

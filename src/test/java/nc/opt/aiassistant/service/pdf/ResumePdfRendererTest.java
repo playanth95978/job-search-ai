@@ -60,8 +60,10 @@ class ResumePdfRendererTest {
 
     @Test
     void keepsRefereesOnTheAustralianTemplateOnly() throws IOException {
+        // Section headings are uppercased by `text-transform`, which the renderer bakes into the glyphs
+        // it writes — so the extracted text reads REFEREES, not Referees.
         assertThat(textOf(renderer.render(resume("australian", 1))))
-            .contains("Referees")
+            .containsIgnoringCase("Referees")
             .contains("Erin Blake");
         assertThat(textOf(renderer.render(resume("modern", 1)))).doesNotContain("Erin Blake");
     }
