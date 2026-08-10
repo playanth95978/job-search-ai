@@ -147,4 +147,8 @@ public class JobOffer implements Serializable {
 
     @Column(name = "expires_at")
     private Instant expiresAt;
+
+    /** Last time the liveness job verified the apply URL is still reachable (null = never checked). */
+    @Column(name = "last_checked_at")
+    private Instant lastCheckedAt;
 }

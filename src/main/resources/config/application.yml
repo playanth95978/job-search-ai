@@ -346,6 +346,14 @@ application:
       concurrency: ${PURGE_CONCURRENCY:4}
       # Plafond par exécution ; le reliquat part au run suivant.
       max-per-run: ${PURGE_MAX_PER_RUN:50000}
+    liveness:
+      # Vérifie que les apply_url stockées répondent encore ; 404/410 => offre marquée expirée.
+      # Ne re-teste pas une offre vérifiée depuis moins de N heures.
+      recheck-hours: ${LIVENESS_RECHECK_HOURS:24}
+      batch-size: ${LIVENESS_BATCH_SIZE:25}
+      concurrency: ${LIVENESS_CONCURRENCY:4}
+      max-per-run: ${LIVENESS_MAX_PER_RUN:2000}
+      http-timeout-seconds: ${LIVENESS_HTTP_TIMEOUT:6}
     radar:
       # Opportunity Radar: proactively match newly ingested offers against each user's profile.
       enabled: ${RADAR_ENABLED:true}

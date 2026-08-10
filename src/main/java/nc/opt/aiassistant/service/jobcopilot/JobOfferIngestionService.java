@@ -121,9 +121,9 @@ public class JobOfferIngestionService {
             Instant now = Instant.now();
             if (offer.getCreatedAt() == null) offer.setCreatedAt(now);
             offer.setUpdatedAt(now);
-            // Refresh the expiry each time an offer is (re)ingested: an offer that stops being scraped
-            // keeps its last expiry and is eventually purged; one still on the board keeps sliding.
-            offer.setExpiresAt(defaultExpiry(now));
+            // Keep a source-provided expiry if the connector set one; otherwise apply the default TTL.
+            // Each scrape is a fresh object, so null-expiry sources still get a sliding "last seen + TTL".
+            if (offer.getExpiresAt() == null) offer.setExpiresAt(defaultExpiry(now));
 
             return offer;
         } catch (Exception e) {

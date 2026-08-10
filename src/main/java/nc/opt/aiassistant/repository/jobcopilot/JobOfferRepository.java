@@ -138,4 +138,42 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
             "j.retryCount = 0, j.indexingError = null WHERE j.embeddingStatus = nc.opt.aiassistant.domain.enumeration.EmbeddingStatus.FAILED"
     )
     int requeueFailed();
+
+    // --- Vérification de liveness des offres (apply_url encore joignable) --------------------
+
+    /**
+     * Offres actives d'une partition, dont l'{@code apply_url} n'a pas été vérifiée depuis
+     * {@code staleBefore}, les moins récemment vérifiées d'abord. Renvoie {@code [id, apply_url]}.
+     */
+    @Query(
+        value = """
+        SELECT id, apply_url FROM job_offer
+        WHERE apply_url IS NOT NULL
+          AND (expires_at IS NULL OR expires_at > :now)
+          AND (last_checked_at IS NULL OR last_checked_at < :staleBefore)
+          AND mod(abs(hashtext(id::text)::bigint), :gridSize) = :partition
+        ORDER BY last_checked_at ASC NULLS FIRST
+        LIMIT :limit
+        """,
+        nativeQuery = true
+    )
+    List<Object[]> findLivenessCandidates(
+        @Param("now") Instant now,
+        @Param("staleBefore") Instant staleBefore,
+        @Param("gridSize") int gridSize,
+        @Param("partition") int partition,
+        @Param("limit") int limit
+    );
+
+    /** Marks offers expired now (dead apply URL) so the daily purge removes them. */
+    @Modifying
+    @Transactional
+    @Query("UPDATE JobOffer j SET j.expiresAt = :now WHERE j.id IN :ids")
+    int markExpiredByIds(@Param("ids") Collection<UUID> ids, @Param("now") Instant now);
+
+    /** Stamps offers as checked now, whatever the liveness outcome, so they rotate to the back. */
+    @Modifying
+    @Transactional
+    @Query("UPDATE JobOffer j SET j.lastCheckedAt = :now WHERE j.id IN :ids")
+    int markCheckedByIds(@Param("ids") Collection<UUID> ids, @Param("now") Instant now);
 }

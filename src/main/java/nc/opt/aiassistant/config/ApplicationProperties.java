@@ -65,6 +65,7 @@ public class ApplicationProperties {
         private Ingestion ingestion = new Ingestion();
         private Radar radar = new Radar();
         private Purge purge = new Purge();
+        private Liveness liveness = new Liveness();
     }
 
     @Setter
@@ -140,6 +141,22 @@ public class ApplicationProperties {
         private int concurrency = 4;
         /** Cap per run; the remainder is handled on the next run. */
         private int maxPerRun = 50000;
+    }
+
+    @Setter
+    @Getter
+    public static class Liveness {
+
+        /** Offers whose apply URL was checked more recently than this (hours) are skipped. */
+        private int recheckHours = 24;
+        /** Offers verified per batch/transaction. */
+        private int batchSize = 25;
+        /** Partitions checked in parallel (virtual threads); keep under the JDBC pool size. */
+        private int concurrency = 4;
+        /** Cap of offers checked per partition per run. */
+        private int maxPerRun = 2000;
+        /** Per-request HTTP timeout (seconds). */
+        private int httpTimeoutSeconds = 6;
     }
 
     @Setter

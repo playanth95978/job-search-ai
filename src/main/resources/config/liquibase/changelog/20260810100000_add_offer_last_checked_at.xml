@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="20260810100000-1" author="claude">
+    <!-- Last time the offer's apply_url was verified alive by the liveness job (null = never checked). -->
+    <addColumn tableName="job_offer">
+      <column name="last_checked_at" type="timestamp"/>
+    </addColumn>
+    <createIndex tableName="job_offer" indexName="idx_job_offer_last_checked_at">
+      <column name="last_checked_at"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>
