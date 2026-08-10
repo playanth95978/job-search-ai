@@ -158,6 +158,32 @@ export function createEmptyResume(): Resume {
   };
 }
 
+/**
+ * Whether the resume still holds nothing the user typed — every content section empty and no identity
+ * filled in. Theme, template and section order are ignored on purpose: they carry defaults, not content.
+ *
+ * Used to decide whether it is safe to seed the builder from the extracted candidate profile; a draft
+ * with any real content in it must never be overwritten.
+ */
+export function isBlankResume(resume: Resume): boolean {
+  const p = resume.personal;
+  const identityFilled = [p.firstName, p.lastName, p.title, p.email, p.phone, p.location, p.linkedin, p.github, p.website].some(
+    v => v.trim() !== '',
+  );
+
+  return (
+    !identityFilled &&
+    resume.summary.trim() === '' &&
+    resume.experiences.length === 0 &&
+    resume.education.length === 0 &&
+    resume.projects.length === 0 &&
+    resume.certifications.length === 0 &&
+    resume.skills.length === 0 &&
+    resume.languages.length === 0 &&
+    resume.referees.length === 0
+  );
+}
+
 export function emptyExperience(): Experience {
   return { id: uid(), jobTitle: '', company: '', startDate: '', endDate: '', current: false, description: '', achievements: [] };
 }

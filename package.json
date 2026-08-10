@@ -89,8 +89,6 @@
     "docx": "^9.7.1",
     "dompurify": "^3.4.9",
     "highlight.js": "^11.11.1",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^4.2.1",
     "marked": "^18.0.5",
     "ngx-infinite-scroll": "21.0.0",
     "ngx-spinner": "^21.1.0",

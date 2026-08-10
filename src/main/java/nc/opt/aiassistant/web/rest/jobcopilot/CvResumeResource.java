@@ -9,6 +9,11 @@ import nc.opt.aiassistant.service.jobcopilot.CvResumeService;
 import nc.opt.aiassistant.service.jobcopilot.CvRewriteService;
 import nc.opt.aiassistant.service.jobcopilot.dto.*;
 import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
+import nc.opt.aiassistant.service.pdf.ResumeDocument;
+import nc.opt.aiassistant.service.pdf.ResumeExportService;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +27,7 @@ public class CvResumeResource {
     private final CvRewriteService cvRewriteService;
     private final CandidateProfileRepository candidateProfileRepository;
     private final CandidateProfileMapper candidateProfileMapper;
+    private final ResumeExportService resumeExportService;
 
     @GetMapping("/resume")
     public ResponseEntity<ResumeDto> getResume() {
@@ -60,6 +66,38 @@ public class CvResumeResource {
             .restoreVersion(id)
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Renders the resume carried in the request body — i.e. exactly what the user is looking at in the
+     * builder. It is a POST rather than a GET on the stored resume because the editor auto-saves on a
+     * 1.5s debounce: exporting server-side state would hand back a CV that is one edit behind.
+     */
+    @PostMapping(value = "/resume/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> exportPdf(@RequestBody ResumeDocument resume) {
+        return pdfResponse(resumeExportService.render(resume), resume.slug());
+    }
+
+    /** Renders the stored resume, for callers that have no editor state to send (links, integrations). */
+    @GetMapping(value = "/resume/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> exportStoredPdf() {
+        return resumeExportService
+            .currentUserResume()
+            .map(resume -> pdfResponse(resumeExportService.render(resume), resume.slug()))
+            .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    static ResponseEntity<byte[]> pdfResponse(byte[] pdf, String fileNameSlug) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_PDF)
+            .header(
+                HttpHeaders.CONTENT_DISPOSITION,
+                ContentDisposition.attachment()
+                    .filename(fileNameSlug + ".pdf")
+                    .build()
+                    .toString()
+            )
+            .body(pdf);
     }
 
     @PostMapping("/rewrite")

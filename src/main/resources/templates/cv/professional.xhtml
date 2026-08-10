@@ -1,0 +1,118 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title th:text="${cv.title} ?: 'CV'">CV</title>
+  <style th:replace="~{_base :: pageCss}" />
+  <!-- th:replace (precedence 100) runs before th:if (300), so the condition has to sit on an outer
+       element or the footer would be inlined unconditionally. -->
+  <th:block th:if="${pageNumbers}"><style th:replace="~{_base :: pageNumberCss}" /></th:block>
+  <style type="text/css">
+    body { color: #222222; }
+
+    .p-head {
+      text-align: center;
+      border-bottom: 3px double [(${theme.primary})];
+      padding-bottom: 4mm;
+      margin-bottom: 6mm;
+    }
+    .p-head h1 { font-size: 2em; letter-spacing: 0.02em; color: [(${theme.primary})]; }
+    .p-title { margin: 1.5mm 0 0; font-style: italic; color: [(${theme.secondary})]; }
+    .p-contact { margin: 3mm 0 0; font-size: 0.8em; color: #555555; }
+
+    h2 {
+      font-size: 1.02em;
+      color: [(${theme.primary})];
+      border-bottom: 1px solid #d7d7d7;
+      padding-bottom: 1mm;
+      margin-bottom: 2.5mm;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .row .dates { color: #777777; font-size: 0.8em; }
+  </style>
+</head>
+<body>
+
+  <header class="p-head">
+    <h1 th:text="${cv.fullName()}">Prénom Nom</h1>
+    <p class="p-title" th:if="${cv.personal.title}" th:text="${cv.personal.title}">Titre</p>
+    <p class="p-contact" th:if="${!#strings.isEmpty(cv.contactLine())}" th:text="${cv.contactLine()}">contact</p>
+  </header>
+
+  <th:block th:each="s : ${sections}" th:switch="${s}">
+
+    <th:block th:case="'summary'">
+      <section th:if="${cv.summary}">
+        <h2>Résumé professionnel</h2>
+        <p th:text="${cv.summary}">…</p>
+      </section>
+    </th:block>
+
+    <th:block th:case="'experiences'">
+      <section th:if="${!cv.experiences.isEmpty()}">
+        <h2>Expérience professionnelle</h2>
+        <article class="entry" th:each="e : ${cv.experiences}">
+          <div class="row">
+            <strong th:text="${e.company} ? ${e.jobTitle} + ', ' + ${e.company} : ${e.jobTitle}">Poste, Société</strong>
+            <span class="dates" th:text="${e.dateRange('Aujourd''hui')}">dates</span>
+          </div>
+          <p th:if="${e.description}" th:text="${e.description}">…</p>
+          <ul th:if="${!e.achievements.isEmpty()}">
+            <li th:each="a : ${e.achievements}" th:text="${a}">…</li>
+          </ul>
+        </article>
+      </section>
+    </th:block>
+
+    <th:block th:case="'education'">
+      <section th:if="${!cv.education.isEmpty()}">
+        <h2>Formation</h2>
+        <article class="entry" th:each="ed : ${cv.education}">
+          <div class="row">
+            <strong th:text="${ed.school} ? ${ed.degree} + ', ' + ${ed.school} : ${ed.degree}">Diplôme, École</strong>
+            <span class="dates" th:text="${ed.dateRange()}">dates</span>
+          </div>
+          <p th:if="${ed.description}" th:text="${ed.description}">…</p>
+        </article>
+      </section>
+    </th:block>
+
+    <th:block th:case="'skills'">
+      <section th:if="${!cv.skills.isEmpty()}">
+        <h2>Compétences</h2>
+        <p th:text="${cv.skillNames()}">…</p>
+      </section>
+    </th:block>
+
+    <th:block th:case="'languages'">
+      <section th:if="${!cv.languages.isEmpty()}">
+        <h2>Langues</h2>
+        <p th:text="${cv.languagesLine()}">…</p>
+      </section>
+    </th:block>
+
+    <th:block th:case="'projects'">
+      <section th:if="${!cv.projects.isEmpty()}">
+        <h2>Projets</h2>
+        <article class="entry" th:each="p : ${cv.projects}">
+          <strong th:text="${p.name}">Projet</strong>
+          <p th:if="${p.description}" th:text="${p.description}">…</p>
+        </article>
+      </section>
+    </th:block>
+
+    <th:block th:case="'certifications'">
+      <section th:if="${!cv.certifications.isEmpty()}">
+        <h2>Certifications</h2>
+        <div class="row entry" th:each="c : ${cv.certifications}">
+          <strong th:text="${c.name}">certification</strong>
+          <span class="dates" th:text="${c.issuedLine()}">émetteur</span>
+        </div>
+      </section>
+    </th:block>
+
+  </th:block>
+
+</body>
+</html>

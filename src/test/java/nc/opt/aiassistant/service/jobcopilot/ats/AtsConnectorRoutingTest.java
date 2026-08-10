@@ -7,13 +7,14 @@ import nc.opt.aiassistant.config.ApplicationProperties;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
 import nc.opt.aiassistant.service.jobcopilot.ats.AtsConnector.PostingRef;
-import nc.opt.aiassistant.service.pdf.ResumePdfService;
+import nc.opt.aiassistant.service.pdf.ResumeExportService;
 import org.junit.jupiter.api.Test;
 
 class AtsConnectorRoutingTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private final ResumePdfService pdf = new ResumePdfService();
+    /** Only URL parsing and auto-apply routing are under test here; no application is ever submitted. */
+    private final ResumeExportService pdf = null;
 
     private JobOffer offer(JobSource source, String applyUrl) {
         JobOffer o = new JobOffer();

@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
-import nc.opt.aiassistant.service.pdf.ResumePdfService;
+import nc.opt.aiassistant.service.pdf.ResumeExportService;
 import org.jsoup.Jsoup;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -30,7 +30,7 @@ public class LeverConnector implements AtsConnector {
     private static final Pattern URL_REF = Pattern.compile("lever\\.co/([^/]+)/([0-9a-fA-F-]{36})");
 
     private final ObjectMapper objectMapper;
-    private final ResumePdfService resumePdfService;
+    private final ResumeExportService resumeExportService;
 
     @Override
     public boolean supports(String url) {
@@ -89,7 +89,7 @@ public class LeverConnector implements AtsConnector {
             if (coverLetter != null && !coverLetter.isBlank()) {
                 form.part("comments", coverLetter);
             }
-            byte[] pdf = resumePdfService.fromProfile(profile);
+            byte[] pdf = resumeExportService.renderForAts(profile);
             ByteArrayResource resume = new ByteArrayResource(pdf) {
                 @Override
                 public String getFilename() {

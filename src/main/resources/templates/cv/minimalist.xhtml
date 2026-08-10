@@ -1,0 +1,110 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title th:text="${cv.title} ?: 'CV'">CV</title>
+  <style th:replace="~{_base :: pageCss}" />
+  <!-- th:replace (precedence 100) runs before th:if (300), so the condition has to sit on an outer
+       element or the footer would be inlined unconditionally. -->
+  <th:block th:if="${pageNumbers}"><style th:replace="~{_base :: pageNumberCss}" /></th:block>
+  <style type="text/css">
+    body { color: #2b2b2b; line-height: 1.55; }
+
+    .x-head { margin-bottom: 7mm; }
+    .x-head h1 { font-size: 1.7em; font-weight: 600; letter-spacing: 0.01em; }
+    .x-title { color: [(${theme.primary})]; font-size: 0.95em; }
+    .x-contact { color: #888888; font-size: 0.8em; margin-top: 2mm; }
+
+    h2 {
+      font-size: 0.8em;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #999999;
+      font-weight: 600;
+      margin-bottom: 2.5mm;
+    }
+
+    .x-strong { font-weight: 600; }
+    .row .dates { color: #aaaaaa; font-size: 0.8em; }
+    .x-summary { font-size: 1.02em; }
+  </style>
+</head>
+<body>
+
+  <header class="x-head">
+    <h1 th:text="${cv.fullName()}">Prénom Nom</h1>
+    <div class="x-title" th:if="${cv.personal.title}" th:text="${cv.personal.title}">Titre</div>
+    <div class="x-contact" th:if="${!#strings.isEmpty(cv.contactLine())}" th:text="${cv.contactLine()}">contact</div>
+  </header>
+
+  <th:block th:each="s : ${sections}" th:switch="${s}">
+
+    <th:block th:case="'summary'">
+      <section th:if="${cv.summary}">
+        <p class="x-summary" th:text="${cv.summary}">…</p>
+      </section>
+    </th:block>
+
+    <th:block th:case="'experiences'">
+      <section th:if="${!cv.experiences.isEmpty()}">
+        <h2>Expérience</h2>
+        <article class="entry" th:each="e : ${cv.experiences}">
+          <div class="row">
+            <span class="x-strong" th:text="${e.company} ? ${e.jobTitle} + ' · ' + ${e.company} : ${e.jobTitle}">Poste · Société</span>
+            <span class="dates" th:text="${e.dateRange('')}">dates</span>
+          </div>
+          <p th:if="${e.description}" th:text="${e.description}">…</p>
+          <ul th:if="${!e.achievements.isEmpty()}">
+            <li th:each="a : ${e.achievements}" th:text="${a}">…</li>
+          </ul>
+        </article>
+      </section>
+    </th:block>
+
+    <th:block th:case="'education'">
+      <section th:if="${!cv.education.isEmpty()}">
+        <h2>Formation</h2>
+        <div class="row entry" th:each="ed : ${cv.education}">
+          <span class="x-strong" th:text="${ed.school} ? ${ed.degree} + ' · ' + ${ed.school} : ${ed.degree}">Diplôme · École</span>
+          <span class="dates" th:text="${ed.dateRange()}">dates</span>
+        </div>
+      </section>
+    </th:block>
+
+    <th:block th:case="'skills'">
+      <section th:if="${!cv.skills.isEmpty()}">
+        <h2>Compétences</h2>
+        <p th:text="${cv.skillNames()}">…</p>
+      </section>
+    </th:block>
+
+    <th:block th:case="'languages'">
+      <section th:if="${!cv.languages.isEmpty()}">
+        <h2>Langues</h2>
+        <p th:text="${cv.languagesLine()}">…</p>
+      </section>
+    </th:block>
+
+    <th:block th:case="'projects'">
+      <section th:if="${!cv.projects.isEmpty()}">
+        <h2>Projets</h2>
+        <div class="entry" th:each="p : ${cv.projects}">
+          <span class="x-strong" th:text="${p.name}">Projet</span>
+          <span th:if="${p.description}" th:text="' — ' + ${p.description}">…</span>
+        </div>
+      </section>
+    </th:block>
+
+    <th:block th:case="'certifications'">
+      <section th:if="${!cv.certifications.isEmpty()}">
+        <h2>Certifications</h2>
+        <div class="row entry" th:each="c : ${cv.certifications}">
+          <span th:text="${c.name}">certification</span>
+          <span class="dates" th:text="${c.issuedLine()}">émetteur</span>
+        </div>
+      </section>
+    </th:block>
+
+  </th:block>
+
+</body>
+</html>

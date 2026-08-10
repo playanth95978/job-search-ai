@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import {
   Document,
   Paragraph,
@@ -51,49 +53,23 @@ const DOCX_LABELS_EN: DocxSectionLabels = {
 
 @Injectable({ providedIn: 'root' })
 export class CvExportService {
+  private readonly http = inject(HttpClient);
+
   /**
-   * Captures the rendered .cv-page element via html2canvas and generates a faithful PDF via jsPDF.
-   * Dynamic import keeps these heavy libs out of the initial bundle.
+   * Renders the PDF server-side (XHTML + print CSS → openhtmltopdf) and downloads the result.
+   *
+   * This used to screenshot the `.cv-page` element with html2canvas and wrap the bitmap in a jsPDF
+   * document. The resulting "text" was an image: not selectable, not searchable, and unreadable by the
+   * ATS parsers this product exists to get past. It also sliced the canvas at a fixed height when the
+   * CV ran past one page, cutting lines in half. The server emits real text and breaks pages on entry
+   * boundaries.
+   *
+   * The current editor state is posted rather than rendered from the stored resume, because auto-save
+   * is debounced by 1.5s — the server copy can be one edit behind what the user is looking at.
    */
-  async exportPdf(cvPageElement: HTMLElement, filename: string): Promise<void> {
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')]);
-
-    // Scale 2x for crisp rendering on high-DPI screens
-    const canvas = await html2canvas(cvPageElement, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    // A4: 210 × 297 mm
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-
-    const canvasAspect = canvas.height / canvas.width;
-    const imgH = pageW * canvasAspect;
-
-    if (imgH <= pageH) {
-      pdf.addImage(imgData, 'PNG', 0, 0, pageW, imgH);
-    } else {
-      // Multi-page: slice the canvas height-wise
-      let yOffset = 0;
-      const sliceH = Math.floor((canvas.width * pageH) / pageW);
-      while (yOffset < canvas.height) {
-        const slice = document.createElement('canvas');
-        slice.width = canvas.width;
-        slice.height = Math.min(sliceH, canvas.height - yOffset);
-        const ctx = slice.getContext('2d')!;
-        ctx.drawImage(canvas, 0, -yOffset);
-        if (yOffset > 0) pdf.addPage();
-        pdf.addImage(slice.toDataURL('image/png'), 'PNG', 0, 0, pageW, (slice.height / canvas.width) * pageW);
-        yOffset += sliceH;
-      }
-    }
-
-    pdf.save(filename);
+  async exportPdf(resume: Resume, filename: string): Promise<void> {
+    const blob = await firstValueFrom(this.http.post('api/cv-builder/resume/pdf', resume, { responseType: 'blob' }));
+    this.triggerDownload(blob, filename);
   }
 
   /** Generates a structured DOCX from the resume data. */

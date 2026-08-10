@@ -41,7 +41,7 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5434/job-search-ai
+    url: jdbc:postgresql://localhost:5433/job-search-ai
     username: ${SPRING_DATASOURCE_USERNAME:job-search-ai}
     password: ${SPRING_DATASOURCE_PASSWORD:job-search-ai}
     hikari:
@@ -114,4 +114,4 @@ application:
   google-drive:
     client-id: ${GOOGLE_CLIENT_ID:366206884167-7gsfsckpvhc62oagh7780slkaghaa5b1.apps.googleusercontent.com}
     client-secret: ${GOOGLE_CLIENT_SECRET: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}
-    redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:4200/login/google/callback}
+    redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:4201/login/google/callback}

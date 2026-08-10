@@ -223,6 +223,17 @@
       <artifactId>spring-ai-pdf-document-reader</artifactId>
       <version>2.0.0</version>
     </dependency>
+    <!--
+      XHTML+CSS -> PDF renderer for the CV Builder exports.
+      The `io.github.openhtmltopdf` coordinates are the maintained continuation of `com.openhtmltopdf`
+      (which stopped at 1.0.10 / PDFBox 2); they build on PDFBox 3.0.7, i.e. the version already pulled
+      in transitively by spring-ai-pdf-document-reader — no classpath conflict.
+    -->
+    <dependency>
+      <groupId>io.github.openhtmltopdf</groupId>
+      <artifactId>openhtmltopdf-pdfbox</artifactId>
+      <version>1.1.73</version>
+    </dependency>
     <dependency>
       <groupId>com.microsoft.onnxruntime</groupId>
       <artifactId>onnxruntime</artifactId>
