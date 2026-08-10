@@ -64,6 +64,7 @@ public class ApplicationProperties {
         private SmartRecruiters smartRecruiters = new SmartRecruiters();
         private Ingestion ingestion = new Ingestion();
         private Radar radar = new Radar();
+        private Purge purge = new Purge();
     }
 
     @Setter
@@ -120,6 +121,25 @@ public class ApplicationProperties {
         private int chunkSize = 200;
         private int concurrency = 4;
         private int skipLimit = 100;
+        /**
+         * Default lifetime (days) applied to ingested offers whose source gives no expiry date, so the
+         * daily purge has an {@code expires_at} to act on. Refreshed each time an offer is (re)ingested.
+         */
+        private int offerTtlDays = 30;
+    }
+
+    @Setter
+    @Getter
+    public static class Purge {
+
+        /** Cron for the daily purge of expired offers. */
+        private String cron = "0 0 4 * * *";
+        /** Offers deleted per batch (one transaction per batch). */
+        private int batchSize = 500;
+        /** Batches deleted in parallel (virtual threads); keep under the JDBC pool size. */
+        private int concurrency = 4;
+        /** Cap per run; the remainder is handled on the next run. */
+        private int maxPerRun = 50000;
     }
 
     @Setter

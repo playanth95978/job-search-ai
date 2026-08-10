@@ -1,9 +1,11 @@
 package nc.opt.aiassistant.service.jobcopilot;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nc.opt.aiassistant.config.ApplicationProperties;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
@@ -18,6 +20,12 @@ import org.springframework.util.DigestUtils;
 public class JobOfferIngestionService {
 
     private final JobOfferRepository jobOfferRepository;
+    private final ApplicationProperties applicationProperties;
+
+    /** Default expiry stamped on ingested offers so the daily purge has an {@code expires_at} to act on. */
+    private Instant defaultExpiry(Instant now) {
+        return now.plus(applicationProperties.getJobCopilot().getIngestion().getOfferTtlDays(), ChronoUnit.DAYS);
+    }
 
     private static @NonNull String contentJobOfferHash(JobOffer offer) {
         String contentToHash = (offer.getTitle() + offer.getCompany() + offer.getDescription()).toLowerCase();
@@ -69,6 +77,7 @@ public class JobOfferIngestionService {
             Instant now = Instant.now();
             if (offer.getCreatedAt() == null) offer.setCreatedAt(now);
             offer.setUpdatedAt(now);
+            if (offer.getExpiresAt() == null) offer.setExpiresAt(defaultExpiry(now));
             return offer;
         } catch (Exception e) {
             log.error("Failed to prepare job offer {}: {}", offer.getTitle(), e.getMessage());
@@ -112,6 +121,9 @@ public class JobOfferIngestionService {
             Instant now = Instant.now();
             if (offer.getCreatedAt() == null) offer.setCreatedAt(now);
             offer.setUpdatedAt(now);
+            // Refresh the expiry each time an offer is (re)ingested: an offer that stops being scraped
+            // keeps its last expiry and is eventually purged; one still on the board keeps sliding.
+            offer.setExpiresAt(defaultExpiry(now));
 
             return offer;
         } catch (Exception e) {

@@ -140,6 +140,11 @@ spring:
             web-search:
               url: ${WEB_SEARCH_MCP_URL:http://localhost:3000}
   batch:
+    # Jobs are launched by the application's schedulers (ingestion, purge), never at startup.
+    # Without this, Spring Boot's JobLauncherApplicationRunner tries to run jobs on boot and fails
+    # with "Job name must be specified in case of multiple jobs" once there is more than one Job bean.
+    job:
+      enabled: false
     jdbc:
       initialize-schema: never
   servlet:
@@ -328,6 +333,8 @@ application:
       concurrency: ${INGESTION_CONCURRENCY:6}
       # Max offers a step may skip on error before failing the whole step.
       skip-limit: ${INGESTION_SKIP_LIMIT:1000}
+      # Default lifetime (days) stamped on ingested offers with no source expiry, so the purge can act.
+      offer-ttl-days: ${OFFER_TTL_DAYS:30}
     purge:
       # Suppression quotidienne des offres expirées (expires_at dépassé). Les offres liées à une
       # candidature sont conservées (historique utilisateur) mais restent masquées des recherches.
