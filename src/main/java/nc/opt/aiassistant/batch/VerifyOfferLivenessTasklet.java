@@ -8,6 +8,7 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import nc.opt.aiassistant.service.jobcopilot.OfferLivenessChecker;
+import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -54,7 +55,7 @@ public class VerifyOfferLivenessTasklet implements Tasklet {
     }
 
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
+    public RepeatStatus execute(@NonNull StepContribution contribution, @NonNull ChunkContext chunkContext) {
         if (processed >= maxPerRun) {
             return RepeatStatus.FINISHED;
         }
