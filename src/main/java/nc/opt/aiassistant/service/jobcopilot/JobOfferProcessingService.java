@@ -24,8 +24,11 @@ public class JobOfferProcessingService {
     /** Offers pulled per scheduling tick, processed as sequential sub-batches. */
     private static final int FETCH_SIZE = 64;
     private static final int MAX_RETRIES = 2;
+    /** Marqueur d'échec définitif : l'offre n'a aucun texte à embedder, inutile de la re-queuer. */
+    static final String ERR_EMPTY_SEARCH_TEXT = "empty search text";
     private final JobOfferRepository jobOfferRepository;
     private final JobOfferEmbeddingService embeddingService;
+    private final JobOfferIngestionService ingestionService;
 
     /**
      * Background task to process pending embeddings.
@@ -56,7 +59,7 @@ public class JobOfferProcessingService {
      */
     @Scheduled(fixedDelay = 1800000, initialDelay = 600000)
     public void requeueFailedOffers() {
-        int requeued = jobOfferRepository.requeueFailed();
+        int requeued = jobOfferRepository.requeueFailed(ERR_EMPTY_SEARCH_TEXT);
         if (requeued > 0) {
             log.info("Re-queued {} offer(s) from FAILED to PENDING for another embedding attempt", requeued);
         }
@@ -81,7 +84,26 @@ public class JobOfferProcessingService {
     }
 
     @Transactional
-    public void processBatch(List<JobOffer> batch) {
+    public void processBatch(List<JobOffer> rawBatch) {
+        // Un seul texte null dans le tableau `input` fait répondre 400 {"error":"invalid input type"}
+        // à Ollama, ce qui faisait échouer les 16 offres du lot. On écarte donc les offres sans texte
+        // avant l'appel, après avoir tenté de reconstruire leur search_text.
+        List<JobOffer> batch = new java.util.ArrayList<>();
+        List<JobOffer> unembeddable = new java.util.ArrayList<>();
+        for (JobOffer offer : rawBatch) {
+            if (resolveSearchText(offer)) {
+                batch.add(offer);
+            } else {
+                unembeddable.add(offer);
+            }
+        }
+
+        if (!unembeddable.isEmpty()) {
+            log.warn("Skipping {} offer(s) with no usable search text", unembeddable.size());
+            markPermanentlyFailed(unembeddable, ERR_EMPTY_SEARCH_TEXT);
+        }
+        if (batch.isEmpty()) return;
+
         List<UUID> ids = batch.stream().map(JobOffer::getId).toList();
 
         try {
@@ -91,9 +113,12 @@ public class JobOfferProcessingService {
             List<String> texts = batch.stream().map(JobOffer::getSearchText).toList();
             List<float[]> embeddings = embeddingService.embedBatch(texts);
             log.debug("Generated embeddings for {} offers", batch.size());
-            embeddings.forEach(embedding -> {
-                log.debug("Embedding: {}", embedding);
-            });
+
+            if (embeddings.size() != batch.size()) {
+                throw new IllegalStateException(
+                    "Embedding backend returned " + embeddings.size() + " vectors for " + batch.size() + " texts"
+                );
+            }
 
             for (int i = 0; i < batch.size(); i++) {
                 JobOffer offer = batch.get(i);
@@ -111,6 +136,38 @@ public class JobOfferProcessingService {
             log.error("Failed to process batch: {}", e.getMessage());
             handleBatchError(batch, e.getMessage());
         }
+    }
+
+    /**
+     * Garantit que l'offre porte un {@code searchText} exploitable : sinon on le reconstruit depuis
+     * ses champs. Renvoie {@code false} si l'offre reste sans texte (description absente par
+     * exemple) — elle est alors inembeddable, et la réessayer indéfiniment ne sert à rien.
+     */
+    private boolean resolveSearchText(JobOffer offer) {
+        if (offer.getSearchText() != null && !offer.getSearchText().isBlank()) {
+            return true;
+        }
+        try {
+            String rebuilt = ingestionService.buildSearchText(offer);
+            if (rebuilt != null && !rebuilt.isBlank()) {
+                offer.setSearchText(rebuilt);
+                return true;
+            }
+        } catch (Exception e) {
+            log.debug("Cannot rebuild search text for offer {}: {}", offer.getId(), e.getMessage());
+        }
+        return false;
+    }
+
+    /** Échec définitif (donnée invalide, pas panne backend) : pas de retry, statut FAILED immédiat. */
+    private void markPermanentlyFailed(List<JobOffer> offers, String error) {
+        for (JobOffer offer : offers) {
+            offer.setEmbeddingStatus(EmbeddingStatus.FAILED);
+            offer.setIndexingError(error);
+            offer.setRetryCount(MAX_RETRIES);
+            log.error("Offer {} is not embeddable: {}", offer.getId(), error);
+        }
+        jobOfferRepository.saveAll(offers);
     }
 
     private void handleBatchError(List<JobOffer> batch, String error) {

@@ -76,7 +76,7 @@ public class FranceTravailConnector implements AtsConnector {
                 .retrieve()
                 .body(String.class);
 
-            JsonNode root = objectMapper.readTree(body);
+            JsonNode root = readResponse(body);
             for (JsonNode r : root.path("resultats")) {
                 JobOffer jobOffer = mapJobOffer(r);
                 results.add(jobOffer);
@@ -85,6 +85,18 @@ public class FranceTravailConnector implements AtsConnector {
             log.error("France Travail fetch failed: {}", e.getMessage());
         }
         return results;
+    }
+
+    /**
+     * L'API France Travail répond <b>204 No Content</b> (corps vide) quand la recherche ne ramène
+     * aucune offre. {@code readTree(null)} lèverait alors {@code argument "content" is null} : on
+     * renvoie un noeud vide, que les appelants interprètent comme « page sans résultat ».
+     */
+    private JsonNode readResponse(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
+        if (body == null || body.isBlank()) {
+            return objectMapper.createObjectNode();
+        }
+        return objectMapper.readTree(body);
     }
 
     private JobOffer mapJobOffer(JsonNode r) {
@@ -169,7 +181,7 @@ public class FranceTravailConnector implements AtsConnector {
                         .bodyToMono(String.class)
                         .block();
 
-                    JsonNode root = objectMapper.readTree(body);
+                    JsonNode root = readResponse(body);
                     JsonNode results = root.path("resultats");
                     if (results.isEmpty()) {
                         sink.complete();
@@ -234,7 +246,7 @@ public class FranceTravailConnector implements AtsConnector {
                         .bodyToMono(String.class)
                         .block();
 
-                    JsonNode root = objectMapper.readTree(body);
+                    JsonNode root = readResponse(body);
                     JsonNode results = root.path("resultats");
                     if (results.isEmpty()) {
                         sink.complete();
