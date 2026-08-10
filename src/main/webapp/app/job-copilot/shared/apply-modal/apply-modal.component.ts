@@ -27,6 +27,7 @@ export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: s
 
 @Component({
   selector: 'jhi-apply-modal',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
 import { CommonModule } from '@angular/common';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslatePipe } from '@ngx-translate/core';
-import { TranslateDirective } from 'app/shared/language';
+import TranslateDirective from '../../../../../shared/language/translate.directive';
 
 export interface PrefillField {
   key: string;

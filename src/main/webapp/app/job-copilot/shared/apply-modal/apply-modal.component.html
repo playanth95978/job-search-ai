@@ -57,7 +57,10 @@
     <div [ngbNavOutlet]="nav" class="jc-modal-tab-content"></div>
 
     <!-- Assisted pre-fill: for sources without a submit API, help the candidate fill the source form fast. -->
-    @if (application() && applyUrl() && !autoApplySupported()) {
+    <!-- Ancre explicite du trigger : sans cible, `on viewport` exige un @placeholder réduit à un
+         unique noeud élément racine, contrainte que ce bloc ne satisfait pas (NG8020). -->
+    <div #prefillAnchor class="jc-prefill-placeholder"></div>
+    @defer (on viewport(prefillAnchor); when application() && applyUrl() && !autoApplySupported()) {
       <jhi-apply-prefill [candidateProfile]="candidate()" [coverLetter]="coverLetter()" />
     }
   }
