@@ -1,0 +1,135 @@
+<div class="jc-search-tabs">
+  <button
+    class="jc-tab"
+    [class.active]="activeTab() === 'search'"
+    (click)="activeTab.set('search')"
+    jhiTranslate="jobCopilot.search.tabs.keyword"
+  >
+    <fa-icon icon="search"></fa-icon> Keyword Search
+  </button>
+  <button class="jc-tab" [class.active]="activeTab() === 'ats'" (click)="activeTab.set('ats')" jhiTranslate="jobCopilot.search.tabs.ats">
+    <fa-icon icon="globe"></fa-icon> ATS / Board URL
+  </button>
+</div>
+
+@if (activeTab() === 'search') {
+  <div class="jc-search-form">
+    <div class="jc-input-group">
+      <div class="jc-input-wrapper">
+        <fa-icon icon="search" class="jc-input-icon"></fa-icon>
+        <input
+          type="text"
+          class="jc-input"
+          [placeholder]="'jobCopilot.search.form.keywordsPlaceholder' | translate"
+          [ngModel]="keywords()"
+          (ngModelChange)="keywords.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+      </div>
+      <div class="jc-input-wrapper">
+        <fa-icon icon="location-dot" class="jc-input-icon"></fa-icon>
+        <input
+          type="text"
+          class="jc-input"
+          [placeholder]="'jobCopilot.search.form.locationPlaceholder' | translate"
+          [ngModel]="location()"
+          (ngModelChange)="location.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+      </div>
+      <div class="jc-input-wrapper">
+        <fa-icon icon="filter" class="jc-input-icon"></fa-icon>
+        <select class="jc-input jc-select" [ngModel]="source()" (ngModelChange)="source.set($event)" aria-label="Source">
+          <option value="" jhiTranslate="jobCopilot.search.form.allSources">Toutes les sources</option>
+          @for (s of sources; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select>
+      </div>
+      @if (selectedSource()?.hasCountrySelect) {
+        <div class="jc-input-wrapper">
+          <fa-icon icon="globe" class="jc-input-icon"></fa-icon>
+          <select
+            class="jc-input jc-select"
+            [ngModel]="country()"
+            (ngModelChange)="country.set($event)"
+            [attr.aria-label]="'jobCopilot.search.form.country' | translate"
+          >
+            @for (c of countries; track c.code) {
+              <option [value]="c.code">{{ c.label }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+    @if (selectedSource(); as sel) {
+      <p class="jc-source-hint">
+        <fa-icon icon="circle-info"></fa-icon>
+        <span>{{ sel.coverageKey | translate }}</span>
+        <span class="jc-source-examples">{{ sel.examples.join(' · ') }}</span>
+      </p>
+    }
+    <div class="jc-search-actions">
+      <button class="jc-btn jc-btn-primary" (click)="onSmartSearch()" [disabled]="smartSearching()">
+        @if (smartSearching()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.actions.smartSearching">Smart search...</span>
+        } @else {
+          <fa-icon icon="wand-magic-sparkles"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.actions.smartSearch">Smart Search</span>
+        }
+      </button>
+      <button class="jc-btn jc-btn-secondary" (click)="onSearch()" [disabled]="searching()">
+        @if (searching()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.actions.searching">Searching...</span>
+        } @else {
+          <fa-icon icon="search"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.search">Search</span>
+        }
+      </button>
+      <button class="jc-btn jc-btn-secondary" (click)="onMatchAll()" [disabled]="matching()">
+        @if (matching()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.actions.matching">Matching...</span>
+        } @else {
+          <fa-icon icon="wand-magic-sparkles"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</span>
+        }
+      </button>
+      <button class="jc-btn jc-btn-accent" (click)="onMatchAdvanced()" [disabled]="matchingAdvanced()">
+        @if (matchingAdvanced()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.actions.advanced">Advanced...</span>
+        } @else {
+          <fa-icon icon="chart-line"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matchAdvanced">Match Advanced</span>
+        }
+      </button>
+    </div>
+  </div>
+} @else {
+  <div class="jc-search-form">
+    <div class="jc-input-group jc-input-single">
+      <div class="jc-input-wrapper jc-input-full">
+        <fa-icon icon="globe" class="jc-input-icon"></fa-icon>
+        <input
+          type="text"
+          class="jc-input"
+          [placeholder]="'jobCopilot.search.form.atsPlaceholder' | translate"
+          [ngModel]="atsUrl()"
+          (ngModelChange)="atsUrl.set($event)"
+          (keyup.enter)="onFetch()"
+        />
+      </div>
+    </div>
+    <div class="jc-search-actions">
+      <button class="jc-btn jc-btn-primary" (click)="onFetch()" [disabled]="fetching()">
+        @if (fetching()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.actions.fetching">Fetching...</span>
+        } @else {
+          <fa-icon icon="download"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.fetchJobs">Fetch Jobs</span>
+        }
+      </button>
+    </div>
+  </div>
+}

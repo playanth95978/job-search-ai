@@ -1,0 +1,121 @@
+// Shared primitives for the job-search feature (buttons, badges, tags), imported by the form,
+// results and card sub-components (Emulated encapsulation scopes them per host).
+
+.jc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.jc-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  color: white;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  }
+}
+
+.jc-btn-secondary {
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+
+  &:hover:not(:disabled) {
+    border-color: #4f46e5;
+    color: #4f46e5;
+  }
+}
+
+.jc-btn-accent {
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
+  color: #fff;
+  border: none;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(67, 56, 202, 0.4);
+  }
+}
+
+.jc-btn-ghost {
+  background: transparent;
+  color: var(--bs-secondary-color);
+
+  &:hover {
+    color: #4f46e5;
+  }
+}
+
+.jc-btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.jc-source-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+}
+
+.jc-remote-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.jc-contract-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.jc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.jc-tag-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.jc-tag-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.jc-separator {
+  margin: 0 0.1rem;
+}

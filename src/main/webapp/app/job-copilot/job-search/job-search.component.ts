@@ -1,84 +1,62 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
 import { AccountService } from 'app/core/auth/account.service';
 import { SeoService } from 'app/pages/shared/seo.service';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
 import { AuthPromptModalComponent } from '../shared/auth-prompt-modal/auth-prompt-modal.component';
-import {
-  ADZUNA_COUNTRIES,
-  JobOffer,
-  JobOfferPreview,
-  jobSourceColor,
-  jobSourceLabel,
-  MatchResult,
-  SEARCHABLE_JOB_SOURCES,
-} from '../shared/job-copilot.model';
+import { JobOffer, JobOfferPreview, MatchResult } from '../shared/job-copilot.model';
 import TranslateDirective from '../../shared/language/translate.directive';
 import { JobSearchDetail } from './job-search-detail/job-search-detail';
+import { JobSearchFormComponent } from './job-search-form/job-search-form.component';
+import { JobResultsComponent } from './job-results/job-results.component';
+import { JobSearchCriteria, OfferDetail } from './job-search.types';
 
-/** Shared shape of an offer shown in the detail pane — satisfied by both JobOffer and JobOfferDto. */
-export type OfferDetail = JobOfferPreview & {
-  id?: string;
-  remote?: boolean;
-  contractType?: string;
-  salaryMin?: number;
-  salaryMax?: number;
-};
+// Re-exported so existing importers (e.g. the detail pane) keep resolving OfferDetail from here.
+export type { OfferDetail } from './job-search.types';
 
+/**
+ * Job-search page orchestrator. Owns the results/selection state and the service calls, and composes
+ * the standalone {@link JobSearchFormComponent} (controls), {@link JobResultsComponent} (list) and
+ * {@link JobSearchDetail} (side pane). Form state lives in the form; this component only reacts to
+ * the criteria it emits.
+ */
 @Component({
   selector: 'jhi-job-copilot-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, FaIconComponent, TranslateModule, TranslateDirective, JobSearchDetail],
+  imports: [FaIconComponent, TranslateModule, TranslateDirective, JobSearchFormComponent, JobResultsComponent, JobSearchDetail],
   templateUrl: './job-search.component.html',
   styleUrl: './job-search.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobSearchComponent {
-  keywords = '';
-  location = '';
-  source = '';
-  /** Adzuna market (country path segment); only used when the Adzuna source is selected. */
-  country = 'fr';
-  atsUrl = '';
   /** Number of semantically closest offers to score in "Match My Profile". */
-  matchTopK = 30;
+  private static readonly MATCH_TOP_K = 30;
 
-  readonly sources = SEARCHABLE_JOB_SOURCES;
-  readonly countries = ADZUNA_COUNTRIES;
-
-  /** The metadata of the currently selected source, or undefined for "all sources". */
-  get selectedSource() {
-    return this.sources.find(s => s.value === this.source);
-  }
-
-  offers = signal<JobOffer[]>([]);
-  matchResults = signal<MatchResult[]>([]);
+  readonly offers = signal<JobOffer[]>([]);
+  readonly matchResults = signal<MatchResult[]>([]);
   /** Seek-style detail pane: the offer currently opened alongside the results list. */
-  selectedOffer = signal<OfferDetail | null>(null);
-  selectedLoading = signal(false);
-  searching = signal(false);
-  smartSearching = signal(false);
-  matching = signal(false);
-  matchingAdvanced = signal(false);
-  fetching = signal(false);
-  error = signal<string | null>(null);
-  activeTab = signal<'search' | 'ats'>('search');
+  readonly selectedOffer = signal<OfferDetail | null>(null);
+  readonly selectedLoading = signal(false);
 
-  private service = inject(JobCopilotService);
-  private translateService = inject(TranslateService);
-  private modalService = inject(NgbModal);
-  private accountService = inject(AccountService);
-  private seo = inject(SeoService);
+  readonly searching = signal(false);
+  readonly smartSearching = signal(false);
+  readonly matching = signal(false);
+  readonly matchingAdvanced = signal(false);
+  readonly fetching = signal(false);
+  readonly error = signal<string | null>(null);
+
+  private readonly service = inject(JobCopilotService);
+  private readonly modalService = inject(NgbModal);
+  private readonly accountService = inject(AccountService);
+  private readonly seo = inject(SeoService);
 
   constructor() {
-    // This component backs both the public /search route (crawlable) and the auth-gated
-    // /job-copilot/search route. Pin the canonical to the public /search URL so search
-    // engines index a single, reachable page and never a login redirect.
+    // Backs both the public /search route (crawlable) and the auth-gated /job-copilot/search route.
+    // Pin the canonical to the public /search URL so search engines index a single, reachable page.
     this.seo.update({
       title: "Recherche d'emploi IA — Trouvez les offres qui matchent votre profil | Job Search AI",
       description:
@@ -87,12 +65,11 @@ export class JobSearchComponent {
     });
   }
 
-  search(): void {
+  onSearch(c: JobSearchCriteria): void {
     this.searching.set(true);
     this.matchResults.set([]);
     this.error.set(null);
-    const country = this.selectedSource?.hasCountrySelect ? this.country : undefined;
-    this.service.searchJobs(this.keywords || undefined, this.location || undefined, this.source || undefined, country).subscribe({
+    this.service.searchJobs(c.keywords, c.location, c.source, c.country).subscribe({
       next: o => {
         this.offers.set(o);
         this.searching.set(false);
@@ -104,19 +81,16 @@ export class JobSearchComponent {
     });
   }
 
-  /**
-   * Semantic search over the ingested corpus (hybrid vector + BM25 + RRF + reranking).
-   * Instant and meaning-aware, vs. the live board scraping of {@link search}.
-   */
-  smartSearch(): void {
-    if (!this.keywords) {
-      this.search();
+  /** Semantic search over the ingested corpus (hybrid vector + BM25 + RRF + reranking). */
+  onSmartSearch(c: JobSearchCriteria): void {
+    if (!c.keywords) {
+      this.onSearch(c);
       return;
     }
     this.smartSearching.set(true);
     this.matchResults.set([]);
     this.error.set(null);
-    this.service.searchSmart(this.keywords, this.location || undefined, this.source || undefined).subscribe({
+    this.service.searchSmart(c.keywords, c.location, c.source).subscribe({
       next: o => {
         this.offers.set(o);
         this.smartSearching.set(false);
@@ -128,11 +102,10 @@ export class JobSearchComponent {
     });
   }
 
-  fetchUrl(): void {
-    if (!this.atsUrl) return;
+  onFetch(url: string): void {
     this.fetching.set(true);
     this.error.set(null);
-    this.service.fetchFromUrl(this.atsUrl).subscribe({
+    this.service.fetchFromUrl(url).subscribe({
       next: o => {
         this.offers.set(o);
         this.fetching.set(false);
@@ -144,11 +117,11 @@ export class JobSearchComponent {
     });
   }
 
-  matchAll(): void {
+  onMatchAll(c: JobSearchCriteria): void {
     if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
     this.matching.set(true);
     this.error.set(null);
-    this.service.matchJobs(this.matchTopK, this.location || undefined).subscribe({
+    this.service.matchJobs(JobSearchComponent.MATCH_TOP_K, c.location).subscribe({
       next: r => {
         this.matchResults.set(r);
         this.matching.set(false);
@@ -160,10 +133,10 @@ export class JobSearchComponent {
     });
   }
 
-  matchAdvanced(): void {
+  onMatchAdvanced(c: JobSearchCriteria): void {
     if (!this.requireAuth('jobCopilot.authPrompt.feature.matchAdvanced')) return;
     this.matchingAdvanced.set(true);
-    this.service.matchAdvanced(this.location || undefined).subscribe({
+    this.service.matchAdvanced(c.location).subscribe({
       next: r => {
         this.matchResults.set(r);
         this.matchingAdvanced.set(false);
@@ -238,19 +211,5 @@ export class JobSearchComponent {
     const modalRef = this.modalService.open(AuthPromptModalComponent, { centered: true });
     modalRef.componentInstance.featureKey.set(featureKey);
     return false;
-  }
-
-  getScoreClass(score: number): string {
-    if (score >= 0.7) return 'high';
-    if (score >= 0.4) return 'medium';
-    return 'low';
-  }
-
-  getSourceLabel(source?: string): string {
-    return jobSourceLabel(source);
-  }
-
-  getSourceColor(source?: string): string {
-    return jobSourceColor(source);
   }
 }

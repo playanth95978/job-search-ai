@@ -1,0 +1,117 @@
+@if (matchResults().length > 0) {
+  <div class="jc-results-header">
+    <h2 jhiTranslate="jobCopilot.search.results.matchTitle">Match Results</h2>
+    <span class="jc-results-count">{{ matchResults().length }} <span jhiTranslate="jobCopilot.search.results.matches">matches</span></span>
+  </div>
+  <div class="jc-results">
+    @for (match of matchResults(); track match.jobOffer.id) {
+      <div
+        class="jc-match-card jc-clickable"
+        [class.selected]="selectedId() === match.jobOffer.id"
+        (click)="selectOffer.emit(match.jobOffer)"
+      >
+        <div class="jc-match-score" [class]="'score-' + getScoreClass(match.score)">
+          <span class="jc-score-value">{{ match.score * 100 | number: '1.0-0' }}</span>
+          <span class="jc-score-label">%</span>
+        </div>
+        <div class="jc-match-info">
+          <div class="jc-match-title">
+            <strong>{{ match.jobOffer.title }}</strong>
+            @if (match.jobOffer.source) {
+              <span class="jc-source-badge" [style.background]="getSourceColor(match.jobOffer.source)">
+                {{ getSourceLabel(match.jobOffer.source) }}
+              </span>
+            }
+          </div>
+          <div class="jc-match-company">
+            <fa-icon icon="building"></fa-icon> {{ match.jobOffer.company || ('jobCopilot.search.results.unknown' | translate) }}
+            @if (match.jobOffer.location) {
+              <span class="jc-separator">&middot;</span>
+              <fa-icon icon="location-dot"></fa-icon> {{ match.jobOffer.location }}
+            }
+            @if (match.jobOffer.remote) {
+              <span class="jc-remote-badge" jhiTranslate="jobCopilot.search.results.remote">Remote</span>
+            }
+          </div>
+          <div class="jc-match-tags">
+            @for (s of match.strengths; track $index) {
+              <span class="jc-tag jc-tag-success"><fa-icon icon="check"></fa-icon> {{ s.key | translate: { skill: s.skill } }}</span>
+            }
+            @for (w of match.weaknesses; track $index) {
+              <span class="jc-tag jc-tag-warning"
+                ><fa-icon icon="triangle-exclamation"></fa-icon> {{ w.key | translate: { skill: w.skill } }}</span
+              >
+            }
+          </div>
+          <div class="jc-match-actions" (click)="$event.stopPropagation()">
+            @if (match.jobOffer.applyUrl) {
+              <a [href]="match.jobOffer.applyUrl" target="_blank" class="jc-btn jc-btn-ghost">
+                <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.search.results.view">View</span>
+              </a>
+            }
+            <button (click)="apply.emit(match.jobOffer)" class="jc-btn jc-btn-primary jc-btn-sm">
+              <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+@if (offers().length > 0 && matchResults().length === 0) {
+  <div class="jc-results-header">
+    <h2 jhiTranslate="jobCopilot.search.results.foundTitle">Jobs Found</h2>
+    <span class="jc-results-count">{{ offers().length }} <span jhiTranslate="jobCopilot.search.results.results">results</span></span>
+  </div>
+  <div class="jc-results">
+    @for (offer of offers(); track offer.id) {
+      <div class="jc-job-card jc-clickable" [class.selected]="selectedId() === offer.id" (click)="selectOffer.emit(offer)">
+        <div class="jc-job-info">
+          <div class="jc-job-title">
+            <strong>{{ offer.title }}</strong>
+            @if (offer.source) {
+              <span class="jc-source-badge" [style.background]="getSourceColor(offer.source)">
+                {{ getSourceLabel(offer.source) }}
+              </span>
+            }
+          </div>
+          <div class="jc-job-company">
+            <fa-icon icon="building"></fa-icon> {{ offer.company || ('jobCopilot.search.results.unknown' | translate) }}
+            @if (offer.location) {
+              <span class="jc-separator">&middot;</span>
+              <fa-icon icon="location-dot"></fa-icon> {{ offer.location }}
+            }
+            @if (offer.remote) {
+              <span class="jc-remote-badge" jhiTranslate="jobCopilot.search.results.remote">Remote</span>
+            }
+            @if (offer.contractType) {
+              <span class="jc-contract-badge">{{ offer.contractType }}</span>
+            }
+          </div>
+          @if (offer.salaryMin || offer.salaryMax) {
+            <div class="jc-job-salary">
+              @if (offer.salaryMin && offer.salaryMax) {
+                {{ offer.salaryMin | number }} — {{ offer.salaryMax | number }} €
+              } @else if (offer.salaryMin) {
+                <span jhiTranslate="jobCopilot.search.results.salaryFrom">From</span> {{ offer.salaryMin | number }} €
+              } @else {
+                <span jhiTranslate="jobCopilot.search.results.salaryUpTo">Up to</span> {{ offer.salaryMax | number }} €
+              }
+            </div>
+          }
+        </div>
+        <div class="jc-job-actions" (click)="$event.stopPropagation()">
+          @if (offer.applyUrl) {
+            <a [href]="offer.applyUrl" target="_blank" class="jc-btn jc-btn-ghost jc-btn-sm">
+              <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.search.results.view">View</span>
+            </a>
+          }
+          <button (click)="apply.emit(offer)" class="jc-btn jc-btn-primary jc-btn-sm">
+            <fa-icon icon="paper-plane"></fa-icon> <span jhiTranslate="jobCopilot.search.results.apply">Postuler</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}
