@@ -328,6 +328,17 @@ application:
       concurrency: ${INGESTION_CONCURRENCY:6}
       # Max offers a step may skip on error before failing the whole step.
       skip-limit: ${INGESTION_SKIP_LIMIT:1000}
+    purge:
+      # Suppression quotidienne des offres expirées (expires_at dépassé). Les offres liées à une
+      # candidature sont conservées (historique utilisateur) mais restent masquées des recherches.
+      # Programmée à 4 h, après l'ingestion de 2 h ; annulée si celle-ci tourne encore.
+      cron: ${PURGE_CRON:0 0 4 * * *}
+      # Offres supprimées par lot, une transaction par lot.
+      batch-size: ${PURGE_BATCH_SIZE:500}
+      # Lots supprimés en parallèle (threads virtuels) ; rester sous la taille du pool JDBC.
+      concurrency: ${PURGE_CONCURRENCY:4}
+      # Plafond par exécution ; le reliquat part au run suivant.
+      max-per-run: ${PURGE_MAX_PER_RUN:50000}
     radar:
       # Opportunity Radar: proactively match newly ingested offers against each user's profile.
       enabled: ${RADAR_ENABLED:true}
