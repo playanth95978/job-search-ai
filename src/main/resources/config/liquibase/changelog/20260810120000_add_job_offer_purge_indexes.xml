@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+  <changeSet id="20260810120000-1" author="aattia" runInTransaction="false">
+    <comment>Index partiel sur job_offer.expires_at : sélection des offres expirées</comment>
+    <sql>
+      -- Partiel (WHERE expires_at IS NOT NULL) : les sources qui ne fournissent pas de date
+      -- d'expiration sont majoritaires et ne sont jamais purgeables — inutile de les indexer.
+      CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_job_offer_expires_at
+        ON job_offer (expires_at)
+        WHERE expires_at IS NOT NULL;
+    </sql>
+  </changeSet>
+
+  <changeSet id="20260810120000-2" author="claude" runInTransaction="false">
+    <comment>Index sur les colonnes de FK vers job_offer : anti-jointure de la purge et contrôle RESTRICT</comment>
+    <sql>
+      -- PostgreSQL n'indexe PAS automatiquement les colonnes portant une clé étrangère. Sans ces
+      -- index, chaque suppression dans job_offer impose un parcours séquentiel des tables filles
+      -- pour vérifier la contrainte RESTRICT, et le NOT EXISTS de la purge devient très coûteux.
+      -- job_application n'était indexé que sur (user_id, status), et radar_hit sur (user_id, ...) :
+      -- aucun de ces index n'est utilisable pour une recherche par job_offer_id seul.
+      CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_job_application_job_offer
+        ON job_application (job_offer_id);
+
+      CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_radar_hit_job_offer
+        ON radar_hit (job_offer_id);
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

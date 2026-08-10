@@ -38,4 +38,5 @@
   <include file="config/liquibase/changelog/20260726090000_add_candidate_profile_embedding.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260726100000_add_radar_tables.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260810090000_add_auto_apply_config.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260810120000_add_job_offer_purge_indexes.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
