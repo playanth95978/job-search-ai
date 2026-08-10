@@ -130,14 +130,21 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
     @Query("DELETE FROM JobOffer j WHERE j.id IN :ids")
     int deleteByIdIn(@Param("ids") Collection<UUID> ids);
 
-    /** Re-queues offers that previously failed embedding (e.g. Ollama was down) so they are retried. */
+    /**
+     * Re-queues offers that previously failed embedding (e.g. Ollama was down) so they are retried.
+     *
+     * <p>Les échecs définitifs — offre sans texte indexable, marquée par {@code indexingError =
+     * :permanentError} — sont exclus : les remettre en PENDING ferait boucler le poller sur des
+     * données qui ne seront jamais embeddables.</p>
+     */
     @Modifying
     @Transactional
     @Query(
         "UPDATE JobOffer j SET j.embeddingStatus = nc.opt.aiassistant.domain.enumeration.EmbeddingStatus.PENDING, " +
-            "j.retryCount = 0, j.indexingError = null WHERE j.embeddingStatus = nc.opt.aiassistant.domain.enumeration.EmbeddingStatus.FAILED"
+            "j.retryCount = 0, j.indexingError = null WHERE j.embeddingStatus = nc.opt.aiassistant.domain.enumeration.EmbeddingStatus.FAILED " +
+            "AND (j.indexingError IS NULL OR j.indexingError <> :permanentError)"
     )
-    int requeueFailed();
+    int requeueFailed(@Param("permanentError") String permanentError);
 
     // --- Vérification de liveness des offres (apply_url encore joignable) --------------------
 

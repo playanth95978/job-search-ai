@@ -26,6 +26,13 @@ public class JobOfferEmbeddingService {
     public List<float[]> embedBatch(List<String> texts) {
         if (texts == null || texts.isEmpty()) return List.of();
 
+        // Ollama /api/embed rejette tout le lot avec 400 {"error":"invalid input type"} dès qu'un
+        // élément du tableau `input` n'est pas une chaîne (un null sérialisé, typiquement).
+        // On échoue ici avec un message exploitable plutôt que de laisser le 400 opaque remonter.
+        if (texts.stream().anyMatch(t -> t == null || t.isBlank())) {
+            throw new IllegalArgumentException("Embedding batch contains null or blank text");
+        }
+
         log.debug("Generating embeddings for batch of {} texts", texts.size());
 
         // Spring AI EmbeddingModel.embed(List<String>) is generally optimized
