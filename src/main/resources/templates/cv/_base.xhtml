@@ -28,7 +28,9 @@
 
     /* A heading stranded at the foot of a page, and single lines split off a paragraph, are the two
        ways a generated CV most visibly looks broken. */
-    h1, h2, h3 { margin: 0; font-weight: 700; page-break-after: avoid; }
+    /* line-height 1.2 rather than the inherited 1.5: an underlined section heading otherwise gets its
+       rule pushed half a line below the text, which reads as a stray separator. */
+    h1, h2, h3 { margin: 0; font-weight: 700; line-height: 1.2; page-break-after: avoid; }
     p { margin: 4px 0; orphans: 3; widows: 3; }
     ul { margin: 4px 0; padding-left: 14px; }
     li { margin-bottom: 1px; orphans: 2; widows: 2; }

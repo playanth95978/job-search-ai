@@ -297,7 +297,7 @@ application:
     base-url: ${SEO_BASE_URL:https://aicarreerfinder.com}
   ai:
     ollama:
-      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      base-url: http://localhost:11434
       token: ${OLLAMA_TOKEN:500bdabb06bf48d1954498b694f30030.8BDqI18mRi5HRt0PylrqyWDJ} # set your own token here from ollama web ui if you want to use cloud model.
       model: ${OLLAMA_MODEL:nemotron-3-super:cloud} # set your own model here, you can find more models here: https://ollama.com/library
       enabled: true

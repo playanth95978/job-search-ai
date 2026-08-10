@@ -32,10 +32,10 @@
        display and stacks it full width whatever float or inline-block you set on it. The bullet is
        U+2022 because the base-14 fonts only cover WinAnsi — U+25AA, which the on-screen template uses,
        has no glyph and prints as a placeholder box. */
-    .au-skills span { display: inline-block; width: 48%; padding-left: 4mm; font-size: 0.9em; }
-    .au-skills span:before { content: "\2022"; margin-left: -4mm; padding-right: 2mm; color: [(${theme.primary})]; }
+    .au-skills span { float: left; width: 47%; padding-left: 4mm; font-size: 0.9em; }
+    .au-skills span:before { content: "\2022"; padding-right: 2mm; color: [(${theme.primary})]; }
 
-    .au-ref { display: inline-block; width: 48%; vertical-align: top; margin-bottom: 3mm; page-break-inside: avoid; }
+    .au-ref { float: left; width: 47%; margin-bottom: 3mm; page-break-inside: avoid; }
     .au-ref-contact { font-size: 0.8em; color: #777777; }
     .au-ref-none { color: #555555; font-style: italic; }
   </style>

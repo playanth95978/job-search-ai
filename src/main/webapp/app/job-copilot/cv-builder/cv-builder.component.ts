@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { debounceTime, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -44,8 +44,6 @@ export class CvBuilderComponent {
   private readonly exportService = inject(CvExportService);
   readonly r = this.store.resume;
   readonly fonts = FONT_FAMILIES;
-
-  @ViewChild('previewPane', { read: ElementRef }) private previewPane!: ElementRef<HTMLElement>;
 
   readonly templates: { id: ResumeTemplateId; labelKey: string }[] = [
     { id: 'modern', labelKey: 'cvBuilder.templates.modern' },
@@ -120,9 +118,7 @@ export class CvBuilderComponent {
   }
 
   exportPdf(): void {
-    const cvPage: HTMLElement | null = this.previewPane.nativeElement.querySelector('.cv-page');
-    if (!cvPage) return;
-    void this.exportService.exportPdf(cvPage, `${this.safeName()}.pdf`);
+    void this.exportService.exportPdf(this.r(), `${this.safeName()}.pdf`);
   }
 
   exportDocx(): void {
