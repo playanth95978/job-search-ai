@@ -1,0 +1,66 @@
+<fragments xmlns:th="http://www.thymeleaf.org">
+
+  <!--
+    Print stylesheet shared by every CV template.
+
+    Renderer constraints worth knowing before editing any template in this folder — openhtmltopdf
+    implements CSS 2.1, so none of the following are available: flexbox, CSS grid, `var()` custom
+    properties, `linear-gradient`, multi-column. The Angular preview components use all of them; their
+    print counterparts here reach for absolute positioning, floats and (for the modern template's
+    sidebar) a layout table instead. Theme colors are baked in by Thymeleaf rather than passed as
+    custom properties.
+
+    Its default stylesheet is XHTML 1.0-era, which means HTML5 sectioning elements have no `display`
+    rule and would otherwise lay out inline — hence the explicit block declaration below.
+  -->
+  <style th:fragment="pageCss" type="text/css">
+    @page { size: A4; margin: 13mm 14mm 15mm; }
+
+    html, body { margin: 0; padding: 0; }
+    header, footer, section, article, aside, main, nav, div { display: block; }
+
+    body {
+      font-family: [(${theme.fontStack})];
+      font-size: [[${theme.baseSize}]];
+      line-height: 1.45;
+      color: #1f2733;
+    }
+
+    /* A heading stranded at the foot of a page, and single lines split off a paragraph, are the two
+       ways a generated CV most visibly looks broken. */
+    h1, h2, h3 { margin: 0; font-weight: 700; page-break-after: avoid; }
+    p { margin: 4px 0; orphans: 3; widows: 3; }
+    ul { margin: 4px 0; padding-left: 14px; }
+    li { margin-bottom: 1px; orphans: 2; widows: 2; }
+    a { color: inherit; text-decoration: none; }
+    strong { font-weight: 700; }
+
+    section { margin-bottom: 5mm; }
+
+    /* One job / degree / project is the unit that must never be sliced across a page boundary. */
+    .entry { page-break-inside: avoid; margin-bottom: 3mm; }
+
+    /* Title on the left, dates flush right, without flexbox — and, unlike a float or a layout table,
+       keeping the title ahead of the dates in the text stream, which is the order an ATS reads. */
+    .row { position: relative; padding-right: 32mm; min-height: 1.2em; }
+    .row .dates { position: absolute; right: 0; top: 0; white-space: nowrap; }
+
+    .clearfix:after { content: " "; display: block; clear: both; height: 0; }
+  </style>
+
+  <!--
+    Only emitted when the document actually spans several pages: {@code ResumePdfRenderer} lays the CV
+    out once, counts the pages, and re-renders with this rule when there is more than one. A one-page
+    CV is never stamped "1 / 1".
+  -->
+  <style th:fragment="pageNumberCss" type="text/css">
+    @page {
+      @bottom-right {
+        content: counter(page) " / " counter(pages);
+        font-size: 7.5pt;
+        color: #9aa3b0;
+      }
+    }
+  </style>
+
+</fragments>

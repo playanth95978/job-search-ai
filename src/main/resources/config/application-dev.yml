@@ -41,7 +41,7 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5434/job-search-ai
+    url: jdbc:postgresql://localhost:5433/job-search-ai
     username: ${SPRING_DATASOURCE_USERNAME:job-search-ai}
     password: ${SPRING_DATASOURCE_PASSWORD:job-search-ai}
     hikari:

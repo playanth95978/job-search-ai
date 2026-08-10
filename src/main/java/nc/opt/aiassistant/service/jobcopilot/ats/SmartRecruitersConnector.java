@@ -15,7 +15,7 @@ import nc.opt.aiassistant.config.ApplicationProperties;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
-import nc.opt.aiassistant.service.pdf.ResumePdfService;
+import nc.opt.aiassistant.service.pdf.ResumeExportService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -39,7 +39,7 @@ public class SmartRecruitersConnector implements AtsConnector {
     private static final Pattern URL_REF = Pattern.compile("smartrecruiters\\.com/([^/]+)/(\\d+)");
 
     private final ObjectMapper objectMapper;
-    private final ResumePdfService resumePdfService;
+    private final ResumeExportService resumeExportService;
     private final ApplicationProperties applicationProperties;
 
     @Override
@@ -95,7 +95,7 @@ public class SmartRecruitersConnector implements AtsConnector {
         ObjectNode resume = attachments.addObject();
         resume.put("type", "resume");
         resume.put("fileName", "cv.pdf");
-        resume.put("content", Base64.getEncoder().encodeToString(resumePdfService.fromProfile(profile)));
+        resume.put("content", Base64.getEncoder().encodeToString(resumeExportService.renderForAts(profile)));
 
         String url = API_BASE + "/" + companyId + "/postings/" + postingId + "/candidates";
         try {

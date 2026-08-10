@@ -1,0 +1,142 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title th:text="${cv.title} ?: 'Resume'">Resume</title>
+  <style th:replace="~{cv/_base :: pageCss}" />
+  <style th:if="${pageNumbers}" th:replace="~{cv/_base :: pageNumberCss}" />
+  <style type="text/css">
+    body { color: #2b2b2b; line-height: 1.5; }
+
+    .au-head { padding-bottom: 4mm; margin-bottom: 6mm; border-bottom: 2px solid [(${theme.primary})]; }
+    .au-head h1 { font-size: 1.9em; letter-spacing: 0.01em; color: #1f2733; }
+    .au-title { margin: 1mm 0 0; font-size: 1.05em; color: [(${theme.secondary})]; }
+    .au-contact { margin: 2.5mm 0 0; font-size: 0.8em; color: #555555; }
+    .au-rights { margin: 2mm 0 0; font-size: 0.8em; font-weight: 700; color: [(${theme.secondary})]; }
+
+    h2 {
+      font-size: 0.93em;
+      color: [(${theme.primary})];
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid #cfcfcf;
+      padding-bottom: 1mm;
+      margin-bottom: 3mm;
+    }
+
+    .row .dates { color: #777777; font-size: 0.8em; }
+    .au-org { margin: 0.5mm 0 1mm; font-style: italic; color: #444444; }
+
+    /* Two even columns without CSS grid. These blocks are short enough to stay on one page, so plain
+       floats are safe here — unlike the modern template's full-height sidebar, which needs a table. */
+    .au-skills { list-style: none; margin: 0; padding: 0; }
+    .au-skills li { float: left; width: 48%; margin-right: 2%; padding-left: 4mm; font-size: 0.9em; }
+    .au-skills li:before { content: "\25AA"; float: left; margin-left: -4mm; color: [(${theme.primary})]; }
+
+    .au-ref { float: left; width: 48%; margin-right: 2%; margin-bottom: 3mm; page-break-inside: avoid; }
+    .au-ref-contact { font-size: 0.8em; color: #777777; }
+    .au-ref-none { color: #555555; font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <header class="au-head">
+    <h1 th:text="${cv.fullName()}">First Last</h1>
+    <p class="au-title" th:if="${cv.personal.title}" th:text="${cv.personal.title}">Title</p>
+    <p class="au-contact" th:if="${!#strings.isEmpty(cv.contactLine())}" th:text="${cv.contactLine()}">contact</p>
+    <p class="au-rights" th:if="${cv.personal.workingRights}" th:text="${cv.personal.workingRights}">Working rights</p>
+  </header>
+
+  <th:block th:each="s : ${sections}" th:switch="${s}">
+
+    <th:block th:case="'summary'">
+      <section th:if="${cv.summary}">
+        <h2>Professional Summary</h2>
+        <p th:text="${cv.summary}">…</p>
+      </section>
+    </th:block>
+
+    <th:block th:case="'skills'">
+      <section class="clearfix" th:if="${!cv.skills.isEmpty()}">
+        <h2>Key Skills</h2>
+        <ul class="au-skills clearfix">
+          <li th:each="sk : ${cv.skills}" th:text="${sk.name}">skill</li>
+        </ul>
+      </section>
+    </th:block>
+
+    <th:block th:case="'experiences'">
+      <section th:if="${!cv.experiences.isEmpty()}">
+        <h2>Professional Experience</h2>
+        <article class="entry" th:each="e : ${cv.experiences}">
+          <div class="row">
+            <strong th:text="${e.jobTitle}">Job title</strong>
+            <span class="dates" th:text="${e.dateRange('Present')}">dates</span>
+          </div>
+          <p class="au-org" th:if="${e.company}" th:text="${e.company}">Company</p>
+          <p th:if="${e.description}" th:text="${e.description}">…</p>
+          <ul th:if="${!e.achievements.isEmpty()}">
+            <li th:each="a : ${e.achievements}" th:text="${a}">…</li>
+          </ul>
+        </article>
+      </section>
+    </th:block>
+
+    <th:block th:case="'education'">
+      <section th:if="${!cv.education.isEmpty()}">
+        <h2>Education &amp; Qualifications</h2>
+        <article class="entry" th:each="ed : ${cv.education}">
+          <div class="row">
+            <strong th:text="${ed.degree}">Degree</strong>
+            <span class="dates" th:text="${ed.dateRange()}">dates</span>
+          </div>
+          <p class="au-org" th:if="${ed.school}" th:text="${ed.school}">School</p>
+          <p th:if="${ed.description}" th:text="${ed.description}">…</p>
+        </article>
+      </section>
+    </th:block>
+
+    <th:block th:case="'certifications'">
+      <section th:if="${!cv.certifications.isEmpty()}">
+        <h2>Certifications &amp; Licences</h2>
+        <div class="row entry" th:each="c : ${cv.certifications}">
+          <strong th:text="${c.name}">certification</strong>
+          <span class="dates" th:text="${c.issuedLine()}">issuer</span>
+        </div>
+      </section>
+    </th:block>
+
+    <th:block th:case="'projects'">
+      <section th:if="${!cv.projects.isEmpty()}">
+        <h2>Projects</h2>
+        <article class="entry" th:each="p : ${cv.projects}">
+          <strong th:text="${p.name}">Project</strong>
+          <p th:if="${p.description}" th:text="${p.description}">…</p>
+        </article>
+      </section>
+    </th:block>
+
+    <th:block th:case="'languages'">
+      <section th:if="${!cv.languages.isEmpty()}">
+        <h2>Languages</h2>
+        <p th:text="${cv.languagesLine()}">…</p>
+      </section>
+    </th:block>
+
+  </th:block>
+
+  <!-- Referees are expected on an Australian resume, so the section is always present — with the
+       conventional "available upon request" line when none are listed. -->
+  <section class="clearfix">
+    <h2>Referees</h2>
+    <div class="clearfix" th:if="${!cv.referees.isEmpty()}">
+      <div class="au-ref" th:each="ref : ${cv.referees}">
+        <strong th:text="${ref.name}">Name</strong>
+        <p class="au-org" th:if="${!#strings.isEmpty(ref.role())}" th:text="${ref.role()}">Role</p>
+        <p class="au-ref-contact" th:if="${!#strings.isEmpty(ref.contact())}" th:text="${ref.contact()}">contact</p>
+      </div>
+    </div>
+    <p class="au-ref-none" th:unless="${!cv.referees.isEmpty()}">Available upon request.</p>
+  </section>
+
+</body>
+</html>

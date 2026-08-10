@@ -7,6 +7,8 @@ import nc.opt.aiassistant.service.jobcopilot.CvTailoringService;
 import nc.opt.aiassistant.service.jobcopilot.JobPositioningService;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvMatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.GeneratedResumeDto;
+import nc.opt.aiassistant.service.pdf.ResumeExportService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,7 @@ public class JobPositioningResource {
 
     private final JobPositioningService jobPositioningService;
     private final CvTailoringService cvTailoringService;
+    private final ResumeExportService resumeExportService;
 
     @GetMapping("/positioning")
     public ResponseEntity<CvMatchResultDto> positioning(
@@ -46,6 +49,15 @@ public class JobPositioningResource {
         @RequestParam(name = "refresh", defaultValue = "false") boolean refresh
     ) {
         return ResponseEntity.ok(cvTailoringService.getTailored(id, refresh));
+    }
+
+    /** The same tailored variant as a PDF, laid out with the master resume's template and theme. */
+    @GetMapping(value = "/tailored/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> tailoredPdf(
+        @PathVariable UUID id,
+        @RequestParam(name = "refresh", defaultValue = "false") boolean refresh
+    ) {
+        return CvResumeResource.pdfResponse(resumeExportService.renderTailored(id, refresh), "cv-" + id);
     }
 
     /** What-if payload: skills/experience the candidate would add. */
