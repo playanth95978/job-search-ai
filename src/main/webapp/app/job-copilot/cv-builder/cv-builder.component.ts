@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { debounceTime, filter } from 'rxjs/operators';
+import { debounceTime, filter, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -13,8 +14,8 @@ import { CvPreviewComponent } from './preview/cv-preview.component';
 import { CvReviewComponent } from './cv-review/cv-review.component';
 import { CvMatchComponent } from './cv-match/cv-match.component';
 import { CvGenerateComponent } from './cv-generate/cv-generate.component';
-import { FONT_FAMILIES, Resume, ResumeTemplateId } from './resume.model';
-import { CvResumeApiService } from './cv-resume-api.service';
+import { FONT_FAMILIES, isBlankResume, Resume, ResumeTemplateId } from './resume.model';
+import { CvResumeApiService, ResumeApiDto } from './cv-resume-api.service';
 import { candidateProfileToResume } from './candidate-profile.mapper';
 import { generatedResumeToResume } from './generated-resume.mapper';
 import { CvExportService } from './cv-export.service';
@@ -68,15 +69,26 @@ export class CvBuilderComponent {
     // 1. Load the server copy once (overrides the local draft), then enable auto-save.
     this.api
       .getResume()
-      .pipe(takeUntilDestroyed())
+      .pipe(
+        switchMap(dto => {
+          const stored = this.parseStoredResume(dto);
+          if (stored) {
+            this.store.load(stored);
+            return of(null);
+          }
+          // No resume saved yet — the common case right after a first CV upload. Seed the builder from
+          // the profile that was extracted from that CV instead of showing an empty form, which is
+          // otherwise only reachable through the "import profile" button most users never find.
+          return this.api.getCandidateProfile();
+        }),
+        takeUntilDestroyed(),
+      )
       .subscribe({
-        next: dto => {
-          if (dto?.data) {
-            try {
-              this.store.load(JSON.parse(dto.data) as Resume);
-            } catch {
-              /* keep local draft on parse error */
-            }
+        next: profile => {
+          // A local draft with real content in it wins: the user's own typing is never clobbered.
+          if (profile && isBlankResume(this.store.resume())) {
+            const current = this.store.resume();
+            this.store.load({ ...candidateProfileToResume(profile), template: current.template, theme: current.theme });
           }
           this.loaded.set(true);
         },
@@ -147,6 +159,18 @@ export class CvBuilderComponent {
       this.store.load({ ...mapped, template: current.template, theme: current.theme });
     });
   }
+  /** The stored resume, or null when there is none or it fails to parse (a corrupt copy keeps the draft). */
+  private parseStoredResume(dto: ResumeApiDto | null): Resume | null {
+    if (!dto?.data) {
+      return null;
+    }
+    try {
+      return JSON.parse(dto.data) as Resume;
+    } catch {
+      return null;
+    }
+  }
+
   private safeName(): string {
     const p = this.r().personal;
     const base = `${p.firstName}-${p.lastName}`.trim() || this.r().title || 'cv';
