@@ -61,9 +61,9 @@
     <th:block th:case="'skills'">
       <section class="clearfix" th:if="${!cv.skills.isEmpty()}">
         <h2>Key Skills</h2>
-        <ul class="au-skills clearfix">
-          <li th:each="sk : ${cv.skills}" th:text="${sk.name}">skill</li>
-        </ul>
+        <div class="au-skills">
+          <span th:each="sk : ${cv.skills}" th:text="${sk.name}">skill</span>
+        </div>
       </section>
     </th:block>
 
