@@ -60,6 +60,11 @@ public class GreenhouseConnector implements AtsConnector {
     }
 
     /** Fetches jobs from a specific Greenhouse board (company slug). */
+    @Override
+    public List<JobOffer> fetchFromUrl(String url) {
+        return fetchFromBoard(AtsConnector.boardSlug(url, "greenhouse.io/"));
+    }
+
     public List<JobOffer> fetchFromBoard(String boardToken) {
         List<JobOffer> results = new ArrayList<>();
         try {

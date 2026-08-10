@@ -112,6 +112,11 @@ public class LeverConnector implements AtsConnector {
     }
 
     /** Fetches jobs from a Lever company page. */
+    @Override
+    public List<JobOffer> fetchFromUrl(String url) {
+        return fetchFromCompany(AtsConnector.boardSlug(url, "lever.co/"));
+    }
+
     public List<JobOffer> fetchFromCompany(String company) {
         List<JobOffer> results = new ArrayList<>();
         try {

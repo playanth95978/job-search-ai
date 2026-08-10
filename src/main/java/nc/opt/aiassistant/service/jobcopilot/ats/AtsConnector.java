@@ -39,6 +39,24 @@ public interface AtsConnector {
         return null;
     }
 
+    /**
+     * Fetches the offers implied by a board/feed URL this connector {@link #supports(String) supports}
+     * — e.g. a Greenhouse/Lever/SmartRecruiters company board, or an aggregator's feed. Default: none.
+     */
+    default List<JobOffer> fetchFromUrl(String url) {
+        return List.of();
+    }
+
+    /** Extracts the path segment right after {@code marker} (e.g. the board/company slug in a URL). */
+    static String boardSlug(String url, String marker) {
+        if (url == null) return "";
+        int idx = url.indexOf(marker);
+        if (idx < 0) return url;
+        String rest = url.substring(idx + marker.length());
+        int slash = rest.indexOf('/');
+        return slash > 0 ? rest.substring(0, slash) : rest;
+    }
+
     /** Whether this connector can submit an application directly via an ATS API. */
     default boolean supportsAutoApply() {
         return false;

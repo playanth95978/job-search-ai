@@ -111,6 +111,13 @@ public class SmartRecruitersConnector implements AtsConnector {
     }
 
     /** Fetches postings from a SmartRecruiters company (best-effort; no auth for public postings). */
+    @Override
+    public List<JobOffer> fetchFromUrl(String url) {
+        PostingRef ref = parseRef(url);
+        String companyId = ref != null ? ref.site() : AtsConnector.boardSlug(url, "smartrecruiters.com/");
+        return fetchFromCompany(companyId);
+    }
+
     public List<JobOffer> fetchFromCompany(String companyId) {
         List<JobOffer> results = new ArrayList<>();
         try {

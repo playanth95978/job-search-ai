@@ -32,6 +32,12 @@ public class HelloWorkConnector implements AtsConnector {
     }
 
     @Override
+    public List<JobOffer> fetchFromUrl(String url) {
+        // A bare hellowork.com URL maps to a default search (first page).
+        return fetchJobs(null, null);
+    }
+
+    @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
         List<JobOffer> results = new ArrayList<>();
         try {

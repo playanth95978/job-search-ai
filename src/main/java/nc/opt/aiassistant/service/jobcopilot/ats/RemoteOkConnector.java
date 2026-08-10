@@ -33,6 +33,12 @@ public class RemoteOkConnector implements AtsConnector {
     }
 
     @Override
+    public List<JobOffer> fetchFromUrl(String url) {
+        // A bare remoteok.com URL maps to the whole remote feed.
+        return fetchJobs(null, null);
+    }
+
+    @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
         List<JobOffer> results = new ArrayList<>();
         try {

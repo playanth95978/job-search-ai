@@ -44,6 +44,12 @@ public class EmploiNcConnector implements AtsConnector {
     }
 
     @Override
+    public List<JobOffer> fetchFromUrl(String url) {
+        // A bare emploi.nc URL maps to the active-offers feed.
+        return fetchJobs(null, null);
+    }
+
+    @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
         return fetchJobsPaginated(keywords, location).collectList().block();
     }

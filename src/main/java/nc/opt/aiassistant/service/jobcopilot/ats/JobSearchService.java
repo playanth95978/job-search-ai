@@ -23,8 +23,6 @@ public class JobSearchService {
 
     private final List<AtsConnector> connectors;
     private final JobOfferRepository jobOfferRepository;
-    private final GreenhouseConnector greenhouseConnector;
-    private final LeverConnector leverConnector;
     private final JobOfferIngestionService jobOfferIngestionService;
     private final JobOfferSearchService jobOfferSearchService;
     private final GeoLocationService geoLocationService;
@@ -105,15 +103,19 @@ public class JobSearchService {
 
     /** Fetches from a specific ATS board URL. */
     @Transactional
+    /**
+     * Fetches offers from a pasted board/feed URL by delegating to the first connector that
+     * {@link AtsConnector#supports(String) supports} it (Greenhouse/Lever/SmartRecruiters boards,
+     * or an aggregator feed like RemoteOK / HelloWork / Emploi.nc), then persists them.
+     */
     public List<JobOffer> fetchFromUrl(String url) {
-        List<JobOffer> offers = new ArrayList<>();
-        if (url.contains("greenhouse.io")) {
-            String board = extractBoardToken(url, "greenhouse.io/");
-            offers.addAll(greenhouseConnector.fetchFromBoard(board));
-        } else if (url.contains("lever.co")) {
-            String company = extractBoardToken(url, "lever.co/");
-            offers.addAll(leverConnector.fetchFromCompany(company));
-        }
+        if (url == null || url.isBlank()) return List.of();
+        List<JobOffer> offers = connectors
+            .stream()
+            .filter(c -> c.supports(url))
+            .findFirst()
+            .map(c -> c.fetchFromUrl(url))
+            .orElse(List.of());
         offers.forEach(jobOfferIngestionService::ingest);
         return offers;
     }
@@ -135,13 +137,5 @@ public class JobSearchService {
     /** Searches locally persisted job offers by keyword. */
     public List<JobOffer> searchLocal(String keyword) {
         return jobOfferRepository.searchByKeyword(keyword);
-    }
-
-    private String extractBoardToken(String url, String marker) {
-        int idx = url.indexOf(marker);
-        if (idx < 0) return url;
-        String rest = url.substring(idx + marker.length());
-        int slash = rest.indexOf('/');
-        return slash > 0 ? rest.substring(0, slash) : rest;
     }
 }
