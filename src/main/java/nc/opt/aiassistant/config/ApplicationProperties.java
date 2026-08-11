@@ -61,22 +61,11 @@ public class ApplicationProperties {
         private JobCopilotConfig franceTravail;
         private Adzuna adzuna;
         private Seek seek = new Seek();
-        private SmartRecruiters smartRecruiters = new SmartRecruiters();
         private Ingestion ingestion = new Ingestion();
         private Radar radar = new Radar();
         private Purge purge = new Purge();
+        private Gdpr gdpr = new Gdpr();
         private Liveness liveness = new Liveness();
-    }
-
-    @Setter
-    @Getter
-    public static class SmartRecruiters {
-
-        /**
-         * Auto-apply via the public SmartRecruiters Posting API. Off by default: enable only after
-         * validating the request payload against a posting you control (avoid junk applications).
-         */
-        private boolean autoApplyEnabled = false;
     }
 
     @Setter
@@ -141,6 +130,24 @@ public class ApplicationProperties {
         private int concurrency = 4;
         /** Cap per run; the remainder is handled on the next run. */
         private int maxPerRun = 50000;
+    }
+
+    /** Purge des données personnelles au-delà de la durée de conservation (RGPD art. 5-1-e). */
+    @Setter
+    @Getter
+    public static class Gdpr {
+
+        /** Désactivable en développement, où les jeux de test ont des dates arbitraires. */
+        private boolean enabled = true;
+        /** Cron de la purge quotidienne ; 5 h, après l'ingestion (2 h) et la purge des offres (4 h). */
+        private String cron = "0 0 5 * * *";
+        /**
+         * Conservation à compter de la DERNIÈRE activité de l'utilisateur, pas de la création de la
+         * ligne. 730 jours = 2 ans, recommandation CNIL pour les données de candidature.
+         */
+        private int retentionDays = 730;
+        /** Utilisateurs traités par transaction. */
+        private int batchSize = 100;
     }
 
     @Setter

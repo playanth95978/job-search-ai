@@ -110,10 +110,6 @@
         "title": "All matches",
         "subtitle": "Offers ranked for your profile by AI"
       },
-      "autoApply": {
-        "title": "Auto-apply",
-        "subtitle": "Let AI apply for you, within your guardrails"
-      },
       "interview": {
         "title": "Interview practice",
         "subtitle": "Train with an AI recruiter"

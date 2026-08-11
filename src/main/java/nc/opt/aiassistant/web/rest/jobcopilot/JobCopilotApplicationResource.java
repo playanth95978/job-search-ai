@@ -14,7 +14,6 @@ import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.dto.JobApplicationDTO;
 import nc.opt.aiassistant.service.jobcopilot.ApplicationTrackingService;
 import nc.opt.aiassistant.service.jobcopilot.CoverLetterService;
-import nc.opt.aiassistant.service.jobcopilot.dto.ApplyOutcomeDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,30 +66,6 @@ public class JobCopilotApplicationResource {
     public ResponseEntity<JobApplication> updateCoverLetter(@PathVariable UUID id, @RequestBody String coverLetter) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
         return ResponseEntity.ok(trackingService.updateCoverLetter(id, userId, coverLetter));
-    }
-
-    /** Sources for which a direct, in-app application submission is available. */
-    @GetMapping("/auto-apply-sources")
-    public ResponseEntity<List<String>> getAutoApplySources() {
-        return ResponseEntity.ok(trackingService.getAutoApplySources());
-    }
-
-    /**
-     * Whether a given offer can be auto-applied — matched by source OR by apply URL (an aggregator
-     * offer whose applyUrl points to a Lever/Greenhouse/SmartRecruiters board). Drives the modal's
-     * "auto-apply" vs "assisted apply" choice per offer.
-     */
-    @GetMapping("/auto-apply-capable/{jobOfferId}")
-    public ResponseEntity<Boolean> autoApplyCapable(@PathVariable UUID jobOfferId) {
-        JobOffer offer = jobOfferRepository.findById(jobOfferId).orElse(null);
-        return ResponseEntity.ok(offer != null && trackingService.canAutoApply(offer));
-    }
-
-    /** Submits the application directly via the source ATS API when supported, else leaves it for manual submission. */
-    @PostMapping("/{id}/apply")
-    public ResponseEntity<ApplyOutcomeDto> apply(@PathVariable UUID id) {
-        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        return ResponseEntity.ok(trackingService.submitApplication(id, userId));
     }
 
     @PostMapping("/{jobOfferId}/cover-letter")

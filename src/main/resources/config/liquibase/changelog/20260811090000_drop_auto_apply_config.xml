@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!--
+    Retrait de la soumission automatique de candidature.
+
+    Postuler au nom d'un candidat sans son geste explicite sort du cadre des CGU des ATS visés
+    (Lever, SmartRecruiters) et constitue un traitement de données personnelles difficile à
+    justifier. La table de configuration associée n'a donc plus de raison d'être.
+
+    Le changeSet de création (20260810090000) est conservé dans l'historique : le supprimer ferait
+    diverger le DATABASECHANGELOG des environnements où il a déjà tourné.
+  -->
+  <changeSet id="20260811090000-1" author="claude">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="auto_apply_config"/>
+    </preConditions>
+    <dropTable tableName="auto_apply_config"/>
+  </changeSet>
+
+</databaseChangeLog>

@@ -60,7 +60,6 @@ export class ApplyModalComponent implements OnInit {
   loading = signal(true);
   submitting = signal(false);
   error = signal<string | null>(null);
-  autoApplySupported = signal(false);
   resultMessage = signal<string | null>(null);
   previewMode = signal(true);
   language = signal('');
@@ -77,16 +76,6 @@ export class ApplyModalComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit(): void {
-    // Capability is per-offer: an aggregator offer whose applyUrl points to a Lever/SmartRecruiters
-    // board is auto-appliable even though its source is France Travail/Adzuna.
-    const offerId = this.jobOfferId() ?? this.existingApplication()?.jobOffer?.id;
-    if (offerId) {
-      this.service.autoApplyCapable(offerId).subscribe({
-        next: capable => this.autoApplySupported.set(capable),
-        error: () => this.autoApplySupported.set(false),
-      });
-    }
-
     this.enrichOffer();
 
     if (this.existingApplication()) {
@@ -125,9 +114,10 @@ export class ApplyModalComponent implements OnInit {
   candidate = computed(() => this.application()?.candidateProfile ?? this.existingApplication()?.candidateProfile);
 
   /**
-   * Assisted apply for sources without a submit API: copies the cover letter to the clipboard so the
-   * candidate can paste it on the source form, opens the offer in a new tab, and records the
-   * application as APPLIED so it is tracked.
+   * Candidature assistée — le seul mode de candidature de l'application. On copie la lettre dans le
+   * presse-papier, on ouvre l'offre dans un onglet, et on enregistre la candidature comme APPLIED
+   * pour le suivi. C'est le candidat qui valide et soumet le formulaire chez la source : rien n'est
+   * jamais envoyé en son nom.
    */
   applyAssisted(): void {
     const url = this.applyUrl();
@@ -138,40 +128,6 @@ export class ApplyModalComponent implements OnInit {
       window.open(url, '_blank', 'noopener');
     }
     this.markAsApplied();
-  }
-
-  submitAuto(): void {
-    const app = this.application();
-    if (!app?.id) return;
-    this.submitting.set(true);
-    this.error.set(null);
-    this.service.updateCoverLetter(app.id, this.coverLetter()).subscribe({
-      next: () => {
-        this.service.applyToJob(app.id!).subscribe({
-          next: outcome => {
-            this.submitting.set(false);
-            this.application.set(outcome.application);
-            if (outcome.autoApplied) {
-              this.resultMessage.set(
-                this.translateService.instant('jobCopilot.applyModal.success.autoApplied', { source: this.sourceLabel() }),
-              );
-              this.applied.emit(outcome.application);
-              this.activeModal.close(outcome.application);
-            } else {
-              this.error.set(outcome.message);
-            }
-          },
-          error: err => {
-            this.submitting.set(false);
-            this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.autoApply'));
-          },
-        });
-      },
-      error: err => {
-        this.submitting.set(false);
-        this.error.set(err.error?.message ?? this.translateService.instant('jobCopilot.applyModal.error.save'));
-      },
-    });
   }
 
   markAsApplied(): void {

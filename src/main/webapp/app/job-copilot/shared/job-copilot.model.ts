@@ -106,33 +106,6 @@ export interface UserPreferenceDto {
   preferredLocations: string[];
 }
 
-export type AutoApplyMode = 'VALIDATION' | 'AUTO';
-
-export interface AutoApplyConfig {
-  mode: AutoApplyMode;
-  minScore: number;
-  maxPerDay: number;
-  sources: string[];
-}
-
-export interface AutoApplyItem {
-  title: string;
-  company?: string;
-  source?: string;
-  score: number;
-  status: 'PREPARED' | 'SUBMITTED';
-  message?: string;
-}
-
-export interface AutoApplyRunResult {
-  scanned: number;
-  prepared: number;
-  submitted: number;
-  skipped: number;
-  mode: string;
-  items: AutoApplyItem[];
-}
-
 export type ApplicationStats = Record<string, number>;
 
 export interface CvReview {
@@ -153,13 +126,6 @@ export interface CvMatchResult {
   strengths: string[];
   weaknesses: string[];
   suggestions: string[];
-}
-
-export interface ApplyOutcome {
-  autoApplied: boolean;
-  autoApplySupported: boolean;
-  message: string;
-  application: JobApplication;
 }
 
 export interface InterviewMessage {

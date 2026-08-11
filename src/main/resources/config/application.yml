@@ -346,6 +346,18 @@ application:
       concurrency: ${PURGE_CONCURRENCY:4}
       # Plafond par exécution ; le reliquat part au run suivant.
       max-per-run: ${PURGE_MAX_PER_RUN:50000}
+    gdpr:
+      # Purge des données personnelles au-delà de la durée de conservation (RGPD art. 5-1-e).
+      # Programmée à 5 h, après l'ingestion (2 h) et la purge des offres (4 h) ; annulée si l'une
+      # d'elles tourne encore. Efface profil candidat, CV, candidatures, positionnements, radar,
+      # préférences et conversations — pas le compte lui-même, qui relève d'une demande d'effacement.
+      enabled: ${GDPR_PURGE_ENABLED:true}
+      cron: ${GDPR_PURGE_CRON:0 0 5 * * *}
+      # Conservation à compter de la DERNIÈRE activité de l'utilisateur, pas de la création de la
+      # ligne : 730 jours = 2 ans, recommandation CNIL pour les données de candidature.
+      retention-days: ${GDPR_RETENTION_DAYS:730}
+      # Utilisateurs traités par transaction.
+      batch-size: ${GDPR_PURGE_BATCH_SIZE:100}
     liveness:
       # Vérifie que les apply_url stockées répondent encore ; 404/410 => offre marquée expirée.
       # Ne re-teste pas une offre vérifiée depuis moins de N heures.

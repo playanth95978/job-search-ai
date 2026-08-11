@@ -56,11 +56,12 @@
 
     <div [ngbNavOutlet]="nav" class="jc-modal-tab-content"></div>
 
-    <!-- Assisted pre-fill: for sources without a submit API, help the candidate fill the source form fast. -->
+    <!-- Pré-remplissage assisté : champs prêts à copier pour que le candidat remplisse vite le
+         formulaire de la source, qu'il soumet lui-même. -->
     <!-- Ancre explicite du trigger : sans cible, `on viewport` exige un @placeholder réduit à un
          unique noeud élément racine, contrainte que ce bloc ne satisfait pas (NG8020). -->
     <div #prefillAnchor class="jc-prefill-placeholder"></div>
-    @defer (on viewport(prefillAnchor); when application() && applyUrl() && !autoApplySupported()) {
+    @defer (on viewport(prefillAnchor); when application() && applyUrl()) {
       <jhi-apply-prefill [candidateProfile]="candidate()" [coverLetter]="coverLetter()" />
     }
   }
@@ -76,28 +77,10 @@
       <fa-icon icon="check"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.close">Fermer</span>
     </button>
   } @else if (application()) {
-    @if (applyUrl() && !autoApplySupported()) {
+    @if (applyUrl()) {
       <button (click)="applyAssisted()" [disabled]="submitting()" class="jc-btn jc-btn-accent" type="button">
         <fa-icon icon="wand-magic-sparkles"></fa-icon>
         <span jhiTranslate="jobCopilot.applyModal.copyAndApply">Copier la lettre & postuler</span>
-      </button>
-    } @else if (applyUrl()) {
-      <a [href]="applyUrl()" class="jc-btn jc-btn-ghost" rel="noopener" target="_blank">
-        <fa-icon icon="external-link-alt"></fa-icon> <span jhiTranslate="jobCopilot.applyModal.openOffer">Ouvrir l'offre</span>
-      </a>
-    }
-
-    @if (autoApplySupported()) {
-      <button (click)="submitAuto()" [disabled]="submitting()" class="jc-btn jc-btn-accent" type="button">
-        @if (submitting()) {
-          <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
-          <span jhiTranslate="jobCopilot.applyModal.sending">Envoi...</span>
-        } @else {
-          <fa-icon icon="paper-plane"></fa-icon>
-          <span jhiTranslate="jobCopilot.applyModal.submitVia" [translateValues]="{ source: sourceLabel() }"
-            >Soumettre via {{ sourceLabel() }}</span
-          >
-        }
       </button>
     }
 

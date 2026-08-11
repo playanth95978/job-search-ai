@@ -13,8 +13,6 @@ import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.ApplicationStatus;
 import nc.opt.aiassistant.repository.jobcopilot.JobApplicationRepository;
 import nc.opt.aiassistant.service.dto.JobApplicationDTO;
-import nc.opt.aiassistant.service.jobcopilot.ats.AtsConnector;
-import nc.opt.aiassistant.service.jobcopilot.dto.ApplyOutcomeDto;
 import nc.opt.aiassistant.service.mapper.JobApplicationMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationTrackingService {
 
     private final JobApplicationRepository applicationRepository;
-    private final List<AtsConnector> connectors;
     private final JobApplicationMapper jobApplicationMapper;
 
     @Transactional
@@ -63,56 +60,6 @@ public class ApplicationTrackingService {
         JobApplication app = getOwnedApplication(applicationId, userId);
         app.setCoverLetter(coverLetter);
         return applicationRepository.save(app);
-    }
-
-    /** ATS sources for which a direct, in-app application submission is available. */
-    public List<String> getAutoApplySources() {
-        return connectors
-            .stream()
-            .filter(AtsConnector::supportsAutoApply)
-            .map(c -> c.getSource().name())
-            .toList();
-    }
-
-    /**
-     * Whether any connector can auto-apply to this offer — matched by source OR by apply URL
-     * (an aggregator offer whose applyUrl points to a Lever/Greenhouse/SmartRecruiters board).
-     */
-    @Transactional(readOnly = true)
-    public boolean canAutoApply(JobOffer offer) {
-        return offer != null && connectors.stream().anyMatch(c -> c.canAutoApply(offer));
-    }
-
-    /**
-     * Attempts to submit the application directly through the source ATS API.
-     * Falls back to {@code autoApplied = false} when the source has no auto-apply connector,
-     * letting the caller fall back to opening the offer's apply link instead.
-     */
-    @Transactional
-    public ApplyOutcomeDto submitApplication(UUID applicationId, String userId) {
-        JobApplication app = getOwnedApplication(applicationId, userId);
-        JobOffer offer = app.getJobOffer();
-        // Route by URL first (unlocks aggregator offers that link to an ATS board), then by source.
-        AtsConnector connector =
-            offer == null
-                ? null
-                : connectors
-                      .stream()
-                      .filter(c -> c.canAutoApply(offer))
-                      .findFirst()
-                      .orElse(null);
-
-        if (connector == null) {
-            return new ApplyOutcomeDto(false, false, "Auto-apply not available for this offer. Apply manually via the offer link.", app);
-        }
-
-        AtsConnector.ApplyResult result = connector.applyTo(offer, app.getCandidateProfile(), app.getCoverLetter());
-        if (result.success()) {
-            app.setStatus(ApplicationStatus.APPLIED);
-            app.setAppliedAt(Instant.now());
-            app = applicationRepository.save(app);
-        }
-        return new ApplyOutcomeDto(result.success(), true, result.message(), app);
     }
 
     private JobApplication getOwnedApplication(UUID applicationId, String userId) {

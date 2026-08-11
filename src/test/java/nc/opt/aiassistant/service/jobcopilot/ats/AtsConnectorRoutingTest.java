@@ -3,29 +3,22 @@ package nc.opt.aiassistant.service.jobcopilot.ats;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nc.opt.aiassistant.config.ApplicationProperties;
-import nc.opt.aiassistant.domain.JobOffer;
-import nc.opt.aiassistant.domain.enumeration.JobSource;
 import nc.opt.aiassistant.service.jobcopilot.ats.AtsConnector.PostingRef;
-import nc.opt.aiassistant.service.pdf.ResumeExportService;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Couvre l'extraction de la référence de publication depuis une URL d'ATS, qui sert à récupérer le
+ * détail d'une offre — y compris quand l'offre vient d'un agrégateur mais pointe vers un board ATS.
+ *
+ * <p>Les connecteurs sont en lecture seule : aucune candidature n'est soumise par l'application.</p>
+ */
 class AtsConnectorRoutingTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    /** Only URL parsing and auto-apply routing are under test here; no application is ever submitted. */
-    private final ResumeExportService pdf = null;
-
-    private JobOffer offer(JobSource source, String applyUrl) {
-        JobOffer o = new JobOffer();
-        o.setSource(source);
-        o.setApplyUrl(applyUrl);
-        return o;
-    }
 
     @Test
-    void leverParsesRefAndAutoAppliesByUrlEvenForAggregatorSource() {
-        LeverConnector lever = new LeverConnector(mapper, pdf);
+    void leverParsesSiteAndPostingIdFromApplyUrl() {
+        LeverConnector lever = new LeverConnector(mapper);
         String url = "https://jobs.lever.co/acme/12345678-1234-1234-1234-123456789abc/apply";
 
         PostingRef ref = lever.parseRef(url);
@@ -33,38 +26,24 @@ class AtsConnectorRoutingTest {
         assertThat(ref.site()).isEqualTo("acme");
         assertThat(ref.postingId()).isEqualTo("12345678-1234-1234-1234-123456789abc");
 
-        // An offer sourced from an aggregator but linking to a Lever board is still auto-appliable.
-        assertThat(lever.canAutoApply(offer(JobSource.FRANCE_TRAVAIL, url))).isTrue();
-        assertThat(lever.canAutoApply(offer(JobSource.ADZUNA, "https://example.com/jobs/1"))).isFalse();
+        assertThat(lever.supports(url)).isTrue();
+        assertThat(lever.supports("https://example.com/jobs/1")).isFalse();
     }
 
     @Test
-    void smartRecruitersAutoApplyIsGatedByConfig() {
-        ApplicationProperties props = new ApplicationProperties();
-        SmartRecruitersConnector sr = new SmartRecruitersConnector(mapper, pdf, props);
+    void smartRecruitersParsesCompanyAndPostingId() {
+        SmartRecruitersConnector sr = new SmartRecruitersConnector(mapper);
         String url = "https://jobs.smartrecruiters.com/AcmeInc/743999912345678";
 
         assertThat(sr.parseRef(url).site()).isEqualTo("AcmeInc");
         assertThat(sr.parseRef(url).postingId()).isEqualTo("743999912345678");
-
-        // Off by default → not capable even for a SmartRecruiters URL.
-        assertThat(sr.supportsAutoApply()).isFalse();
-        assertThat(sr.canAutoApply(offer(JobSource.ADZUNA, url))).isFalse();
-
-        props.getJobCopilot().getSmartRecruiters().setAutoApplyEnabled(true);
-        assertThat(sr.supportsAutoApply()).isTrue();
-        assertThat(sr.canAutoApply(offer(JobSource.ADZUNA, url))).isTrue();
     }
 
     @Test
-    void greenhouseParsesRefButDoesNotAutoApply() {
+    void greenhouseParsesBothBoardAndQueryParamUrls() {
         GreenhouseConnector gh = new GreenhouseConnector(mapper);
 
         assertThat(gh.parseRef("https://boards.greenhouse.io/acme/jobs/456").postingId()).isEqualTo("456");
         assertThat(gh.parseRef("https://acme.com/careers?gh_jid=789").postingId()).isEqualTo("789");
-
-        // Auto-apply needs a per-employer Job Board API key → always assisted fallback.
-        assertThat(gh.supportsAutoApply()).isFalse();
-        assertThat(gh.canAutoApply(offer(JobSource.GREENHOUSE, "https://boards.greenhouse.io/acme/jobs/456"))).isFalse();
     }
 }

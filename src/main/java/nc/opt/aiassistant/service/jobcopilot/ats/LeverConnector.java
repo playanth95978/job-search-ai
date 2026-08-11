@@ -8,17 +8,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
-import nc.opt.aiassistant.service.pdf.ResumeExportService;
 import org.jsoup.Jsoup;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Component
@@ -30,7 +24,6 @@ public class LeverConnector implements AtsConnector {
     private static final Pattern URL_REF = Pattern.compile("lever\\.co/([^/]+)/([0-9a-fA-F-]{36})");
 
     private final ObjectMapper objectMapper;
-    private final ResumeExportService resumeExportService;
 
     @Override
     public boolean supports(String url) {
@@ -54,61 +47,6 @@ public class LeverConnector implements AtsConnector {
     @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
         return List.of();
-    }
-
-    /**
-     * Lever exposes a public "apply" endpoint on its Postings API
-     * (POST /v0/postings/{site}/{postingId}/apply) that companies can enable
-     * for their job board. {@code offer.getCompany()} holds the Lever site
-     * slug and {@code offer.getSourceId()} the posting id, both captured
-     * during {@link #fetchFromCompany(String)}.
-     */
-    @Override
-    public boolean supportsAutoApply() {
-        return true;
-    }
-
-    @Override
-    public ApplyResult applyTo(JobOffer offer, CandidateProfile profile, String coverLetter) {
-        // Prefer the ids captured at fetch time; fall back to parsing the offer's apply URL
-        // (aggregator offers that link to a Lever board).
-        PostingRef ref = parseRef(offer.getApplyUrl());
-        String site = offer.getCompany() != null ? offer.getCompany() : ref != null ? ref.site() : null;
-        String postingId = offer.getSourceId() != null ? offer.getSourceId() : ref != null ? ref.postingId() : null;
-        if (site == null || postingId == null) {
-            return new ApplyResult(false, "Missing Lever posting reference");
-        }
-        if (profile == null || profile.getFullName() == null || profile.getEmail() == null) {
-            return new ApplyResult(false, "Champs obligatoires manquants (nom, e-mail). Complétez votre profil, puis réessayez.");
-        }
-        String url = API_BASE + "/" + site + "/" + postingId + "/apply";
-        try {
-            MultipartBodyBuilder form = new MultipartBodyBuilder();
-            form.part("name", profile.getFullName());
-            form.part("email", profile.getEmail());
-            if (coverLetter != null && !coverLetter.isBlank()) {
-                form.part("comments", coverLetter);
-            }
-            byte[] pdf = resumeExportService.renderForAts(profile);
-            ByteArrayResource resume = new ByteArrayResource(pdf) {
-                @Override
-                public String getFilename() {
-                    return "cv.pdf";
-                }
-            };
-            form.part("resume", resume).contentType(MediaType.APPLICATION_PDF);
-
-            RestClient client = RestClient.create();
-            client.post().uri(url).contentType(MediaType.MULTIPART_FORM_DATA).body(form.build()).retrieve().toBodilessEntity();
-
-            return new ApplyResult(true, "Application submitted via Lever");
-        } catch (RestClientResponseException e) {
-            log.warn("Lever auto-apply rejected for {}/{}: {} {}", site, postingId, e.getStatusCode(), e.getMessage());
-            return new ApplyResult(false, "Lever rejected the application (" + e.getStatusCode() + "). Apply manually instead.");
-        } catch (Exception e) {
-            log.error("Lever auto-apply failed for {}/{}: {}", site, postingId, e.getMessage());
-            return new ApplyResult(false, "Lever auto-apply failed: " + e.getMessage());
-        }
     }
 
     /** Fetches jobs from a Lever company page. */

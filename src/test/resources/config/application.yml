@@ -16,6 +16,12 @@
 spring:
   application:
     name: job-search-ai
+  # Le application.yml de test masque entièrement celui de main : les clés que des beans injectent
+  # sans valeur par défaut doivent donc être redéclarées ici, sinon le contexte ne démarre pas.
+  # Valeurs factices : aucun appel réseau n'est effectué en test.
+  ai:
+    mistralai:
+      api-key: test-api-key
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production
   liquibase:
     contexts: test

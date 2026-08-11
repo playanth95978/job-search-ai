@@ -4,9 +4,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import {
   ApplicationStats,
-  ApplyOutcome,
-  AutoApplyConfig,
-  AutoApplyRunResult,
   AssistantMessage,
   AutopsyReport,
   CandidateProfile,
@@ -239,33 +236,6 @@ export class JobCopilotService {
     return this.http.put<JobApplication>(`${this.baseUrl}/applications/${applicationId}/cover-letter`, coverLetter, {
       headers: { 'Content-Type': 'text/plain' },
     });
-  }
-
-  getAutoApplySources(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.baseUrl}/applications/auto-apply-sources`);
-  }
-
-  // Auto-apply agent (Level 1: API-first, human-in-the-loop)
-  getAutoApplyConfig(): Observable<AutoApplyConfig> {
-    return this.http.get<AutoApplyConfig>(`${this.baseUrl}/auto-apply/config`);
-  }
-
-  saveAutoApplyConfig(config: AutoApplyConfig): Observable<AutoApplyConfig> {
-    return this.http.put<AutoApplyConfig>(`${this.baseUrl}/auto-apply/config`, config);
-  }
-
-  /** Runs the auto-apply agent once for the current user; returns a per-offer summary. */
-  runAutoApply(): Observable<AutoApplyRunResult> {
-    return this.http.post<AutoApplyRunResult>(`${this.baseUrl}/auto-apply/run`, null);
-  }
-
-  /** Whether a given offer can be auto-applied (matched by source or by its apply URL). */
-  autoApplyCapable(jobOfferId: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.baseUrl}/applications/auto-apply-capable/${jobOfferId}`);
-  }
-
-  applyToJob(applicationId: string): Observable<ApplyOutcome> {
-    return this.http.post<ApplyOutcome>(`${this.baseUrl}/applications/${applicationId}/apply`, null);
   }
 
   // Interview roleplay
