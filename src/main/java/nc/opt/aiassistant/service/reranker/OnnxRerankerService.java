@@ -302,7 +302,7 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
     }
 
     private List<Float> calculateBatchScores(PairList<String, String> batch, int maxLength) throws OrtException {
-        long t1 = System.currentTimeMillis();
+        long preparationStart = System.currentTimeMillis();
         Encoding[] encodings = tokenizer.batchEncode(batch);
 
         int batchSize = encodings.length;
@@ -326,10 +326,25 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
         inputs.put("input_ids", OnnxTensor.createTensor(env, inputIds));
         inputs.put("attention_mask", OnnxTensor.createTensor(env, attentionMask));
 
+        long preparationMs = System.currentTimeMillis() - preparationStart;
+
         // Les tenseurs d'entrée détiennent de la mémoire hors tas : sans fermeture explicite, elle
         // n'est rendue qu'au bon vouloir du GC, invisible depuis les métriques JVM.
         try (AutoCloseable ignored = () -> inputs.values().forEach(OnnxTensor::close); InferenceSlot slot = acquireInferenceSlot()) {
-            return runInference(inputs, batchSize, t1);
+            long inferenceStart = System.currentTimeMillis();
+            List<Float> scores = runInference(inputs, batchSize);
+
+            // Les deux phases sont journalisées séparément, et nommées pour ce qu'elles sont : un
+            // compteur unique intitulé « tokenisation » mais couvrant aussi l'inférence a déjà fait
+            // chercher l'optimisation du mauvais côté. Mesuré ici, l'inférence pèse ~99 %.
+            log.debug(
+                "Rerank de {} documents ({} tokens) : préparation {} ms, inférence {} ms",
+                batchSize,
+                maxLength,
+                preparationMs,
+                System.currentTimeMillis() - inferenceStart
+            );
+            return scores;
         } catch (OrtException e) {
             throw e;
         } catch (Exception e) {
@@ -352,10 +367,8 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
         void close();
     }
 
-    private List<Float> runInference(Map<String, OnnxTensor> inputs, int batchSize, long t1) throws OrtException {
+    private List<Float> runInference(Map<String, OnnxTensor> inputs, int batchSize) throws OrtException {
         try (OrtSession.Result results = session.run(inputs)) {
-            //            ragMetrics.recordOnnxInference(System.currentTimeMillis() - start);
-
             float[][] output = (float[][]) results.get(0).getValue();
 
             if (output == null || output.length == 0) {
@@ -373,15 +386,11 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
                     scores.add(-10.0f); // Default low score
                 }
             }
-            long t2 = System.currentTimeMillis();
-
-            log.info("Tokenization time: {}", (t2 - t1));
             return scores;
-        } finally {
-            for (OnnxTensor tensor : inputs.values()) {
-                tensor.close();
-            }
         }
+        // Pas de fermeture des tenseurs ici : l'appelant s'en charge dans son try-with-resources,
+        // qui couvre aussi les chemins où cette méthode n'est jamais atteinte (attente du sémaphore
+        // interrompue). Fermer aux deux endroits reviendrait à fermer deux fois.
     }
 
     /**
