@@ -410,6 +410,12 @@ reranker:
   #   tokenizer-path: scripts/rerankers/mminilm/tokenizer.json
   model-path: ${RERANKER_MODEL_PATH:scripts/rerankers/bge-base/model.onnx}
   tokenizer-path: ${RERANKER_TOKENIZER_PATH:scripts/rerankers/bge-base/tokenizer.json}
+  # Sources téléchargées au démarrage si les fichiers ci-dessus sont absents. Les QUATRE lignes
+  # (chemins + URL) se règlent ensemble : pour le repli mMiniLM, viser
+  #   https://huggingface.co/cross-encoder/mmarco-mMiniLMv2-L12-H384-v1/resolve/main/onnx/model_qint8_avx512_vnni.onnx
+  #   https://huggingface.co/cross-encoder/mmarco-mMiniLMv2-L12-H384-v1/resolve/main/tokenizer.json
+  model-url: ${RERANKER_MODEL_URL:https://huggingface.co/onnx-community/bge-reranker-base-ONNX/resolve/main/onnx/model_int8.onnx}
+  tokenizer-url: ${RERANKER_TOKENIZER_URL:https://huggingface.co/onnx-community/bge-reranker-base-ONNX/resolve/main/tokenizer.json}
   # Troncature des offres, en tokens. Mesuré sur bge-reranker-base : 128 au lieu de 256 rapporte
   # ~1,8x pour une corrélation de rangs de ~0,83. Ne pas descendre à 64, le top-1 s'effondre.
   job-offer-max-length: ${RERANKER_MAX_LENGTH:128}
