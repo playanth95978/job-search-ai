@@ -507,7 +507,9 @@
       "replaceCv": "Remplacer le CV",
       "cancel": "Annuler",
       "save": "Enregistrer",
-      "languages": "Langues"
+      "languages": "Langues",
+      "editSubtitle": "Personnalisez vos informations pour améliorer le matching avec les offres",
+      "analysisTitle": "Analyse & Performance"
     },
     "settings": {
       "title": "Préférences de Job",
