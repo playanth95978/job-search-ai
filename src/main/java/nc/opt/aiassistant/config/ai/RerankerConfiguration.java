@@ -1,5 +1,6 @@
 package nc.opt.aiassistant.config.ai;
 
+import java.nio.file.Path;
 import nc.opt.aiassistant.service.metrics.RagMetrics;
 import nc.opt.aiassistant.service.reranker.OnnxRerankerService;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +54,12 @@ public class RerankerConfiguration {
      */
     @Bean
     public OnnxRerankerService onnxRerankerService(RagMetrics ragMetrics) {
+        // Installation avant construction du bean : l'ancien téléchargement vivait dans le
+        // @PostConstruct de la classe d'application, dont l'ordre vis-à-vis du reranker n'était pas
+        // garanti — il ne fonctionnait que par chance.
+        RerankerModelProvisioner.ensurePresent(Path.of(modelPath), modelUrl, "modèle de reranking");
+        RerankerModelProvisioner.ensurePresent(Path.of(tokenizerPath), tokenizerUrl, "tokenizer de reranking");
+
         return new OnnxRerankerService(ragMetrics, intraOpThreads, maxConcurrentInferences, modelPath, tokenizerPath);
     }
 }

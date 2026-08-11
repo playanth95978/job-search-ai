@@ -1,14 +1,8 @@
 package nc.opt.aiassistant;
 
 import jakarta.annotation.PostConstruct;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.URI;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -64,41 +58,6 @@ public class JobSearchAiApp {
             LOG.error(
                 "You have misconfigured your application! It should not " + "run with both the 'dev' and 'cloud' profiles at the same time."
             );
-        }
-        downloadOnnxModelIfAbsent();
-    }
-
-    private void downloadOnnxModelIfAbsent() {
-        Path modelDir = Path.of("scripts/onnxmodel");
-        Path modelFile = modelDir.resolve("model.onnx");
-        if (Files.exists(modelFile)) {
-            LOG.info("ONNX model already present, skipping download.");
-            return;
-        }
-        try {
-            Files.createDirectories(modelDir);
-            String repo = "onnx-community/bge-reranker-v2-m3-ONNX";
-            String baseUrl = "https://huggingface.co/" + repo + "/resolve/main";
-
-            // Download model
-            downloadFile(baseUrl + "/onnx/model_int8.onnx?download=true", modelFile);
-
-            // Download tokenizer and config files
-            String[] files = { "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "config.json" };
-            for (String file : files) {
-                downloadFile(baseUrl + "/" + file + "?download=true", modelDir.resolve(file));
-            }
-
-            LOG.info("ONNX model and configuration files downloaded successfully.");
-        } catch (Exception e) {
-            LOG.error("Failed to download ONNX model", e);
-        }
-    }
-
-    private void downloadFile(String url, Path targetPath) throws Exception {
-        LOG.info("Downloading from {} to {}...", url, targetPath);
-        try (InputStream in = URI.create(url).toURL().openStream(); FileOutputStream out = new FileOutputStream(targetPath.toFile())) {
-            in.transferTo(out);
         }
     }
 
