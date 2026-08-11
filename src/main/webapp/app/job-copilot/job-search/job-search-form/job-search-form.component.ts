@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 import TranslateDirective from '../../../shared/language/translate.directive';
 import { ADZUNA_COUNTRIES, SEARCHABLE_JOB_SOURCES } from '../../shared/job-copilot.model';
@@ -16,11 +17,18 @@ import { JobSearchCriteria } from '../job-search.types';
   selector: 'jhi-job-search-form',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, FaIconComponent, TranslateModule, TranslateDirective],
+  imports: [FormsModule, FaIconComponent, TranslateModule, TranslateDirective, NgbTooltip],
   templateUrl: './job-search-form.component.html',
   styleUrl: './job-search-form.component.scss',
 })
 export class JobSearchFormComponent {
+  /**
+   * Panneau d'aide déplié. Double l'info-bulle plutôt que la remplacer : `ngbTooltip` réagit au
+   * survol et au focus, absents sur écran tactile où un appui déclenche l'action. Le panneau donne
+   * donc au doigt ce que l'info-bulle donne à la souris, à partir des mêmes textes.
+   */
+  readonly helpOpen = signal(false);
+
   // Loading flags (drive spinners / disabled state).
   readonly searching = input(false);
   readonly smartSearching = input(false);

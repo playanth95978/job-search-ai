@@ -319,6 +319,14 @@
         "apply": "Apply",
         "salaryFrom": "From",
         "salaryUpTo": "Up to"
+      },
+      "help": {
+        "search": "Queries job boards live (France Travail, Emploi.nc…) and returns what matches your keywords. No AI: fast and up to date, but you need the right words.",
+        "smartSearch": "AI searches by meaning, not just words: “developer” also finds “software engineer”. It draws on already-collected offers, then moves the most relevant ones to the top.",
+        "matchProfile": "Starts from your CV instead of a query: AI finds offers that look like your profile and gives each a match score. Requires an uploaded CV.",
+        "matchAdvanced": "Like “Matches”, but deeper: AI combines meaning and keywords, then re-reads each offer to refine the ranking. More accurate, a little slower.",
+        "fetchJobs": "Paste a company careers page URL (Greenhouse, Lever…) to import its openings. No AI: direct retrieval.",
+        "toggle": "Show help about the search buttons"
       }
     },
     "dashboard": {

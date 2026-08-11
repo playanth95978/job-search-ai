@@ -146,3 +146,52 @@
     }
   }
 }
+
+// Bouton « ? » : compact, il ne concurrence pas les actions principales. `flex: 0 0 auto` annule
+// l'étirement appliqué aux autres boutons de la barre, qui le rendrait aussi large qu'eux.
+.jc-search-actions .jc-btn-help {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 40px;
+  padding-inline: 0.75rem;
+  background: transparent;
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-secondary-color);
+
+  &:hover {
+    color: var(--bs-body-color);
+    border-color: var(--bs-secondary-color);
+  }
+
+  @media (max-width: 575.98px) {
+    width: auto;
+  }
+}
+
+// Panneau d'aide : l'équivalent tactile des info-bulles, replié par défaut.
+.jc-help-panel {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 10px;
+  background: var(--bs-tertiary-bg);
+  font-size: 0.85rem;
+  line-height: 1.45;
+
+  .jc-help-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin: 0 0 0.6rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    fa-icon {
+      margin-top: 0.15rem;
+      color: var(--bs-secondary-color);
+      flex: 0 0 auto;
+    }
+  }
+}

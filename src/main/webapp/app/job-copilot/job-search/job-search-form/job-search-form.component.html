@@ -70,7 +70,13 @@
       </p>
     }
     <div class="jc-search-actions">
-      <button class="jc-btn jc-btn-primary" (click)="onSmartSearch()" [disabled]="smartSearching()">
+      <button
+        class="jc-btn jc-btn-primary"
+        (click)="onSmartSearch()"
+        [disabled]="smartSearching()"
+        [ngbTooltip]="'jobCopilot.search.help.smartSearch' | translate"
+        container="body"
+      >
         @if (smartSearching()) {
           <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
           <span jhiTranslate="jobCopilot.search.actions.smartSearching">Smart search...</span>
@@ -79,7 +85,13 @@
           <span jhiTranslate="jobCopilot.search.actions.smartSearch">Smart Search</span>
         }
       </button>
-      <button class="jc-btn jc-btn-secondary" (click)="onSearch()" [disabled]="searching()">
+      <button
+        class="jc-btn jc-btn-secondary"
+        (click)="onSearch()"
+        [disabled]="searching()"
+        [ngbTooltip]="'jobCopilot.search.help.search' | translate"
+        container="body"
+      >
         @if (searching()) {
           <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
           <span jhiTranslate="jobCopilot.search.actions.searching">Searching...</span>
@@ -87,7 +99,13 @@
           <fa-icon icon="search"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.search">Search</span>
         }
       </button>
-      <button class="jc-btn jc-btn-secondary" (click)="onMatchAll()" [disabled]="matching()">
+      <button
+        class="jc-btn jc-btn-secondary"
+        (click)="onMatchAll()"
+        [disabled]="matching()"
+        [ngbTooltip]="'jobCopilot.search.help.matchProfile' | translate"
+        container="body"
+      >
         @if (matching()) {
           <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
           <span jhiTranslate="jobCopilot.search.actions.matching">Matching...</span>
@@ -96,7 +114,13 @@
           <span jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</span>
         }
       </button>
-      <button class="jc-btn jc-btn-accent" (click)="onMatchAdvanced()" [disabled]="matchingAdvanced()">
+      <button
+        class="jc-btn jc-btn-accent"
+        (click)="onMatchAdvanced()"
+        [disabled]="matchingAdvanced()"
+        [ngbTooltip]="'jobCopilot.search.help.matchAdvanced' | translate"
+        container="body"
+      >
         @if (matchingAdvanced()) {
           <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
           <span jhiTranslate="jobCopilot.search.actions.advanced">Advanced...</span>
@@ -104,7 +128,51 @@
           <fa-icon icon="chart-line"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matchAdvanced">Match Advanced</span>
         }
       </button>
+      <button
+        type="button"
+        class="jc-btn jc-btn-help"
+        (click)="helpOpen.set(!helpOpen())"
+        [attr.aria-expanded]="helpOpen()"
+        [attr.aria-label]="'jobCopilot.search.help.toggle' | translate"
+        aria-controls="jc-search-help"
+        [ngbTooltip]="'jobCopilot.search.help.toggle' | translate"
+        container="body"
+      >
+        <fa-icon icon="circle-question"></fa-icon>
+      </button>
     </div>
+    @if (helpOpen()) {
+      <div id="jc-search-help" class="jc-help-panel">
+        <p class="jc-help-line">
+          <fa-icon icon="wand-magic-sparkles"></fa-icon>
+          <span
+            ><strong jhiTranslate="jobCopilot.search.actions.smartSearch">Smart Search</strong> —
+            <span jhiTranslate="jobCopilot.search.help.smartSearch"></span
+          ></span>
+        </p>
+        <p class="jc-help-line">
+          <fa-icon icon="search"></fa-icon>
+          <span
+            ><strong jhiTranslate="jobCopilot.search.actions.search">Search</strong> —
+            <span jhiTranslate="jobCopilot.search.help.search"></span
+          ></span>
+        </p>
+        <p class="jc-help-line">
+          <fa-icon icon="wand-magic-sparkles"></fa-icon>
+          <span
+            ><strong jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</strong> —
+            <span jhiTranslate="jobCopilot.search.help.matchProfile"></span
+          ></span>
+        </p>
+        <p class="jc-help-line">
+          <fa-icon icon="chart-line"></fa-icon>
+          <span
+            ><strong jhiTranslate="jobCopilot.search.actions.matchAdvanced">Match Advanced</strong> —
+            <span jhiTranslate="jobCopilot.search.help.matchAdvanced"></span
+          ></span>
+        </p>
+      </div>
+    }
   </div>
 } @else {
   <div class="jc-search-form">
@@ -122,7 +190,13 @@
       </div>
     </div>
     <div class="jc-search-actions">
-      <button class="jc-btn jc-btn-primary" (click)="onFetch()" [disabled]="fetching()">
+      <button
+        class="jc-btn jc-btn-primary"
+        (click)="onFetch()"
+        [disabled]="fetching()"
+        [ngbTooltip]="'jobCopilot.search.help.fetchJobs' | translate"
+        container="body"
+      >
         @if (fetching()) {
           <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
           <span jhiTranslate="jobCopilot.search.actions.fetching">Fetching...</span>
@@ -130,6 +204,29 @@
           <fa-icon icon="download"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.fetchJobs">Fetch Jobs</span>
         }
       </button>
+      <button
+        type="button"
+        class="jc-btn jc-btn-help"
+        (click)="helpOpen.set(!helpOpen())"
+        [attr.aria-expanded]="helpOpen()"
+        [attr.aria-label]="'jobCopilot.search.help.toggle' | translate"
+        aria-controls="jc-ats-help"
+        [ngbTooltip]="'jobCopilot.search.help.toggle' | translate"
+        container="body"
+      >
+        <fa-icon icon="circle-question"></fa-icon>
+      </button>
     </div>
+    @if (helpOpen()) {
+      <div id="jc-ats-help" class="jc-help-panel">
+        <p class="jc-help-line">
+          <fa-icon icon="download"></fa-icon>
+          <span
+            ><strong jhiTranslate="jobCopilot.search.actions.fetchJobs">Fetch Jobs</strong> —
+            <span jhiTranslate="jobCopilot.search.help.fetchJobs"></span
+          ></span>
+        </p>
+      </div>
+    }
   </div>
 }
