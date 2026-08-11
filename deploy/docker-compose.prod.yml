@@ -60,12 +60,21 @@ services:
     restart: 'no'
 
   # One-shot: makes the ONNX volume writable by the app's non-root user (uid 1000).
+  # Prépare les répertoires de modèles avant l'application : `/scripts` appartient à root (créé
+  # implicitement par Docker au montage), l'utilisateur applicatif 1000 ne peut donc pas y créer de
+  # sous-dossier lui-même. Chaque emplacement de modèle a besoin de son propre volume chowné.
   onnx-init:
     image: busybox
     container_name: jsa-onnx-init
-    command: ['sh', '-c', 'mkdir -p /scripts/onnxmodel && chown -R 1000:1000 /scripts/onnxmodel']
+    command:
+      [
+        'sh',
+        '-c',
+        'mkdir -p /scripts/onnxmodel /scripts/rerankers && chown -R 1000:1000 /scripts/onnxmodel /scripts/rerankers',
+      ]
     volumes:
       - onnx-model:/scripts/onnxmodel
+      - reranker-models:/scripts/rerankers
     restart: 'no'
 
   app:
@@ -84,8 +93,12 @@ services:
       MCP_WEB_SEARCH_ENABLED: 'true'
       WEB_SEARCH_MCP_URL: http://open-websearch:3000
     volumes:
-      # Persist the ~570 MB ONNX reranker model (downloaded on first boot).
+      # Ancien reranker bge-reranker-v2-m3 (~570 Mo). Conservé le temps de valider le nouveau en
+      # conditions réelles ; supprimable ensuite, avec son volume.
       - onnx-model:/scripts/onnxmodel
+      # Reranker courant, bge-reranker-base (~280 Mo), téléchargé au premier démarrage. Le chemin
+      # par défaut est relatif et `working_dir` vaut « / » : il se résout donc ici.
+      - reranker-models:/scripts/rerankers
     healthcheck:
       test:
         - CMD-SHELL
@@ -161,3 +174,4 @@ volumes:
   postgres-data:
   ollama-models:
   onnx-model:
+  reranker-models:

@@ -11,13 +11,12 @@ services:
       - SPRING_DATASOURCE_USERNAME=job-search-ai
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://postgresql:5432/job-search-ai
-      # Modèles de reranking (~280 Mo) : chemin ABSOLU sur un volume inscriptible. Le défaut est
-      # relatif, or Jib démarre le conteneur à la racine avec l'utilisateur 1000 — il viserait donc
-      # /scripts, non inscriptible. Le volume évite aussi de retélécharger à chaque redémarrage.
-      - RERANKER_MODEL_PATH=/var/opt/reranker/bge-base/model.onnx
-      - RERANKER_TOKENIZER_PATH=/var/opt/reranker/bge-base/tokenizer.json
     volumes:
-      - reranker-models:/var/opt/reranker
+      # Modèles de reranking (~280 Mo), téléchargés au premier démarrage. Jib fixe le répertoire de
+      # travail à « / » : le chemin relatif par défaut se résout donc en /scripts/rerankers. Le
+      # volume évite de retélécharger à chaque redémarrage. Voir deploy/docker-compose.prod.yml pour
+      # la préparation des droits (l'utilisateur applicatif ne peut pas créer de dossier sous /).
+      - reranker-models:/scripts/rerankers
     ports:
       - 127.0.0.1:8080:8080
     healthcheck:
