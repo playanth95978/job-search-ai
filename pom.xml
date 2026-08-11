@@ -139,6 +139,18 @@
       <artifactId>spring-boot-starter-security-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <!--
+      Corrélation de Spearman des bancs de reranking (RankingFidelity). Disponible transitivement
+      via Tika -> POI, mais déclaré explicitement : un usage direct ne doit pas dépendre du graphe
+      de dépendances d'une bibliothèque tierce. Version alignée sur la transitive pour ne pas
+      déclencher le contrôle de convergence.
+    -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>3.6.1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>

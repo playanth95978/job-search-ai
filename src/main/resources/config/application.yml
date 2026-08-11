@@ -390,3 +390,30 @@ application:
       max-pages: 5
       # Seed "what" queries paged through by the daily ingestion batch.
       queries: ${ADZUNA_QUERIES:développeur,architecte,data engineer,devops,software engineer,cloud,cybersécurité,product manager}
+
+# ===================================================================
+# Reranking (cross-encoder ONNX)
+#
+# Clés hors du préfixe `application.` : ApplicationProperties est en ignoreUnknownFields=false,
+# tout ajout sous `application.` exigerait une classe correspondante.
+#
+# Les modèles ne sont pas versionnés (~280 Mo) : exécuter ./scripts/download-rerankers.sh sur
+# la machine avant le premier démarrage, sinon l'application s'arrête avec un message explicite.
+# ===================================================================
+reranker:
+  # bge-reranker-base (278 M, INT8, multilingue) : 2,9x plus rapide que bge-reranker-v2-m3 pour la
+  # meilleure fidélité de classement des candidats mesurés.
+  #
+  # REPLI si le CPU du VPS reste insuffisant — mmarco-mMiniLMv2-L12 (118 M), 7,3x plus rapide mais
+  # classement plus éloigné. Changer les DEUX lignes ensemble, modèle et tokenizer sont solidaires :
+  #   model-path: scripts/rerankers/mminilm/model.onnx
+  #   tokenizer-path: scripts/rerankers/mminilm/tokenizer.json
+  model-path: ${RERANKER_MODEL_PATH:scripts/rerankers/bge-base/model.onnx}
+  tokenizer-path: ${RERANKER_TOKENIZER_PATH:scripts/rerankers/bge-base/tokenizer.json}
+  # Troncature des offres, en tokens. Mesuré sur bge-reranker-base : 128 au lieu de 256 rapporte
+  # ~1,8x pour une corrélation de rangs de ~0,83. Ne pas descendre à 64, le top-1 s'effondre.
+  job-offer-max-length: ${RERANKER_MAX_LENGTH:128}
+  # Threads ONNX par inférence ; 0 = tous les cœurs. Mesuré : brider dégrade débit ET latence.
+  intra-op-threads: ${RERANKER_INTRA_OP_THREADS:0}
+  # Inférences simultanées ; 0 = illimité. Borner stabilise le p95 sous charge sans gagner de débit.
+  max-concurrent-inferences: ${RERANKER_MAX_CONCURRENT:0}

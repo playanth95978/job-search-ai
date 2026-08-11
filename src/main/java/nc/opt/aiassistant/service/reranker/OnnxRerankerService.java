@@ -53,12 +53,24 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
     private int maxConcurrentInferences;
 
     /**
-     * Modèle chargé. Basculer sur {@code scripts/onnxmodel/model-int8.onnx} (voir
-     * {@code scripts/quantize-reranker.py}) échange un peu de précision de classement contre un
-     * gain de vitesse important sur CPU.
+     * Modèle chargé. Défaut : {@code bge-reranker-base}, mesuré 2,9× plus rapide que
+     * {@code bge-reranker-v2-m3} pour la meilleure fidélité de classement des candidats évalués
+     * (voir {@code RerankerModelComparisonBenchmark}).
+     *
+     * <p>Repli si le VPS reste trop lent : {@code scripts/rerankers/mminilm/model.onnx}, 7,3× plus
+     * rapide, au prix d'un classement plus éloigné (Spearman ~0,58 contre ~0,75). Penser à changer
+     * le tokenizer <b>en même temps</b>.</p>
      */
-    @Value("${reranker.model-path:scripts/onnxmodel/model.onnx}")
+    @Value("${reranker.model-path:scripts/rerankers/bge-base/model.onnx}")
     private String modelPath;
+
+    /**
+     * Tokenizer du modèle. <b>Toujours solidaire de {@code model-path}</b> : chaque modèle a son
+     * vocabulaire, en associer un autre produirait des identifiants de tokens sans rapport avec les
+     * poids, donc des scores silencieusement absurdes — sans la moindre erreur au démarrage.
+     */
+    @Value("${reranker.tokenizer-path:scripts/rerankers/bge-base/tokenizer.json}")
+    private String tokenizerPath;
 
     /** {@code null} quand la concurrence n'est pas bornée. */
     private Semaphore inferenceLimiter;
@@ -76,14 +88,27 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
      * @param maxConcurrentInferences inférences simultanées autorisées ; {@code 0} = illimité.
      */
     public OnnxRerankerService(RagMetrics ragMetrics, int intraOpThreads, int maxConcurrentInferences) {
-        this(ragMetrics, intraOpThreads, maxConcurrentInferences, "scripts/onnxmodel/model.onnx");
+        this(
+            ragMetrics,
+            intraOpThreads,
+            maxConcurrentInferences,
+            "scripts/rerankers/bge-base/model.onnx",
+            "scripts/rerankers/bge-base/tokenizer.json"
+        );
     }
 
-    public OnnxRerankerService(RagMetrics ragMetrics, int intraOpThreads, int maxConcurrentInferences, String modelPath) {
+    public OnnxRerankerService(
+        RagMetrics ragMetrics,
+        int intraOpThreads,
+        int maxConcurrentInferences,
+        String modelPath,
+        String tokenizerPath
+    ) {
         this.ragMetrics = ragMetrics;
         this.intraOpThreads = intraOpThreads;
         this.maxConcurrentInferences = maxConcurrentInferences;
         this.modelPath = modelPath;
+        this.tokenizerPath = tokenizerPath;
     }
 
     private static List<Document> scoredRerankerDocuments(int topK, List<ScoredDocument> scoredDocuments) {
@@ -149,16 +174,34 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
         opts.setExecutionMode(OrtSession.SessionOptions.ExecutionMode.PARALLEL);
         opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
 
+        // Message explicite plutôt qu'une erreur native ONNX illisible : le modèle n'est pas versionné,
+        // il doit être installé au déploiement (voir scripts/download-rerankers.sh).
+        requireFile(modelPath, "modèle de reranking");
+        requireFile(tokenizerPath, "tokenizer de reranking");
+
         this.session = env.createSession(modelPath, opts);
         this.inferenceLimiter = maxConcurrentInferences > 0 ? new Semaphore(maxConcurrentInferences, true) : null;
 
-        this.tokenizer = HuggingFaceTokenizer.newInstance(Paths.get("scripts/onnxmodel/tokenizer.json"));
+        this.tokenizer = HuggingFaceTokenizer.newInstance(Paths.get(tokenizerPath));
         log.info(
-            "OnnxRerankerService initialized with model: {} (intraOpThreads={}, maxConcurrentInferences={})",
+            "OnnxRerankerService initialized with model: {} (tokenizer={}, intraOpThreads={}, maxConcurrentInferences={})",
             modelPath,
+            tokenizerPath,
             threads,
             maxConcurrentInferences > 0 ? maxConcurrentInferences : "illimité"
         );
+    }
+
+    private static void requireFile(String path, String label) {
+        if (!java.nio.file.Files.exists(Paths.get(path))) {
+            throw new IllegalStateException(
+                "Fichier introuvable pour le " +
+                    label +
+                    " : " +
+                    Paths.get(path).toAbsolutePath() +
+                    " — exécuter ./scripts/download-rerankers.sh sur cette machine."
+            );
+        }
     }
 
     @Override

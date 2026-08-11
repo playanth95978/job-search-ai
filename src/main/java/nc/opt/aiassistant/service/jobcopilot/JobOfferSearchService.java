@@ -12,6 +12,7 @@ import nc.opt.aiassistant.service.vector.DataType;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Vector;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobOfferSearchService {
 
-    /** Job offer search_text is short, so a smaller cross-encoder max length keeps reranking fast. */
-    private static final int JOB_OFFER_RERANK_MAX_LENGTH = 256;
+    /**
+     * Troncature du cross-encoder pour les offres, en tokens.
+     *
+     * <p>Mesuré sur {@code bge-reranker-base} : passer de 256 à 128 rapporte ~1,8x, pour une
+     * corrélation de rangs de ~0,83 avec le classement à 256 et un top-1 le plus souvent préservé.
+     * 128 tokens couvrent titre, entreprise, contrat et le début de la description — assez pour
+     * juger la pertinence d'une offre.</p>
+     *
+     * <p>Ne pas descendre à 64 : le gain supplémentaire est faible et le classement s'effondre
+     * (top-1 nul à 60 documents).</p>
+     */
+    private final int rerankMaxLength;
 
     private final JobOfferRepository jobOfferRepository;
 
@@ -34,12 +45,14 @@ public class JobOfferSearchService {
         JobOfferRepository jobOfferRepository,
         EmbeddingModel jobOfferEmbeddingModel,
         ReciprocalRankFusionService rrfService,
-        RerankerService rerankerService
+        RerankerService rerankerService,
+        @Value("${reranker.job-offer-max-length:128}") int rerankMaxLength
     ) {
         this.jobOfferRepository = jobOfferRepository;
         this.jobOfferEmbeddingModel = jobOfferEmbeddingModel;
         this.rrfService = rrfService;
         this.rerankerService = rerankerService;
+        this.rerankMaxLength = rerankMaxLength;
     }
 
     /**
@@ -99,8 +112,7 @@ public class JobOfferSearchService {
         List<Document> fusedDocs = rrfService.rrf(List.of(vectorDocs, bm25Docs), limit * 2);
 
         // 3. Reranking for high precision matching (Semantic Reranker)
-        // Job offer search_text is short, so a smaller max length keeps inference fast.
-        List<Document> rerankedDocs = rerankerService.rerank(query, fusedDocs, limit, JOB_OFFER_RERANK_MAX_LENGTH);
+        List<Document> rerankedDocs = rerankerService.rerank(query, fusedDocs, limit, rerankMaxLength);
 
         // 4. Retrieve full entities while maintaining reranked order
         List<UUID> orderedIds = rerankedDocs
