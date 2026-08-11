@@ -159,3 +159,7 @@ deploy/.env
 coverage/
 .nyc_output/
 .env
+
+# Modèles de reranking téléchargés pour le banc comparatif (plusieurs centaines de Mo,
+# reproductibles via scripts/download-rerankers.sh) : hors du dépôt.
+scripts/rerankers/

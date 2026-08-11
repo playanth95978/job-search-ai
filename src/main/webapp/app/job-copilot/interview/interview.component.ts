@@ -7,7 +7,7 @@ import { TranslateDirective } from 'app/shared/language';
 import { TranslateModule } from '@ngx-translate/core';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { JobOffer } from '../shared/job-copilot.model';
-import { COVER_LETTER_LANGUAGES } from '../shared/apply-modal/apply-modal.component';
+import { COVER_LETTER_LANGUAGES } from '../shared/apply-modal/components/apply-cover/apply-cover.component';
 import { ConversationService } from '../../admin/conversation/service/conversation.service';
 import { IConversation } from '../../admin/conversation/conversation.model';
 import { Conversation } from '../../admin/conversation/list/conversation';

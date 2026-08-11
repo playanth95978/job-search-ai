@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { TranslateDirective } from 'app/shared/language';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { JobOffer, PanelReport } from '../shared/job-copilot.model';
-import { COVER_LETTER_LANGUAGES } from '../shared/apply-modal/apply-modal.component';
+import { COVER_LETTER_LANGUAGES } from '../shared/apply-modal/components/apply-cover/apply-cover.component';
 
 interface PanelTurn {
   side: 'candidate' | 'juror';

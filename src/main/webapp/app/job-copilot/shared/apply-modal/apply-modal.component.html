@@ -58,11 +58,13 @@
 
     <!-- Pré-remplissage assisté : champs prêts à copier pour que le candidat remplisse vite le
          formulaire de la source, qu'il soumet lui-même. -->
-    <!-- Ancre explicite du trigger : sans cible, `on viewport` exige un @placeholder réduit à un
-         unique noeud élément racine, contrainte que ce bloc ne satisfait pas (NG8020). -->
-    <div #prefillAnchor class="jc-prefill-placeholder"></div>
+    <!-- L'ancre du trigger est le squelette lui-même : `on viewport` sans cible explicite exigerait
+         un @placeholder réduit à un unique noeud élément racine (NG8020). Le squelette disparaît
+         quand le bloc se charge — une ancre hors du @placeholder laisserait, elle, un blanc permanent. -->
     @defer (on viewport(prefillAnchor); when application() && applyUrl()) {
       <jhi-apply-prefill [candidateProfile]="candidate()" [coverLetter]="coverLetter()" />
+    } @placeholder {
+      <div #prefillAnchor class="jc-prefill-placeholder"></div>
     }
   }
 

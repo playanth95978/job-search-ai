@@ -14,11 +14,13 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import nc.opt.aiassistant.service.metrics.RagMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,18 +31,59 @@ import org.springframework.stereotype.Service;
  * It uses {@link ai.onnxruntime.OrtSession} for inference and {@link ai.djl.huggingface.tokenizers.HuggingFaceTokenizer}
  * for text tokenization.
  */
-@Service
 public class OnnxRerankerService implements RerankerService, ScoringModel {
 
     private static final Logger log = LoggerFactory.getLogger(OnnxRerankerService.class);
 
     private final RagMetrics ragMetrics;
+
+    /**
+     * Threads ONNX alloués à <b>une</b> inférence. Défaut historique : tous les cœurs — ce qui fait
+     * que deux recherches simultanées se disputent la machine entière. Réglable par
+     * {@code reranker.intra-op-threads} pour arbitrer latence unitaire contre débit concurrent.
+     */
+    @Value("${reranker.intra-op-threads:0}")
+    private int intraOpThreads;
+
+    /**
+     * Inférences simultanées autorisées ; au-delà, les appelants attendent au lieu de saturer le CPU.
+     * {@code 0} = illimité (comportement historique).
+     */
+    @Value("${reranker.max-concurrent-inferences:0}")
+    private int maxConcurrentInferences;
+
+    /**
+     * Modèle chargé. Basculer sur {@code scripts/onnxmodel/model-int8.onnx} (voir
+     * {@code scripts/quantize-reranker.py}) échange un peu de précision de classement contre un
+     * gain de vitesse important sur CPU.
+     */
+    @Value("${reranker.model-path:scripts/onnxmodel/model.onnx}")
+    private String modelPath;
+
+    /** {@code null} quand la concurrence n'est pas bornée. */
+    private Semaphore inferenceLimiter;
+
     private OrtEnvironment env;
     private OrtSession session;
     private HuggingFaceTokenizer tokenizer;
 
     public OnnxRerankerService(RagMetrics ragMetrics) {
+        this(ragMetrics, 0, 0);
+    }
+
+    /**
+     * @param intraOpThreads          threads ONNX par inférence ; {@code 0} = tous les cœurs.
+     * @param maxConcurrentInferences inférences simultanées autorisées ; {@code 0} = illimité.
+     */
+    public OnnxRerankerService(RagMetrics ragMetrics, int intraOpThreads, int maxConcurrentInferences) {
+        this(ragMetrics, intraOpThreads, maxConcurrentInferences, "scripts/onnxmodel/model.onnx");
+    }
+
+    public OnnxRerankerService(RagMetrics ragMetrics, int intraOpThreads, int maxConcurrentInferences, String modelPath) {
         this.ragMetrics = ragMetrics;
+        this.intraOpThreads = intraOpThreads;
+        this.maxConcurrentInferences = maxConcurrentInferences;
+        this.modelPath = modelPath;
     }
 
     private static List<Document> scoredRerankerDocuments(int topK, List<ScoredDocument> scoredDocuments) {
@@ -99,17 +142,23 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
     @PostConstruct
     public void init() throws Exception {
         this.env = OrtEnvironment.getEnvironment();
-        String modelPath = "scripts/onnxmodel/model.onnx";
         OrtSession.SessionOptions opts = new OrtSession.SessionOptions();
 
-        opts.setIntraOpNumThreads(Runtime.getRuntime().availableProcessors());
+        int threads = intraOpThreads > 0 ? intraOpThreads : Runtime.getRuntime().availableProcessors();
+        opts.setIntraOpNumThreads(threads);
         opts.setExecutionMode(OrtSession.SessionOptions.ExecutionMode.PARALLEL);
         opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
 
         this.session = env.createSession(modelPath, opts);
+        this.inferenceLimiter = maxConcurrentInferences > 0 ? new Semaphore(maxConcurrentInferences, true) : null;
 
         this.tokenizer = HuggingFaceTokenizer.newInstance(Paths.get("scripts/onnxmodel/tokenizer.json"));
-        log.info("OnnxRerankerService initialized with model: {}", modelPath);
+        log.info(
+            "OnnxRerankerService initialized with model: {} (intraOpThreads={}, maxConcurrentInferences={})",
+            modelPath,
+            threads,
+            maxConcurrentInferences > 0 ? maxConcurrentInferences : "illimité"
+        );
     }
 
     @Override
@@ -234,6 +283,33 @@ public class OnnxRerankerService implements RerankerService, ScoringModel {
         inputs.put("input_ids", OnnxTensor.createTensor(env, inputIds));
         inputs.put("attention_mask", OnnxTensor.createTensor(env, attentionMask));
 
+        // Les tenseurs d'entrée détiennent de la mémoire hors tas : sans fermeture explicite, elle
+        // n'est rendue qu'au bon vouloir du GC, invisible depuis les métriques JVM.
+        try (AutoCloseable ignored = () -> inputs.values().forEach(OnnxTensor::close); InferenceSlot slot = acquireInferenceSlot()) {
+            return runInference(inputs, batchSize, t1);
+        } catch (OrtException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("ONNX inference failed", e);
+        }
+    }
+
+    /** Borne la concurrence quand {@code reranker.max-concurrent-inferences} est défini. */
+    private InferenceSlot acquireInferenceSlot() throws InterruptedException {
+        if (inferenceLimiter == null) {
+            return () -> {};
+        }
+        inferenceLimiter.acquire();
+        return inferenceLimiter::release;
+    }
+
+    /** Jeton de concurrence relâché en fin de bloc {@code try}. */
+    private interface InferenceSlot extends AutoCloseable {
+        @Override
+        void close();
+    }
+
+    private List<Float> runInference(Map<String, OnnxTensor> inputs, int batchSize, long t1) throws OrtException {
         try (OrtSession.Result results = session.run(inputs)) {
             //            ragMetrics.recordOnnxInference(System.currentTimeMillis() - start);
 

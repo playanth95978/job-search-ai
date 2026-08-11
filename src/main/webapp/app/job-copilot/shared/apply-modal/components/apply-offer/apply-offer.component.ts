@@ -7,7 +7,7 @@ import { SanitizerService } from '../../../../../shared/sanitizer/sanitizer.serv
 import TranslateDirective from '../../../../../shared/language/translate.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { COVER_LETTER_LANGUAGES } from '../../apply-modal.component';
+import { COVER_LETTER_LANGUAGES } from '../apply-cover/apply-cover.component';
 import { JobCopilotService } from '../../../job-copilot.service';
 
 @Component({

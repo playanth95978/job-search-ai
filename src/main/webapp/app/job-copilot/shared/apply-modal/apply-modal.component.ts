@@ -1,9 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, model, OnInit, output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Router } from '@angular/router';
 import { NgbActiveModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { JobCopilotService } from '../job-copilot.service';
@@ -16,21 +13,10 @@ import { ApplyOfferComponent } from './components/apply-offer/apply-offer.compon
 import { ApplyCoverComponent } from './components/apply-cover/apply-cover.component';
 import { ApplyPrefillComponent } from './components/apply-prefill/apply-prefill.component';
 
-/** Languages the cover letter can be generated in. The value is sent to the LLM as part of its prompt. */
-export const COVER_LETTER_LANGUAGES: { value: string; label: string; labelKey: string }[] = [
-  { value: '', label: "Langue de l'offre", labelKey: 'jobCopilot.applyModal.languages.offer' },
-  { value: 'French', label: 'Français', labelKey: 'jobCopilot.applyModal.languages.french' },
-  { value: 'English', label: 'English', labelKey: 'jobCopilot.applyModal.languages.english' },
-  { value: 'Spanish', label: 'Español', labelKey: 'jobCopilot.applyModal.languages.spanish' },
-  { value: 'German', label: 'Deutsch', labelKey: 'jobCopilot.applyModal.languages.german' },
-];
-
 @Component({
   selector: 'jhi-apply-modal',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
     FaIconComponent,
     TranslatePipe,
     TranslateDirective,
@@ -61,19 +47,15 @@ export class ApplyModalComponent implements OnInit {
   submitting = signal(false);
   error = signal<string | null>(null);
   resultMessage = signal<string | null>(null);
-  previewMode = signal(true);
   language = signal('');
-  regenerating = signal(false);
   /** True while the full description is being fetched from the source. */
   enriching = signal(false);
   /** Emits the enriched offer so the parent list can be refreshed. */
   enrichedOffer = output<JobOffer>();
 
-  readonly languages = COVER_LETTER_LANGUAGES;
   private service = inject(JobCopilotService);
   private translateService = inject(TranslateService);
   private activeModal = inject(NgbActiveModal);
-  private router = inject(Router);
 
   ngOnInit(): void {
     this.enrichOffer();
