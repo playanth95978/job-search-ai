@@ -43,7 +43,19 @@ final class RerankerModelProvisioner {
             );
         }
 
-        LOG.info("{} absent, téléchargement depuis {}", label, url);
+        if (!target.isAbsolute()) {
+            // En conteneur, Jib fixe le répertoire de travail à « / » : un chemin relatif vise donc
+            // la racine du système de fichiers, que l'utilisateur applicatif ne peut pas écrire.
+            LOG.warn(
+                "{} configuré en chemin relatif ({}) : il sera résolu depuis {} — en conteneur, " +
+                    "préférer un chemin absolu sur un volume inscriptible.",
+                label,
+                target,
+                Path.of("").toAbsolutePath()
+            );
+        }
+
+        LOG.info("{} absent, téléchargement depuis {} vers {}", label, url, target.toAbsolutePath());
         // Écriture dans un fichier temporaire puis déplacement atomique : une coupure réseau en
         // cours de route laisserait sinon un fichier tronqué que le démarrage suivant considérerait
         // comme « présent », et le modèle échouerait à charger indéfiniment.
@@ -57,6 +69,22 @@ final class RerankerModelProvisioner {
             Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             temp = null;
             LOG.info("{} installé : {} ({} octets)", label, target, Files.size(target));
+        } catch (java.nio.file.AccessDeniedException e) {
+            // Cause la plus fréquente en production, et la moins lisible dans la trace brute :
+            // le chemin par défaut est relatif, et le conteneur démarre à la racine.
+            throw new IllegalStateException(
+                "Droits insuffisants pour écrire le " +
+                    label +
+                    " dans " +
+                    target.toAbsolutePath() +
+                    " (répertoire de travail : " +
+                    Path.of("").toAbsolutePath() +
+                    ", utilisateur : " +
+                    System.getProperty("user.name") +
+                    "). Pointer RERANKER_MODEL_PATH et RERANKER_TOKENIZER_PATH vers un volume " +
+                    "inscriptible plutôt que d'élargir les droits de la racine.",
+                e
+            );
         } catch (Exception e) {
             throw new IllegalStateException(
                 "Échec du téléchargement du " +

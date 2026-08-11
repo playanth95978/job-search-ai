@@ -11,6 +11,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=job-search-ai
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://postgresql:5432/job-search-ai
+      # Modèles de reranking (~280 Mo) : chemin ABSOLU sur un volume inscriptible. Le défaut est
+      # relatif, or Jib démarre le conteneur à la racine avec l'utilisateur 1000 — il viserait donc
+      # /scripts, non inscriptible. Le volume évite aussi de retélécharger à chaque redémarrage.
+      - RERANKER_MODEL_PATH=/var/opt/reranker/bge-base/model.onnx
+      - RERANKER_TOKENIZER_PATH=/var/opt/reranker/bge-base/tokenizer.json
+    volumes:
+      - reranker-models:/var/opt/reranker
     ports:
       - 127.0.0.1:8080:8080
     healthcheck:
@@ -29,3 +36,8 @@ services:
     extends:
       file: ./postgresql.yml
       service: postgresql
+
+# Persiste les modèles de reranking entre redémarrages : sans ce volume nommé, chaque relance
+# du conteneur retéléchargerait ~280 Mo depuis HuggingFace.
+volumes:
+  reranker-models:
