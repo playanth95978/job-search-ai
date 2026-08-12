@@ -35,7 +35,16 @@
       "search": "Trouve-moi des offres de développeur à Nouméa",
       "match": "Matche les offres avec mon profil",
       "applications": "Où en sont mes candidatures ?",
-      "coverLetter": "Aide-moi à écrire une lettre de motivation"
+      "coverLetter": "Aide-moi à écrire une lettre de motivation",
+      "label": "Suggestions",
+      "followUp": {
+        "whyMatch": "Pourquoi ces offres me correspondent ?",
+        "applications": "Où en sont mes candidatures ?",
+        "coverLetter": "Rédige la lettre de motivation",
+        "improveCv": "Comment améliorer mon CV pour ces offres ?",
+        "moreDetails": "Peux-tu détailler davantage ?",
+        "bestOffers": "Quelles sont les meilleures offres pour moi ?"
+      }
     }
   }
 }

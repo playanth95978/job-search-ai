@@ -52,6 +52,9 @@
         [streamingHtml]="streamingHtml()"
         [streamingMessage]="streamingMessage()"
       />
+
+      <!-- Bulles de suggestions : rangée défilante posée au-dessus du fil, juste sur la zone de saisie -->
+      <jhi-chat-suggestions [compact]="true" [suggestions]="suggestions()" (suggestionSelected)="onSuggestionClick($event)" />
     </div>
 
     <jhi-chat-input-area />

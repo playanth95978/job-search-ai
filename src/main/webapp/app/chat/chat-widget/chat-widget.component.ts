@@ -8,6 +8,7 @@ import { TranslateDirective } from 'app/shared/language';
 import { MessageService } from '../message.service';
 import { ChatMessagesComponent } from '../chat-messages/chat-messages.component';
 import { ChatInputAreaComponent } from '../chat-input-area/chat-input-area.component';
+import { ChatSuggestionsComponent } from '../chat-suggestions/chat-suggestions.component';
 
 /**
  * Floating, always-available chat launcher. A FAB in the bottom-right corner opens a compact panel
@@ -21,7 +22,16 @@ import { ChatInputAreaComponent } from '../chat-input-area/chat-input-area.compo
   templateUrl: './chat-widget.component.html',
   styleUrl: './chat-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [A11yModule, FaIconComponent, TranslateModule, TranslateDirective, ChatMessagesComponent, ChatInputAreaComponent, NgbTooltip],
+  imports: [
+    A11yModule,
+    FaIconComponent,
+    TranslateModule,
+    TranslateDirective,
+    ChatMessagesComponent,
+    ChatInputAreaComponent,
+    ChatSuggestionsComponent,
+    NgbTooltip,
+  ],
 })
 export class ChatWidgetComponent {
   readonly open = signal(false);
@@ -31,6 +41,7 @@ export class ChatWidgetComponent {
   readonly streamingMessage = this.messageService.streamingMessage;
   readonly streamingHtml = this.messageService.streamingHtml;
   readonly isTyping = this.messageService.generatingInProgress;
+  readonly suggestions = this.messageService.promptChips;
 
   readonly formatMessage = (message: string): string => this.messageService.formatCodeBlocks(message);
 
@@ -40,6 +51,10 @@ export class ChatWidgetComponent {
 
   close(): void {
     this.open.set(false);
+  }
+
+  onSuggestionClick(suggestion: string): void {
+    this.messageService.sendSuggestion(suggestion);
   }
 
   startNewChat(): void {

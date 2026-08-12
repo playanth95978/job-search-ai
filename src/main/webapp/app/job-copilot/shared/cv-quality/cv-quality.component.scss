@@ -28,7 +28,7 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--jc-shadow-md);
   }
 
   fa-icon {
@@ -134,7 +134,7 @@
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--jc-shadow-md);
     border-color: var(--rating-color, var(--bs-border-color));
   }
 
@@ -223,8 +223,8 @@
 
 .jc-cv-ai-error {
   color: #ef4444;
-  border-color: #fecaca;
-  background: #fef2f2;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 @keyframes slideInUp {
@@ -247,7 +247,7 @@
   background:
     linear-gradient(var(--bs-body-bg), var(--bs-body-bg)) padding-box,
     linear-gradient(135deg, #8b5cf6, #ec4899) border-box;
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -260,7 +260,7 @@
     right: -10%;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
     pointer-events: none;
   }
 }
@@ -380,45 +380,45 @@
 /* Rating colors */
 .rating-good {
   --rating-color: #10b981;
-  background-color: rgba(16, 185, 129, 0.03);
+  background-color: rgba(16, 185, 129, 0.05);
   &.jc-cv-score {
-    border-color: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
     &::before {
       background: #10b981;
     }
     .jc-cv-score-value,
     .jc-cv-score-label {
-      color: #059669;
+      color: #10b981;
     }
   }
 }
 
 .rating-fair {
   --rating-color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.03);
+  background-color: rgba(245, 158, 11, 0.05);
   &.jc-cv-score {
-    border-color: rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.3);
     &::before {
       background: #f59e0b;
     }
     .jc-cv-score-value,
     .jc-cv-score-label {
-      color: #d97706;
+      color: #f59e0b;
     }
   }
 }
 
 .rating-poor {
   --rating-color: #ef4444;
-  background-color: rgba(239, 68, 68, 0.03);
+  background-color: rgba(239, 68, 68, 0.05);
   &.jc-cv-score {
-    border-color: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.3);
     &::before {
       background: #ef4444;
     }
     .jc-cv-score-value,
     .jc-cv-score-label {
-      color: #dc2626;
+      color: #ef4444;
     }
   }
 }
@@ -451,8 +451,8 @@
   }
 
   &.active {
-    background: rgba(79, 70, 229, 0.1);
-    border-color: #4f46e5;
-    color: #4f46e5;
+    background: var(--jc-accent-soft);
+    border-color: var(--jc-accent);
+    color: var(--jc-accent);
   }
 }

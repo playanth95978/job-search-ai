@@ -1,0 +1,10 @@
+@if (suggestions().length > 0) {
+  <div class="chat-suggestions-bar" [class.is-compact]="compact()" role="group" [attr.aria-label]="'chat.suggestions.label' | translate">
+    @for (suggestion of suggestions(); track suggestion) {
+      <button type="button" class="chat-suggestion-chip" (click)="suggestionSelected.emit(suggestion)">
+        <fa-icon icon="lightbulb" />
+        <span>{{ suggestion | translate }}</span>
+      </button>
+    }
+  </div>
+}

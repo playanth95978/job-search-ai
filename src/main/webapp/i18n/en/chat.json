@@ -35,7 +35,16 @@
       "search": "Find me developer jobs in Nouméa",
       "match": "Match job offers with my profile",
       "applications": "What's the status of my applications?",
-      "coverLetter": "Help me write a cover letter"
+      "coverLetter": "Help me write a cover letter",
+      "label": "Suggestions",
+      "followUp": {
+        "whyMatch": "Why do these offers fit my profile?",
+        "applications": "What's the status of my applications?",
+        "coverLetter": "Write the cover letter",
+        "improveCv": "How can I improve my CV for these roles?",
+        "moreDetails": "Can you go into more detail?",
+        "bestOffers": "What are the best offers for me?"
+      }
     }
   }
 }
