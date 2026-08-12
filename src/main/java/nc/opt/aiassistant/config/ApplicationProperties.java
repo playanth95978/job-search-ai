@@ -80,8 +80,17 @@ public class ApplicationProperties {
         private int candidateLimit = 100;
         /** Max new hits created per user per scan (anti-flood). */
         private int maxPerScan = 10;
-        /** On a user's first scan, how far back to look (days) instead of the whole corpus. */
-        private int initialWindowDays = 3;
+        /**
+         * Ancienneté maximale (jours) des offres examinées à <b>chaque</b> scan.
+         *
+         * <p>Ce n'était auparavant qu'une fenêtre <i>initiale</i> : les scans suivants ne voyaient
+         * que les offres créées depuis le scan précédent, soit ~15 minutes. Comme l'ingestion est
+         * quotidienne, la quasi-totalité des scans travaillaient sur un ensemble vide, et une offre
+         * passée sous le seuil n'était jamais réexaminée. La déduplication est assurée par identité
+         * ({@code radar_hit} unique sur user + offre), pas par le temps : rejouer une fenêtre
+         * glissante ne crée donc pas de doublon.</p>
+         */
+        private int lookbackDays = 7;
         /** Delay between scans, in ms. */
         private long scanIntervalMs = 900000;
     }

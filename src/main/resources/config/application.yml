@@ -372,7 +372,10 @@ application:
       threshold: ${RADAR_THRESHOLD:0.65}
       candidate-limit: ${RADAR_CANDIDATE_LIMIT:100}
       max-per-scan: ${RADAR_MAX_PER_SCAN:10}
-      initial-window-days: ${RADAR_INITIAL_WINDOW_DAYS:3}
+      # Ancienneté max des offres examinées à CHAQUE scan (et non seulement au premier) : une offre
+      # sous le seuil redevient éligible si le profil s'enrichit. Pas de doublon possible, la
+      # déduplication se fait par identité (user + offre) et non par le temps.
+      lookback-days: ${RADAR_LOOKBACK_DAYS:7}
       scan-interval-ms: ${RADAR_SCAN_INTERVAL_MS:900000}
     seek:
       # Seek (AU) is protected by bot mitigation (Kasada); server-side scraping is blocked (403).
