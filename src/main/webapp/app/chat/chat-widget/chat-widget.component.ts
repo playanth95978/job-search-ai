@@ -8,7 +8,6 @@ import { TranslateDirective } from 'app/shared/language';
 import { MessageService } from '../message.service';
 import { ChatMessagesComponent } from '../chat-messages/chat-messages.component';
 import { ChatInputAreaComponent } from '../chat-input-area/chat-input-area.component';
-import { ChatSuggestionsComponent } from '../chat-suggestions/chat-suggestions.component';
 
 /**
  * Floating, always-available chat launcher. A FAB in the bottom-right corner opens a compact panel
@@ -22,16 +21,7 @@ import { ChatSuggestionsComponent } from '../chat-suggestions/chat-suggestions.c
   templateUrl: './chat-widget.component.html',
   styleUrl: './chat-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    A11yModule,
-    FaIconComponent,
-    TranslateModule,
-    TranslateDirective,
-    ChatMessagesComponent,
-    ChatInputAreaComponent,
-    ChatSuggestionsComponent,
-    NgbTooltip,
-  ],
+  imports: [A11yModule, FaIconComponent, TranslateModule, TranslateDirective, ChatMessagesComponent, ChatInputAreaComponent, NgbTooltip],
 })
 export class ChatWidgetComponent {
   readonly open = signal(false);

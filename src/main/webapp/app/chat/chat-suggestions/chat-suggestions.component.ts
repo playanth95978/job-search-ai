@@ -3,9 +3,10 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
 
 /**
- * Clickable prompt chips shown under the conversation thread (starter prompts on an empty thread,
- * follow-ups after an answer). Purely presentational: it receives i18n keys and emits the one that
- * was clicked, so both the full {@code /chat} page and the floating widget share the same look.
+ * Clickable prompt chips rendered at the end of the conversation thread by
+ * {@code ChatMessagesComponent} (starter prompts on an empty thread, follow-ups after an answer).
+ * Purely presentational: it receives i18n keys and emits the one that was clicked, so the full
+ * {@code /chat} page and the floating widget share the same look through the same thread component.
  */
 @Component({
   selector: 'jhi-chat-suggestions',
@@ -17,8 +18,6 @@ import { TranslateModule } from '@ngx-translate/core';
 export class ChatSuggestionsComponent {
   /** i18n keys of the prompts to offer. */
   readonly suggestions = input.required<string[]>();
-  /** Compact variant for the floating widget: one scrollable row instead of a wrapping grid. */
-  readonly compact = input(false);
   /** Emits the i18n key of the clicked chip. */
   readonly suggestionSelected = output<string>();
 }

@@ -20,13 +20,14 @@ import { SanitizerComponent } from '../../shared/sanitizer/sanitizer/sanitizer.c
 import { ChatMessage } from '../message.service';
 import { FormatMediumDatetimePipe } from '../../shared/date';
 import TranslateDirective from '../../shared/language/translate.directive';
+import { ChatSuggestionsComponent } from '../chat-suggestions/chat-suggestions.component';
 
 @Component({
   selector: 'jhi-chat-messages',
   templateUrl: './chat-messages.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./chat-messages.component.scss'],
-  imports: [FontAwesomeModule, FormatMediumDatetimePipe, SanitizerComponent, TranslateModule, TranslateDirective],
+  imports: [FontAwesomeModule, FormatMediumDatetimePipe, SanitizerComponent, TranslateModule, TranslateDirective, ChatSuggestionsComponent],
 })
 export class ChatMessagesComponent implements AfterViewChecked {
   messages = input.required<ChatMessage[]>();
@@ -37,7 +38,10 @@ export class ChatMessagesComponent implements AfterViewChecked {
 
   hasEvents = input<boolean>(false);
   formatMessage = input.required<(message: string) => string>();
+  /** Puces de suggestion (clés i18n) affichées en fin de fil ; vide = rien à proposer. */
+  suggestions = input<string[]>([]);
   feedbackClicked = output<{ messageId: string; feedback: 'up' | 'down' }>();
+  suggestionSelected = output<string>();
 
   expandedSources = signal<Record<string, boolean>>({});
 

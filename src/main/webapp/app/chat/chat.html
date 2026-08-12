@@ -12,11 +12,10 @@
       [messages]="messages()"
       [streamingHtml]="streamingHtml()"
       [streamingMessage]="streamingMessage()"
+      [suggestions]="suggestions()"
       (feedbackClicked)="onFeedback($event)"
+      (suggestionSelected)="onSuggestionClick($event)"
     />
-
-    <!-- Bulles de suggestions : amorces sur un fil vide, relances après une réponse -->
-    <jhi-chat-suggestions [suggestions]="suggestions()" (suggestionSelected)="onSuggestionClick($event)" />
     <jhi-chat-input-area (loginClicked)="login()" (userInputChange)="userInput = $event" />
 
     <!-- Panneau coulissant : historique des conversations, à côté du chat -->

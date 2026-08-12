@@ -106,22 +106,9 @@ $accent-dark: #4338ca;
 }
 
 .chat-widget-body {
-  position: relative;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-}
-
-// Le panneau ne fait que 560 px : les suggestions flottent au-dessus du fil, ancrées juste
-// au-dessus de la zone de saisie, plutôt que de prendre une ligne dans le flux.
-jhi-chat-suggestions {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  display: block;
-  pointer-events: none; // seules les puces restent cliquables (cf. .chat-suggestions-bar)
 }
 
 // Mobile : bottom-sheet plein largeur ancré au bas de l'écran.

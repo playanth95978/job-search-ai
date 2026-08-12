@@ -117,6 +117,12 @@
       </div>
     </div>
   }
+
+  <!-- Bulles de suggestions : en fin de fil, elles défilent avec la conversation.
+       Le @if évite que l'élément hôte, vide, consomme le `gap` du conteneur. -->
+  @if (suggestions().length > 0) {
+    <jhi-chat-suggestions [suggestions]="suggestions()" (suggestionSelected)="suggestionSelected.emit($event)" />
+  }
 </div>
 
 <!-- Retour en bas : apparaît dès que l'utilisateur remonte le fil pendant la génération. -->

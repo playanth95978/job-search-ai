@@ -9,46 +9,16 @@
   }
 }
 
-// Les couleurs passent par les tokens Bootstrap : le thème sombre est géré sans règle dédiée.
+// Rendu à l'intérieur du fil (dernier élément de .chat-messages) : pas de bandeau ni de fond,
+// les puces s'alignent simplement sur les messages et passent à la ligne quand il le faut.
 .chat-suggestions-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0.625rem 1rem;
-  border-top: 1px solid var(--bs-border-color);
-  background: var(--bs-tertiary-bg);
   animation: chatSuggestionsFadeIn 0.3s ease-out;
-
-  // Variante widget : panneau étroit et court. Une seule ligne défilable horizontalement,
-  // posée au-dessus du fil (l'ancrage est fait par le widget), fond translucide pour que le
-  // dernier message reste lisible dessous.
-  &.is-compact {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0.5rem 0.75rem;
-    border-top: none;
-    background: var(--bs-body-bg);
-    background: color-mix(in srgb, var(--bs-body-bg) 82%, transparent);
-    backdrop-filter: blur(6px);
-    pointer-events: auto; // la rangée doit rester attrapable pour être défilée
-
-    // Barre de défilement masquée : elle ferait la moitié de la hauteur de la rangée.
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    .chat-suggestion-chip {
-      flex: 0 0 auto;
-      padding: 0.35rem 0.7rem;
-      font-size: 0.78rem;
-      box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
-    }
-  }
 }
 
+// Les couleurs passent par les tokens Bootstrap : le thème sombre est géré sans règle dédiée.
 .chat-suggestion-chip {
   display: inline-flex;
   align-items: center;
@@ -61,7 +31,7 @@
   color: var(--bs-body-color);
   font-size: 0.83rem;
   line-height: 1.2;
-  white-space: nowrap;
+  text-align: left;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -70,12 +40,8 @@
     transform 0.15s ease,
     box-shadow 0.2s ease;
 
-  span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   fa-icon {
+    flex: 0 0 auto;
     color: #ffc107;
     font-size: 0.8rem;
   }

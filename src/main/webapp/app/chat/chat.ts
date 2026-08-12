@@ -10,7 +10,6 @@ import { ChatInputAreaComponent } from './chat-input-area/chat-input-area.compon
 import { ChatHeaderComponent } from './chat-header/chat-header.component';
 import { ChatMessagesComponent } from './chat-messages/chat-messages.component';
 import { ChatContainerWrapperComponent } from './chat-container-wrapper/chat-container-wrapper.component';
-import { ChatSuggestionsComponent } from './chat-suggestions/chat-suggestions.component';
 import { Subject, takeUntil } from 'rxjs';
 import { AccountService } from '../core/auth/account.service';
 import { MessageService, TypeChat } from './message.service';
@@ -25,14 +24,7 @@ import { MessageService, TypeChat } from './message.service';
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    ChatHistoryComponent,
-    ChatInputAreaComponent,
-    ChatHeaderComponent,
-    ChatMessagesComponent,
-    ChatContainerWrapperComponent,
-    ChatSuggestionsComponent,
-  ],
+  imports: [ChatHistoryComponent, ChatInputAreaComponent, ChatHeaderComponent, ChatMessagesComponent, ChatContainerWrapperComponent],
 })
 export default class Chat implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
