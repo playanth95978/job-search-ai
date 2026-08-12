@@ -112,9 +112,9 @@ export class MessageService {
   private streamSubscription: Subscription | null = null;
 
   /** Nombre de caractères révélés par frame, proportionnel au retard (min 1). */
-  private static readonly REVEAL_DIVISOR = 8;
-  /** Le markdown est re-parsé au plus toutes les 33 ms (~30 fps) : inutile de le faire à 60 fps. */
-  private static readonly MARKDOWN_RENDER_INTERVAL_MS = 33;
+  private static readonly REVEAL_DIVISOR = 4;
+  /** Le markdown est re-parsé au plus toutes les 16 ms (~60 fps) pour une fluidité maximale. */
+  private static readonly MARKDOWN_RENDER_INTERVAL_MS = 16;
 
   constructor() {
     marked.setOptions({
@@ -142,7 +142,7 @@ export class MessageService {
   streamText(url: string): Observable<string> {
     return this.http.get(url, { responseType: 'text', observe: 'events', reportProgress: true }).pipe(
       filter((event: HttpEvent<string>): boolean => event.type === HttpEventType.DownloadProgress || event.type === HttpEventType.Response),
-      auditTime(30),
+      auditTime(16),
       map((event: HttpEvent<string>): string =>
         event.type === HttpEventType.DownloadProgress ? (event.partialText ?? '') : ((event as HttpResponse<string>).body ?? ''),
       ),
@@ -482,7 +482,7 @@ export class MessageService {
         filter(
           (event: HttpEvent<string>): boolean => event.type === HttpEventType.DownloadProgress || event.type === HttpEventType.Response,
         ),
-        auditTime(30),
+        auditTime(16),
         map(
           (event: HttpEvent<string>): ChatMessage =>
             event.type === HttpEventType.DownloadProgress
@@ -666,7 +666,7 @@ export class MessageService {
         filter(
           (event: HttpEvent<string>): boolean => event.type === HttpEventType.DownloadProgress || event.type === HttpEventType.Response,
         ),
-        auditTime(30),
+        auditTime(16),
         map(
           (event: HttpEvent<string>): ChatMessage =>
             event.type === HttpEventType.DownloadProgress

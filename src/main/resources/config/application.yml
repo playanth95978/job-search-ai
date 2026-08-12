@@ -97,6 +97,12 @@ spring:
     mistral:
       rate-limit:
         requests-per-second: 3 # limite client le débit vers Mistral pour éviter les 429
+        burst-capacity: 5 # tolère une petite rafale après une période d'inactivité
+        max-wait: 20s # au-delà, on bascule sur le modèle de repli plutôt que d'attendre
+      fallback:
+        model: mistral-small-latest # modèle de repli quand le modèle principal renvoie 429
+        temperature: 0.1
+      stream-timeout: 180s # coupe un flux SSE bloqué (modèle ou outil qui ne répond plus)
     chat:
       observations:
         log-completion: true

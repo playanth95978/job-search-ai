@@ -48,7 +48,9 @@ export class ChatMessagesComponent implements AfterViewChecked {
   private stickToBottom = signal(true);
 
   /** Tolérance en px pour considérer qu'on est « en bas » (marge d'arrondi / inertie). */
-  private static readonly STICK_THRESHOLD_PX = 80;
+  private static readonly STICK_THRESHOLD_PX = 2;
+
+  private lastScrollHeight = 0;
 
   @ViewChildren('messageEl') messageElements!: QueryList<ElementRef>;
   @ViewChildren('contentRef') contentRefs!: QueryList<ElementRef>;
@@ -62,11 +64,16 @@ export class ChatMessagesComponent implements AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    // On ne recolle en bas que si l'utilisateur y était déjà : sinon on le ramènerait de force
-    // pendant qu'il relit un message plus haut (comportement ChatGPT/Gemini).
-    if (this.stickToBottom()) {
+    const el = this.scrollContainer?.nativeElement;
+    if (!el) return;
+
+    // On ne recolle en bas que si l'utilisateur y était déjà ET que le contenu a changé.
+    // Cela évite de bloquer le scroll manuel quand le texte n'évolue pas ou quand l'utilisateur
+    // essaie de remonter (scrollHeight inchangé entre deux frames de rendu).
+    if (this.stickToBottom() && el.scrollHeight !== this.lastScrollHeight) {
       this.scrollToBottom();
     }
+    this.lastScrollHeight = el.scrollHeight;
   }
 
   /**
