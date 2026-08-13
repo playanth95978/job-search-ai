@@ -98,6 +98,11 @@ public final class AshbyConnector extends AbstractAtsConnector {
     }
 
     @Override
+    public List<JobOffer> fetchBySlug(String slug) {
+        return StringUtils.isBlank(slug) ? List.of() : fetchFromBoard(slug);
+    }
+
+    @Override
     public List<JobOffer> fetchFromUrl(String url) {
         String board = boardOf(url);
         return StringUtils.isBlank(board) ? List.of() : fetchFromBoard(board);

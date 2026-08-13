@@ -51,6 +51,9 @@ public class JobCopilotAgentService {
           search engine and scores each offer against their CV (skills, location, salary, preferences).
         - search job offers, read their CV profile, list/update their applications, generate a cover letter,
           or compare two locations.
+        - when a company is named — by the user, or one you judge relevant to their profile — fetch its
+          openings with the company-name tool. Never ask the user for a careers URL and never guess one:
+          the tool resolves the ATS itself and answers "not found" when the company has no public board.
         - for job offers that are NOT in the internal database (external companies, roles posted only online,
           international/remote listings), use the web search tool to look them up on the internet, then
           summarize the findings with their source links. Prefer the internal job-search tool first; fall

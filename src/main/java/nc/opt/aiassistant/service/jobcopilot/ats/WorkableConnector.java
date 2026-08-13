@@ -104,6 +104,11 @@ public final class WorkableConnector extends AbstractAtsConnector {
     }
 
     @Override
+    public List<JobOffer> fetchBySlug(String slug) {
+        return StringUtils.isBlank(slug) ? List.of() : fetchFromAccount(slug);
+    }
+
+    @Override
     public List<JobOffer> fetchFromUrl(String url) {
         String account = accountOf(url);
         return StringUtils.isBlank(account) ? List.of() : fetchFromAccount(account);

@@ -73,6 +73,11 @@ public final class LeverConnector extends AbstractAtsConnector {
 
     /** Fetches jobs from a Lever company page. */
     @Override
+    public List<JobOffer> fetchBySlug(String slug) {
+        return StringUtils.isBlank(slug) ? List.of() : fetchFromCompany(slug);
+    }
+
+    @Override
     public List<JobOffer> fetchFromUrl(String url) {
         String company = slugAfter(url, "lever.co/");
         return StringUtils.isBlank(company) ? List.of() : fetchFromCompany(company);

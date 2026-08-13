@@ -100,6 +100,11 @@ public final class RecruiteeConnector extends AbstractAtsConnector {
     }
 
     @Override
+    public List<JobOffer> fetchBySlug(String slug) {
+        return StringUtils.isBlank(slug) ? List.of() : fetchFromCompany(slug);
+    }
+
+    @Override
     public List<JobOffer> fetchFromUrl(String url) {
         String company = companyOf(url);
         return StringUtils.isBlank(company) ? List.of() : fetchFromCompany(company);

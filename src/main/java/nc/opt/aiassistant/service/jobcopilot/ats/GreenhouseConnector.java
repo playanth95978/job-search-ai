@@ -84,6 +84,11 @@ public final class GreenhouseConnector extends AbstractAtsConnector {
 
     /** Fetches jobs from a specific Greenhouse board (company slug). */
     @Override
+    public List<JobOffer> fetchBySlug(String slug) {
+        return StringUtils.isBlank(slug) ? List.of() : fetchFromBoard(slug);
+    }
+
+    @Override
     public List<JobOffer> fetchFromUrl(String url) {
         String board = slugAfter(url, "greenhouse.io/");
         return StringUtils.isBlank(board) ? List.of() : fetchFromBoard(board);

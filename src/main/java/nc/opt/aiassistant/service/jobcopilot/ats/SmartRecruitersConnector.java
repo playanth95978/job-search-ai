@@ -80,6 +80,11 @@ public final class SmartRecruitersConnector extends AbstractAtsConnector {
 
     /** Fetches postings from a SmartRecruiters company (best-effort; no auth for public postings). */
     @Override
+    public List<JobOffer> fetchBySlug(String slug) {
+        return StringUtils.isBlank(slug) ? List.of() : fetchFromCompany(slug);
+    }
+
+    @Override
     public List<JobOffer> fetchFromUrl(String url) {
         PostingRef ref = parseRef(url);
         String companyId = ref != null ? ref.site() : slugAfter(url, "smartrecruiters.com/");

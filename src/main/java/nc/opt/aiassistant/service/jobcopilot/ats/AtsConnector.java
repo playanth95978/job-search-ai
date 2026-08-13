@@ -40,6 +40,17 @@ public interface AtsConnector {
     }
 
     /**
+     * Fetches every posting of a company board identified by its slug on <em>this</em> ATS
+     * (Greenhouse board token, Lever/SmartRecruiters/Recruitee company, Workable account, Ashby board).
+     *
+     * <p>Default: none — only board-based connectors implement it. It is what makes a slug probeable
+     * without knowing which ATS a company uses: an empty result means "not this one".</p>
+     */
+    default List<JobOffer> fetchBySlug(String slug) {
+        return List.of();
+    }
+
+    /**
      * Fetches the offers implied by a board/feed URL this connector {@link #supports(String) supports}
      * — e.g. a Greenhouse/Lever/SmartRecruiters company board, or an aggregator's feed. Default: none.
      */
