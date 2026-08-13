@@ -408,6 +408,9 @@ application:
       # pas d'utilisateur : renseigner l'IP publique du serveur, sinon le connecteur reste inactif.
       user-ip: ${CAREERJET_USER_IP:10.162.4.35}
       user-agent: ${CAREERJET_USER_AGENT:Mozilla/5.0 (compatible; JobSearchAI/1.0)}
+      # En-tête Referer EXIGÉ par l'API (403 "Undeclared referrer" sinon) : il doit correspondre au
+      # site déclaré sur le compte partenaire Careerjet. Vide = connecteur inactif.
+      referer: ${CAREERJET_REFERER:https://aicarreerfinder.com}
       page-size: 50
       max-pages: 5
     jobicy:

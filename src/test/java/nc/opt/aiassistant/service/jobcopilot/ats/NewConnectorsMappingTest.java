@@ -110,6 +110,17 @@ class NewConnectorsMappingTest {
 
         private final CareerjetConnector connector = new CareerjetConnector(mapper);
 
+        /** Même annonce, URL de tracking différente : ce que renvoie réellement l'API à chaque appel. */
+        private static final String SAME_JOB_OTHER_URL = """
+            {
+              "title": "Senior Java Developer",
+              "company": "ACME Pty",
+              "date": "Tue, 21 Jul 2026 05:04:02 GMT",
+              "locations": "Brisbane, QLD",
+              "url": "https://jobviewtrack.com/v2/UN-AUTRE-TOKEN-SIGNE"
+            }
+            """;
+
         @Test
         void mapsDocumentedJobFieldsAndYearlySalary() {
             JobOffer offer = connector.mapJobOffer(
@@ -118,7 +129,7 @@ class NewConnectorsMappingTest {
                     {
                       "title": "Senior Java Developer",
                       "company": "ACME Pty",
-                      "date": "Tue, 21 Jul 2026",
+                      "date": "Tue, 21 Jul 2026 05:04:02 GMT",
                       "description": "Java, Spring Boot, <b>Angular</b>",
                       "locations": "Brisbane, QLD",
                       "salary": "110,000 - 130,000 AUD per year",
@@ -138,13 +149,17 @@ class NewConnectorsMappingTest {
             assertThat(offer.getLocation()).isEqualTo("Brisbane, QLD");
             assertThat(offer.getDescription()).isEqualTo("Java, Spring Boot, Angular");
             assertThat(offer.getApplyUrl()).isEqualTo("https://www.careerjet.com.au/jobad/au123");
-            assertThat(offer.getSourceId()).isEqualTo("https://www.careerjet.com.au/jobad/au123");
+            // L'URL est un lien de tracking signé, variable d'un appel à l'autre : l'identité est
+            // un hash des invariants de l'annonce, donc stable entre deux ingestions.
+            assertThat(offer.getSourceId())
+                .hasSize(32)
+                .isEqualTo(connector.mapJobOffer(json(SAME_JOB_OTHER_URL), "en_AU").getSourceId());
             assertThat(offer.getSource()).isEqualTo(JobSource.CAREERJET);
             assertThat(offer.getCountry()).isEqualTo("AU");
             assertThat(offer.getSalaryMin()).isEqualTo(110000);
             assertThat(offer.getSalaryMax()).isEqualTo(130000);
             assertThat(offer.getSalaryCurrency()).isEqualTo("AUD");
-            assertThat(offer.getPublishedAt()).isEqualTo(Instant.parse("2026-07-21T00:00:00Z"));
+            assertThat(offer.getPublishedAt()).isEqualTo(Instant.parse("2026-07-21T05:04:02Z"));
         }
 
         @Test

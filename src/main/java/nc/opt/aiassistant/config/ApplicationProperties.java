@@ -203,6 +203,8 @@ public class ApplicationProperties {
         private String localeCode = "fr_FR";
         private String userIp;
         private String userAgent = "Mozilla/5.0 (compatible; JobSearchAI/1.0)";
+        /** Site declared on the Careerjet account; sent as Referer, mandatory. */
+        private String referer;
         private int pageSize = 50;
         private int maxPages = 5;
     }
