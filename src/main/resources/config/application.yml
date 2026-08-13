@@ -399,6 +399,32 @@ application:
       max-pages: 5
       # Seed "what" queries paged through by the daily ingestion batch.
       queries: ${ADZUNA_QUERIES:développeur,architecte,data engineer,devops,software engineer,cloud,cybersécurité,product manager}
+    careerjet:
+      # Clé gratuite (https://www.careerjet.com/partners/api/), en Basic auth. Vide = connecteur inactif.
+      api-key: ${CAREERJET_API_KEY:}
+      # Careerjet partitionne son index par locale : fr_FR, en_AU, en_GB, en_US…
+      locale-code: ${CAREERJET_LOCALE:fr_FR}
+      # user_ip est OBLIGATOIRE côté API (IP de l'utilisateur final). En ingestion planifiée il n'y a
+      # pas d'utilisateur : renseigner l'IP publique du serveur, sinon le connecteur reste inactif.
+      user-ip: ${CAREERJET_USER_IP:10.162.4.35}
+      user-agent: ${CAREERJET_USER_AGENT:Mozilla/5.0 (compatible; JobSearchAI/1.0)}
+      page-size: 50
+      max-pages: 5
+    jobicy:
+      # API publique sans clé (https://jobicy.com/jobs-rss-feed). Offres 100 % remote, salaire et
+      # niveau structurés. Leurs conditions plafonnent l'appel à 1/heure : le flux entier est donc
+      # mis en cache et filtré en mémoire, quel que soit le trafic de recherche.
+      count: 100
+      cache-ttl: ${JOBICY_CACHE_TTL:1h}
+    workable:
+      # Slugs de comptes Workable (apply.workable.com/{slug}), séparés par des virgules.
+      accounts: ${WORKABLE_ACCOUNTS:}
+    ashby:
+      # Noms de job boards Ashby (jobs.ashbyhq.com/{board}), séparés par des virgules.
+      boards: ${ASHBY_BOARDS:}
+    recruitee:
+      # Sous-domaines de sites carrières Recruitee ({company}.recruitee.com), séparés par des virgules.
+      companies: ${RECRUITEE_COMPANIES:}
 
 # ===================================================================
 # Reranking (cross-encoder ONNX)

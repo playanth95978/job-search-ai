@@ -60,6 +60,11 @@ public class ApplicationProperties {
 
         private JobCopilotConfig franceTravail;
         private Adzuna adzuna;
+        private Careerjet careerjet = new Careerjet();
+        private Jobicy jobicy = new Jobicy();
+        private Workable workable = new Workable();
+        private Ashby ashby = new Ashby();
+        private Recruitee recruitee = new Recruitee();
         private Seek seek = new Seek();
         private Ingestion ingestion = new Ingestion();
         private Radar radar = new Radar();
@@ -186,6 +191,58 @@ public class ApplicationProperties {
         private int resultsPerPage;
         private int maxPages;
         private String queries;
+    }
+
+    /** Careerjet Search API v4 — Basic auth with the API key, and a mandatory end-user ip/user-agent. */
+    @Setter
+    @Getter
+    public static class Careerjet {
+
+        private String apiKey;
+        /** Market: Careerjet partitions its index by locale (fr_FR, en_AU, en_GB…). */
+        private String localeCode = "fr_FR";
+        private String userIp;
+        private String userAgent = "Mozilla/5.0 (compatible; JobSearchAI/1.0)";
+        private int pageSize = 50;
+        private int maxPages = 5;
+    }
+
+    /** Jobicy remote-jobs API — no key; their terms cap polling at one call per hour, hence the cache. */
+    @Setter
+    @Getter
+    public static class Jobicy {
+
+        /** Listings fetched per call; 1..100 per the API. */
+        private int count = 100;
+        /** Minimum interval between two calls; must stay >= 1h to respect their fair-use policy. */
+        private java.time.Duration cacheTtl = java.time.Duration.ofHours(1);
+    }
+
+    /** Workable public careers API — one account slug per company, no key. */
+    @Setter
+    @Getter
+    public static class Workable {
+
+        /** Comma-separated account slugs crawled by the ingestion. */
+        private String accounts;
+    }
+
+    /** Ashby public job-posting API — one board name per company, no key. */
+    @Setter
+    @Getter
+    public static class Ashby {
+
+        /** Comma-separated job-board names crawled by the ingestion. */
+        private String boards;
+    }
+
+    /** Recruitee careers-site API — one subdomain per company, no key. */
+    @Setter
+    @Getter
+    public static class Recruitee {
+
+        /** Comma-separated company subdomains crawled by the ingestion. */
+        private String companies;
     }
 
     @Getter
