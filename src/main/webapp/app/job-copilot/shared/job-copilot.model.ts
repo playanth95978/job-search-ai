@@ -221,24 +221,51 @@ export interface JobSourceInfo {
   coverageKey: string;
   examples: string[];
   hasCountrySelect?: boolean;
+  /**
+   * Ce que la source sait réellement faire d'une localisation. Chaque API a sa propre notion :
+   * saisir « Paris » là où un code postal est attendu ne donne pas des résultats approximatifs,
+   * mais aucun résultat — le champ doit donc s'adapter plutôt que de laisser l'utilisateur deviner.
+   */
+  locationMode: LocationMode;
 }
+
+/**
+ * - `city`        : nom de ville en texte libre
+ * - `postalCode`  : uniquement un code postal à 5 chiffres (France Travail)
+ * - `region`      : zone d'éligibilité à choisir dans une liste (Jobicy, 100 % télétravail)
+ * - `none`        : la source ignore la localisation
+ */
+export type LocationMode = 'city' | 'postalCode' | 'region' | 'none';
+
+/** Zones d'éligibilité acceptées par Jobicy (son paramètre `geo` n'accepte que ces valeurs). */
+export const JOBICY_REGIONS: { value: string; label: string }[] = [
+  { value: 'europe', label: 'Europe' },
+  { value: 'apac', label: 'Asie-Pacifique' },
+  { value: 'usa', label: 'États-Unis' },
+  { value: 'canada', label: 'Canada' },
+  { value: 'latam', label: 'Amérique latine' },
+  { value: 'emea', label: 'EMEA' },
+];
 
 /** Connectors that support keyword search (matches the registered backend AtsConnector beans). */
 export const SEARCHABLE_JOB_SOURCES: JobSourceInfo[] = [
   {
     value: 'EMPLOI_NC',
+    locationMode: 'city',
     label: JOB_SOURCE_LABELS['EMPLOI_NC'],
     coverageKey: 'jobCopilot.search.coverage.emploiNc',
     examples: ['Nouméa', 'Dumbéa', 'Mont-Dore'],
   },
   {
     value: 'FRANCE_TRAVAIL',
+    locationMode: 'postalCode',
     label: JOB_SOURCE_LABELS['FRANCE_TRAVAIL'],
     coverageKey: 'jobCopilot.search.coverage.franceTravail',
-    examples: ['Paris', 'Lyon', 'Marseille', '75', '69'],
+    examples: ['75001', '69003', '13001'],
   },
   {
     value: 'ADZUNA',
+    locationMode: 'city',
     label: JOB_SOURCE_LABELS['ADZUNA'],
     coverageKey: 'jobCopilot.search.coverage.adzuna',
     examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
@@ -246,13 +273,14 @@ export const SEARCHABLE_JOB_SOURCES: JobSourceInfo[] = [
   },
   {
     value: 'JOBICY',
+    locationMode: 'region',
     label: JOB_SOURCE_LABELS['JOBICY'],
     coverageKey: 'jobCopilot.search.coverage.jobicy',
-    examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
-    hasCountrySelect: true,
+    examples: [],
   },
   {
     value: 'CAREERJET',
+    locationMode: 'city',
     label: JOB_SOURCE_LABELS['CAREERJET'],
     coverageKey: 'jobCopilot.search.coverage.careerjet',
     examples: ['Paris', 'London', 'Brisbane', 'Berlin'],

@@ -285,12 +285,19 @@
         "locationPlaceholder": "Location",
         "allSources": "All sources",
         "country": "Country",
-        "atsPlaceholder": "Paste ATS board URL (Greenhouse, Lever...)"
+        "atsPlaceholder": "Paste ATS board URL (Greenhouse, Lever...)",
+        "postalCodePlaceholder": "Postal code (e.g. 75001)",
+        "locationIgnored": "Location not applicable for this source",
+        "region": "Eligibility region",
+        "allRegions": "All regions",
+        "postalCodeRequired": "France Travail only accepts a 5-digit postal code: the location will be ignored."
       },
       "coverage": {
         "emploiNc": "Covers New Caledonia. Example locations:",
         "franceTravail": "Covers France (metropolitan). City, département or postcode:",
-        "adzuna": "Pick the country first, then a city in that country:"
+        "adzuna": "Pick the country first, then a city in that country:",
+        "jobicy": "Remote-only listings. Pick an eligibility region rather than a city:",
+        "careerjet": "Covers many countries. Pick the country, then the city:"
       },
       "detail": {
         "close": "Close detail",

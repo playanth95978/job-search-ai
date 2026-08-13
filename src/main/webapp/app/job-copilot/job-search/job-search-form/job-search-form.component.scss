@@ -278,3 +278,17 @@
   color: var(--bs-secondary-color);
   font-size: 0.85rem;
 }
+
+/* Saisie que la source rejettera (code postal mal formé) : signalée sans bloquer la recherche. */
+.jc-input.is-invalid {
+  border-color: var(--bs-warning-border-subtle, #ffc107);
+}
+
+.jc-source-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0;
+  color: var(--bs-warning-text-emphasis, #997404);
+  font-size: 0.8rem;
+}

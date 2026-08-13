@@ -26,20 +26,40 @@
           (keyup.enter)="onSearch()"
         />
       </div>
+      <!-- Le champ de localisation suit ce que la source sait exploiter : liste fermée pour une
+           zone d'éligibilité, saisie numérique pour un code postal, texte libre sinon. -->
       <div class="jc-input-wrapper">
         <fa-icon icon="location-dot" class="jc-input-icon"></fa-icon>
-        <input
-          type="text"
-          class="jc-input"
-          [placeholder]="'jobCopilot.search.form.locationPlaceholder' | translate"
-          [ngModel]="location()"
-          (ngModelChange)="location.set($event)"
-          (keyup.enter)="onSearch()"
-        />
+        @if (locationMode() === 'region') {
+          <select
+            class="jc-input jc-select"
+            [ngModel]="location()"
+            (ngModelChange)="location.set($event)"
+            [attr.aria-label]="'jobCopilot.search.form.region' | translate"
+          >
+            <option value="" jhiTranslate="jobCopilot.search.form.allRegions">Toutes les zones</option>
+            @for (r of regions; track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        } @else {
+          <input
+            type="text"
+            class="jc-input"
+            [class.is-invalid]="locationInvalid()"
+            [placeholder]="locationPlaceholderKey() | translate"
+            [attr.inputmode]="locationMode() === 'postalCode' ? 'numeric' : null"
+            [attr.maxlength]="locationMode() === 'postalCode' ? 5 : null"
+            [disabled]="locationMode() === 'none'"
+            [ngModel]="location()"
+            (ngModelChange)="location.set($event)"
+            (keyup.enter)="onSearch()"
+          />
+        }
       </div>
       <div class="jc-input-wrapper">
         <fa-icon icon="filter" class="jc-input-icon"></fa-icon>
-        <select class="jc-input jc-select" [ngModel]="source()" (ngModelChange)="source.set($event)" aria-label="Source">
+        <select class="jc-input jc-select" [ngModel]="source()" (ngModelChange)="onSourceChange($event)" aria-label="Source">
           <option value="" jhiTranslate="jobCopilot.search.form.allSources">Toutes les sources</option>
           @for (s of sources; track s.value) {
             <option [value]="s.value">{{ s.label }}</option>
@@ -66,7 +86,17 @@
       <p class="jc-source-hint">
         <fa-icon icon="circle-info"></fa-icon>
         <span>{{ sel.coverageKey | translate }}</span>
-        <span class="jc-source-examples">{{ sel.examples.join(' · ') }}</span>
+        @if (sel.examples.length > 0) {
+          <span class="jc-source-examples">{{ sel.examples.join(' · ') }}</span>
+        }
+      </p>
+    }
+    @if (locationInvalid()) {
+      <p class="jc-source-warning">
+        <fa-icon icon="triangle-exclamation"></fa-icon>
+        <span jhiTranslate="jobCopilot.search.form.postalCodeRequired">
+          France Travail n'accepte qu'un code postal à 5 chiffres : la localisation sera ignorée.
+        </span>
       </p>
     }
     <div class="jc-search-actions">

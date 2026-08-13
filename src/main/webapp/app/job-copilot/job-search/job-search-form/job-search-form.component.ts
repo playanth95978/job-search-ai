@@ -5,7 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 import TranslateDirective from '../../../shared/language/translate.directive';
-import { ADZUNA_COUNTRIES, SEARCHABLE_JOB_SOURCES } from '../../shared/job-copilot.model';
+import { ADZUNA_COUNTRIES, JOBICY_REGIONS, LocationMode, SEARCHABLE_JOB_SOURCES } from '../../shared/job-copilot.model';
 import { JobSearchCriteria } from '../job-search.types';
 import { BoardSuggestion } from '../../shared/job-copilot.model';
 
@@ -61,7 +61,33 @@ export class JobSearchFormComponent {
   readonly country = signal('fr');
   readonly atsUrl = signal('');
 
+  readonly regions = JOBICY_REGIONS;
+
   readonly selectedSource = computed(() => this.sources.find(s => s.value === this.source()));
+
+  /** Sans source précise, on reste sur du texte libre : chaque connecteur fera au mieux. */
+  readonly locationMode = computed<LocationMode>(() => this.selectedSource()?.locationMode ?? 'city');
+
+  /** Placeholder adapté à ce que la source sait réellement exploiter. */
+  readonly locationPlaceholderKey = computed(() => {
+    switch (this.locationMode()) {
+      case 'postalCode':
+        return 'jobCopilot.search.form.postalCodePlaceholder';
+      case 'none':
+        return 'jobCopilot.search.form.locationIgnored';
+      default:
+        return 'jobCopilot.search.form.locationPlaceholder';
+    }
+  });
+
+  /**
+   * Signale une saisie que la source rejettera. Non bloquant : le backend ignore proprement une
+   * localisation inexploitable, mais l'utilisateur doit savoir pourquoi elle ne servira à rien.
+   */
+  readonly locationInvalid = computed(() => {
+    const value = this.location().trim();
+    return this.locationMode() === 'postalCode' && value.length > 0 && !/^\d{5}$/.test(value);
+  });
 
   private criteria(): JobSearchCriteria {
     return {
@@ -70,6 +96,12 @@ export class JobSearchFormComponent {
       source: this.source() || undefined,
       country: this.selectedSource()?.hasCountrySelect ? this.country() : undefined,
     };
+  }
+
+  /** Change de source et remet à zéro une localisation qui n'aurait plus de sens. */
+  onSourceChange(value: string): void {
+    this.source.set(value);
+    this.location.set('');
   }
 
   onSearch(): void {

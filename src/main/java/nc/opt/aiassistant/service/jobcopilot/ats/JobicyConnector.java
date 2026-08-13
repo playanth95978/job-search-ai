@@ -67,6 +67,7 @@ public final class JobicyConnector extends AbstractAtsConnector {
         Map.entry("melbourne", "apac"),
         Map.entry("new zealand", "apac"),
         Map.entry("asia", "apac"),
+        Map.entry("apac", "apac"),
         Map.entry("usa", "usa"),
         Map.entry("united states", "usa"),
         Map.entry("canada", "canada"),
