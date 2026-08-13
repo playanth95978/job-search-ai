@@ -18,6 +18,10 @@ import org.springframework.web.client.RestClient;
  * <p>The feed is a bare JSON array whose <b>first element is a legal notice</b>, not a job: entries
  * without a {@code position} are skipped. Keyword filtering is done client-side, the feed having no
  * query parameters.</p>
+ *
+ * <p>{@code location} is deliberately ignored: every RemoteOK posting is remote, so filtering them by
+ * city would empty the source rather than narrow it. The geographic re-ranking done by
+ * {@code JobSearchService} on the aggregated results is what places them relative to the search.</p>
  */
 @Slf4j
 @Component
@@ -69,7 +73,7 @@ public final class RemoteOkConnector extends AbstractAtsConnector {
         return java.util.Arrays.stream(jobs)
             .filter(Objects::nonNull)
             .filter(job -> StringUtils.isNotBlank(job.position()))
-            .filter(job -> StringUtils.isBlank(keywords) || StringUtils.containsIgnoreCase(job.position(), keywords))
+            .filter(job -> matchesAllKeywords(keywords, job.position(), job.company(), job.description()))
             .map(this::mapJobOffer)
             .toList();
     }

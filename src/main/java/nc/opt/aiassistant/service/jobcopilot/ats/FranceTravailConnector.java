@@ -37,6 +37,9 @@ public final class FranceTravailConnector extends AbstractAtsConnector {
     private static final int BATCH_PAGE_SIZE = 150;
     /** API hard cap: the range value cannot exceed 3149. */
     private static final int MAX_RESULTS = 3150;
+    /** L'API n'accepte pas plus de 5 mots-clés. */
+    private static final int MAX_KEYWORDS = 5;
+
     /** Renew slightly before expiry so a long page never runs with a stale token. */
     private static final int TOKEN_RENEWAL_MARGIN_SECONDS = 60;
 
@@ -151,11 +154,17 @@ public final class FranceTravailConnector extends AbstractAtsConnector {
 
     private List<JobOffer> fetchRange(String keywords, String location, Partition partition, int start, int size) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_BASE).queryParam("range", start + "-" + (start + size - 1));
-        if (StringUtils.isNotBlank(keywords)) {
-            builder.queryParam("motsCles", keywords);
+        String motsCles = toMotsCles(keywords);
+        if (StringUtils.isNotBlank(motsCles)) {
+            builder.queryParam("motsCles", motsCles);
         }
-        if (StringUtils.isNotBlank(location)) {
-            builder.queryParam("codePostal", location);
+        // `codePostal` n'accepte qu'un code postal : « Paris » y produit une erreur 400, donc aucune
+        // offre. Une localisation non numérique est ignorée — mieux vaut des résultats nationaux,
+        // que le re-classement géographique de JobSearchService remettra ensuite dans l'ordre.
+        if (isPostalCode(location)) {
+            builder.queryParam("codePostal", StringUtils.trim(location));
+        } else if (StringUtils.isNotBlank(location)) {
+            log.debug("France Travail: location '{}' ignorée (un code postal est attendu)", location);
         }
         if (partition != null) {
             builder.queryParam("grandDomaine", partition.grandDomaine());
@@ -178,6 +187,24 @@ public final class FranceTravailConnector extends AbstractAtsConnector {
             return List.of();
         }
         return search.resultats().stream().filter(Objects::nonNull).map(this::mapJobOffer).toList();
+    }
+
+    /**
+     * {@code motsCles} attend des mots-clés séparés par des <b>virgules</b> (5 au maximum). Envoyer
+     * « java spring boot » tel quel fait chercher l'expression entière et ne remonte quasiment rien :
+     * on découpe donc sur les espaces.
+     */
+    private static String toMotsCles(String keywords) {
+        if (StringUtils.isBlank(keywords)) {
+            return null;
+        }
+        String[] words = StringUtils.split(StringUtils.trim(keywords));
+        return StringUtils.join(words, ',', 0, Math.min(words.length, MAX_KEYWORDS));
+    }
+
+    /** Codes postaux métropolitains et DOM : cinq chiffres. */
+    private static boolean isPostalCode(String location) {
+        return StringUtils.isNumeric(StringUtils.trim(location)) && StringUtils.length(StringUtils.trim(location)) == 5;
     }
 
     /** OAuth2 client-credentials token, cached until shortly before expiry. */

@@ -133,6 +133,22 @@ public abstract sealed class AbstractAtsConnector
     }
 
     /**
+     * Client-side keyword filtering for feed sources that offer no query parameter.
+     *
+     * <p><b>Tous</b> les mots doivent apparaître, et la recherche porte sur l'ensemble des champs
+     * fournis — pas seulement le titre. Chercher la requête entière comme une sous-chaîne d'un seul
+     * champ ne remonte rien dès que l'utilisateur saisit deux mots ("java spring"), puisqu'aucun
+     * intitulé ne contient littéralement cette suite.</p>
+     */
+    protected static boolean matchesAllKeywords(String keywords, String... fields) {
+        if (StringUtils.isBlank(keywords)) {
+            return true;
+        }
+        String haystack = StringUtils.lowerCase(StringUtils.join(fields, ' '));
+        return Arrays.stream(StringUtils.split(StringUtils.lowerCase(keywords))).allMatch(haystack::contains);
+    }
+
+    /**
      * Stable identity for sources that expose no id — or an unstable one, such as a signed redirect
      * that changes on every call. Hashing the posting's invariants keeps deduplication working across
      * ingestion runs, since it keys on (source, sourceId).

@@ -395,3 +395,16 @@ export interface BoardSuggestion {
   offerCount: number;
   sampleTitles: string[];
 }
+
+/**
+ * Langues proposées pour la traduction d'une offre. `value` part telle quelle dans le prompt du
+ * modèle (« Translate the following job offer into French »), `label` est ce que voit l'utilisateur.
+ */
+export const TRANSLATION_LANGUAGES: { value: string; label: string }[] = [
+  { value: 'French', label: 'Français' },
+  { value: 'English', label: 'English' },
+  { value: 'Spanish', label: 'Español' },
+  { value: 'German', label: 'Deutsch' },
+  { value: 'Italian', label: 'Italiano' },
+  { value: 'Portuguese', label: 'Português' },
+];

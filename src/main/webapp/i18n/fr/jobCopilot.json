@@ -294,7 +294,10 @@
       },
       "detail": {
         "close": "Fermer le détail",
-        "noDescription": "Aucune description disponible."
+        "noDescription": "Aucune description disponible.",
+        "translate": "Traduire",
+        "showOriginal": "Voir l'original",
+        "translatedBy": "Traduction automatique"
       },
       "actions": {
         "smartSearch": "Recherche intelligente",

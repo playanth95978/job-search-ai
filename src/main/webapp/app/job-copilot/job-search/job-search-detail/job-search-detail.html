@@ -44,6 +44,36 @@
             <span jhiTranslate="jobCopilot.search.results.view">View</span>
           </a>
         }
+        <!-- Traduction de l'offre : les sources publient dans leur langue, rarement dans la nôtre. -->
+        <div ngbDropdown class="jc-detail-translate" container="body">
+          <button class="jc-btn jc-btn-secondary" ngbDropdownToggle [disabled]="translating() || !offer.description">
+            @if (translating()) {
+              <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+            } @else {
+              <fa-icon icon="language"></fa-icon>
+            }
+            <span>{{ currentLanguageLabel() ?? ('jobCopilot.search.detail.translate' | translate) }}</span>
+          </button>
+          <div ngbDropdownMenu>
+            @for (language of languages; track language.value) {
+              <button
+                ngbDropdownItem
+                type="button"
+                (click)="onTranslate(language.value)"
+                [class.active]="translatedLanguage() === language.value"
+              >
+                {{ language.label }}
+              </button>
+            }
+            @if (translatedLanguage()) {
+              <div class="dropdown-divider"></div>
+              <button ngbDropdownItem type="button" (click)="onRestoreOriginal()">
+                <fa-icon icon="rotate-left"></fa-icon>
+                <span jhiTranslate="jobCopilot.search.detail.showOriginal">Voir l'original</span>
+              </button>
+            }
+          </div>
+        </div>
       </div>
     </div>
     <div class="jc-detail-body">
@@ -51,6 +81,13 @@
         <div class="jc-detail-loading">
           <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
         </div>
+      }
+      @if (translatedLanguage()) {
+        <p class="jc-detail-translated-note">
+          <fa-icon icon="language"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.detail.translatedBy">Traduction automatique</span>
+          <span>· {{ currentLanguageLabel() }}</span>
+        </p>
       }
       @if (offer.description) {
         <p class="jc-detail-desc">{{ offer.description }}</p>

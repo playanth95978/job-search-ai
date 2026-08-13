@@ -142,3 +142,26 @@
   font-size: 0.75rem;
   font-weight: 500;
 }
+
+/* ---- Traduction de l'offre ---- */
+.jc-detail-translate {
+  display: inline-block;
+
+  // Le menu est rendu dans <body> (container="body") pour ne pas être rogné par le volet,
+  // qui défile et masque son débordement.
+  .dropdown-item.active {
+    font-weight: 600;
+  }
+}
+
+.jc-detail-translated-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  font-size: 0.78rem;
+}

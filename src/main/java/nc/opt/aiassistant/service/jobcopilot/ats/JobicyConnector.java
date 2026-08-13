@@ -144,7 +144,7 @@ public final class JobicyConnector extends AbstractAtsConnector {
         String geo = geoFor(location);
         return cachedFeed()
             .stream()
-            .filter(offer -> matchesKeywords(offer, keywords))
+            .filter(offer -> matchesAllKeywords(keywords, offer.getTitle(), offer.getCompany(), offer.getDescription()))
             .filter(offer -> matchesGeo(offer, geo))
             .toList();
     }
@@ -176,17 +176,6 @@ public final class JobicyConnector extends AbstractAtsConnector {
         List<JobOffer> offers = feed.jobs().stream().filter(Objects::nonNull).map(this::mapJobOffer).toList();
         log.info("Jobicy feed refreshed: {} offers", offers.size());
         return offers;
-    }
-
-    private boolean matchesKeywords(JobOffer offer, String keywords) {
-        if (StringUtils.isBlank(keywords)) {
-            return true;
-        }
-        String haystack = StringUtils.lowerCase(
-            StringUtils.join(new String[] { offer.getTitle(), offer.getCompany(), offer.getDescription() }, ' ')
-        );
-        // Every word must appear: an "OR" match would return the whole feed on a two-word query.
-        return Arrays.stream(StringUtils.split(StringUtils.lowerCase(keywords))).allMatch(haystack::contains);
     }
 
     private boolean matchesGeo(JobOffer offer, String geo) {

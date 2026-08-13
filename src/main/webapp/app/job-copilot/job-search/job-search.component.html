@@ -43,7 +43,11 @@
         [sel]="sel"
         [selectedLoading]="selectedLoading()"
         (close)="selectedOffer.set(null)"
+        [translating]="translating()"
+        [translatedLanguage]="translatedLanguage()"
         (apply)="openApplyModal($event)"
+        (translateRequested)="onTranslate($event)"
+        (restoreOriginal)="onRestoreOriginal()"
       />
     }
   </div>

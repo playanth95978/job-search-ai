@@ -294,7 +294,10 @@
       },
       "detail": {
         "close": "Close detail",
-        "noDescription": "No description available."
+        "noDescription": "No description available.",
+        "translate": "Translate",
+        "showOriginal": "Show original",
+        "translatedBy": "Machine translation"
       },
       "actions": {
         "smartSearch": "Smart Search",
