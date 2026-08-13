@@ -2,11 +2,13 @@ package nc.opt.aiassistant.service.jobcopilot.ats;
 
 import static org.assertj.core.api.Assumptions.assumeThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.List;
 import nc.opt.aiassistant.domain.JobOffer;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClient;
 
 /**
  * Appel RÉEL de l'API Careerjet, de bout en bout : requête HTTP + auth Basic + mapping vers
@@ -24,7 +26,12 @@ class CareerjetLiveTest {
         assumeThat(key).as("careerjet.key").isNotBlank();
         assumeThat(ip).as("careerjet.ip").isNotBlank();
 
-        CareerjetConnector connector = new CareerjetConnector(new ObjectMapper());
+        // Même configuration que le bean atsObjectMapper : Careerjet renvoie des champs non mappés
+        // (response_time…) et un mapper strict échouerait là où la production passe.
+        CareerjetConnector connector = new CareerjetConnector(
+            RestClient.create(),
+            JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build()
+        );
         ReflectionTestUtils.setField(connector, "apiKey", key);
         ReflectionTestUtils.setField(connector, "userIp", ip);
         ReflectionTestUtils.setField(connector, "localeCode", System.getProperty("careerjet.locale", "fr_FR"));

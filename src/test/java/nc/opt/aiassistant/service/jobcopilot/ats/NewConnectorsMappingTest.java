@@ -2,28 +2,33 @@ package nc.opt.aiassistant.service.jobcopilot.ats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.time.Instant;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
 import nc.opt.aiassistant.service.jobcopilot.ats.AtsConnector.PostingRef;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.RestClient;
 
 /**
- * Vérifie que chaque nouveau connecteur mappe bien les champs tels que documentés par son API, et
- * qu'il reconnaît/décompose correctement les URLs de son ATS. Les charges utiles sont copiées de la
- * documentation (ou d'une réponse réelle) de chaque fournisseur : c'est le contrat qu'on teste ici,
- * pas le transport HTTP.
+ * Vérifie que chaque connecteur décode et mappe les champs tels que documentés par son API. Les
+ * charges utiles sont copiées de la documentation (ou d'une réponse réelle) de chaque fournisseur :
+ * on teste le contrat JSON -> record -> {@link JobOffer}, pas le transport HTTP.
  */
 class NewConnectorsMappingTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    /** Même souplesse que le bean atsObjectMapper : les tiers ajoutent des champs sans prévenir. */
+    private final ObjectMapper mapper = JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
-    private JsonNode json(String raw) {
+    private final RestClient restClient = RestClient.create();
+
+    /** Décode une charge utile documentée dans le record du connecteur — le contrat sous test. */
+    private <T> T parse(String raw, Class<T> type) {
         try {
-            return mapper.readTree(raw);
+            return mapper.readValue(raw, type);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -32,36 +37,38 @@ class NewConnectorsMappingTest {
     @Nested
     class Jobicy {
 
-        private final JobicyConnector connector = new JobicyConnector(mapper);
+        private final JobicyConnector connector = new JobicyConnector(restClient, mapper);
 
-        private JsonNode sampleJob() {
-            return json(
-                """
-                {
-                  "id": 150593,
-                  "url": "https://jobicy.com/jobs/150593-ai-solutions-builder",
-                  "jobSlug": "150593-ai-solutions-builder",
-                  "jobTitle": "AI Solutions Builder",
-                  "companyName": "Smartcat",
-                  "jobIndustry": ["Software Engineering"],
-                  "jobType": ["Full-Time"],
-                  "jobGeo": "Europe",
-                  "jobLevel": "Senior",
-                  "jobExcerpt": "Build AI solutions",
-                  "jobDescription": "<p>Java, Spring Boot and Angular</p>",
-                  "pubDate": "2026-08-12T14:19:54+00:00",
-                  "salaryMin": 90000,
-                  "salaryMax": 120000,
-                  "salaryCurrency": "EUR",
-                  "salaryPeriod": "yearly"
-                }
-                """
-            );
+        private JobicyConnector.JobicyJob job(String raw) {
+            return parse(raw, JobicyConnector.JobicyJob.class);
         }
 
         @Test
         void mapsDocumentedJobFields() {
-            JobOffer offer = connector.mapJobOffer(sampleJob());
+            JobOffer offer = connector.mapJobOffer(
+                job(
+                    """
+                    {
+                      "id": 150593,
+                      "url": "https://jobicy.com/jobs/150593-ai-solutions-builder",
+                      "jobSlug": "150593-ai-solutions-builder",
+                      "jobTitle": "AI Solutions Builder",
+                      "companyName": "Smartcat",
+                      "jobIndustry": ["Software Engineering"],
+                      "jobType": ["Full-Time"],
+                      "jobGeo": "Europe",
+                      "jobLevel": "Senior",
+                      "jobExcerpt": "Build AI solutions",
+                      "jobDescription": "<p>Java, Spring Boot and Angular</p>",
+                      "pubDate": "2026-08-12T14:19:54+00:00",
+                      "salaryMin": 90000,
+                      "salaryMax": 120000,
+                      "salaryCurrency": "EUR",
+                      "salaryPeriod": "yearly"
+                    }
+                    """
+                )
+            );
 
             assertThat(offer.getTitle()).isEqualTo("AI Solutions Builder");
             assertThat(offer.getCompany()).isEqualTo("Smartcat");
@@ -82,7 +89,7 @@ class NewConnectorsMappingTest {
         @Test
         void ignoresNonYearlySalary() {
             JobOffer offer = connector.mapJobOffer(
-                json("{\"jobTitle\":\"Dev\",\"salaryMin\":50,\"salaryMax\":80,\"salaryCurrency\":\"USD\",\"salaryPeriod\":\"hourly\"}")
+                job("{\"jobTitle\":\"Dev\",\"salaryMin\":50,\"salaryMax\":80,\"salaryCurrency\":\"USD\",\"salaryPeriod\":\"hourly\"}")
             );
 
             assertThat(offer.getSalaryMin()).isNull();
@@ -92,7 +99,7 @@ class NewConnectorsMappingTest {
 
         @Test
         void fallsBackOnTheExcerptWhenTheDescriptionIsEmpty() {
-            JobOffer offer = connector.mapJobOffer(json("{\"jobTitle\":\"Dev\",\"jobExcerpt\":\"Short pitch\"}"));
+            JobOffer offer = connector.mapJobOffer(job("{\"jobTitle\":\"Dev\",\"jobExcerpt\":\"Short pitch\"}"));
 
             assertThat(offer.getDescription()).isEqualTo("Short pitch");
         }
@@ -108,8 +115,6 @@ class NewConnectorsMappingTest {
     @Nested
     class Careerjet {
 
-        private final CareerjetConnector connector = new CareerjetConnector(mapper);
-
         /** Même annonce, URL de tracking différente : ce que renvoie réellement l'API à chaque appel. */
         private static final String SAME_JOB_OTHER_URL = """
             {
@@ -121,10 +126,16 @@ class NewConnectorsMappingTest {
             }
             """;
 
+        private final CareerjetConnector connector = new CareerjetConnector(restClient, mapper);
+
+        private CareerjetConnector.CareerjetJob job(String raw) {
+            return parse(raw, CareerjetConnector.CareerjetJob.class);
+        }
+
         @Test
         void mapsDocumentedJobFieldsAndYearlySalary() {
             JobOffer offer = connector.mapJobOffer(
-                json(
+                job(
                     """
                     {
                       "title": "Senior Java Developer",
@@ -149,23 +160,23 @@ class NewConnectorsMappingTest {
             assertThat(offer.getLocation()).isEqualTo("Brisbane, QLD");
             assertThat(offer.getDescription()).isEqualTo("Java, Spring Boot, Angular");
             assertThat(offer.getApplyUrl()).isEqualTo("https://www.careerjet.com.au/jobad/au123");
-            // L'URL est un lien de tracking signé, variable d'un appel à l'autre : l'identité est
-            // un hash des invariants de l'annonce, donc stable entre deux ingestions.
-            assertThat(offer.getSourceId())
-                .hasSize(32)
-                .isEqualTo(connector.mapJobOffer(json(SAME_JOB_OTHER_URL), "en_AU").getSourceId());
             assertThat(offer.getSource()).isEqualTo(JobSource.CAREERJET);
             assertThat(offer.getCountry()).isEqualTo("AU");
             assertThat(offer.getSalaryMin()).isEqualTo(110000);
             assertThat(offer.getSalaryMax()).isEqualTo(130000);
             assertThat(offer.getSalaryCurrency()).isEqualTo("AUD");
             assertThat(offer.getPublishedAt()).isEqualTo(Instant.parse("2026-07-21T05:04:02Z"));
+            // L'URL est un lien de tracking signé, variable d'un appel à l'autre : l'identité est un
+            // hash des invariants de l'annonce, donc stable entre deux ingestions.
+            assertThat(offer.getSourceId())
+                .hasSize(32)
+                .isEqualTo(connector.mapJobOffer(job(SAME_JOB_OTHER_URL), "en_AU").getSourceId());
         }
 
         @Test
         void ignoresNonYearlySalaryToKeepTheColumnHomogeneous() {
             JobOffer offer = connector.mapJobOffer(
-                json("{\"title\":\"Dev\",\"salary_min\":45,\"salary_max\":60,\"salary_type\":\"H\",\"salary_currency_code\":\"EUR\"}"),
+                job("{\"title\":\"Dev\",\"salary_min\":45,\"salary_max\":60,\"salary_type\":\"H\",\"salary_currency_code\":\"EUR\"}"),
                 "fr_FR"
             );
 
@@ -178,12 +189,12 @@ class NewConnectorsMappingTest {
     @Nested
     class Workable {
 
-        private final WorkableConnector connector = new WorkableConnector(mapper);
+        private final WorkableConnector connector = new WorkableConnector(restClient, mapper);
 
         @Test
         void mapsFieldsOfTheLiveWidgetPayload() {
             JobOffer offer = connector.mapJobOffer(
-                json(
+                parse(
                     """
                     {
                       "title": "Low-level Senior Software Engineer",
@@ -203,7 +214,8 @@ class NewConnectorsMappingTest {
                       "locations": [{ "country": "France", "countryCode": "FR", "city": "Paris" }],
                       "description": "<p>Role managing storage</p>"
                     }
-                    """
+                    """,
+                    WorkableConnector.WorkableJob.class
                 ),
                 "Hugging Face"
             );
@@ -238,12 +250,16 @@ class NewConnectorsMappingTest {
     @Nested
     class Ashby {
 
-        private final AshbyConnector connector = new AshbyConnector(mapper);
+        private final AshbyConnector connector = new AshbyConnector(restClient, mapper);
+
+        private AshbyConnector.AshbyJob job(String raw) {
+            return parse(raw, AshbyConnector.AshbyJob.class);
+        }
 
         @Test
         void mapsDocumentedPostingFields() {
             JobOffer offer = connector.mapJobOffer(
-                json(
+                job(
                     """
                     {
                       "id": "0b1e4f66-6d1f-4a2c-9a1e-1f2d3c4b5a69",
@@ -280,7 +296,7 @@ class NewConnectorsMappingTest {
 
         @Test
         void treatsHybridAsNotRemote() {
-            JobOffer offer = connector.mapJobOffer(json("{\"title\":\"Dev\",\"isRemote\":false,\"workplaceType\":\"Hybrid\"}"), "acme");
+            JobOffer offer = connector.mapJobOffer(job("{\"title\":\"Dev\",\"isRemote\":false,\"workplaceType\":\"Hybrid\"}"), "acme");
 
             assertThat(offer.getRemote()).isFalse();
         }
@@ -298,12 +314,12 @@ class NewConnectorsMappingTest {
     @Nested
     class Recruitee {
 
-        private final RecruiteeConnector connector = new RecruiteeConnector(mapper);
+        private final RecruiteeConnector connector = new RecruiteeConnector(restClient, mapper);
 
         @Test
         void mapsDocumentedOfferFieldsAndMergesRequirements() {
             JobOffer offer = connector.mapJobOffer(
-                json(
+                parse(
                     """
                     {
                       "id": 987654,
@@ -321,7 +337,8 @@ class NewConnectorsMappingTest {
                       "careers_apply_url": "https://acme.recruitee.com/o/developpeur-java/c/new",
                       "published_at": "2026-07-30T09:12:00.000Z"
                     }
-                    """
+                    """,
+                    RecruiteeConnector.RecruiteeOffer.class
                 ),
                 "acme"
             );

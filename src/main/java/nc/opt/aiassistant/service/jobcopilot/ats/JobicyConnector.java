@@ -1,26 +1,25 @@
 package nc.opt.aiassistant.service.jobcopilot.ats;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
-import org.jsoup.Jsoup;
+import nc.opt.aiassistant.service.jobcopilot.ats.support.AtsDates;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Connector for the <a href="https://jobicy.com/jobs-rss-feed">Jobicy remote-jobs API</a>:
@@ -38,8 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class JobicyConnector implements AtsConnector {
+public final class JobicyConnector extends AbstractAtsConnector {
 
     private static final String API_BASE = "https://jobicy.com/api/v2/remote-jobs";
 
@@ -47,7 +45,10 @@ public class JobicyConnector implements AtsConnector {
     private static final Pattern URL_REF = Pattern.compile("jobicy\\.com/jobs/(\\d+)");
 
     /** Only yearly amounts land in the salary columns, so they stay comparable across sources. */
-    private static final String YEARLY = "yearly";
+    private static final String[] YEARLY_PERIODS = { "yearly", "annual" };
+
+    /** Offers open to any region stay eligible whatever the searched location. */
+    private static final List<String> WORLDWIDE_MARKERS = List.of("anywhere", "worldwide");
 
     /**
      * {@code geo} is the candidate's eligibility region, not a city: only a few slugs are accepted
@@ -73,8 +74,6 @@ public class JobicyConnector implements AtsConnector {
         Map.entry("emea", "emea")
     );
 
-    private final ObjectMapper objectMapper;
-
     /** 1..100 per the API; 100 is the documented maximum and the default. */
     @Value("${application.job-copilot.jobicy.count:100}")
     private int count;
@@ -85,11 +84,40 @@ public class JobicyConnector implements AtsConnector {
 
     private final AtomicReference<CachedFeed> cache = new AtomicReference<>();
 
+    public JobicyConnector(@Qualifier("atsRestClient") RestClient restClient, @Qualifier("atsObjectMapper") ObjectMapper objectMapper) {
+        super(restClient, objectMapper);
+    }
+
     private record CachedFeed(Instant fetchedAt, List<JobOffer> offers) {}
+
+    // --- Payload ------------------------------------------------------------------------------
+
+    record JobicyFeed(List<JobicyJob> jobs) {}
+
+    record JobicyJob(
+        Long id,
+        String url,
+        String jobSlug,
+        String jobTitle,
+        String companyName,
+        List<String> jobIndustry,
+        List<String> jobType,
+        String jobGeo,
+        String jobLevel,
+        String jobExcerpt,
+        String jobDescription,
+        String pubDate,
+        Integer salaryMin,
+        Integer salaryMax,
+        String salaryCurrency,
+        String salaryPeriod
+    ) {}
+
+    // --- Connector ----------------------------------------------------------------------------
 
     @Override
     public boolean supports(String url) {
-        return url != null && url.contains("jobicy.com");
+        return StringUtils.contains(url, "jobicy.com");
     }
 
     @Override
@@ -113,9 +141,8 @@ public class JobicyConnector implements AtsConnector {
      */
     @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
-        List<JobOffer> feed = cachedFeed();
         String geo = geoFor(location);
-        return feed
+        return cachedFeed()
             .stream()
             .filter(offer -> matchesKeywords(offer, keywords))
             .filter(offer -> matchesGeo(offer, geo))
@@ -142,54 +169,36 @@ public class JobicyConnector implements AtsConnector {
     }
 
     private List<JobOffer> fetchFeed() {
-        List<JobOffer> results = new ArrayList<>();
-        try {
-            String uri = UriComponentsBuilder.fromUriString(API_BASE)
-                .queryParam("count", Math.clamp(count, 1, 100))
-                .build()
-                .encode()
-                .toUriString();
-
-            String body = RestClient.create().get().uri(uri).retrieve().body(String.class);
-            JsonNode root = objectMapper.readTree(body);
-            for (JsonNode job : root.path("jobs")) {
-                results.add(mapJobOffer(job));
-            }
-            log.info("Jobicy feed refreshed: {} offers", results.size());
-        } catch (Exception e) {
-            log.error("Jobicy fetch failed: {}", e.getMessage());
+        JobicyFeed feed = getJson(API_BASE + "?count=" + Math.clamp(count, 1, 100), JobicyFeed.class);
+        if (feed == null || feed.jobs() == null) {
+            return List.of();
         }
-        return results;
+        List<JobOffer> offers = feed.jobs().stream().filter(Objects::nonNull).map(this::mapJobOffer).toList();
+        log.info("Jobicy feed refreshed: {} offers", offers.size());
+        return offers;
     }
 
     private boolean matchesKeywords(JobOffer offer, String keywords) {
-        if (keywords == null || keywords.isBlank()) {
+        if (StringUtils.isBlank(keywords)) {
             return true;
         }
-        String haystack = (
-            (offer.getTitle() == null ? "" : offer.getTitle()) +
-            " " +
-            (offer.getCompany() == null ? "" : offer.getCompany()) +
-            " " +
-            (offer.getDescription() == null ? "" : offer.getDescription())
-        ).toLowerCase(Locale.ROOT);
+        String haystack = StringUtils.lowerCase(
+            StringUtils.join(new String[] { offer.getTitle(), offer.getCompany(), offer.getDescription() }, ' ')
+        );
         // Every word must appear: an "OR" match would return the whole feed on a two-word query.
-        return java.util.Arrays.stream(keywords.toLowerCase(Locale.ROOT).split("\\s+"))
-            .filter(word -> !word.isBlank())
-            .allMatch(haystack::contains);
+        return Arrays.stream(StringUtils.split(StringUtils.lowerCase(keywords))).allMatch(haystack::contains);
     }
 
     private boolean matchesGeo(JobOffer offer, String geo) {
         if (geo == null) {
             return true;
         }
-        String offerGeo = offer.getLocation() == null ? "" : offer.getLocation().toLowerCase(Locale.ROOT);
-        // "Anywhere"/"Worldwide" offers stay eligible whatever the searched region.
-        return offerGeo.contains(geo) || offerGeo.contains("anywhere") || offerGeo.contains("worldwide") || offerGeo.isBlank();
+        String offerGeo = StringUtils.lowerCase(StringUtils.trimToEmpty(offer.getLocation()));
+        return offerGeo.isEmpty() || offerGeo.contains(geo) || WORLDWIDE_MARKERS.stream().anyMatch(offerGeo::contains);
     }
 
     private String geoFor(String location) {
-        if (location == null || location.isBlank()) {
+        if (StringUtils.isBlank(location)) {
             return null;
         }
         String lower = location.toLowerCase(Locale.ROOT);
@@ -201,82 +210,48 @@ public class JobicyConnector implements AtsConnector {
             .orElse(null);
     }
 
-    JobOffer mapJobOffer(JsonNode job) {
+    JobOffer mapJobOffer(JobicyJob job) {
         JobOffer offer = new JobOffer();
-        offer.setTitle(job.path("jobTitle").asText(""));
-        offer.setCompany(blankToNull(job.path("companyName").asText(null)));
+        offer.setTitle(StringUtils.defaultString(job.jobTitle()));
+        offer.setCompany(StringUtils.trimToNull(job.companyName()));
         // jobGeo is the eligibility region ("Europe", "Anywhere"), the closest thing to a location.
-        offer.setLocation(blankToNull(job.path("jobGeo").asText(null)));
-        offer.setDescription(description(job));
+        offer.setLocation(StringUtils.trimToNull(job.jobGeo()));
+        offer.setDescription(StringUtils.firstNonBlank(stripHtml(job.jobDescription()), stripHtml(job.jobExcerpt())));
         // Canonical Jobicy URL, required by their attribution terms.
-        offer.setApplyUrl(blankToNull(job.path("url").asText(null)));
-        offer.setSourceId(blankToNull(job.path("id").asText(null)));
+        offer.setApplyUrl(StringUtils.trimToNull(job.url()));
+        offer.setSourceId(job.id() == null ? null : String.valueOf(job.id()));
         offer.setSource(JobSource.JOBICY);
-        offer.setContractType(firstOfArray(job.path("jobType")));
-        offer.setExperienceLevel(blankToNull(job.path("jobLevel").asText(null)));
+        offer.setContractType(first(job.jobType()));
+        offer.setExperienceLevel(StringUtils.trimToNull(job.jobLevel()));
         offer.setRemote(true);
-        offer.setPublishedAt(parseDate(job.path("pubDate").asText(null)));
+        offer.setPublishedAt(AtsDates.parse(job.pubDate()));
         applySalary(offer, job);
         return offer;
-    }
-
-    private String description(JsonNode job) {
-        String full = stripHtml(job.path("jobDescription").asText(""));
-        return full.isBlank() ? stripHtml(job.path("jobExcerpt").asText("")) : full;
     }
 
     /**
      * Same rule as the other connectors: only yearly amounts are stored, so the salary component of
      * the match score never compares an hourly rate with an annual package.
      */
-    private void applySalary(JobOffer offer, JsonNode job) {
-        String period = job.path("salaryPeriod").asText("");
-        if (!YEARLY.equalsIgnoreCase(period) && !"annual".equalsIgnoreCase(period)) {
+    private void applySalary(JobOffer offer, JobicyJob job) {
+        if (!StringUtils.equalsAnyIgnoreCase(job.salaryPeriod(), YEARLY_PERIODS)) {
             return;
         }
-        Integer min = intOrNull(job.path("salaryMin"));
-        Integer max = intOrNull(job.path("salaryMax"));
+        Integer min = positiveOrNull(job.salaryMin());
+        Integer max = positiveOrNull(job.salaryMax());
         if (min == null && max == null) {
             return;
         }
         offer.setSalaryMin(min);
         offer.setSalaryMax(max);
-        offer.setSalaryCurrency(blankToNull(job.path("salaryCurrency").asText(null)));
+        offer.setSalaryCurrency(StringUtils.trimToNull(job.salaryCurrency()));
     }
 
-    private static Integer intOrNull(JsonNode node) {
-        if (node.isMissingNode() || node.isNull()) {
-            return null;
-        }
-        double value = node.asDouble(0);
-        return value <= 0 ? null : (int) Math.round(value);
+    private static Integer positiveOrNull(Integer value) {
+        return value == null || value <= 0 ? null : value;
     }
 
-    private static String firstOfArray(JsonNode array) {
-        return array.isArray() && !array.isEmpty() ? blankToNull(array.get(0).asText(null)) : null;
-    }
-
-    private Instant parseDate(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            // pubDate carries an offset: 2026-08-12T14:19:54+00:00
-            return OffsetDateTime.parse(value).toInstant();
-        } catch (Exception e) {
-            try {
-                return Instant.parse(value);
-            } catch (Exception ignored) {
-                return null;
-            }
-        }
-    }
-
-    private static String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value;
-    }
-
-    private String stripHtml(String html) {
-        return html == null || html.isBlank() ? "" : Jsoup.parse(html).text();
+    private static String first(List<String> values) {
+        return values == null || values.isEmpty() ? null : StringUtils.trimToNull(values.getFirst());
     }
 }

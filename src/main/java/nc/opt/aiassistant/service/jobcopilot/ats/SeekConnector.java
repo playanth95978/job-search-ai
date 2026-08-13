@@ -6,7 +6,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
@@ -25,11 +24,18 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @ConditionalOnProperty(prefix = "application.job-copilot.seek", name = "enabled", havingValue = "true")
-@RequiredArgsConstructor
-public class SeekConnector implements AtsConnector {
+public final class SeekConnector extends AbstractAtsConnector {
 
     private static final String SEEK_BASE = "https://www.seek.com.au";
-    private final ObjectMapper objectMapper;
+
+    public SeekConnector(
+        @org.springframework.beans.factory.annotation.Qualifier("atsRestClient") org.springframework.web.client.RestClient restClient,
+        @org.springframework.beans.factory.annotation.Qualifier("atsObjectMapper") ObjectMapper objectMapper
+    ) {
+        // Seek exposes no API: the connector reads the schema.org JSON-LD embedded in the HTML, whose
+        // shape varies per page — JsonNode stays the right tool there, records would not fit.
+        super(restClient, objectMapper);
+    }
 
     @Override
     public boolean supports(String url) {

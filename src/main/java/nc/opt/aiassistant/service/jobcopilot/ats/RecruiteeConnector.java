@@ -1,20 +1,19 @@
 package nc.opt.aiassistant.service.jobcopilot.ats;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
-import org.jsoup.Jsoup;
+import nc.opt.aiassistant.service.jobcopilot.ats.support.AtsDates;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -30,23 +29,53 @@ import org.springframework.web.client.RestClient;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class RecruiteeConnector implements AtsConnector {
+public final class RecruiteeConnector extends AbstractAtsConnector {
 
     /** Careers-site host: {company}.recruitee.com — the subdomain is the company slug. */
     private static final Pattern SUBDOMAIN = Pattern.compile("https?://([^./]+)\\.recruitee\\.com");
     /** Offer URL: {company}.recruitee.com/o/{slug} (public) or /offers/{id}. */
     private static final Pattern OFFER_SLUG = Pattern.compile("recruitee\\.com/o/([^/?#]+)");
 
-    private final ObjectMapper objectMapper;
+    private static final String PUBLISHED = "published";
 
     /** Comma-separated Recruitee company subdomains crawled by the ingestion; blank = pasted URLs only. */
     @Value("${application.job-copilot.recruitee.companies:}")
     private String companiesCsv;
 
+    public RecruiteeConnector(@Qualifier("atsRestClient") RestClient restClient, @Qualifier("atsObjectMapper") ObjectMapper objectMapper) {
+        super(restClient, objectMapper);
+    }
+
+    // --- Payload ------------------------------------------------------------------------------
+
+    record RecruiteeOffers(List<RecruiteeOffer> offers) {}
+
+    record RecruiteeOffer(
+        Long id,
+        String slug,
+        String title,
+        String status,
+        String description,
+        String requirements,
+        Boolean remote,
+        @JsonProperty("employment_type_code") String employmentTypeCode,
+        @JsonProperty("experience_code") String experienceCode,
+        List<RecruiteeLocation> locations,
+        RecruiteeSalary salary,
+        @JsonProperty("careers_url") String careersUrl,
+        @JsonProperty("careers_apply_url") String careersApplyUrl,
+        @JsonProperty("published_at") String publishedAt
+    ) {}
+
+    record RecruiteeLocation(String city, String country, @JsonProperty("country_code") String countryCode, String state) {}
+
+    record RecruiteeSalary(Integer min, Integer max, String currency, String period) {}
+
+    // --- Connector ----------------------------------------------------------------------------
+
     @Override
     public boolean supports(String url) {
-        return url != null && url.contains("recruitee.com");
+        return StringUtils.contains(url, "recruitee.com");
     }
 
     @Override
@@ -61,7 +90,7 @@ public class RecruiteeConnector implements AtsConnector {
         }
         String company = companyOf(url);
         Matcher slug = OFFER_SLUG.matcher(url);
-        return slug.find() ? new PostingRef(company.isBlank() ? null : company, slug.group(1)) : null;
+        return slug.find() ? new PostingRef(StringUtils.trimToNull(company), slug.group(1)) : null;
     }
 
     /** Board-based ATS: no cross-company search endpoint, so keyword search is a no-op. */
@@ -73,43 +102,28 @@ public class RecruiteeConnector implements AtsConnector {
     @Override
     public List<JobOffer> fetchFromUrl(String url) {
         String company = companyOf(url);
-        return company.isBlank() ? List.of() : fetchFromCompany(company);
+        return StringUtils.isBlank(company) ? List.of() : fetchFromCompany(company);
     }
 
     /** Fetches every published offer of the configured companies (ingestion entry point). */
     public List<JobOffer> fetchConfiguredCompanies() {
-        List<String> companies = Arrays.stream(companiesCsv.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isBlank())
-            .toList();
-        if (companies.isEmpty()) {
-            return List.of();
-        }
         List<JobOffer> all = new ArrayList<>();
-        companies.forEach(company -> all.addAll(fetchFromCompany(company)));
+        csv(companiesCsv).forEach(company -> all.addAll(fetchFromCompany(company)));
         return all;
     }
 
     public List<JobOffer> fetchFromCompany(String company) {
-        List<JobOffer> results = new ArrayList<>();
-        try {
-            String body = RestClient.create()
-                .get()
-                .uri("https://" + company + ".recruitee.com/api/offers/")
-                .retrieve()
-                .body(String.class);
-
-            JsonNode root = objectMapper.readTree(body);
-            for (JsonNode offer : root.path("offers")) {
-                if (!"published".equalsIgnoreCase(offer.path("status").asText(""))) {
-                    continue;
-                }
-                results.add(mapJobOffer(offer, company));
-            }
-        } catch (Exception e) {
-            log.error("Recruitee fetch failed for company={}: {}", company, e.getMessage());
+        RecruiteeOffers payload = getJson("https://" + company + ".recruitee.com/api/offers/", RecruiteeOffers.class);
+        if (payload == null || payload.offers() == null) {
+            return List.of();
         }
-        return results;
+        return payload
+            .offers()
+            .stream()
+            .filter(Objects::nonNull)
+            .filter(offer -> StringUtils.equalsIgnoreCase(offer.status(), PUBLISHED))
+            .map(offer -> mapJobOffer(offer, company))
+            .toList();
     }
 
     private String companyOf(String url) {
@@ -117,99 +131,61 @@ public class RecruiteeConnector implements AtsConnector {
         return m.find() && !"www".equals(m.group(1)) ? m.group(1) : "";
     }
 
-    JobOffer mapJobOffer(JsonNode offer, String company) {
+    JobOffer mapJobOffer(RecruiteeOffer offer, String company) {
         JobOffer job = new JobOffer();
-        job.setTitle(offer.path("title").asText(""));
+        job.setTitle(StringUtils.defaultString(offer.title()));
         job.setCompany(company);
         job.setLocation(buildLocation(offer));
-        job.setCountry(blankToNull(offer.path("locations").path(0).path("country_code").asText(null)));
+        job.setCountry(firstLocation(offer) == null ? null : StringUtils.trimToNull(firstLocation(offer).countryCode()));
         job.setDescription(buildDescription(offer));
-        job.setApplyUrl(firstNonBlank(offer.path("careers_apply_url").asText(null), offer.path("careers_url").asText(null)));
-        job.setSourceId(blankToNull(offer.path("id").asText(null)));
+        job.setApplyUrl(StringUtils.firstNonBlank(offer.careersApplyUrl(), offer.careersUrl()));
+        job.setSourceId(offer.id() == null ? null : String.valueOf(offer.id()));
         job.setSource(JobSource.RECRUITEE);
-        job.setContractType(blankToNull(offer.path("employment_type_code").asText(null)));
-        job.setExperienceLevel(blankToNull(offer.path("experience_code").asText(null)));
-        job.setRemote(offer.path("remote").asBoolean(false));
-        job.setPublishedAt(parseTimestamp(offer.path("published_at").asText(null)));
-        applySalary(job, offer.path("salary"));
+        job.setContractType(StringUtils.trimToNull(offer.employmentTypeCode()));
+        job.setExperienceLevel(StringUtils.trimToNull(offer.experienceCode()));
+        job.setRemote(BooleanUtils.isTrue(offer.remote()));
+        job.setPublishedAt(AtsDates.parse(offer.publishedAt()));
+        applySalary(job, offer.salary());
         return job;
     }
 
-    private String buildLocation(JsonNode offer) {
-        JsonNode first = offer.path("locations").path(0);
-        List<String> parts = new ArrayList<>();
-        addIfPresent(parts, first.path("city").asText(null));
-        addIfPresent(parts, first.path("country").asText(null));
-        return parts.isEmpty() ? null : String.join(", ", parts);
+    private RecruiteeLocation firstLocation(RecruiteeOffer offer) {
+        return offer.locations() == null || offer.locations().isEmpty() ? null : offer.locations().getFirst();
     }
 
-    private String buildDescription(JsonNode offer) {
-        String description = stripHtml(offer.path("description").asText(""));
-        String requirements = stripHtml(offer.path("requirements").asText(""));
-        if (requirements.isBlank()) {
+    private String buildLocation(RecruiteeOffer offer) {
+        RecruiteeLocation first = firstLocation(offer);
+        if (first == null) {
+            return null;
+        }
+        Object[] parts = java.util.stream.Stream.of(first.city(), first.country()).filter(StringUtils::isNotBlank).toArray();
+        return parts.length == 0 ? null : StringUtils.join(parts, ", ");
+    }
+
+    private String buildDescription(RecruiteeOffer offer) {
+        String description = stripHtml(offer.description());
+        String requirements = stripHtml(offer.requirements());
+        if (StringUtils.isBlank(requirements)) {
             return description;
         }
-        return description.isBlank() ? requirements : description + "\n\n" + requirements;
+        return StringUtils.isBlank(description) ? requirements : description + "\n\n" + requirements;
     }
 
-    private void applySalary(JobOffer job, JsonNode salary) {
-        if (salary.isMissingNode() || salary.isNull()) {
+    private void applySalary(JobOffer job, RecruiteeSalary salary) {
+        if (salary == null) {
             return;
         }
-        Integer min = intOrNull(salary.path("min"));
-        Integer max = intOrNull(salary.path("max"));
+        Integer min = positiveOrNull(salary.min());
+        Integer max = positiveOrNull(salary.max());
         if (min == null && max == null) {
             return;
         }
         job.setSalaryMin(min);
         job.setSalaryMax(max);
-        job.setSalaryCurrency(blankToNull(salary.path("currency").asText(null)));
+        job.setSalaryCurrency(StringUtils.trimToNull(salary.currency()));
     }
 
-    private static Integer intOrNull(JsonNode node) {
-        if (node.isMissingNode() || node.isNull()) {
-            return null;
-        }
-        double value = node.asDouble(0);
-        return value <= 0 ? null : (int) Math.round(value);
-    }
-
-    private Instant parseTimestamp(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return Instant.parse(value);
-        } catch (Exception e) {
-            try {
-                // Recruitee also returns zone-less timestamps (2026-07-30T09:12:00).
-                return LocalDateTime.parse(value).toInstant(ZoneOffset.UTC);
-            } catch (Exception ignored) {
-                return null;
-            }
-        }
-    }
-
-    private static void addIfPresent(List<String> parts, String value) {
-        if (value != null && !value.isBlank()) {
-            parts.add(value);
-        }
-    }
-
-    private static String firstNonBlank(String... values) {
-        for (String value : values) {
-            if (value != null && !value.isBlank()) {
-                return value;
-            }
-        }
-        return null;
-    }
-
-    private static String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value;
-    }
-
-    private String stripHtml(String html) {
-        return html == null || html.isBlank() ? "" : Jsoup.parse(html).text();
+    private static Integer positiveOrNull(Integer value) {
+        return value == null || value <= 0 ? null : value;
     }
 }

@@ -1,28 +1,17 @@
 package nc.opt.aiassistant.service.jobcopilot.ats;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HexFormat;
 import java.util.List;
-import java.util.Locale;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
-import org.jsoup.Jsoup;
+import nc.opt.aiassistant.service.jobcopilot.ats.support.AtsDates;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,25 +24,24 @@ import reactor.core.publisher.Flux;
  * ({@code Base64(apiKey + ":")}). The API <strong>requires</strong> {@code user_ip} and
  * {@code user_agent} to be forwarded — they identify the end user whose action triggered the call —
  * plus a {@code Referer} header matching the site declared on the Careerjet account (undocumented,
- * but enforced: without it the API answers 403 "Undeclared referrer").
- * The market is chosen with {@code locale_code} (fr_FR, en_AU, en_GB…), which is how Careerjet
- * partitions its index. Without a key the connector degrades to a no-op.</p>
+ * but enforced: without it the API answers 403 "Undeclared referrer"). The account also whitelists
+ * the calling server's IP. The market is chosen with {@code locale_code} (fr_FR, en_AU, en_GB…),
+ * which is how Careerjet partitions its index. Missing credentials degrade the connector to a no-op.</p>
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class CareerjetConnector implements AtsConnector {
+public final class CareerjetConnector extends AbstractAtsConnector {
 
     private static final String API_BASE = "https://search.api.careerjet.net/v4/query";
 
-    /** Salary period codes returned by the API: Y(early), M(onthly), W(eekly), D(aily), H(ourly). */
+    /** Salary period codes: Y(early), M(onthly), W(eekly), D(aily), H(ourly). */
     private static final String YEARLY = "Y";
 
-    /** Dates come back in full RFC 1123 form: "Tue, 11 Aug 2026 05:04:02 GMT". */
-    private static final DateTimeFormatter RFC_DATE = DateTimeFormatter.RFC_1123_DATE_TIME.withLocale(Locale.ENGLISH);
+    /** The API caps the page parameter at 10. */
+    private static final int MAX_PAGE = 10;
 
     /** Market → locale_code mapping for the country-aware search used by the job-search service. */
-    private static final java.util.Map<String, String> LOCALE_BY_COUNTRY = java.util.Map.of(
+    private static final Map<String, String> LOCALE_BY_COUNTRY = Map.of(
         "fr",
         "fr_FR",
         "au",
@@ -69,17 +57,6 @@ public class CareerjetConnector implements AtsConnector {
         "nz",
         "en_NZ"
     );
-
-    /** MessageDigest is not thread-safe and connectors are shared singletons. */
-    private static final ThreadLocal<MessageDigest> DIGEST = ThreadLocal.withInitial(() -> {
-        try {
-            return MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
-    });
-
-    private final ObjectMapper objectMapper;
 
     @Value("${application.job-copilot.careerjet.api-key:}")
     private String apiKey;
@@ -102,17 +79,44 @@ public class CareerjetConnector implements AtsConnector {
     @Value("${application.job-copilot.careerjet.referer:}")
     private String referer;
 
-    /** 1..100, per the API. */
+    /** Sent as documented, but observed to be ignored: the API always returns 20 results per page. */
     @Value("${application.job-copilot.careerjet.page-size:50}")
     private int pageSize;
 
-    /** 1..10, per the API. */
     @Value("${application.job-copilot.careerjet.max-pages:5}")
     private int maxPages;
 
+    public CareerjetConnector(@Qualifier("atsRestClient") RestClient restClient, @Qualifier("atsObjectMapper") ObjectMapper objectMapper) {
+        super(restClient, objectMapper);
+    }
+
+    // --- Payload ------------------------------------------------------------------------------
+
+    record CareerjetResponse(String type, String message, Integer hits, Integer pages, List<CareerjetJob> jobs) {}
+
+    record CareerjetJob(
+        String title,
+        String company,
+        String date,
+        String description,
+        String locations,
+        String salary,
+        String site,
+        String url,
+        @JsonProperty("salary_min") Double salaryMin,
+        @JsonProperty("salary_max") Double salaryMax,
+        @JsonProperty("salary_type") String salaryType,
+        @JsonProperty("salary_currency_code") String salaryCurrencyCode
+    ) {}
+
+    /** One page of results plus the total page count the API reports for the query. */
+    private record PageResult(List<JobOffer> offers, int pages) {}
+
+    // --- Connector ----------------------------------------------------------------------------
+
     @Override
     public boolean supports(String url) {
-        return url != null && url.contains("careerjet.");
+        return StringUtils.contains(url, "careerjet.");
     }
 
     @Override
@@ -121,15 +125,15 @@ public class CareerjetConnector implements AtsConnector {
     }
 
     private boolean configured() {
-        if (apiKey.isBlank()) {
+        if (StringUtils.isBlank(apiKey)) {
             log.warn("Careerjet API key not configured (application.job-copilot.careerjet.api-key)");
             return false;
         }
-        if (userIp.isBlank()) {
+        if (StringUtils.isBlank(userIp)) {
             log.warn("Careerjet requires user_ip (application.job-copilot.careerjet.user-ip) — connector disabled");
             return false;
         }
-        if (referer.isBlank()) {
+        if (StringUtils.isBlank(referer)) {
             log.warn("Careerjet requires a declared Referer (application.job-copilot.careerjet.referer) — connector disabled");
             return false;
         }
@@ -157,8 +161,7 @@ public class CareerjetConnector implements AtsConnector {
         return Flux.<List<JobOffer>, Integer>generate(
             () -> 1,
             (page, sink) -> {
-                // The API caps `page` at 10.
-                if (page > Math.min(maxPages, 10)) {
+                if (page > Math.min(maxPages, MAX_PAGE)) {
                     sink.complete();
                     return page;
                 }
@@ -175,79 +178,66 @@ public class CareerjetConnector implements AtsConnector {
                 }
                 return page + 1;
             }
-        ).flatMapIterable(p -> p);
+        ).flatMapIterable(offers -> offers);
     }
 
     /** Careerjet partitions its index by locale, so a market code selects the right one. */
     private String localeFor(String country) {
-        if (country == null || country.isBlank()) {
-            return localeCode;
-        }
-        return LOCALE_BY_COUNTRY.getOrDefault(country.toLowerCase(), localeCode);
+        return StringUtils.isBlank(country) ? localeCode : LOCALE_BY_COUNTRY.getOrDefault(StringUtils.lowerCase(country), localeCode);
     }
-
-    /** One page of results plus the total page count the API reports for the query. */
-    private record PageResult(List<JobOffer> offers, int pages) {}
 
     private PageResult fetchPage(String keywords, String location, int page, String locale) {
-        List<JobOffer> results = new ArrayList<>();
-        int pages = 0;
-        try {
-            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_BASE)
-                .queryParam("locale_code", locale)
-                .queryParam("user_ip", userIp)
-                .queryParam("user_agent", userAgent)
-                .queryParam("page", page)
-                .queryParam("page_size", Math.clamp(pageSize, 1, 100));
-            if (keywords != null && !keywords.isBlank()) {
-                builder.queryParam("keywords", keywords);
-            }
-            if (location != null && !location.isBlank()) {
-                builder.queryParam("location", location);
-            }
-            URI uri = builder.build().encode().toUri();
-
-            String body = RestClient.create()
-                .get()
-                .uri(uri)
-                .header(HttpHeaders.AUTHORIZATION, basicAuth())
-                .header(HttpHeaders.REFERER, referer)
-                .retrieve()
-                .body(String.class);
-
-            JsonNode root = objectMapper.readTree(body);
-            String type = root.path("type").asText("");
-            if (!"JOBS".equals(type)) {
-                log.warn("Careerjet returned type='{}' ({})", type, root.path("message").asText(""));
-                return new PageResult(results, 0);
-            }
-            pages = root.path("pages").asInt(0);
-            for (JsonNode job : root.path("jobs")) {
-                results.add(mapJobOffer(job, locale));
-            }
-        } catch (Exception e) {
-            log.error("Careerjet fetch failed (keywords='{}', page={}): {}", keywords, page, e.getMessage());
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_BASE)
+            .queryParam("locale_code", locale)
+            .queryParam("user_ip", userIp)
+            .queryParam("user_agent", userAgent)
+            .queryParam("page", page)
+            .queryParam("page_size", Math.clamp(pageSize, 1, 100));
+        if (StringUtils.isNotBlank(keywords)) {
+            builder.queryParam("keywords", keywords);
         }
-        return new PageResult(results, pages);
+        if (StringUtils.isNotBlank(location)) {
+            builder.queryParam("location", location);
+        }
+
+        CareerjetResponse response = getJson(
+            builder.build().encode().toUriString(),
+            CareerjetResponse.class,
+            headers(AUTHORIZATION, basicAuth(apiKey, ""), REFERER, referer)
+        );
+        if (response == null) {
+            return new PageResult(List.of(), 0);
+        }
+        if (!"JOBS".equals(response.type())) {
+            log.warn("Careerjet returned type='{}' ({})", response.type(), StringUtils.defaultString(response.message()));
+            return new PageResult(List.of(), 0);
+        }
+        List<JobOffer> offers =
+            response.jobs() == null
+                ? List.of()
+                : response
+                      .jobs()
+                      .stream()
+                      .filter(Objects::nonNull)
+                      .map(job -> mapJobOffer(job, locale))
+                      .toList();
+        return new PageResult(offers, response.pages() == null ? 0 : response.pages());
     }
 
-    /** Basic auth with an empty password, as documented: {@code Base64(api_key:)}. */
-    private String basicAuth() {
-        String token = Base64.getEncoder().encodeToString((apiKey + ":").getBytes(StandardCharsets.UTF_8));
-        return "Basic " + token;
-    }
-
-    JobOffer mapJobOffer(JsonNode job, String locale) {
+    JobOffer mapJobOffer(CareerjetJob job, String locale) {
         JobOffer offer = new JobOffer();
-        offer.setTitle(job.path("title").asText(""));
-        offer.setCompany(blankToNull(job.path("company").asText(null)));
-        offer.setLocation(blankToNull(job.path("locations").asText(null)));
-        offer.setDescription(stripHtml(job.path("description").asText("")));
-        offer.setApplyUrl(blankToNull(job.path("url").asText(null)));
+        offer.setTitle(StringUtils.defaultString(job.title()));
+        offer.setCompany(StringUtils.trimToNull(job.company()));
+        offer.setLocation(StringUtils.trimToNull(job.locations()));
+        offer.setDescription(stripHtml(job.description()));
+        offer.setApplyUrl(StringUtils.trimToNull(job.url()));
         offer.setSource(JobSource.CAREERJET);
-        offer.setSourceId(stableId(job));
+        // Careerjet exposes no id, and `url` is a signed jobviewtrack redirect that changes on every
+        // call — using it as the identity would re-create every offer at each ingestion, since
+        // deduplication keys on (source, sourceId). The posting's own invariants are hashed instead.
+        offer.setSourceId(stableId(job.title(), job.company(), job.locations(), job.date()));
         offer.setCountry(countryOf(locale));
-        offer.setPublishedAt(parseDate(job.path("date").asText(null)));
+        offer.setPublishedAt(AtsDates.parse(job.date()));
         applySalary(offer, job);
         offer.setRemote(detectRemote(offer.getTitle(), offer.getLocation(), offer.getDescription()));
         return offer;
@@ -258,84 +248,27 @@ public class CareerjetConnector implements AtsConnector {
      * amounts *for the given period*, and storing an hourly rate in the same column as an annual one
      * would corrupt the salary-based part of the matching score.
      */
-    private void applySalary(JobOffer offer, JsonNode job) {
-        if (!YEARLY.equals(job.path("salary_type").asText(null))) {
+    private void applySalary(JobOffer offer, CareerjetJob job) {
+        if (!YEARLY.equals(job.salaryType())) {
             return;
         }
-        Integer min = intOrNull(job.path("salary_min"));
-        Integer max = intOrNull(job.path("salary_max"));
+        Integer min = positiveOrNull(job.salaryMin());
+        Integer max = positiveOrNull(job.salaryMax());
         if (min == null && max == null) {
             return;
         }
         offer.setSalaryMin(min);
         offer.setSalaryMax(max);
-        offer.setSalaryCurrency(blankToNull(job.path("salary_currency_code").asText(null)));
+        offer.setSalaryCurrency(StringUtils.trimToNull(job.salaryCurrencyCode()));
     }
 
-    private static Integer intOrNull(JsonNode node) {
-        if (node.isMissingNode() || node.isNull()) {
-            return null;
-        }
-        double value = node.asDouble(0);
-        return value <= 0 ? null : (int) Math.round(value);
-    }
-
-    /**
-     * Careerjet exposes no id, and {@code url} is a signed jobviewtrack redirect that <b>changes on
-     * every call</b> — using it as the identity would re-create every offer at each ingestion, since
-     * deduplication keys on (source, sourceId). The posting's own invariants are hashed instead.
-     */
-    private String stableId(JsonNode job) {
-        String seed = String.join(
-            "|",
-            job.path("title").asText(""),
-            job.path("company").asText(""),
-            job.path("locations").asText(""),
-            job.path("date").asText("")
-        );
-        return HexFormat.of()
-            .formatHex(DIGEST.get().digest(seed.getBytes(StandardCharsets.UTF_8)))
-            .substring(0, 32);
+    private static Integer positiveOrNull(Double value) {
+        return value == null || value <= 0 ? null : (int) Math.round(value);
     }
 
     /** locale_code is language_COUNTRY (fr_FR) — the ISO country is what the offer carries. */
     private static String countryOf(String locale) {
-        int underscore = locale == null ? -1 : locale.indexOf('_');
-        return underscore > 0 ? locale.substring(underscore + 1).toUpperCase() : null;
-    }
-
-    private Instant parseDate(String date) {
-        if (date == null || date.isBlank()) {
-            return null;
-        }
-        try {
-            return ZonedDateTime.parse(date, RFC_DATE).toInstant();
-        } catch (Exception e) {
-            try {
-                // Some locales return a plain ISO date instead.
-                return LocalDate.parse(date).atStartOfDay(ZoneOffset.UTC).toInstant();
-            } catch (Exception ignored) {
-                return null;
-            }
-        }
-    }
-
-    private static String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value;
-    }
-
-    private String stripHtml(String html) {
-        return html == null || html.isBlank() ? "" : Jsoup.parse(html).text();
-    }
-
-    private boolean detectRemote(String title, String location, String description) {
-        String haystack = (
-            (title == null ? "" : title) +
-            " " +
-            (location == null ? "" : location) +
-            " " +
-            (description == null ? "" : description)
-        ).toLowerCase();
-        return haystack.contains("remote") || haystack.contains("télétravail") || haystack.contains("teletravail");
+        String country = StringUtils.substringAfter(StringUtils.defaultString(locale), "_");
+        return StringUtils.isBlank(country) ? null : StringUtils.upperCase(country);
     }
 }

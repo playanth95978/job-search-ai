@@ -4,7 +4,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
@@ -16,10 +15,18 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class HelloWorkConnector implements AtsConnector {
+public final class HelloWorkConnector extends AbstractAtsConnector {
 
     private static final String SEARCH_URL = "https://www.hellowork.com/fr-fr/emploi/recherche.html";
+
+    public HelloWorkConnector(
+        @org.springframework.beans.factory.annotation.Qualifier("atsRestClient") org.springframework.web.client.RestClient restClient,
+        @org.springframework.beans.factory.annotation.Qualifier("atsObjectMapper") com.fasterxml.jackson.databind.ObjectMapper objectMapper
+    ) {
+        // HelloWork has no public API: the connector scrapes the search page with Jsoup, so the
+        // shared client is unused here — it is injected to keep one construction contract for all.
+        super(restClient, objectMapper);
+    }
 
     @Override
     public boolean supports(String url) {

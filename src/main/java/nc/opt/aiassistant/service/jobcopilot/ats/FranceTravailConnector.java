@@ -1,43 +1,44 @@
 package nc.opt.aiassistant.service.jobcopilot.ats;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.URI;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
+import nc.opt.aiassistant.service.jobcopilot.ats.support.AtsDates;
+import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
+/**
+ * Connector for the France Travail "Offres d'emploi v2" API (OAuth2 client-credentials).
+ *
+ * <p>Paging goes through the {@code range=start-end} parameter; the API caps a query at 3150 results,
+ * hence the ROME grand-domaine partitioning used by the ingestion batch.</p>
+ */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class FranceTravailConnector implements AtsConnector {
+public final class FranceTravailConnector extends AbstractAtsConnector {
 
     private static final String API_BASE = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
-    /** A full page of 150 offers exceeds WebClient's default 256 KB in-memory buffer, so raise it. */
-    private static final int MAX_IN_MEMORY_BYTES = 16 * 1024 * 1024;
+    private static final String TOKEN_URL = "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire";
 
-    private final ObjectMapper objectMapper;
-    private final org.springframework.web.reactive.function.client.WebClient.Builder webClientBuilder;
-    private org.springframework.web.reactive.function.client.WebClient webClient;
-
-    /** Lazily builds a WebClient with an enlarged buffer; cloned so the shared builder is untouched. */
-    private org.springframework.web.reactive.function.client.WebClient webClient() {
-        if (webClient == null) {
-            webClient = webClientBuilder
-                .clone()
-                .codecs(c -> c.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_BYTES))
-                .build();
-        }
-        return webClient;
-    }
+    private static final int DEFAULT_PAGE_SIZE = 50;
+    private static final int BATCH_PAGE_SIZE = 150;
+    /** API hard cap: the range value cannot exceed 3149. */
+    private static final int MAX_RESULTS = 3150;
+    /** Renew slightly before expiry so a long page never runs with a stale token. */
+    private static final int TOKEN_RENEWAL_MARGIN_SECONDS = 60;
 
     @Value("${application.job-copilot.france-travail.client-id:}")
     private String clientId;
@@ -46,11 +47,46 @@ public class FranceTravailConnector implements AtsConnector {
     private String clientSecret;
 
     private String cachedToken;
-    private java.time.Instant tokenExpiry;
+    private Instant tokenExpiry;
+
+    public FranceTravailConnector(
+        @Qualifier("atsRestClient") RestClient restClient,
+        @Qualifier("atsObjectMapper") ObjectMapper objectMapper
+    ) {
+        super(restClient, objectMapper);
+    }
+
+    // --- Payload ------------------------------------------------------------------------------
+
+    record FranceTravailSearch(List<FranceTravailOffer> resultats) {}
+
+    record FranceTravailOffer(
+        String id,
+        String intitule,
+        String description,
+        String typeContrat,
+        String dateCreation,
+        FranceTravailEntreprise entreprise,
+        FranceTravailLieu lieuTravail,
+        FranceTravailOrigine origineOffre,
+        FranceTravailSalaire salaire
+    ) {}
+
+    record FranceTravailEntreprise(String nom) {}
+
+    record FranceTravailLieu(String libelle, String codePostal) {}
+
+    record FranceTravailOrigine(String urlOrigine) {}
+
+    record FranceTravailSalaire(String libelle) {}
+
+    record FranceTravailToken(@JsonProperty("access_token") String accessToken, @JsonProperty("expires_in") Integer expiresIn) {}
+
+    // --- Connector ----------------------------------------------------------------------------
 
     @Override
     public boolean supports(String url) {
-        return url != null && url.contains("francetravail");
+        return StringUtils.contains(url, "francetravail");
     }
 
     @Override
@@ -58,230 +94,160 @@ public class FranceTravailConnector implements AtsConnector {
         return JobSource.FRANCE_TRAVAIL;
     }
 
+    private boolean configured() {
+        if (StringUtils.isAnyBlank(clientId, clientSecret)) {
+            log.warn("France Travail API credentials not configured");
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
-        if (clientId.isBlank() || clientSecret.isBlank()) {
-            log.warn("France Travail API credentials not configured");
-            return List.of();
-        }
-
-        List<JobOffer> results = new ArrayList<>();
-        try {
-            String token = getAccessToken();
-            RestClient client = RestClient.create();
-            String body = client
-                .get()
-                .uri(API_BASE + "?motsCles=" + (keywords != null ? keywords : "") + "&range=0-49")
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .body(String.class);
-
-            JsonNode root = readResponse(body);
-            for (JsonNode r : root.path("resultats")) {
-                JobOffer jobOffer = mapJobOffer(r);
-                results.add(jobOffer);
-            }
-        } catch (Exception e) {
-            log.error("France Travail fetch failed: {}", e.getMessage());
-        }
-        return results;
-    }
-
-    /**
-     * L'API France Travail répond <b>204 No Content</b> (corps vide) quand la recherche ne ramène
-     * aucune offre. {@code readTree(null)} lèverait alors {@code argument "content" is null} : on
-     * renvoie un noeud vide, que les appelants interprètent comme « page sans résultat ».
-     */
-    private JsonNode readResponse(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
-        if (body == null || body.isBlank()) {
-            return objectMapper.createObjectNode();
-        }
-        return objectMapper.readTree(body);
-    }
-
-    private JobOffer mapJobOffer(JsonNode r) {
-        JobOffer offer = new JobOffer();
-        offer.setTitle(r.path("intitule").asText());
-        offer.setCompany(r.path("entreprise").path("nom").asText(null));
-        offer.setLocation(r.path("lieuTravail").path("libelle").asText(null));
-        offer.setDescription(r.path("description").asText(""));
-        offer.setContractType(r.path("typeContrat").asText(null));
-        offer.setApplyUrl(r.path("origineOffre").path("urlOrigine").asText(null));
-        offer.setSourceId(r.path("id").asText());
-        offer.setSource(JobSource.FRANCE_TRAVAIL);
-        offer.setRemote(false);
-
-        JsonNode sal = r.path("salaire");
-        if (!sal.isMissingNode() && sal.has("libelle")) {
-            parseSalary(sal.path("libelle").asText(""), offer);
-        }
-        return offer;
-    }
-
-    private synchronized String getAccessToken() {
-        if (cachedToken != null && tokenExpiry != null && tokenExpiry.isAfter(java.time.Instant.now().plusSeconds(60))) {
-            return cachedToken;
-        }
-
-        RestClient client = RestClient.create();
-        String body = client
-            .post()
-            .uri("https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire")
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(
-                "grant_type=client_credentials&client_id=" +
-                    clientId +
-                    "&client_secret=" +
-                    clientSecret +
-                    "&scope=api_offresdemploiv2 o2dsoffre"
-            )
-            .retrieve()
-            .body(String.class);
-        try {
-            JsonNode node = objectMapper.readTree(body);
-            cachedToken = node.path("access_token").asText();
-            int expiresIn = node.path("expires_in").asInt(3600);
-            tokenExpiry = java.time.Instant.now().plusSeconds(expiresIn);
-            return cachedToken;
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to get France Travail token", e);
-        }
+        return configured() ? fetchRange(keywords, location, null, 0, DEFAULT_PAGE_SIZE) : List.of();
     }
 
     @Override
     public Flux<JobOffer> fetchJobsPaginated(String keywords, String location) {
-        if (clientId.isBlank() || clientSecret.isBlank()) {
-            return Flux.empty();
-        }
-
-        final int pageSize = 50;
-        // Flux.generate allows at most one sink.next() per call: emit one page (a List) per call and
-        // fan it out with flatMapIterable.
-        return Flux.<java.util.List<JobOffer>, Integer>generate(
-            () -> 0,
-            (start, sink) -> {
-                try {
-                    int end = start + pageSize - 1;
-                    String token = getAccessToken();
-                    // API_BASE is an absolute URL: build the full URI from it explicitly. Using the
-                    // WebClient UriBuilder's path(API_BASE) would drop scheme/host -> "Host is not specified".
-                    org.springframework.web.util.UriComponentsBuilder uriComponentsBuilder =
-                        org.springframework.web.util.UriComponentsBuilder.fromUriString(API_BASE)
-                            .queryParam("motsCles", keywords)
-                            .queryParam("range", start + "-" + end);
-                    if (location != null && !location.isBlank()) {
-                        uriComponentsBuilder.queryParam("codePostal", location);
-                    }
-                    java.net.URI uri = uriComponentsBuilder.build().toUri();
-                    String body = webClient()
-                        .get()
-                        .uri(uri)
-                        .header("Authorization", "Bearer " + token)
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .block();
-
-                    JsonNode root = readResponse(body);
-                    JsonNode results = root.path("resultats");
-                    if (results.isEmpty()) {
-                        sink.complete();
-                        return start;
-                    }
-                    java.util.List<JobOffer> page = new java.util.ArrayList<>();
-                    for (JsonNode r : results) {
-                        page.add(mapJobOffer(r));
-                    }
-                    sink.next(page);
-                    if (results.size() < pageSize) {
-                        sink.complete();
-                    }
-                    return start + pageSize;
-                } catch (Exception e) {
-                    sink.error(e);
-                    return start;
-                }
-            }
-        ).flatMapIterable(page -> page);
+        return configured() ? paginate(keywords, location, null, DEFAULT_PAGE_SIZE, Integer.MAX_VALUE) : Flux.empty();
     }
 
     /**
      * Paginates over a single ROME grand domaine (and optionally a département), for mass ingestion.
      *
-     * <p>Uses the maximum page size (150) and stops at the API's hard ceiling of 3150 results
-     * (range 0-3149); beyond that the API rejects the request. On any page error the partition ends
-     * gracefully (the other partitions keep running) rather than aborting the whole job.</p>
+     * <p>Uses the maximum page size (150) and stops at the API's hard ceiling of 3150 results; beyond
+     * that the API rejects the request. A failing page ends the partition gracefully — the other
+     * partitions keep running — rather than aborting the whole job.</p>
      */
     public Flux<JobOffer> fetchByGrandDomaine(String grandDomaine, String departement) {
-        if (clientId.isBlank() || clientSecret.isBlank()) {
-            log.warn("France Travail API credentials not configured");
-            return Flux.empty();
-        }
+        return configured() ? paginate(null, null, new Partition(grandDomaine, departement), BATCH_PAGE_SIZE, MAX_RESULTS) : Flux.empty();
+    }
 
-        final int pageSize = 150;
-        final int maxResults = 3150; // API hard cap: range value cannot exceed 3149
-        // Flux.generate allows at most one sink.next() per call: emit one page (a List) per call and
-        // fan it out with flatMapIterable.
-        return Flux.<java.util.List<JobOffer>, Integer>generate(
+    /** ROME grand domaine + optional INSEE département, the batch's partitioning key. */
+    private record Partition(String grandDomaine, String departement) {}
+
+    private Flux<JobOffer> paginate(String keywords, String location, Partition partition, int pageSize, int maxResults) {
+        return Flux.<List<JobOffer>, Integer>generate(
             () -> 0,
             (start, sink) -> {
                 if (start >= maxResults) {
                     sink.complete();
                     return start;
                 }
-                try {
-                    int end = Math.min(start + pageSize, maxResults) - 1;
-                    String token = getAccessToken();
-                    UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(API_BASE)
-                        .queryParam("grandDomaine", grandDomaine)
-                        .queryParam("range", start + "-" + end);
-                    if (departement != null && !departement.isBlank()) {
-                        uriComponentsBuilder.queryParam("departement", departement);
-                    }
-                    URI uri = uriComponentsBuilder.build().toUri();
-                    String body = webClient()
-                        .get()
-                        .uri(uri)
-                        .header("Authorization", "Bearer " + token)
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .block();
-
-                    JsonNode root = readResponse(body);
-                    JsonNode results = root.path("resultats");
-                    if (results.isEmpty()) {
-                        sink.complete();
-                        return start;
-                    }
-                    java.util.List<JobOffer> page = new java.util.ArrayList<>();
-                    for (JsonNode r : results) {
-                        page.add(mapJobOffer(r));
-                    }
-                    sink.next(page);
-                    if (results.size() < pageSize) {
-                        sink.complete();
-                    }
-                    return start + pageSize;
-                } catch (Exception e) {
-                    log.error(
-                        "France Travail page {} (grandDomaine={}, dep={}) failed: {}",
-                        start,
-                        grandDomaine,
-                        departement,
-                        e.getMessage()
-                    );
+                int size = Math.min(start + pageSize, maxResults) - start;
+                List<JobOffer> page = fetchRange(keywords, location, partition, start, size);
+                if (page.isEmpty()) {
                     sink.complete();
                     return start;
                 }
+                sink.next(page);
+                if (page.size() < pageSize) {
+                    sink.complete();
+                }
+                return start + pageSize;
             }
         ).flatMapIterable(page -> page);
     }
 
-    private void parseSalary(String libelle, JobOffer offer) {
+    private List<JobOffer> fetchRange(String keywords, String location, Partition partition, int start, int size) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_BASE).queryParam("range", start + "-" + (start + size - 1));
+        if (StringUtils.isNotBlank(keywords)) {
+            builder.queryParam("motsCles", keywords);
+        }
+        if (StringUtils.isNotBlank(location)) {
+            builder.queryParam("codePostal", location);
+        }
+        if (partition != null) {
+            builder.queryParam("grandDomaine", partition.grandDomaine());
+            if (StringUtils.isNotBlank(partition.departement())) {
+                builder.queryParam("departement", partition.departement());
+            }
+        }
+
+        String token = accessToken();
+        if (token == null) {
+            return List.of();
+        }
+        // The API answers 204 (empty body) when nothing matches: getJson returns null, i.e. "no page".
+        FranceTravailSearch search = getJson(
+            builder.build().encode().toUriString(),
+            FranceTravailSearch.class,
+            header(AUTHORIZATION, "Bearer " + token)
+        );
+        if (search == null || search.resultats() == null) {
+            return List.of();
+        }
+        return search.resultats().stream().filter(Objects::nonNull).map(this::mapJobOffer).toList();
+    }
+
+    /** OAuth2 client-credentials token, cached until shortly before expiry. */
+    private synchronized String accessToken() {
+        if (cachedToken != null && tokenExpiry != null && tokenExpiry.isAfter(Instant.now().plusSeconds(TOKEN_RENEWAL_MARGIN_SECONDS))) {
+            return cachedToken;
+        }
         try {
-            String cleaned = libelle.replaceAll("[^0-9\\-]", " ").trim();
-            String[] parts = cleaned.split("\\s+");
-            if (parts.length >= 1) offer.setSalaryMin(Integer.parseInt(parts[0]));
-            if (parts.length >= 2) offer.setSalaryMax(Integer.parseInt(parts[1]));
-        } catch (NumberFormatException ignored) {}
+            String form = UriComponentsBuilder.newInstance()
+                .queryParam("grant_type", "client_credentials")
+                .queryParam("client_id", clientId)
+                .queryParam("client_secret", clientSecret)
+                .queryParam("scope", "api_offresdemploiv2 o2dsoffre")
+                .build()
+                .encode()
+                .getQuery();
+
+            String body = restClient
+                .post()
+                .uri(TOKEN_URL)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(form)
+                .retrieve()
+                .body(String.class);
+
+            FranceTravailToken token = objectMapper.readValue(body, FranceTravailToken.class);
+            cachedToken = token.accessToken();
+            tokenExpiry = Instant.now().plusSeconds(token.expiresIn() == null ? 3600 : token.expiresIn());
+            return cachedToken;
+        } catch (Exception e) {
+            log.error("France Travail token request failed: {}", e.getMessage());
+            cachedToken = null;
+            tokenExpiry = null;
+            return null;
+        }
+    }
+
+    JobOffer mapJobOffer(FranceTravailOffer result) {
+        JobOffer offer = new JobOffer();
+        offer.setTitle(StringUtils.defaultString(result.intitule()));
+        offer.setCompany(result.entreprise() == null ? null : StringUtils.trimToNull(result.entreprise().nom()));
+        offer.setLocation(result.lieuTravail() == null ? null : StringUtils.trimToNull(result.lieuTravail().libelle()));
+        offer.setDescription(StringUtils.defaultString(result.description()));
+        offer.setContractType(StringUtils.trimToNull(result.typeContrat()));
+        offer.setApplyUrl(result.origineOffre() == null ? null : StringUtils.trimToNull(result.origineOffre().urlOrigine()));
+        offer.setSourceId(StringUtils.trimToNull(result.id()));
+        offer.setSource(JobSource.FRANCE_TRAVAIL);
+        offer.setRemote(false);
+        offer.setPublishedAt(AtsDates.parse(result.dateCreation()));
+        if (result.salaire() != null) {
+            applySalary(offer, result.salaire().libelle());
+        }
+        return offer;
+    }
+
+    /**
+     * {@code salaire.libelle} is free text ("Annuel de 35000,00 Euros à 45000,00 Euros"): the first
+     * two integers are taken as the range. Anything else leaves the salary columns empty.
+     */
+    private void applySalary(JobOffer offer, String libelle) {
+        if (StringUtils.isBlank(libelle)) {
+            return;
+        }
+        String[] parts = StringUtils.split(StringUtils.trim(RegExUtils.replaceAll(libelle, "[^0-9\\-]", " ")));
+        if (parts == null || parts.length == 0) {
+            return;
+        }
+        Integer min = NumberUtils.toInt(parts[0], -1) > 0 ? NumberUtils.toInt(parts[0]) : null;
+        Integer max = parts.length > 1 && NumberUtils.toInt(parts[1], -1) > 0 ? NumberUtils.toInt(parts[1]) : null;
+        offer.setSalaryMin(min);
+        offer.setSalaryMax(max);
     }
 }

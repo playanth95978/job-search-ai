@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nc.opt.aiassistant.service.jobcopilot.ats.AtsConnector.PostingRef;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.RestClient;
 
 /**
  * Couvre l'extraction de la référence de publication depuis une URL d'ATS, qui sert à récupérer le
@@ -15,10 +16,11 @@ import org.junit.jupiter.api.Test;
 class AtsConnectorRoutingTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private final RestClient restClient = RestClient.create();
 
     @Test
     void leverParsesSiteAndPostingIdFromApplyUrl() {
-        LeverConnector lever = new LeverConnector(mapper);
+        LeverConnector lever = new LeverConnector(restClient, mapper);
         String url = "https://jobs.lever.co/acme/12345678-1234-1234-1234-123456789abc/apply";
 
         PostingRef ref = lever.parseRef(url);
@@ -32,7 +34,7 @@ class AtsConnectorRoutingTest {
 
     @Test
     void smartRecruitersParsesCompanyAndPostingId() {
-        SmartRecruitersConnector sr = new SmartRecruitersConnector(mapper);
+        SmartRecruitersConnector sr = new SmartRecruitersConnector(restClient, mapper);
         String url = "https://jobs.smartrecruiters.com/AcmeInc/743999912345678";
 
         assertThat(sr.parseRef(url).site()).isEqualTo("AcmeInc");
@@ -41,7 +43,7 @@ class AtsConnectorRoutingTest {
 
     @Test
     void greenhouseParsesBothBoardAndQueryParamUrls() {
-        GreenhouseConnector gh = new GreenhouseConnector(mapper);
+        GreenhouseConnector gh = new GreenhouseConnector(restClient, mapper);
 
         assertThat(gh.parseRef("https://boards.greenhouse.io/acme/jobs/456").postingId()).isEqualTo("456");
         assertThat(gh.parseRef("https://acme.com/careers?gh_jid=789").postingId()).isEqualTo("789");
