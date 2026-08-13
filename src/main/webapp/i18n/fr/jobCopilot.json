@@ -327,6 +327,13 @@
         "matchAdvanced": "Comme « Correspondances », en plus poussé : l'IA croise le sens et les mots-clés, puis relit chaque offre pour affiner le classement. Plus précis, un peu plus lent.",
         "fetchJobs": "Colle l'adresse de la page carrières d'une entreprise (Greenhouse, Lever…) pour importer ses offres. Sans IA : récupération directe.",
         "toggle": "Afficher l'aide sur les boutons de recherche"
+      },
+      "boards": {
+        "suggest": "Suggérer des boards selon mon profil",
+        "suggesting": "Recherche des boards…",
+        "hint": "Les entreprises sont proposées d'après votre CV, puis vérifiées sur l'ATS réel : seuls les boards qui répondent sont affichés.",
+        "fetch": "Chercher les offres",
+        "empty": "Aucun board public trouvé pour votre profil. Complétez votre CV, ou collez directement une URL ci-dessus."
       }
     },
     "dashboard": {

@@ -385,3 +385,13 @@ export interface CareerRoadmap {
   steps: RoadmapStep[];
   sampleOffers: JobOfferDto[];
 }
+
+/** Board ATS suggéré pour le profil du candidat — déjà vérifié côté serveur (slug et URL réels). */
+export interface BoardSuggestion {
+  company: string;
+  source: string;
+  slug: string;
+  boardUrl: string;
+  offerCount: number;
+  sampleTitles: string[];
+}

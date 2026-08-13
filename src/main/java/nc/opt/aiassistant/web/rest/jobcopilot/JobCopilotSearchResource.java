@@ -13,8 +13,10 @@ import nc.opt.aiassistant.service.criteria.JobOfferCriteria;
 import nc.opt.aiassistant.service.dto.JobOfferDTO;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferEnrichmentService;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferTranslationService;
+import nc.opt.aiassistant.service.jobcopilot.ats.AtsBoardSuggestionService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobOfferQueryService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobSearchService;
+import nc.opt.aiassistant.service.jobcopilot.dto.BoardSuggestionDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.matching.JobMatchingService;
 import nc.opt.aiassistant.web.rest.errors.BadRequestAlertException;
@@ -33,6 +35,7 @@ import tech.jhipster.web.util.PaginationUtil;
 public class JobCopilotSearchResource {
 
     private final JobSearchService jobSearchService;
+    private final AtsBoardSuggestionService boardSuggestionService;
     private final JobMatchingService matchingService;
     private final CandidateProfileRepository profileRepository;
     private final JobOfferEnrichmentService jobOfferEnrichmentService;
@@ -121,6 +124,17 @@ public class JobCopilotSearchResource {
     @PostMapping("/translate")
     public ResponseEntity<JobOffer> translate(@RequestBody JobOffer offer, @RequestParam String language) {
         return ResponseEntity.ok(jobOfferTranslationService.translate(offer, language));
+    }
+
+    /**
+     * {@code GET /jobs/boards/suggestions} : ATS boards worth watching for the signed-in candidate.
+     * Company names come from the model, but each entry is verified against the real ATS API before
+     * being returned — the UI never shows a slug that does not exist.
+     */
+    @GetMapping("/boards/suggestions")
+    public ResponseEntity<List<BoardSuggestionDto>> suggestBoards(@RequestParam(defaultValue = "6") int limit) {
+        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return ResponseEntity.ok(boardSuggestionService.suggestFor(userId, limit));
     }
 
     @PostMapping("/fetch")

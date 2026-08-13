@@ -7,6 +7,7 @@ import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import TranslateDirective from '../../../shared/language/translate.directive';
 import { ADZUNA_COUNTRIES, SEARCHABLE_JOB_SOURCES } from '../../shared/job-copilot.model';
 import { JobSearchCriteria } from '../job-search.types';
+import { BoardSuggestion } from '../../shared/job-copilot.model';
 
 /**
  * Search controls for the job-search page: keyword/ATS tabs, filters and action buttons. Signal-first
@@ -35,12 +36,19 @@ export class JobSearchFormComponent {
   readonly matching = input(false);
   readonly matchingAdvanced = input(false);
   readonly fetching = input(false);
+  readonly suggestingBoards = input(false);
+  /** Boards résolus pour le profil ; vide tant que l'utilisateur n'a pas lancé la suggestion. */
+  readonly boardSuggestions = input<BoardSuggestion[]>([]);
+  /** Vrai une fois la suggestion revenue, pour distinguer « pas encore lancé » de « aucun résultat ». */
+  readonly boardsSuggested = input(false);
 
   readonly search = output<JobSearchCriteria>();
   readonly smartSearch = output<JobSearchCriteria>();
   readonly matchAll = output<JobSearchCriteria>();
   readonly matchAdvanced = output<JobSearchCriteria>();
   readonly fetchUrl = output<string>();
+  /** Demande de suggestion de boards à partir du profil candidat. */
+  readonly suggestBoards = output();
 
   readonly sources = SEARCHABLE_JOB_SOURCES;
   readonly countries = ADZUNA_COUNTRIES;
@@ -83,5 +91,10 @@ export class JobSearchFormComponent {
   onFetch(): void {
     const url = this.atsUrl().trim();
     if (url) this.fetchUrl.emit(url);
+  }
+
+  /** Chaque suggestion réutilise le même flux que le collage d'URL : son boardUrl est déjà vérifié. */
+  onFetchBoard(board: BoardSuggestion): void {
+    this.fetchUrl.emit(board.boardUrl);
   }
 }

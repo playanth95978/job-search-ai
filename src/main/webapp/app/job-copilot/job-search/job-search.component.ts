@@ -8,7 +8,7 @@ import { SeoService } from 'app/pages/shared/seo.service';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
 import { AuthPromptModalComponent } from '../shared/auth-prompt-modal/auth-prompt-modal.component';
-import { JobOffer, JobOfferPreview, MatchResult } from '../shared/job-copilot.model';
+import { JobOffer, JobOfferPreview, MatchResult, BoardSuggestion } from '../shared/job-copilot.model';
 import TranslateDirective from '../../shared/language/translate.directive';
 import { JobSearchDetail } from './job-search-detail/job-search-detail';
 import { JobSearchFormComponent } from './job-search-form/job-search-form.component';
@@ -47,6 +47,10 @@ export class JobSearchComponent {
   readonly matching = signal(false);
   readonly matchingAdvanced = signal(false);
   readonly fetching = signal(false);
+  readonly suggestingBoards = signal(false);
+  readonly boardSuggestions = signal<BoardSuggestion[]>([]);
+  /** Distingue « suggestion jamais lancée » de « lancée, aucun board trouvé ». */
+  readonly boardsSuggested = signal(false);
   readonly error = signal<string | null>(null);
 
   private readonly service = inject(JobCopilotService);
@@ -113,6 +117,27 @@ export class JobSearchComponent {
       error: err => {
         this.error.set(err.error?.message || 'Fetch failed');
         this.fetching.set(false);
+      },
+    });
+  }
+
+  /**
+   * Suggère des boards ATS à partir du profil. Réservé aux utilisateurs connectés : la suggestion
+   * part de leur CV.
+   */
+  onSuggestBoards(): void {
+    if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
+    this.suggestingBoards.set(true);
+    this.error.set(null);
+    this.service.suggestBoards().subscribe({
+      next: boards => {
+        this.boardSuggestions.set(boards);
+        this.boardsSuggested.set(true);
+        this.suggestingBoards.set(false);
+      },
+      error: err => {
+        this.error.set(err.error?.message ?? 'Board suggestion failed');
+        this.suggestingBoards.set(false);
       },
     });
   }

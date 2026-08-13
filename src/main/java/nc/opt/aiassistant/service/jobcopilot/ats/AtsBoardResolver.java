@@ -42,8 +42,30 @@ public class AtsBoardResolver {
 
     private final List<AtsConnector> connectors;
 
+    /** Public board URL per ATS, rebuilt from a slug — what the user sees and can open. */
+    private static final java.util.Map<JobSource, String> BOARD_URL_TEMPLATE = java.util.Map.of(
+        JobSource.GREENHOUSE,
+        "https://boards.greenhouse.io/%s",
+        JobSource.LEVER,
+        "https://jobs.lever.co/%s",
+        JobSource.SMARTRECRUITERS,
+        "https://jobs.smartrecruiters.com/%s",
+        JobSource.ASHBY,
+        "https://jobs.ashbyhq.com/%s",
+        JobSource.WORKABLE,
+        "https://apply.workable.com/%s",
+        JobSource.RECRUITEE,
+        "https://%s.recruitee.com"
+    );
+
     /** A company board that was actually reached, with the postings that proved it. */
-    public record ResolvedBoard(JobSource source, String slug, List<JobOffer> offers) {}
+    public record ResolvedBoard(JobSource source, String slug, List<JobOffer> offers) {
+        /** Public page of the board; also the URL the existing fetch-by-URL endpoint accepts. */
+        public String boardUrl() {
+            String template = BOARD_URL_TEMPLATE.get(source);
+            return template == null ? slug : template.formatted(slug);
+        }
+    }
 
     /**
      * Resolves a company board from a name ("Hugging Face") or from any board URL — the URL path

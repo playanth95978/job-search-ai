@@ -189,6 +189,50 @@
         />
       </div>
     </div>
+    <!-- Suggestion de boards à partir du profil : évite d'avoir à connaître une URL d'ATS. -->
+    <div class="jc-board-suggest">
+      <button class="jc-btn jc-btn-secondary" (click)="suggestBoards.emit()" [disabled]="suggestingBoards()">
+        @if (suggestingBoards()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.boards.suggesting">Recherche des boards...</span>
+        } @else {
+          <fa-icon icon="wand-magic-sparkles"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.boards.suggest">Suggérer des boards selon mon profil</span>
+        }
+      </button>
+      <small class="jc-board-hint" jhiTranslate="jobCopilot.search.boards.hint">
+        Les entreprises sont proposées selon votre CV, puis vérifiées sur l'ATS réel.
+      </small>
+    </div>
+
+    @if (boardSuggestions().length > 0) {
+      <ul class="jc-board-list">
+        @for (board of boardSuggestions(); track board.boardUrl) {
+          <li class="jc-board-item">
+            <div class="jc-board-info">
+              <div class="jc-board-head">
+                <span class="jc-board-company">{{ board.company }}</span>
+                <span class="jc-board-source">{{ board.source }}</span>
+                <span class="jc-board-count">{{ board.offerCount }}</span>
+              </div>
+              <a class="jc-board-url" [href]="board.boardUrl" target="_blank" rel="noopener">{{ board.boardUrl }}</a>
+              @if (board.sampleTitles.length > 0) {
+                <div class="jc-board-samples">{{ board.sampleTitles.join(' · ') }}</div>
+              }
+            </div>
+            <button class="jc-btn jc-btn-primary jc-btn-sm" (click)="onFetchBoard(board)" [disabled]="fetching()">
+              <fa-icon icon="download"></fa-icon>
+              <span jhiTranslate="jobCopilot.search.boards.fetch">Chercher les offres</span>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else if (boardsSuggested() && !suggestingBoards()) {
+      <p class="jc-board-empty" jhiTranslate="jobCopilot.search.boards.empty">
+        Aucun board public trouvé. Complétez votre profil ou collez directement une URL.
+      </p>
+    }
+
     <div class="jc-search-actions">
       <button
         class="jc-btn jc-btn-primary"
