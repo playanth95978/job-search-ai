@@ -100,7 +100,7 @@
             "buildTarget": "job-search-ai:build:development",
             "open": true,
             "proxyConfig": "proxy.config.mjs",
-            "port": 4200
+            "port": 4201
           },
           "configurations": {
             "production": {
