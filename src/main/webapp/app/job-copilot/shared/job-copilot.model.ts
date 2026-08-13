@@ -195,6 +195,8 @@ export const JOB_SOURCE_LABELS: Record<string, string> = {
   FRANCE_TRAVAIL: 'France Travail',
   EMPLOI_NC: 'Emploi.nc',
   MANUAL: 'Manual',
+  JOBICY: 'jobicy',
+  CAREERJET: 'Career Jet',
 };
 
 export const JOB_SOURCE_COLORS: Record<string, string> = {
@@ -239,6 +241,20 @@ export const SEARCHABLE_JOB_SOURCES: JobSourceInfo[] = [
     value: 'ADZUNA',
     label: JOB_SOURCE_LABELS['ADZUNA'],
     coverageKey: 'jobCopilot.search.coverage.adzuna',
+    examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
+    hasCountrySelect: true,
+  },
+  {
+    value: 'JOBICY',
+    label: JOB_SOURCE_LABELS['JOBICY'],
+    coverageKey: 'jobCopilot.search.coverage.jobicy',
+    examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
+    hasCountrySelect: true,
+  },
+  {
+    value: 'CAREERJET',
+    label: JOB_SOURCE_LABELS['CAREERJET'],
+    coverageKey: 'jobCopilot.search.coverage.careerjet',
     examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
     hasCountrySelect: true,
   },
