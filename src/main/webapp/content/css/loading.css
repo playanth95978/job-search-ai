@@ -1,152 +1,153 @@
-@keyframes lds-pacman-1 {
-  0% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -webkit-transform: rotate(-45deg);
-    transform: rotate(-45deg);
-  }
-  100% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-}
-@-webkit-keyframes lds-pacman-1 {
-  0% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  50% {
-    -webkit-transform: rotate(-45deg);
-    transform: rotate(-45deg);
-  }
-  100% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-}
-@keyframes lds-pacman-2 {
-  0% {
-    -webkit-transform: rotate(180deg);
-    transform: rotate(180deg);
-  }
-  50% {
-    -webkit-transform: rotate(225deg);
-    transform: rotate(225deg);
-  }
-  100% {
-    -webkit-transform: rotate(180deg);
-    transform: rotate(180deg);
-  }
-}
-@-webkit-keyframes lds-pacman-2 {
-  0% {
-    -webkit-transform: rotate(180deg);
-    transform: rotate(180deg);
-  }
-  50% {
-    -webkit-transform: rotate(225deg);
-    transform: rotate(225deg);
-  }
-  100% {
-    -webkit-transform: rotate(180deg);
-    transform: rotate(180deg);
-  }
-}
-@keyframes lds-pacman-3 {
-  0% {
-    -webkit-transform: translate(190px, 0);
-    transform: translate(190px, 0);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    -webkit-transform: translate(70px, 0);
-    transform: translate(70px, 0);
-    opacity: 1;
-  }
-}
-@-webkit-keyframes lds-pacman-3 {
-  0% {
-    -webkit-transform: translate(190px, 0);
-    transform: translate(190px, 0);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    -webkit-transform: translate(70px, 0);
-    transform: translate(70px, 0);
-    opacity: 1;
-  }
-}
+/*
+ * Écran de chargement affiché avant que l'application Angular ne prenne la main.
+ *
+ * Ce fichier est chargé en <link> direct dans index.html : il ne passe pas par le bundle, ne dépend
+ * d'aucune police ni d'aucune image, et doit rester autonome. L'animation est donc en CSS pur.
+ *
+ * Le motif — un balayage radar sur des offres qui remontent — reprend l'Opportunity Radar du
+ * produit, plutôt qu'un spinner générique.
+ */
 
 .app-loading {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  top: 10em;
-}
-.app-loading p {
-  display: block;
-  font-size: 1.17em;
-  margin-inline-start: 0;
-  margin-inline-end: 0;
-  font-weight: normal;
+  min-height: 60vh;
+  color: #4338ca;
+  font-family:
+    'Segoe UI',
+    Roboto,
+    -apple-system,
+    Helvetica,
+    Arial,
+    sans-serif;
 }
 
-.app-loading .lds-pacman {
+.jsa-loader {
   position: relative;
-  margin: auto;
-  width: 200px !important;
-  height: 200px !important;
-  -webkit-transform: translate(-100px, -100px) scale(1) translate(100px, 100px);
-  transform: translate(-100px, -100px) scale(1) translate(100px, 100px);
+  width: 96px;
+  height: 96px;
 }
-.app-loading .lds-pacman > div:nth-child(2) div {
+
+/* Cercles concentriques : la portée du radar. */
+.jsa-loader-ring {
   position: absolute;
-  top: 40px;
-  left: 40px;
-  width: 120px;
-  height: 60px;
-  border-radius: 120px 120px 0 0;
-  background: #bbcedd;
-  -webkit-animation: lds-pacman-1 1s linear infinite;
-  animation: lds-pacman-1 1s linear infinite;
-  -webkit-transform-origin: 60px 60px;
-  transform-origin: 60px 60px;
+  inset: 0;
+  border: 2px solid rgba(99, 102, 241, 0.25);
+  border-radius: 50%;
 }
-.app-loading .lds-pacman > div:nth-child(2) div:nth-child(2) {
-  -webkit-animation: lds-pacman-2 1s linear infinite;
-  animation: lds-pacman-2 1s linear infinite;
+
+.jsa-loader-ring:nth-child(2) {
+  inset: 18px;
 }
-.app-loading .lds-pacman > div:nth-child(1) div {
+
+.jsa-loader-ring:nth-child(3) {
+  inset: 36px;
+}
+
+/* Le faisceau : un secteur en dégradé qui tourne. */
+.jsa-loader-sweep {
   position: absolute;
-  top: 97px;
-  left: -8px;
-  width: 24px;
-  height: 10px;
-  background-image: url('/content/images/logo-jhipster.png');
-  background-size: contain;
-  -webkit-animation: lds-pacman-3 1s linear infinite;
-  animation: lds-pacman-3 1.5s linear infinite;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(99, 102, 241, 0) 0deg, rgba(99, 102, 241, 0) 250deg, rgba(99, 102, 241, 0.55) 360deg);
+  animation: jsa-sweep 1.8s linear infinite;
 }
-.app-loading .lds-pacman > div:nth-child(1) div:nth-child(1) {
-  -webkit-animation-delay: -0.67s;
-  animation-delay: -1s;
+
+/* Points : les offres détectées, qui s'allument au passage du faisceau. */
+.jsa-loader-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #4338ca;
+  opacity: 0;
+  animation: jsa-ping 1.8s ease-in-out infinite;
 }
-.app-loading .lds-pacman > div:nth-child(1) div:nth-child(2) {
-  -webkit-animation-delay: -0.33s;
-  animation-delay: -0.5s;
+
+.jsa-loader-dot:nth-of-type(1) {
+  top: 22px;
+  left: 62px;
+  animation-delay: 0.15s;
 }
-.app-loading .lds-pacman > div:nth-child(1) div:nth-child(3) {
-  -webkit-animation-delay: 0s;
-  animation-delay: 0s;
+
+.jsa-loader-dot:nth-of-type(2) {
+  top: 58px;
+  left: 70px;
+  animation-delay: 0.6s;
+}
+
+.jsa-loader-dot:nth-of-type(3) {
+  top: 66px;
+  left: 26px;
+  animation-delay: 1.05s;
+}
+
+.jsa-loader-dot:nth-of-type(4) {
+  top: 30px;
+  left: 22px;
+  animation-delay: 1.45s;
+}
+
+.jsa-loading-label {
+  margin-top: 1.25rem;
+  color: #6366f1;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+@keyframes jsa-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes jsa-ping {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  45% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+}
+
+/* Accessibilité : pas de rotation continue pour qui a demandé moins d'animations. */
+@media (prefers-reduced-motion: reduce) {
+  .jsa-loader-sweep {
+    animation: none;
+    background: conic-gradient(from 0deg, rgba(99, 102, 241, 0) 250deg, rgba(99, 102, 241, 0.45) 360deg);
+  }
+
+  .jsa-loader-dot {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+/* Bloc de diagnostic affiché si l'application ne démarre pas (voir index.html). */
+.jsa-startup-error {
+  max-width: 34rem;
+  padding: 1.5rem;
+  color: #334155;
+  text-align: left;
+}
+
+.jsa-startup-error h1 {
+  color: #4338ca;
+  font-size: 1.25rem;
+}
+
+.jsa-startup-error code {
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: #eef2ff;
+  color: #4338ca;
 }

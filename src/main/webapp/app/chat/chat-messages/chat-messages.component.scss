@@ -215,6 +215,16 @@
         animation: streamingCursorBlink 1s steps(2, start) infinite;
       }
 
+      jhi-sanitizer {
+        display: inline;
+        ::ng-deep > div {
+          display: inline;
+          > p:last-child {
+            display: inline;
+          }
+        }
+      }
+
       p {
         margin-bottom: 1rem;
         &:last-child {

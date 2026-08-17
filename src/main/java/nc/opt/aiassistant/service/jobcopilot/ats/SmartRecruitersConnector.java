@@ -1,15 +1,17 @@
 package nc.opt.aiassistant.service.jobcopilot.ats;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
+import nc.opt.aiassistant.service.jobcopilot.ats.support.AtsDates;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -20,18 +22,41 @@ import org.springframework.web.client.RestClient;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class SmartRecruitersConnector implements AtsConnector {
+public final class SmartRecruitersConnector extends AbstractAtsConnector {
 
     private static final String API_BASE = "https://api.smartrecruiters.com/v1/companies";
+    private static final String POSTING_BASE = "https://jobs.smartrecruiters.com/";
     /** SmartRecruiters posting URL: jobs.smartrecruiters.com/{companyId}/{postingId}[-slug]. */
     private static final Pattern URL_REF = Pattern.compile("smartrecruiters\\.com/([^/]+)/(\\d+)");
 
-    private final ObjectMapper objectMapper;
+    public SmartRecruitersConnector(
+        @Qualifier("atsRestClient") RestClient restClient,
+        @Qualifier("atsObjectMapper") ObjectMapper objectMapper
+    ) {
+        super(restClient, objectMapper);
+    }
+
+    // --- Payload ------------------------------------------------------------------------------
+
+    record SmartRecruitersPostings(List<SmartRecruitersPosting> content) {}
+
+    record SmartRecruitersPosting(
+        String id,
+        String name,
+        String releasedDate,
+        SmartRecruitersLocation location,
+        SmartRecruitersTypeOfEmployment typeOfEmployment
+    ) {}
+
+    record SmartRecruitersLocation(String city, String region, String country, Boolean remote) {}
+
+    record SmartRecruitersTypeOfEmployment(String label) {}
+
+    // --- Connector ----------------------------------------------------------------------------
 
     @Override
     public boolean supports(String url) {
-        return url != null && url.contains("smartrecruiters.com");
+        return StringUtils.contains(url, "smartrecruiters.com");
     }
 
     @Override
@@ -55,35 +80,46 @@ public class SmartRecruitersConnector implements AtsConnector {
 
     /** Fetches postings from a SmartRecruiters company (best-effort; no auth for public postings). */
     @Override
+    public List<JobOffer> fetchBySlug(String slug) {
+        return StringUtils.isBlank(slug) ? List.of() : fetchFromCompany(slug);
+    }
+
+    @Override
     public List<JobOffer> fetchFromUrl(String url) {
         PostingRef ref = parseRef(url);
-        String companyId = ref != null ? ref.site() : AtsConnector.boardSlug(url, "smartrecruiters.com/");
-        return fetchFromCompany(companyId);
+        String companyId = ref != null ? ref.site() : slugAfter(url, "smartrecruiters.com/");
+        return StringUtils.isBlank(companyId) ? List.of() : fetchFromCompany(companyId);
     }
 
     public List<JobOffer> fetchFromCompany(String companyId) {
-        List<JobOffer> results = new ArrayList<>();
-        try {
-            String body = RestClient.create()
-                .get()
-                .uri(API_BASE + "/" + companyId + "/postings")
-                .retrieve()
-                .body(String.class);
-            JsonNode content = objectMapper.readTree(body).path("content");
-            for (JsonNode posting : content) {
-                JobOffer offer = new JobOffer();
-                offer.setTitle(posting.path("name").asText());
-                offer.setCompany(companyId);
-                offer.setSourceId(posting.path("id").asText());
-                offer.setSource(JobSource.SMARTRECRUITERS);
-                offer.setApplyUrl("https://jobs.smartrecruiters.com/" + companyId + "/" + posting.path("id").asText());
-                JsonNode loc = posting.path("location");
-                offer.setLocation(loc.path("city").asText(null));
-                results.add(offer);
-            }
-        } catch (Exception e) {
-            log.error("SmartRecruiters fetch failed for company={}: {}", companyId, e.getMessage());
+        SmartRecruitersPostings payload = getJson(API_BASE + "/" + companyId + "/postings", SmartRecruitersPostings.class);
+        if (payload == null || payload.content() == null) {
+            return List.of();
         }
-        return results;
+        return payload
+            .content()
+            .stream()
+            .filter(Objects::nonNull)
+            .map(posting -> mapJobOffer(posting, companyId))
+            .toList();
+    }
+
+    JobOffer mapJobOffer(SmartRecruitersPosting posting, String companyId) {
+        JobOffer offer = new JobOffer();
+        offer.setTitle(StringUtils.defaultString(posting.name()));
+        offer.setCompany(companyId);
+        offer.setSourceId(StringUtils.trimToNull(posting.id()));
+        offer.setSource(JobSource.SMARTRECRUITERS);
+        offer.setApplyUrl(POSTING_BASE + companyId + "/" + StringUtils.defaultString(posting.id()));
+        offer.setPublishedAt(AtsDates.parse(posting.releasedDate()));
+        if (posting.location() != null) {
+            offer.setLocation(StringUtils.trimToNull(posting.location().city()));
+            offer.setCountry(StringUtils.trimToNull(posting.location().country()));
+            offer.setRemote(BooleanUtils.isTrue(posting.location().remote()));
+        }
+        if (posting.typeOfEmployment() != null) {
+            offer.setContractType(StringUtils.trimToNull(posting.typeOfEmployment().label()));
+        }
+        return offer;
     }
 }

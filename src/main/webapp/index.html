@@ -36,7 +36,7 @@
     />
     <meta name="twitter:image" content="https://aicarreerfinder.com/content/images/og-default.png" />
 
-    <link rel="icon" href="favicon.ico" />
+    <link rel="icon" href="content/images/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webapp" />
     <link rel="stylesheet" href="content/css/loading.css" />
     <script>
@@ -62,80 +62,35 @@
     <![endif]-->
     <jhi-app>
       <div class="app-loading">
-        <div class="lds-pacman">
-          <div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-          <div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
+        <!-- Balayage radar : reprend l'Opportunity Radar du produit plutôt qu'un spinner générique. -->
+        <div class="jsa-loader" role="status" aria-label="Chargement">
+          <span class="jsa-loader-ring"></span>
+          <span class="jsa-loader-ring"></span>
+          <span class="jsa-loader-ring"></span>
+          <span class="jsa-loader-sweep"></span>
+          <i class="jsa-loader-dot"></i>
+          <i class="jsa-loader-dot"></i>
+          <i class="jsa-loader-dot"></i>
+          <i class="jsa-loader-dot"></i>
         </div>
+        <p class="jsa-loading-label">Recherche des opportunités…</p>
       </div>
       <div class="app-loading">
         <div id="jhipster-error" style="display: none">
-          <!-- This content is for troubleshooting purpose and will be removed when app renders -->
-          <h1>An error has occurred :-(</h1>
-          <h2>Usual error causes</h2>
-          <ol>
-            <li>
-              You started the application from an IDE and you didn't run <code style="color: red">npm start</code> or
-              <code style="color: red">npm run webapp:build</code>.
-            </li>
-            <li>
-              You had a network error while running <code style="color: red">npm install</code>. If you are behind a corporate proxy, it is
-              likely that this error was caused by your proxy. Have a look at the JHipster error logs, you will probably have the cause of
-              the error.
-            </li>
-            <li>
-              You installed a Node.js version that doesn't work with JHipster: please use an LTS (long-term support) version, as it's the
-              only version we support.
-            </li>
-          </ol>
-          <h2>Building the client side code again</h2>
-          <p>If you want to go fast, run <code style="color: red">./npmw run app:start</code> to build and run everything.</p>
-          <p>If you want to have more control, so you can debug your issue more easily, you should follow the following steps:</p>
-          <ol>
-            <li>Install npm dependencies with the command <code style="color: red">npm install</code></li>
-            <li>
-              Build the client with the command <code style="color: red">npm run webapp:build</code> or
-              <code style="color: red">npm start</code>
-            </li>
-            <li>Start the server with <code style="color: red">./npmw run app:start</code> or using your IDE</li>
-          </ol>
-
-          <h2>Getting more help</h2>
-
-          <h3>If you have a question on how to use JHipster</h3>
-          <p>
-            Go to Stack Overflow with the
-            <a href="http://stackoverflow.com/tags/jhipster" target="_blank" rel="noopener noreferrer">"jhipster"</a> tag.
-          </p>
-
-          <h3>If you have a bug or a feature request</h3>
-          <p>
-            First read our
-            <a href="https://github.com/jhipster/generator-jhipster/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer"
-              >contributing guidelines</a
-            >.
-          </p>
-          <p>
-            Then, fill a ticket on our
-            <a href="https://github.com/jhipster/generator-jhipster/issues/new/choose" target="_blank" rel="noopener noreferrer"
-              >bug tracker</a
-            >, we'll be happy to resolve your issue!
-          </p>
-
-          <h3>If you want to chat with contributors and other users</h3>
-          <p>
-            Join our chat room on
-            <a href="https://gitter.im/jhipster/generator-jhipster" target="_blank" rel="noopener noreferrer">Gitter.im</a>. Please note
-            that this is a public chat room, and that we expect you to respect other people and write in a correct English language!
-          </p>
-          <!-- end of troubleshooting content -->
+          <!-- Diagnostic affiché uniquement si l'application ne démarre pas ; retiré au rendu. -->
+          <div class="jsa-startup-error">
+            <h1>L'application n'a pas pu démarrer</h1>
+            <p>Le serveur répond, mais le code de l'interface ne s'est pas chargé. Dans l'ordre :</p>
+            <ol>
+              <li>Rechargez la page : un fichier peut avoir échoué au téléchargement.</li>
+              <li>Videz le cache du navigateur, puis rechargez.</li>
+              <li>
+                En développement, vérifiez que le front a bien été construit :
+                <code>npm start</code> ou <code>npm run webapp:build</code>.
+              </li>
+            </ol>
+            <p>Si le problème persiste, la console du navigateur indique le fichier en cause.</p>
+          </div>
         </div>
       </div>
     </jhi-app>

@@ -3,6 +3,7 @@ package nc.opt.aiassistant.service.jobcopilot.ats;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
@@ -26,6 +27,7 @@ public class JobSearchService {
     private final JobOfferIngestionService jobOfferIngestionService;
     private final JobOfferSearchService jobOfferSearchService;
     private final GeoLocationService geoLocationService;
+    private final AtsBoardResolver boardResolver;
 
     /** Searches all configured connectors and persists new offers with semantic enrichment. */
     @Transactional
@@ -118,6 +120,20 @@ public class JobSearchService {
             .orElse(List.of());
         offers.forEach(jobOfferIngestionService::ingest);
         return offers;
+    }
+
+    /**
+     * Fetches a company's postings from its <b>name</b>: the ATS and its slug are resolved by probing
+     * the boards ({@link AtsBoardResolver}), so no URL has to be pasted. Offers are persisted like any
+     * other source.
+     *
+     * @return the resolved board and its offers, or empty when no ATS answered for that company
+     */
+    @Transactional
+    public Optional<AtsBoardResolver.ResolvedBoard> fetchFromCompanyName(String companyName) {
+        Optional<AtsBoardResolver.ResolvedBoard> resolved = boardResolver.resolve(companyName);
+        resolved.ifPresent(board -> board.offers().forEach(jobOfferIngestionService::ingest));
+        return resolved;
     }
 
     /**

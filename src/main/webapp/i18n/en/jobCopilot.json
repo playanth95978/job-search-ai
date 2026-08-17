@@ -285,16 +285,26 @@
         "locationPlaceholder": "Location",
         "allSources": "All sources",
         "country": "Country",
-        "atsPlaceholder": "Paste ATS board URL (Greenhouse, Lever...)"
+        "atsPlaceholder": "Paste ATS board URL (Greenhouse, Lever...)",
+        "postalCodePlaceholder": "Postal code (e.g. 75001)",
+        "locationIgnored": "Location not applicable for this source",
+        "region": "Eligibility region",
+        "allRegions": "All regions",
+        "postalCodeRequired": "France Travail only accepts a 5-digit postal code: the location will be ignored."
       },
       "coverage": {
         "emploiNc": "Covers New Caledonia. Example locations:",
         "franceTravail": "Covers France (metropolitan). City, département or postcode:",
-        "adzuna": "Pick the country first, then a city in that country:"
+        "adzuna": "Pick the country first, then a city in that country:",
+        "jobicy": "Remote-only listings. Pick an eligibility region rather than a city:",
+        "careerjet": "Covers many countries. Pick the country, then the city:"
       },
       "detail": {
         "close": "Close detail",
-        "noDescription": "No description available."
+        "noDescription": "No description available.",
+        "translate": "Translate",
+        "showOriginal": "Show original",
+        "translatedBy": "Machine translation"
       },
       "actions": {
         "smartSearch": "Smart Search",
@@ -327,6 +337,13 @@
         "matchAdvanced": "Like “Matches”, but deeper: AI combines meaning and keywords, then re-reads each offer to refine the ranking. More accurate, a little slower.",
         "fetchJobs": "Paste a company careers page URL (Greenhouse, Lever…) to import its openings. No AI: direct retrieval.",
         "toggle": "Show help about the search buttons"
+      },
+      "boards": {
+        "suggest": "Suggest boards from my profile",
+        "suggesting": "Looking for boards…",
+        "hint": "Companies are proposed from your CV, then verified against the real ATS: only boards that answer are listed.",
+        "fetch": "Fetch jobs",
+        "empty": "No public board found for your profile. Complete your CV, or paste a URL above."
       }
     },
     "dashboard": {

@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild, OnInit, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
 import { ChatHistoryComponent } from '../home/chat-history/chat-history';
 import { JobCopilotService } from '../job-copilot/shared/job-copilot.service';
@@ -28,21 +24,11 @@ import { MessageService, TypeChat } from './message.service';
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    FormsModule,
-    FontAwesomeModule,
-    TranslateModule,
-    ChatHistoryComponent,
-    ChatInputAreaComponent,
-    ChatHeaderComponent,
-    ChatMessagesComponent,
-    ChatContainerWrapperComponent,
-  ],
+  imports: [ChatHistoryComponent, ChatInputAreaComponent, ChatHeaderComponent, ChatMessagesComponent, ChatContainerWrapperComponent],
 })
 export default class Chat implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly translateService = inject(TranslateService);
   private readonly messageService = inject(MessageService);
 
   readonly conversationId = toSignal(this.route.paramMap.pipe(map(params => params.get('id'))), { initialValue: null });
@@ -59,13 +45,8 @@ export default class Chat implements OnInit, OnDestroy {
   private readonly accountService = inject(AccountService);
   draft = '';
 
-  /** Prompts offered on an empty conversation (i18n keys). */
-  readonly suggestions = signal([
-    'chat.suggestions.search',
-    'chat.suggestions.match',
-    'chat.suggestions.applications',
-    'chat.suggestions.coverLetter',
-  ]);
+  /** Chips proposées sous le fil (amorces puis relances) — même source que le widget flottant. */
+  readonly suggestions = this.messageService.promptChips;
 
   private readonly thread = viewChild<ElementRef<HTMLElement>>('thread');
 
@@ -101,7 +82,7 @@ export default class Chat implements OnInit, OnDestroy {
   }
 
   onSuggestionClick(suggestion: string): void {
-    this.messageService.useSuggestion(this.translateService.instant(suggestion));
+    this.messageService.sendSuggestion(suggestion);
   }
 
   login(): void {

@@ -31,6 +31,7 @@ export class ChatWidgetComponent {
   readonly streamingMessage = this.messageService.streamingMessage;
   readonly streamingHtml = this.messageService.streamingHtml;
   readonly isTyping = this.messageService.generatingInProgress;
+  readonly suggestions = this.messageService.promptChips;
 
   readonly formatMessage = (message: string): string => this.messageService.formatCodeBlocks(message);
 
@@ -40,6 +41,10 @@ export class ChatWidgetComponent {
 
   close(): void {
     this.open.set(false);
+  }
+
+  onSuggestionClick(suggestion: string): void {
+    this.messageService.sendSuggestion(suggestion);
   }
 
   startNewChat(): void {

@@ -51,6 +51,8 @@
         [messages]="messages()"
         [streamingHtml]="streamingHtml()"
         [streamingMessage]="streamingMessage()"
+        [suggestions]="suggestions()"
+        (suggestionSelected)="onSuggestionClick($event)"
       />
     </div>
 

@@ -27,7 +27,30 @@ public class JobSearchTool {
         return offers.stream().limit(20).map(this::formatOffer).collect(Collectors.joining("\n---\n"));
     }
 
-    @Tool(description = "Fetch job offers from a specific ATS company page URL (Greenhouse or Lever)")
+    @Tool(
+        description = "Fetch the open positions of a company from its NAME (e.g. 'Hugging Face', 'Canva'). " +
+            "Use this whenever the user names a company, or when you target companies that fit their profile — " +
+            "never ask them for a careers URL. The ATS hosting the board is resolved automatically."
+    )
+    public String fetchCompanyJobs(@ToolParam(description = "Company name, as the user would say it") String companyName) {
+        return jobSearchService
+            .fetchFromCompanyName(companyName)
+            .map(board ->
+                "%d open position(s) for %s (via %s):%n%s".formatted(
+                    board.offers().size(),
+                    companyName,
+                    board.source(),
+                    board.offers().stream().limit(20).map(this::formatOffer).collect(Collectors.joining("\n---\n"))
+                )
+            )
+            .orElse(
+                "No public job board found for \"%s\". The company may not use a supported ATS (Greenhouse, Lever, SmartRecruiters, Ashby, Workable, Recruitee), or it publishes under a different name.".formatted(
+                    companyName
+                )
+            );
+    }
+
+    @Tool(description = "Fetch job offers from a specific ATS company page URL — only when the user provides the URL themselves")
     public String fetchFromUrl(@ToolParam(description = "ATS company page URL") String url) {
         List<JobOffer> offers = jobSearchService.fetchFromUrl(url);
         if (offers.isEmpty()) return "No jobs found at: " + url;

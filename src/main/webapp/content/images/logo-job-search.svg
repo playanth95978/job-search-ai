@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Job Search AI">
+  <title>Job Search AI</title>
+  <defs>
+    <linearGradient id="jsaBrand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+  </defs>
+
+  <!-- Mallette : le métier. Poignée détachée du corps pour rester lisible en 32 px. -->
+  <path
+    d="M50 30h28a8 8 0 0 1 8 8v6h-8v-5a2 2 0 0 0-2-2H52a2 2 0 0 0-2 2v5h-8v-6a8 8 0 0 1 8-8z"
+    fill="url(#jsaBrand)"
+  />
+  <rect x="18" y="44" width="92" height="60" rx="10" fill="url(#jsaBrand)" />
+  <!-- Fente centrale : sépare visuellement les deux moitiés de la mallette. -->
+  <rect x="18" y="68" width="92" height="6" fill="#ffffff" opacity="0.28" />
+  <rect x="56" y="64" width="16" height="14" rx="3" fill="#ffffff" opacity="0.55" />
+
+  <!-- Loupe : la recherche. Cerclée de blanc pour se détacher de la mallette. -->
+  <g transform="translate(2 2)">
+    <circle cx="82" cy="82" r="26" fill="#ffffff" />
+    <circle cx="82" cy="82" r="20" fill="none" stroke="#4338ca" stroke-width="7" />
+    <path d="M97 97l16 16" stroke="#4338ca" stroke-width="10" stroke-linecap="round" />
+  </g>
+</svg>

@@ -1,13 +1,17 @@
 package nc.opt.aiassistant.service.jobcopilot.ats;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.JobSource;
+import nc.opt.aiassistant.service.jobcopilot.ats.support.AtsDates;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
 /**
@@ -19,8 +23,7 @@ import reactor.core.publisher.Flux;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class EmploiNcConnector implements AtsConnector {
+public final class EmploiNcConnector extends AbstractAtsConnector {
 
     private static final String RECORDS_API =
         "https://data.gouv.nc/api/explore/v2.1/catalog/datasets/offres-d-emploi-deposees-sur-le-site-emploi-nc/records";
@@ -30,12 +33,35 @@ public class EmploiNcConnector implements AtsConnector {
 
     private static final int PAGE_SIZE = 50;
 
-    private final ObjectMapper objectMapper;
-    private final org.springframework.web.reactive.function.client.WebClient.Builder webClientBuilder;
+    public EmploiNcConnector(@Qualifier("atsRestClient") RestClient restClient, @Qualifier("atsObjectMapper") ObjectMapper objectMapper) {
+        super(restClient, objectMapper);
+    }
+
+    // --- Payload ------------------------------------------------------------------------------
+
+    record EmploiNcRecords(List<EmploiNcOffer> results) {}
+
+    /** Opendatasoft flattens the dataset's fields at the record root. */
+    record EmploiNcOffer(
+        String uuid,
+        String titre,
+        String enseigne,
+        String designation,
+        String ville,
+        String ville_physique,
+        String type_contrat,
+        String description,
+        String email,
+        String telephone,
+        String date_debut,
+        String statut
+    ) {}
+
+    // --- Connector ----------------------------------------------------------------------------
 
     @Override
     public boolean supports(String url) {
-        return url != null && (url.contains("emploi.nc") || url.contains("emploi.gouv.nc"));
+        return StringUtils.containsAny(url, "emploi.nc", "emploi.gouv.nc");
     }
 
     @Override
@@ -51,7 +77,7 @@ public class EmploiNcConnector implements AtsConnector {
 
     @Override
     public List<JobOffer> fetchJobs(String keywords, String location) {
-        return fetchJobsPaginated(keywords, location).collectList().block();
+        return fetchPage(keywords, location, 0);
     }
 
     @Override
@@ -61,53 +87,44 @@ public class EmploiNcConnector implements AtsConnector {
         return Flux.<List<JobOffer>, Integer>generate(
             () -> 0,
             (offset, sink) -> {
-                try {
-                    String where = buildWhere(keywords, location);
-                    String body = webClientBuilder
-                        .build()
-                        .get()
-                        .uri(RECORDS_API, uriBuilder ->
-                            uriBuilder
-                                .queryParam("where", where)
-                                .queryParam("limit", PAGE_SIZE)
-                                .queryParam("offset", offset)
-                                .queryParam("order_by", "date_debut desc")
-                                .build()
-                        )
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .block();
-
-                    JsonNode root = objectMapper.readTree(body);
-                    JsonNode results = root.path("results");
-                    if (results.isEmpty()) {
-                        sink.complete();
-                        return offset;
-                    }
-                    java.util.List<JobOffer> page = new java.util.ArrayList<>();
-                    for (JsonNode r : results) {
-                        page.add(mapJobOffer(r));
-                    }
-                    sink.next(page);
-                    if (results.size() < PAGE_SIZE) {
-                        sink.complete();
-                    }
-                    return offset + PAGE_SIZE;
-                } catch (Exception e) {
-                    sink.error(e);
+                List<JobOffer> page = fetchPage(keywords, location, offset);
+                if (page.isEmpty()) {
+                    sink.complete();
                     return offset;
                 }
+                sink.next(page);
+                if (page.size() < PAGE_SIZE) {
+                    sink.complete();
+                }
+                return offset + PAGE_SIZE;
             }
         ).flatMapIterable(page -> page);
+    }
+
+    private List<JobOffer> fetchPage(String keywords, String location, int offset) {
+        String uri = UriComponentsBuilder.fromUriString(RECORDS_API)
+            .queryParam("where", buildWhere(keywords, location))
+            .queryParam("limit", PAGE_SIZE)
+            .queryParam("offset", offset)
+            .queryParam("order_by", "date_debut desc")
+            .build()
+            .encode()
+            .toUriString();
+
+        EmploiNcRecords records = getJson(uri, EmploiNcRecords.class);
+        if (records == null || records.results() == null) {
+            return List.of();
+        }
+        return records.results().stream().filter(Objects::nonNull).map(this::mapJobOffer).toList();
     }
 
     /** Builds an ODSQL {@code where} clause filtering on active offers, keywords and city. */
     private String buildWhere(String keywords, String location) {
         StringBuilder where = new StringBuilder("statut=\"ACTIVE\"");
-        if (keywords != null && !keywords.isBlank()) {
+        if (StringUtils.isNotBlank(keywords)) {
             where.append(" and search(\"").append(sanitize(keywords)).append("\")");
         }
-        if (location != null && !location.isBlank()) {
+        if (StringUtils.isNotBlank(location)) {
             where.append(" and search(ville, \"").append(sanitize(location)).append("\")");
         }
         return where.toString();
@@ -115,21 +132,21 @@ public class EmploiNcConnector implements AtsConnector {
 
     /** Removes characters that would break the ODSQL string literal. */
     private String sanitize(String value) {
-        return value.replace("\"", " ").trim();
+        return StringUtils.trim(StringUtils.replace(value, "\"", " "));
     }
 
-    private JobOffer mapJobOffer(JsonNode r) {
-        String uuid = textOrNull(r, "uuid");
+    JobOffer mapJobOffer(EmploiNcOffer record) {
         JobOffer offer = new JobOffer();
-        offer.setTitle(textOrNull(r, "titre"));
-        offer.setCompany(firstNonBlank(textOrNull(r, "enseigne"), textOrNull(r, "designation")));
-        offer.setLocation(firstNonBlank(textOrNull(r, "ville"), textOrNull(r, "ville_physique")));
-        offer.setContractType(textOrNull(r, "type_contrat"));
-        offer.setApplyUrl(uuid != null ? OFFER_URL_PREFIX + uuid + "#top" : OFFER_URL_PREFIX);
-        offer.setSourceId(uuid);
+        offer.setTitle(StringUtils.trimToNull(record.titre()));
+        offer.setCompany(StringUtils.firstNonBlank(record.enseigne(), record.designation()));
+        offer.setLocation(StringUtils.firstNonBlank(record.ville(), record.ville_physique()));
+        offer.setContractType(StringUtils.trimToNull(record.type_contrat()));
+        offer.setApplyUrl(record.uuid() == null ? OFFER_URL_PREFIX : OFFER_URL_PREFIX + record.uuid() + "#top");
+        offer.setSourceId(StringUtils.trimToNull(record.uuid()));
         offer.setSource(JobSource.EMPLOI_NC);
         offer.setRemote(false);
-        offer.setDescription(buildDescription(r));
+        offer.setPublishedAt(AtsDates.parse(record.date_debut()));
+        offer.setDescription(buildDescription(record));
         return offer;
     }
 
@@ -137,36 +154,25 @@ public class EmploiNcConnector implements AtsConnector {
      * Builds a non-empty description. The dataset's {@code description} field is frequently null,
      * which would make the offer fail ingestion enrichment, so we always synthesize a fallback.
      */
-    private String buildDescription(JsonNode r) {
-        String description = textOrNull(r, "description");
-        if (description != null && !description.isBlank()) {
-            return description;
+    private String buildDescription(EmploiNcOffer record) {
+        if (StringUtils.isNotBlank(record.description())) {
+            return record.description();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Offre ").append(firstNonBlank(textOrNull(r, "titre"), "emploi"));
-        String contract = textOrNull(r, "type_contrat");
-        if (contract != null) sb.append(" — ").append(contract);
-        String city = firstNonBlank(textOrNull(r, "ville"), textOrNull(r, "ville_physique"));
-        if (city != null) sb.append(" à ").append(city);
+        StringBuilder sb = new StringBuilder("Offre ").append(StringUtils.defaultIfBlank(record.titre(), "emploi"));
+        if (StringUtils.isNotBlank(record.type_contrat())) {
+            sb.append(" — ").append(record.type_contrat());
+        }
+        String city = StringUtils.firstNonBlank(record.ville(), record.ville_physique());
+        if (StringUtils.isNotBlank(city)) {
+            sb.append(" à ").append(city);
+        }
         sb.append('.');
-        String email = textOrNull(r, "email");
-        String phone = textOrNull(r, "telephone");
-        if (email != null) sb.append(" Contact : ").append(email).append('.');
-        if (phone != null) sb.append(" Tél : ").append(phone).append('.');
-        sb.append(" Source : emploi.nc.");
-        return sb.toString();
-    }
-
-    private String textOrNull(JsonNode node, String field) {
-        JsonNode value = node.path(field);
-        if (value.isMissingNode() || value.isNull()) return null;
-        String text = value.asText();
-        return text.isBlank() ? null : text;
-    }
-
-    private String firstNonBlank(String a, String b) {
-        if (a != null && !a.isBlank()) return a;
-        if (b != null && !b.isBlank()) return b;
-        return null;
+        if (StringUtils.isNotBlank(record.email())) {
+            sb.append(" Contact : ").append(record.email()).append('.');
+        }
+        if (StringUtils.isNotBlank(record.telephone())) {
+            sb.append(" Tél : ").append(record.telephone()).append('.');
+        }
+        return sb.append(" Source : emploi.nc.").toString();
     }
 }

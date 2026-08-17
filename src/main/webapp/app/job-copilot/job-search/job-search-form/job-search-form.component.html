@@ -26,20 +26,40 @@
           (keyup.enter)="onSearch()"
         />
       </div>
+      <!-- Le champ de localisation suit ce que la source sait exploiter : liste fermée pour une
+           zone d'éligibilité, saisie numérique pour un code postal, texte libre sinon. -->
       <div class="jc-input-wrapper">
         <fa-icon icon="location-dot" class="jc-input-icon"></fa-icon>
-        <input
-          type="text"
-          class="jc-input"
-          [placeholder]="'jobCopilot.search.form.locationPlaceholder' | translate"
-          [ngModel]="location()"
-          (ngModelChange)="location.set($event)"
-          (keyup.enter)="onSearch()"
-        />
+        @if (locationMode() === 'region') {
+          <select
+            class="jc-input jc-select"
+            [ngModel]="location()"
+            (ngModelChange)="location.set($event)"
+            [attr.aria-label]="'jobCopilot.search.form.region' | translate"
+          >
+            <option value="" jhiTranslate="jobCopilot.search.form.allRegions">Toutes les zones</option>
+            @for (r of regions; track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        } @else {
+          <input
+            type="text"
+            class="jc-input"
+            [class.is-invalid]="locationInvalid()"
+            [placeholder]="locationPlaceholderKey() | translate"
+            [attr.inputmode]="locationMode() === 'postalCode' ? 'numeric' : null"
+            [attr.maxlength]="locationMode() === 'postalCode' ? 5 : null"
+            [disabled]="locationMode() === 'none'"
+            [ngModel]="location()"
+            (ngModelChange)="location.set($event)"
+            (keyup.enter)="onSearch()"
+          />
+        }
       </div>
       <div class="jc-input-wrapper">
         <fa-icon icon="filter" class="jc-input-icon"></fa-icon>
-        <select class="jc-input jc-select" [ngModel]="source()" (ngModelChange)="source.set($event)" aria-label="Source">
+        <select class="jc-input jc-select" [ngModel]="source()" (ngModelChange)="onSourceChange($event)" aria-label="Source">
           <option value="" jhiTranslate="jobCopilot.search.form.allSources">Toutes les sources</option>
           @for (s of sources; track s.value) {
             <option [value]="s.value">{{ s.label }}</option>
@@ -66,7 +86,17 @@
       <p class="jc-source-hint">
         <fa-icon icon="circle-info"></fa-icon>
         <span>{{ sel.coverageKey | translate }}</span>
-        <span class="jc-source-examples">{{ sel.examples.join(' · ') }}</span>
+        @if (sel.examples.length > 0) {
+          <span class="jc-source-examples">{{ sel.examples.join(' · ') }}</span>
+        }
+      </p>
+    }
+    @if (locationInvalid()) {
+      <p class="jc-source-warning">
+        <fa-icon icon="triangle-exclamation"></fa-icon>
+        <span jhiTranslate="jobCopilot.search.form.postalCodeRequired">
+          France Travail n'accepte qu'un code postal à 5 chiffres : la localisation sera ignorée.
+        </span>
       </p>
     }
     <div class="jc-search-actions">
@@ -189,6 +219,50 @@
         />
       </div>
     </div>
+    <!-- Suggestion de boards à partir du profil : évite d'avoir à connaître une URL d'ATS. -->
+    <div class="jc-board-suggest">
+      <button class="jc-btn jc-btn-secondary" (click)="suggestBoards.emit()" [disabled]="suggestingBoards()">
+        @if (suggestingBoards()) {
+          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.boards.suggesting">Recherche des boards...</span>
+        } @else {
+          <fa-icon icon="wand-magic-sparkles"></fa-icon>
+          <span jhiTranslate="jobCopilot.search.boards.suggest">Suggérer des boards selon mon profil</span>
+        }
+      </button>
+      <small class="jc-board-hint" jhiTranslate="jobCopilot.search.boards.hint">
+        Les entreprises sont proposées selon votre CV, puis vérifiées sur l'ATS réel.
+      </small>
+    </div>
+
+    @if (boardSuggestions().length > 0) {
+      <ul class="jc-board-list">
+        @for (board of boardSuggestions(); track board.boardUrl) {
+          <li class="jc-board-item">
+            <div class="jc-board-info">
+              <div class="jc-board-head">
+                <span class="jc-board-company">{{ board.company }}</span>
+                <span class="jc-board-source">{{ board.source }}</span>
+                <span class="jc-board-count">{{ board.offerCount }}</span>
+              </div>
+              <a class="jc-board-url" [href]="board.boardUrl" target="_blank" rel="noopener">{{ board.boardUrl }}</a>
+              @if (board.sampleTitles.length > 0) {
+                <div class="jc-board-samples">{{ board.sampleTitles.join(' · ') }}</div>
+              }
+            </div>
+            <button class="jc-btn jc-btn-primary jc-btn-sm" (click)="onFetchBoard(board)" [disabled]="fetching()">
+              <fa-icon icon="download"></fa-icon>
+              <span jhiTranslate="jobCopilot.search.boards.fetch">Chercher les offres</span>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else if (boardsSuggested() && !suggestingBoards()) {
+      <p class="jc-board-empty" jhiTranslate="jobCopilot.search.boards.empty">
+        Aucun board public trouvé. Complétez votre profil ou collez directement une URL.
+      </p>
+    }
+
     <div class="jc-search-actions">
       <button
         class="jc-btn jc-btn-primary"

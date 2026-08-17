@@ -51,8 +51,8 @@ Shared by every wizard step so the look stays consistent without duplicating CSS
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    border-color: var(--jc-accent);
+    box-shadow: var(--jc-ring);
   }
 }
 
@@ -92,7 +92,7 @@ Shared by every wizard step so the look stays consistent without duplicating CSS
 }
 
 .ob-toggle input:checked + .ob-toggle-slider {
-  background: #667eea;
+  background: var(--jc-accent);
 
   &::after {
     transform: translateX(20px);

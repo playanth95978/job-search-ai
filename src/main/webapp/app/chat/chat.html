@@ -12,20 +12,10 @@
       [messages]="messages()"
       [streamingHtml]="streamingHtml()"
       [streamingMessage]="streamingMessage()"
+      [suggestions]="suggestions()"
       (feedbackClicked)="onFeedback($event)"
+      (suggestionSelected)="onSuggestionClick($event)"
     />
-
-    <!-- Follow-up suggestions -->
-    @if (suggestions().length > 0 && !isTyping()) {
-      <div class="suggestions-bar">
-        @for (suggestion of suggestions(); track suggestion) {
-          <button class="suggestion-chip" (click)="onSuggestionClick(suggestion)">
-            <fa-icon [icon]="'lightbulb'"></fa-icon>
-            {{ suggestion | translate }}
-          </button>
-        }
-      </div>
-    }
     <jhi-chat-input-area (loginClicked)="login()" (userInputChange)="userInput = $event" />
 
     <!-- Panneau coulissant : historique des conversations, à côté du chat -->

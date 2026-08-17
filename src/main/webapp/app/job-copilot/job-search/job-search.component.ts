@@ -8,7 +8,7 @@ import { SeoService } from 'app/pages/shared/seo.service';
 import { JobCopilotService } from '../shared/job-copilot.service';
 import { ApplyModalComponent } from '../shared/apply-modal/apply-modal.component';
 import { AuthPromptModalComponent } from '../shared/auth-prompt-modal/auth-prompt-modal.component';
-import { JobOffer, JobOfferPreview, MatchResult } from '../shared/job-copilot.model';
+import { JobOffer, JobOfferPreview, MatchResult, BoardSuggestion } from '../shared/job-copilot.model';
 import TranslateDirective from '../../shared/language/translate.directive';
 import { JobSearchDetail } from './job-search-detail/job-search-detail';
 import { JobSearchFormComponent } from './job-search-form/job-search-form.component';
@@ -47,7 +47,17 @@ export class JobSearchComponent {
   readonly matching = signal(false);
   readonly matchingAdvanced = signal(false);
   readonly fetching = signal(false);
+  readonly suggestingBoards = signal(false);
+  readonly translating = signal(false);
+  /** Langue actuellement affichée dans le volet de détail ; null = texte d'origine. */
+  readonly translatedLanguage = signal<string | null>(null);
+  readonly boardSuggestions = signal<BoardSuggestion[]>([]);
+  /** Distingue « suggestion jamais lancée » de « lancée, aucun board trouvé ». */
+  readonly boardsSuggested = signal(false);
   readonly error = signal<string | null>(null);
+
+  /** Offre telle que reçue de la source, gardée pour pouvoir annuler une traduction. */
+  private originalOffer: OfferDetail | null = null;
 
   private readonly service = inject(JobCopilotService);
   private readonly modalService = inject(NgbModal);
@@ -117,6 +127,27 @@ export class JobSearchComponent {
     });
   }
 
+  /**
+   * Suggère des boards ATS à partir du profil. Réservé aux utilisateurs connectés : la suggestion
+   * part de leur CV.
+   */
+  onSuggestBoards(): void {
+    if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
+    this.suggestingBoards.set(true);
+    this.error.set(null);
+    this.service.suggestBoards().subscribe({
+      next: boards => {
+        this.boardSuggestions.set(boards);
+        this.boardsSuggested.set(true);
+        this.suggestingBoards.set(false);
+      },
+      error: err => {
+        this.error.set(err.error?.message ?? 'Board suggestion failed');
+        this.suggestingBoards.set(false);
+      },
+    });
+  }
+
   onMatchAll(c: JobSearchCriteria): void {
     if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
     this.matching.set(true);
@@ -151,6 +182,9 @@ export class JobSearchComponent {
    */
   selectOffer(offer: OfferDetail): void {
     this.selectedOffer.set(offer);
+    // Une nouvelle offre repart toujours de sa langue d'origine.
+    this.originalOffer = null;
+    this.translatedLanguage.set(null);
     if (offer.id && (!offer.description || offer.description.length < 200)) {
       this.selectedLoading.set(true);
       this.service.enrichJob(offer.id).subscribe({
@@ -162,6 +196,37 @@ export class JobSearchComponent {
         error: () => this.selectedLoading.set(false),
       });
     }
+  }
+
+  /**
+   * Traduit l'offre affichée. Le texte d'origine est conservé à part : la traduction est une vue,
+   * pas une modification — l'utilisateur doit pouvoir revenir à la version publiée par la source.
+   */
+  onTranslate(language: string): void {
+    const offer = this.selectedOffer();
+    if (!offer?.description) return;
+    this.originalOffer ??= offer;
+    this.translating.set(true);
+    this.error.set(null);
+    this.service.translateJob(this.originalOffer, language).subscribe({
+      next: translated => {
+        this.selectedOffer.update(cur => (cur ? { ...cur, title: translated.title, description: translated.description } : cur));
+        this.translatedLanguage.set(language);
+        this.translating.set(false);
+      },
+      error: err => {
+        this.error.set(err.error?.message ?? 'Translation failed');
+        this.translating.set(false);
+      },
+    });
+  }
+
+  /** Rétablit le texte publié par la source. */
+  onRestoreOriginal(): void {
+    if (this.originalOffer) {
+      this.selectedOffer.set(this.originalOffer);
+    }
+    this.translatedLanguage.set(null);
   }
 
   openApplyModal(offer: JobOfferPreview & { id?: string }): void {

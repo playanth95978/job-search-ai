@@ -162,6 +162,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./portfolio:/usr/share/nginx/html:ro
+      # Remplace la conf par defaut de l'image, qui ne compresse rien : la page fait ~36 Ko.
+      - ./portfolio/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=job-search-ai_default'

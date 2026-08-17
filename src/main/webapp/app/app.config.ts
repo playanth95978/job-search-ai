@@ -32,10 +32,38 @@ import routes from './app.routes';
 import { NgbDateDayjsAdapter } from './config/datepicker-adapter';
 import { NgxSpinnerModule } from 'ngx-spinner';
 
+/** Clé de garde : une seule tentative de rechargement automatique par session. */
+const CHUNK_RELOAD_KEY = 'jhi-chunk-reload';
+
+/**
+ * Vrai quand la navigation a échoué parce qu'un chunk paresseux n'a pas pu être téléchargé.
+ *
+ * <p>Ce n'est pas une erreur applicative : le bundle est découpé en dizaines de chunks, et sur un
+ * premier accès (nouveau navigateur, mobile, cache froid) il suffit qu'une seule requête échoue —
+ * réseau instable, connexion coupée, déploiement pendant le chargement — pour que le routeur lève
+ * une erreur de navigation. Le contenu est intact côté serveur : un rechargement suffit.</p>
+ */
+const isChunkLoadFailure = (error: unknown): boolean => {
+  const message = error instanceof Error ? `${error.name} ${error.message}` : typeof error === 'string' ? error : '';
+  return /ChunkLoadError|Loading chunk|dynamically imported module|Importing a module script failed/i.test(message);
+};
+
 const routerFeatures: RouterFeatures[] = [
   withComponentInputBinding(),
   withNavigationErrorHandler((e: NavigationError) => {
     const router = inject(Router);
+    if (isChunkLoadFailure(e.error)) {
+      // Rechargement automatique, une seule fois : sans ce garde-fou, un chunk réellement absent
+      // (déploiement cassé) boucleraient à l'infini. Au 2e échec, on montre la page d'erreur.
+      if (!sessionStorage.getItem(CHUNK_RELOAD_KEY)) {
+        sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+        location.reload();
+        return;
+      }
+      router.navigate(['/error']);
+      return;
+    }
+    sessionStorage.removeItem(CHUNK_RELOAD_KEY);
     if (e.error.status === 403) {
       router.navigate(['/accessdenied']);
     } else if (e.error.status === 404) {

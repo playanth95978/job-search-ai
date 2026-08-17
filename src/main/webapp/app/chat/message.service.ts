@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { auditTime, filter, map, Observable, startWith, Subscription, tap } from 'rxjs';
 import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
@@ -95,6 +95,30 @@ export class MessageService {
   private readonly _pendingSources = signal<SourceInfo[]>([]);
   private readonly _suggestions = signal<string[]>([]);
   readonly suggestions = this._suggestions.asReadonly();
+
+  /** Prompts offered on an empty conversation (i18n keys). */
+  private static readonly STARTER_PROMPTS = [
+    'chat.suggestions.search',
+    'chat.suggestions.match',
+    'chat.suggestions.applications',
+    'chat.suggestions.coverLetter',
+  ];
+
+  /**
+   * Chips to display under the thread, as i18n keys: starter prompts while the user hasn't asked
+   * anything yet, follow-ups once an answer has been produced, and nothing while the agent replies.
+   * Shared by the {@code /chat} page and the floating widget so both behave the same.
+   */
+  readonly promptChips = computed<string[]>(() => {
+    if (this._generatingInProgress()) {
+      return [];
+    }
+    const followUps = this._suggestions();
+    if (followUps.length > 0) {
+      return followUps;
+    }
+    return this._messages().some(m => m.role === 'user') ? [] : MessageService.STARTER_PROMPTS;
+  });
   private streamBuffer = '';
   private readonly conversationService = inject(ConversationService);
 
@@ -112,9 +136,9 @@ export class MessageService {
   private streamSubscription: Subscription | null = null;
 
   /** Nombre de caractères révélés par frame, proportionnel au retard (min 1). */
-  private static readonly REVEAL_DIVISOR = 8;
-  /** Le markdown est re-parsé au plus toutes les 33 ms (~30 fps) : inutile de le faire à 60 fps. */
-  private static readonly MARKDOWN_RENDER_INTERVAL_MS = 33;
+  private static readonly REVEAL_DIVISOR = 4;
+  /** Le markdown est re-parsé au plus toutes les 16 ms (~60 fps) pour une fluidité maximale. */
+  private static readonly MARKDOWN_RENDER_INTERVAL_MS = 16;
 
   constructor() {
     marked.setOptions({
@@ -142,7 +166,7 @@ export class MessageService {
   streamText(url: string): Observable<string> {
     return this.http.get(url, { responseType: 'text', observe: 'events', reportProgress: true }).pipe(
       filter((event: HttpEvent<string>): boolean => event.type === HttpEventType.DownloadProgress || event.type === HttpEventType.Response),
-      auditTime(30),
+      auditTime(16),
       map((event: HttpEvent<string>): string =>
         event.type === HttpEventType.DownloadProgress ? (event.partialText ?? '') : ((event as HttpResponse<string>).body ?? ''),
       ),
@@ -482,7 +506,7 @@ export class MessageService {
         filter(
           (event: HttpEvent<string>): boolean => event.type === HttpEventType.DownloadProgress || event.type === HttpEventType.Response,
         ),
-        auditTime(30),
+        auditTime(16),
         map(
           (event: HttpEvent<string>): ChatMessage =>
             event.type === HttpEventType.DownloadProgress
@@ -582,6 +606,14 @@ export class MessageService {
     return { text: result, sources };
   }
 
+  /**
+   * Sends the prompt behind a suggestion chip. Chips carry i18n keys (so they follow the UI
+   * language); the text actually sent to the agent is the translated sentence.
+   */
+  sendSuggestion(key: string): void {
+    this.useSuggestion(this.translate.instant(key));
+  }
+
   useSuggestion(suggestion: string): void {
     this._suggestions.set([]);
     if (suggestion.includes('Confluence')) {
@@ -602,30 +634,38 @@ export class MessageService {
     );
   }
 
+  /**
+   * Derives follow-up chips from the answer that was just streamed. Keyword-based on purpose: it
+   * costs no extra LLM call (which the free-tier quota would not appreciate) and stays predictable.
+   * Matching is accent-insensitive because the agent answers in natural French.
+   */
   private generateSuggestions(response: string): void {
     if (!response || response.length < 50) {
       this._suggestions.set([]);
       return;
     }
+    const text = MessageService.deaccent(response);
     const suggestions: string[] = [];
-    const lower = response.toLowerCase();
-    if (lower.includes('jira') || lower.includes('ticket')) {
-      suggestions.push('Quels sont les tickets Jira lies a ce sujet ?');
+    if (/\b(offre|poste|job|opportunit|recrut)/.test(text)) {
+      suggestions.push('chat.suggestions.followUp.whyMatch');
     }
-    if (lower.includes('code') || lower.includes('class') || lower.includes('service') || lower.includes('java')) {
-      suggestions.push('Montre-moi le code source associe');
+    if (/\b(candidatur|postul|appl(y|ication)|entretien|interview)/.test(text)) {
+      suggestions.push('chat.suggestions.followUp.applications');
     }
-    if (lower.includes('confluence') || lower.includes('documentation') || lower.includes('page')) {
-      suggestions.push("Y a-t-il d'autres pages Confluence sur ce sujet ?");
+    if (/\b(lettre|motivation|cover letter)/.test(text)) {
+      suggestions.push('chat.suggestions.followUp.coverLetter');
     }
-    if (lower.includes('etape') || lower.includes('procedure') || lower.includes('comment')) {
-      suggestions.push('Peux-tu detailler les etapes ?');
+    if (/\b(cv|profil|competence|skill|experience)/.test(text)) {
+      suggestions.push('chat.suggestions.followUp.improveCv');
     }
     if (suggestions.length === 0) {
-      suggestions.push('Peux-tu approfondir ce sujet ?');
-      suggestions.push('Quelles sont les sources associees ?');
+      suggestions.push('chat.suggestions.followUp.moreDetails', 'chat.suggestions.followUp.bestOffers');
     }
     this._suggestions.set(suggestions.slice(0, 3));
+  }
+
+  private static deaccent(value: string): string {
+    return value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   }
 
   exportConversation(): string {
@@ -666,7 +706,7 @@ export class MessageService {
         filter(
           (event: HttpEvent<string>): boolean => event.type === HttpEventType.DownloadProgress || event.type === HttpEventType.Response,
         ),
-        auditTime(30),
+        auditTime(16),
         map(
           (event: HttpEvent<string>): ChatMessage =>
             event.type === HttpEventType.DownloadProgress

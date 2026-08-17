@@ -6,6 +6,7 @@ import {
   ApplicationStats,
   AssistantMessage,
   AutopsyReport,
+  BoardSuggestion,
   CandidateProfile,
   CareerRoadmap,
   CvMatchResult,
@@ -122,6 +123,14 @@ export class JobCopilotService {
     let params = new HttpParams();
     if (refresh) params = params.set('refresh', 'true');
     return this.http.get<JobOffer[]>(`${this.baseUrl}/opportunities/live`, { params });
+  }
+
+  /**
+   * Boards ATS suggérés à partir du profil : les noms d'entreprise viennent du modèle, mais chaque
+   * entrée renvoyée a été résolue contre l'API réelle de l'ATS — slug et URL sont vérifiés.
+   */
+  suggestBoards(limit = 6): Observable<BoardSuggestion[]> {
+    return this.http.get<BoardSuggestion[]>(`${this.baseUrl}/jobs/boards/suggestions`, { params: { limit } });
   }
 
   fetchFromUrl(url: string): Observable<JobOffer[]> {

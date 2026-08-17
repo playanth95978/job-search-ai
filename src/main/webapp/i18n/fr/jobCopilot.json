@@ -285,16 +285,26 @@
         "locationPlaceholder": "Localisation",
         "allSources": "Toutes les sources",
         "country": "Pays",
-        "atsPlaceholder": "Coller l'URL du board ATS (Greenhouse, Lever...)"
+        "atsPlaceholder": "Coller l'URL du board ATS (Greenhouse, Lever...)",
+        "postalCodePlaceholder": "Code postal (ex : 75001)",
+        "locationIgnored": "Localisation non applicable pour cette source",
+        "region": "Zone d'éligibilité",
+        "allRegions": "Toutes les zones",
+        "postalCodeRequired": "France Travail n'accepte qu'un code postal à 5 chiffres : la localisation sera ignorée."
       },
       "coverage": {
         "emploiNc": "Couvre la Nouvelle-Calédonie. Exemples de lieux :",
         "franceTravail": "Couvre la France (métropole). Ville, département ou code postal :",
-        "adzuna": "Choisissez d'abord le pays, puis la ville de ce pays :"
+        "adzuna": "Choisissez d'abord le pays, puis la ville de ce pays :",
+        "jobicy": "Offres 100 % télétravail. Choisissez une zone d'éligibilité plutôt qu'une ville :",
+        "careerjet": "Couvre de nombreux pays. Choisissez le pays, puis la ville :"
       },
       "detail": {
         "close": "Fermer le détail",
-        "noDescription": "Aucune description disponible."
+        "noDescription": "Aucune description disponible.",
+        "translate": "Traduire",
+        "showOriginal": "Voir l'original",
+        "translatedBy": "Traduction automatique"
       },
       "actions": {
         "smartSearch": "Recherche intelligente",
@@ -327,6 +337,13 @@
         "matchAdvanced": "Comme « Correspondances », en plus poussé : l'IA croise le sens et les mots-clés, puis relit chaque offre pour affiner le classement. Plus précis, un peu plus lent.",
         "fetchJobs": "Colle l'adresse de la page carrières d'une entreprise (Greenhouse, Lever…) pour importer ses offres. Sans IA : récupération directe.",
         "toggle": "Afficher l'aide sur les boutons de recherche"
+      },
+      "boards": {
+        "suggest": "Suggérer des boards selon mon profil",
+        "suggesting": "Recherche des boards…",
+        "hint": "Les entreprises sont proposées d'après votre CV, puis vérifiées sur l'ATS réel : seuls les boards qui répondent sont affichés.",
+        "fetch": "Chercher les offres",
+        "empty": "Aucun board public trouvé pour votre profil. Complétez votre CV, ou collez directement une URL ci-dessus."
       }
     },
     "dashboard": {

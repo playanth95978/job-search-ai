@@ -195,6 +195,8 @@ export const JOB_SOURCE_LABELS: Record<string, string> = {
   FRANCE_TRAVAIL: 'France Travail',
   EMPLOI_NC: 'Emploi.nc',
   MANUAL: 'Manual',
+  JOBICY: 'jobicy',
+  CAREERJET: 'Career Jet',
 };
 
 export const JOB_SOURCE_COLORS: Record<string, string> = {
@@ -219,26 +221,68 @@ export interface JobSourceInfo {
   coverageKey: string;
   examples: string[];
   hasCountrySelect?: boolean;
+  /**
+   * Ce que la source sait réellement faire d'une localisation. Chaque API a sa propre notion :
+   * saisir « Paris » là où un code postal est attendu ne donne pas des résultats approximatifs,
+   * mais aucun résultat — le champ doit donc s'adapter plutôt que de laisser l'utilisateur deviner.
+   */
+  locationMode: LocationMode;
 }
+
+/**
+ * - `city`        : nom de ville en texte libre
+ * - `postalCode`  : uniquement un code postal à 5 chiffres (France Travail)
+ * - `region`      : zone d'éligibilité à choisir dans une liste (Jobicy, 100 % télétravail)
+ * - `none`        : la source ignore la localisation
+ */
+export type LocationMode = 'city' | 'postalCode' | 'region' | 'none';
+
+/** Zones d'éligibilité acceptées par Jobicy (son paramètre `geo` n'accepte que ces valeurs). */
+export const JOBICY_REGIONS: { value: string; label: string }[] = [
+  { value: 'europe', label: 'Europe' },
+  { value: 'apac', label: 'Asie-Pacifique' },
+  { value: 'usa', label: 'États-Unis' },
+  { value: 'canada', label: 'Canada' },
+  { value: 'latam', label: 'Amérique latine' },
+  { value: 'emea', label: 'EMEA' },
+];
 
 /** Connectors that support keyword search (matches the registered backend AtsConnector beans). */
 export const SEARCHABLE_JOB_SOURCES: JobSourceInfo[] = [
   {
     value: 'EMPLOI_NC',
+    locationMode: 'city',
     label: JOB_SOURCE_LABELS['EMPLOI_NC'],
     coverageKey: 'jobCopilot.search.coverage.emploiNc',
     examples: ['Nouméa', 'Dumbéa', 'Mont-Dore'],
   },
   {
     value: 'FRANCE_TRAVAIL',
+    locationMode: 'postalCode',
     label: JOB_SOURCE_LABELS['FRANCE_TRAVAIL'],
     coverageKey: 'jobCopilot.search.coverage.franceTravail',
-    examples: ['Paris', 'Lyon', 'Marseille', '75', '69'],
+    examples: ['75001', '69003', '13001'],
   },
   {
     value: 'ADZUNA',
+    locationMode: 'city',
     label: JOB_SOURCE_LABELS['ADZUNA'],
     coverageKey: 'jobCopilot.search.coverage.adzuna',
+    examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
+    hasCountrySelect: true,
+  },
+  {
+    value: 'JOBICY',
+    locationMode: 'region',
+    label: JOB_SOURCE_LABELS['JOBICY'],
+    coverageKey: 'jobCopilot.search.coverage.jobicy',
+    examples: [],
+  },
+  {
+    value: 'CAREERJET',
+    locationMode: 'city',
+    label: JOB_SOURCE_LABELS['CAREERJET'],
+    coverageKey: 'jobCopilot.search.coverage.careerjet',
     examples: ['Paris', 'London', 'Brisbane', 'Berlin'],
     hasCountrySelect: true,
   },
@@ -369,3 +413,26 @@ export interface CareerRoadmap {
   steps: RoadmapStep[];
   sampleOffers: JobOfferDto[];
 }
+
+/** Board ATS suggéré pour le profil du candidat — déjà vérifié côté serveur (slug et URL réels). */
+export interface BoardSuggestion {
+  company: string;
+  source: string;
+  slug: string;
+  boardUrl: string;
+  offerCount: number;
+  sampleTitles: string[];
+}
+
+/**
+ * Langues proposées pour la traduction d'une offre. `value` part telle quelle dans le prompt du
+ * modèle (« Translate the following job offer into French »), `label` est ce que voit l'utilisateur.
+ */
+export const TRANSLATION_LANGUAGES: { value: string; label: string }[] = [
+  { value: 'French', label: 'Français' },
+  { value: 'English', label: 'English' },
+  { value: 'Spanish', label: 'Español' },
+  { value: 'German', label: 'Deutsch' },
+  { value: 'Italian', label: 'Italiano' },
+  { value: 'Portuguese', label: 'Português' },
+];

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Job Search AI">
+  <title>Job Search AI</title>
+  <defs>
+    <linearGradient id="jsaFav" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+  </defs>
+  <!-- Version simplifiée du logo : à 16 px, la mallette détaillée devient une tache. -->
+  <rect width="64" height="64" rx="14" fill="url(#jsaFav)" />
+  <path d="M24 18h16a6 6 0 0 1 6 6v3h-6v-2H24v2h-6v-3a6 6 0 0 1 6-6z" fill="#ffffff" opacity="0.9" />
+  <rect x="14" y="27" width="36" height="22" rx="4" fill="#ffffff" opacity="0.9" />
+  <circle cx="40" cy="40" r="12" fill="url(#jsaFav)" />
+  <circle cx="40" cy="40" r="8.5" fill="none" stroke="#ffffff" stroke-width="4" />
+  <path d="M46 46l7 7" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
+</svg>
