@@ -188,3 +188,24 @@ textarea {
     background: rgba(79, 70, 229, 0.08);
   }
 }
+
+@media (max-width: 767.98px) {
+  /* Side-by-side fields are unusable at phone width — one field per row. */
+  .cv-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  input,
+  textarea,
+  select {
+    /* Below 16px iOS zooms the page in on focus. */
+    font-size: 16px;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .cv-add {
+    align-self: stretch;
+    justify-content: center;
+    padding: 0.6rem 0.8rem;
+  }
+}

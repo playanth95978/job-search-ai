@@ -125,10 +125,34 @@
   <!-- Split screen -->
   <div class="cv-split">
     <section class="cv-editor-pane">
-      <div class="cv-ai-bar d-flex flex-row gap-2">
-        <jhi-cv-generate />
-        <jhi-cv-review [resume]="r" />
-        <jhi-cv-match [resume]="r" />
+      <div class="w-100 mb-3 cv-ai-bar">
+        <div class="cv-ai-head">
+          <ul ngbNav #aiNav="ngbNav" class="nav cv-ai-tabs">
+            <li [ngbNavItem]="'generate'">
+              <a ngbNavLink>
+                <fa-icon icon="wand-magic-sparkles" /> <span jhiTranslate="cvBuilder.generate.button">Générer avec l'IA</span>
+              </a>
+              <ng-template ngbNavContent>
+                <jhi-cv-generate />
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="'review'">
+              <a ngbNavLink> <fa-icon icon="wand-magic-sparkles" /> <span jhiTranslate="cvBuilder.review.button">Revue IA</span> </a>
+              <ng-template ngbNavContent>
+                <jhi-cv-review [resume]="r" />
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="'match'">
+              <a ngbNavLink> <fa-icon icon="bullseye" /> <span jhiTranslate="cvBuilder.match.button">Match avec une offre</span> </a>
+              <ng-template ngbNavContent>
+                <jhi-cv-match [resume]="r" />
+              </ng-template>
+            </li>
+          </ul>
+        </div>
+        <div class="cv-ai-body">
+          <div [ngbNavOutlet]="aiNav"></div>
+        </div>
       </div>
       <jhi-cv-editor />
     </section>

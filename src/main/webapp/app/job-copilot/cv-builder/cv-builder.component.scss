@@ -178,7 +178,7 @@
 .cv-split {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(360px, 42%) 1fr;
+  grid-template-columns: minmax(420px, 50%) 1fr;
   min-height: 0;
 }
 
@@ -198,8 +198,217 @@
   .cv-split {
     grid-template-columns: 1fr;
   }
+  .cv-editor-pane {
+    border-right: none;
+  }
   .cv-preview-pane {
     border-top: 1px solid var(--bs-border-color);
+  }
+}
+
+/* Mobile / small tablets: the toolbars stop being single rows of tiny targets. */
+@media (max-width: 767.98px) {
+  .cv-builder {
+    /* The panes scroll with the page instead of trapping two nested scroll areas. */
+    height: auto;
+  }
+
+  .cv-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    /* Keeps the title + save state reachable while scrolling a long form. */
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
+
+  .cv-toolbar-left {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .cv-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-color: var(--bs-border-color);
+    font-size: 0.95rem;
+  }
+
+  .cv-toolbar-right {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .cv-tool {
+    /* 44px is the minimum comfortable touch target. */
+    width: 44px;
+    height: 44px;
+  }
+
+  .cv-divider {
+    display: none;
+  }
+
+  .cv-custombar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .cv-templates {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .cv-tmpl {
+    flex: 1 1 calc(50% - 0.4rem);
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+  }
+
+  .cv-translate-group {
+    flex: 1 1 100%;
+    gap: 0.4rem;
+  }
+
+  .cv-lang-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.5rem;
+  }
+
+  .cv-theme {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    input[type='color'] {
+      width: 38px;
+      height: 32px;
+    }
+
+    select {
+      flex: 1 1 140px;
+      min-width: 0;
+      padding: 0.45rem 0.5rem;
+    }
+  }
+
+  .cv-size {
+    flex: 1 1 100%;
+
+    input[type='range'] {
+      flex: 1 1 auto;
+      width: 100%;
+    }
+  }
+
+  .cv-editor-pane {
+    padding: 0.75rem;
+  }
+
+  .cv-preview-pane {
+    padding: 0.75rem;
+  }
+}
+
+/* AI panel: a rounded card with a segmented-control tab bar instead of square Bootstrap tabs. */
+.cv-ai-bar {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  background: var(--bs-body-bg);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  overflow: hidden;
+}
+
+.cv-ai-head {
+  padding: 0.5rem;
+  background: linear-gradient(180deg, var(--bs-tertiary-bg), transparent);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.cv-ai-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 12px;
+  background: var(--bs-tertiary-bg);
+  /* Long labels scroll sideways rather than stacking into a wall of rows. */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  li {
+    flex: 1 1 0;
+    min-width: max-content;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    padding: 0.5rem 0.9rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--bs-secondary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease;
+
+    fa-icon {
+      opacity: 0.75;
+      transition: opacity 0.18s ease;
+    }
+
+    &:hover:not(.active) {
+      background: var(--bs-body-bg);
+      color: var(--bs-body-color);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #4f46e5;
+      outline-offset: 2px;
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      color: #fff;
+      box-shadow: 0 4px 12px rgb(79 70 229 / 30%);
+
+      fa-icon {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.cv-ai-body {
+  padding: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  .cv-ai-tabs .nav-link {
+    /* Touch targets stay comfortable even once the bar starts scrolling. */
+    padding: 0.6rem 0.85rem;
+  }
+
+  .cv-ai-body {
+    padding: 0.75rem;
   }
 }
 

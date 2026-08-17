@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import TranslateDirective from 'app/shared/language/translate.directive';
 
 import { ResumeStore } from './resume-store';
@@ -29,6 +30,7 @@ import { CvExportService } from './cv-export.service';
     FaIconComponent,
     TranslateModule,
     TranslateDirective,
+    NgbNavModule,
     CvEditorComponent,
     CvPreviewComponent,
     CvReviewComponent,

@@ -195,3 +195,10 @@ textarea {
 .cv-match-global.rating-poor .cv-match-global-value {
   color: #ef4444;
 }
+
+@media (max-width: 575.98px) {
+  /* Three score tiles squeeze the labels into unreadable slivers on a phone. */
+  .cv-match-scores {
+    grid-template-columns: 1fr;
+  }
+}
