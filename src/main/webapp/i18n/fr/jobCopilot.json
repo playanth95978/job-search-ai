@@ -398,6 +398,11 @@
           "logistics": "Logistique / Transport",
           "hospitality": "Hôtellerie / Restauration",
           "admin": "Administratif",
+          "industry": "Industrie",
+          "maintenance": "Installation / Maintenance",
+          "agriculture": "Agriculture / Espaces verts",
+          "arts": "Arts / Spectacle",
+          "services": "Services à la personne",
           "other": "Autre"
         }
       }
