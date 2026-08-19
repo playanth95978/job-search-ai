@@ -75,6 +75,9 @@ public class JobOfferDTO implements Serializable {
 
     private String experienceLevel;
 
+    /** Job family derived at ingestion; drives the Category filter. */
+    private String category;
+
     private Instant publishedAt;
 
     @NotNull
@@ -286,6 +289,14 @@ public class JobOfferDTO implements Serializable {
         this.experienceLevel = experienceLevel;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     public Instant getPublishedAt() {
         return publishedAt;
     }
@@ -376,6 +387,7 @@ public class JobOfferDTO implements Serializable {
             ", salaryCurrency='" + getSalaryCurrency() + "'" +
             ", contractType='" + getContractType() + "'" +
             ", experienceLevel='" + getExperienceLevel() + "'" +
+            ", category='" + getCategory() + "'" +
             ", publishedAt='" + getPublishedAt() + "'" +
             ", createdAt='" + getCreatedAt() + "'" +
             ", indexedAt='" + getIndexedAt() + "'" +

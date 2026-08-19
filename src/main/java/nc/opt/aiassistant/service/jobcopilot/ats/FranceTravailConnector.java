@@ -72,7 +72,9 @@ public final class FranceTravailConnector extends AbstractAtsConnector {
         FranceTravailEntreprise entreprise,
         FranceTravailLieu lieuTravail,
         FranceTravailOrigine origineOffre,
-        FranceTravailSalaire salaire
+        FranceTravailSalaire salaire,
+        /** ROME code of the offer (e.g. M1805): the source's own taxonomy, mapped to a job family. */
+        String romeCode
     ) {}
 
     record FranceTravailEntreprise(String nom) {}
@@ -254,6 +256,8 @@ public final class FranceTravailConnector extends AbstractAtsConnector {
         offer.setSource(JobSource.FRANCE_TRAVAIL);
         offer.setRemote(false);
         offer.setPublishedAt(AtsDates.parse(result.dateCreation()));
+        // Not persisted as such: the ingestion resolver maps it to the common category vocabulary.
+        offer.setSourceCategory(StringUtils.trimToNull(result.romeCode()));
         if (result.salaire() != null) {
             applySalary(offer, result.salaire().libelle());
         }

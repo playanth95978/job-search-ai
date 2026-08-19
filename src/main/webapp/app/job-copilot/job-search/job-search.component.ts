@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -13,7 +13,9 @@ import TranslateDirective from '../../shared/language/translate.directive';
 import { JobSearchDetail } from './job-search-detail/job-search-detail';
 import { JobSearchFormComponent } from './job-search-form/job-search-form.component';
 import { JobResultsComponent } from './job-results/job-results.component';
-import { JobSearchCriteria, OfferDetail } from './job-search.types';
+import { JobSearchFiltersComponent } from './job-search-filters/job-search-filters.component';
+import { applyFilters, NO_FILTERS } from './job-search-filtering';
+import { JobSearchCriteria, JobSearchFilters, OfferDetail } from './job-search.types';
 
 // Re-exported so existing importers (e.g. the detail pane) keep resolving OfferDetail from here.
 export type { OfferDetail } from './job-search.types';
@@ -27,7 +29,15 @@ export type { OfferDetail } from './job-search.types';
 @Component({
   selector: 'jhi-job-copilot-search',
   standalone: true,
-  imports: [FaIconComponent, TranslateModule, TranslateDirective, JobSearchFormComponent, JobResultsComponent, JobSearchDetail],
+  imports: [
+    FaIconComponent,
+    TranslateModule,
+    TranslateDirective,
+    JobSearchFormComponent,
+    JobSearchFiltersComponent,
+    JobResultsComponent,
+    JobSearchDetail,
+  ],
   templateUrl: './job-search.component.html',
   styleUrl: './job-search.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +66,31 @@ export class JobSearchComponent {
   readonly boardsSuggested = signal(false);
   readonly error = signal<string | null>(null);
 
+  /** Left-panel criteria, applied client-side to the results already loaded. */
+  readonly filters = signal<JobSearchFilters>({ ...NO_FILTERS });
+
+  /**
+   * The result set the facets are built from: the match offers when a profile match is on screen,
+   * the plain offers otherwise. Always the *unfiltered* set, so ticking a facet never makes the other
+   * facets disappear from under the user.
+   */
+  readonly facetSource = computed(() => (this.matchResults().length ? this.matchResults().map(match => match.jobOffer) : this.offers()));
+
+  readonly visibleOffers = computed(() => applyFilters(this.offers(), this.filters()));
+
+  /** Match cards keep their score badge, so the filters are applied to the offers they carry. */
+  readonly visibleMatchResults = computed(() => {
+    const matches = this.matchResults();
+    const ordered = applyFilters(
+      matches.map(match => match.jobOffer),
+      this.filters(),
+    );
+    // Two offers can share a title/company, so match back by object identity rather than by field.
+    return ordered.map(offer => matches.find(match => match.jobOffer === offer)!).filter(Boolean);
+  });
+
+  readonly visibleCount = computed(() => (this.matchResults().length ? this.visibleMatchResults().length : this.visibleOffers().length));
+
   /** Offre telle que reçue de la source, gardée pour pouvoir annuler une traduction. */
   private originalOffer: OfferDetail | null = null;
 
@@ -73,6 +108,10 @@ export class JobSearchComponent {
         "Recherchez des offres d'emploi et laissez l'IA les faire correspondre à votre CV. Matching sémantique, multi-sources, candidature assistée.",
       path: '/search',
     });
+  }
+
+  onFiltersChange(filters: JobSearchFilters): void {
+    this.filters.set(filters);
   }
 
   onSearch(c: JobSearchCriteria): void {

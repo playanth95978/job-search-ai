@@ -1,5 +1,6 @@
 .jc-search {
-  max-width: 1040px;
+  // Wider than before: the filter panel is a third column and must not squeeze the results.
+  max-width: 1320px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
 
@@ -43,12 +44,20 @@
   font-weight: 500;
 }
 
-/* ---- Seek-style split view (results list + detail pane) ------------------ */
+/* ---- Seek-style split view (filters + results list + detail pane) -------- */
 .jc-results-layout {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
   align-items: start;
+}
+
+/* The filter panel becomes a real left column once there is room for one; below that it stays
+   stacked above the results as a collapsible card (see the child component's own media query). */
+@media (min-width: 900px) {
+  .jc-results-layout {
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  }
 }
 
 .jc-results-col {
@@ -59,7 +68,7 @@
    so the rule must stay here — the child component cannot style it). */
 @media (min-width: 900px) {
   .jc-results-layout.has-detail {
-    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.35fr);
+    grid-template-columns: minmax(220px, 260px) minmax(280px, 1fr) minmax(0, 1.35fr);
   }
 }
 

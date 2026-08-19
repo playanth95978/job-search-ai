@@ -28,10 +28,12 @@
   }
 
   <div class="jc-results-layout" [class.has-detail]="!!selectedOffer()">
+    <jhi-job-search-filters [offers]="facetSource()" [visibleCount]="visibleCount()" (filtersChange)="onFiltersChange($event)" />
+
     <div class="jc-results-col">
       <jhi-job-results
-        [offers]="offers()"
-        [matchResults]="matchResults()"
+        [offers]="visibleOffers()"
+        [matchResults]="visibleMatchResults()"
         [selectedId]="selectedOffer()?.id ?? null"
         (selectOffer)="selectOffer($event)"
         (apply)="openApplyModal($event)"

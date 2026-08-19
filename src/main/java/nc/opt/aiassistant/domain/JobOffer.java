@@ -132,6 +132,22 @@ public class JobOffer implements Serializable {
     @Column(name = "experience_level")
     private String experienceLevel;
 
+    /**
+     * Job family, derived from the title at ingestion by
+     * {@link nc.opt.aiassistant.service.jobcopilot.JobCategoryClassifier} because no source provides a
+     * shared taxonomy. Stored so it can be filtered with a Specification like any other column.
+     */
+    @Column(name = "category")
+    private String category;
+
+    /**
+     * The source's own taxonomy value (a ROME code, an Adzuna tag), set by the connector and consumed by
+     * {@link nc.opt.aiassistant.service.jobcopilot.JobCategoryResolver} at ingestion. Not persisted: only
+     * the resolved family is, and keeping the raw label would add a column nothing queries.
+     */
+    @Transient
+    private String sourceCategory;
+
     @Column(name = "published_at")
     private Instant publishedAt;
 

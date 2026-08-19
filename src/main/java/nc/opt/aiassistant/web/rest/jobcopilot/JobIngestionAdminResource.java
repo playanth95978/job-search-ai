@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class JobIngestionAdminResource {
 
     private final JobOfferBatchScheduler scheduler;
+    private final nc.opt.aiassistant.service.jobcopilot.JobCategoryBackfillService categoryBackfillService;
 
     @PostMapping("/ingest")
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
@@ -31,6 +32,18 @@ public class JobIngestionAdminResource {
         log.info("Manual job-offer ingestion triggered via admin endpoint");
         // Run in the background: a full multi-source ingestion can take a while, so return immediately.
         CompletableFuture.runAsync(scheduler::runIngestionJob);
+        return ResponseEntity.accepted().body(Map.of("status", "started"));
+    }
+
+    /**
+     * Classifies the offers ingested before {@code job_offer.category} existed. Run once after the
+     * migration; ingestion stamps every new offer on its own. Idempotent — only null categories are touched.
+     */
+    @PostMapping("/backfill-categories")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Map<String, String>> backfillCategories() {
+        log.info("Category backfill triggered via admin endpoint");
+        CompletableFuture.runAsync(categoryBackfillService::backfill);
         return ResponseEntity.accepted().body(Map.of("status", "started"));
     }
 }

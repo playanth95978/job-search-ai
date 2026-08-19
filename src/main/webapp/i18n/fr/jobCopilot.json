@@ -344,6 +344,62 @@
         "hint": "Les entreprises sont proposées d'après votre CV, puis vérifiées sur l'ATS réel : seuls les boards qui répondent sont affichés.",
         "fetch": "Chercher les offres",
         "empty": "Aucun board public trouvé pour votre profil. Complétez votre CV, ou collez directement une URL ci-dessus."
+      },
+      "filters": {
+        "title": "Filtrer les résultats",
+        "clear": "Tout effacer",
+        "empty": "Lancez une recherche pour voir les filtres disponibles.",
+        "sort": {
+          "label": "Trier par",
+          "relevance": "Pertinence",
+          "date": "Date",
+          "salary": "Salaire"
+        },
+        "datePosted": {
+          "label": "Date de publication",
+          "any": "Peu importe",
+          "24h": "24 h",
+          "7d": "7 jours",
+          "30d": "30 jours"
+        },
+        "salary": {
+          "label": "Salaire minimum",
+          "any": "Indifférent",
+          "note": "Les offres sans salaire annoncé sont masquées quand un minimum est choisi."
+        },
+        "remote": {
+          "label": "Télétravail",
+          "only": "Télétravail uniquement"
+        },
+        "location": {
+          "label": "Localisation"
+        },
+        "company": {
+          "label": "Entreprise"
+        },
+        "contractType": {
+          "label": "Type de contrat"
+        },
+        "category": {
+          "label": "Catégorie"
+        },
+        "categories": {
+          "tech": "Informatique",
+          "data": "Data / IA",
+          "design": "Design",
+          "product": "Produit",
+          "sales": "Commercial",
+          "marketing": "Marketing",
+          "finance": "Finance / Comptabilité",
+          "hr": "Ressources humaines",
+          "health": "Santé",
+          "education": "Enseignement",
+          "construction": "BTP",
+          "logistics": "Logistique / Transport",
+          "hospitality": "Hôtellerie / Restauration",
+          "admin": "Administratif",
+          "other": "Autre"
+        }
       }
     },
     "dashboard": {

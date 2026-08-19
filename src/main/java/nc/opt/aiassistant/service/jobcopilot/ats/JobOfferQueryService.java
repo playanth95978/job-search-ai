@@ -62,6 +62,15 @@ public class JobOfferQueryService extends QueryService<JobOffer> {
     }
 
     /**
+     * The {@link Specification} a criteria set resolves to, exposed so the facet counts can be computed
+     * under exactly the same filters as the result list (see
+     * {@link nc.opt.aiassistant.service.jobcopilot.ats.JobOfferFacetService}).
+     */
+    public Specification<JobOffer> toSpecification(JobOfferCriteria criteria) {
+        return createSpecification(criteria);
+    }
+
+    /**
      * Function to convert {@link JobOfferCriteria} to a {@link Specification}
      * @param criteria The object which holds all the filters, which the entities should match.
      * @return the matching {@link Specification} of the entity.
@@ -93,6 +102,7 @@ public class JobOfferQueryService extends QueryService<JobOffer> {
                     buildStringSpecification(criteria.getSalaryCurrency(), JobOffer_.salaryCurrency),
                     buildStringSpecification(criteria.getContractType(), JobOffer_.contractType),
                     buildStringSpecification(criteria.getExperienceLevel(), JobOffer_.experienceLevel),
+                    buildStringSpecification(criteria.getCategory(), JobOffer_.category),
                     buildRangeSpecification(criteria.getPublishedAt(), JobOffer_.publishedAt),
                     buildRangeSpecification(criteria.getCreatedAt(), JobOffer_.createdAt),
                     buildRangeSpecification(criteria.getIndexedAt(), JobOffer_.indexedAt),

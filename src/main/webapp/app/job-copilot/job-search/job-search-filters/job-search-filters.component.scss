@@ -1,0 +1,195 @@
+.jc-filters {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 16px;
+  background: var(--bs-body-bg);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+  overflow: hidden;
+  /* Follows the results list while it scrolls, like the detail pane on the other side. */
+  position: sticky;
+  top: 1rem;
+}
+
+.jc-filters-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.25rem;
+  background: linear-gradient(180deg, var(--bs-tertiary-bg), transparent);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.jc-filters-toggle {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: var(--bs-body-color);
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bs-tertiary-bg);
+  }
+}
+
+.jc-filters-count {
+  margin-left: auto;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.jc-filters-chevron {
+  /* The header doubles as the mobile disclosure; on desktop the panel is always open. */
+  display: none;
+  color: var(--bs-secondary-color);
+}
+
+.jc-filters-clear {
+  border: none;
+  background: transparent;
+  color: #4f46e5;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgb(79 70 229 / 8%);
+  }
+}
+
+.jc-filters-body {
+  padding: 0.25rem 1rem 1rem;
+  /* A long facet list must not push the page: the panel scrolls inside its sticky viewport. */
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+}
+
+.jc-filter-group {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--bs-border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  h3 {
+    margin: 0 0 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-secondary-color);
+  }
+}
+
+.jc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.jc-chip {
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover:not(.active) {
+    border-color: #4f46e5;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    border-color: transparent;
+    color: #fff;
+  }
+}
+
+.jc-switch,
+.jc-facet {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--bs-body-color);
+  cursor: pointer;
+  padding: 0.25rem 0;
+
+  input {
+    /* 1rem keeps the tick a real target without dominating the row. */
+    width: 1rem;
+    height: 1rem;
+    accent-color: #4f46e5;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+}
+
+.jc-facets {
+  display: flex;
+  flex-direction: column;
+  /* Beyond ~8 rows a facet becomes a list of its own; keep it scrollable rather than endless. */
+  max-height: 13rem;
+  overflow-y: auto;
+}
+
+.jc-facet-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jc-facet-count {
+  margin-left: auto;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.jc-filter-note,
+.jc-filter-empty {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+}
+
+/* Mobile: the panel becomes a disclosure above the results instead of a column beside them. */
+@media (max-width: 899.98px) {
+  .jc-filters {
+    position: static;
+  }
+
+  .jc-filters-chevron {
+    display: inline-block;
+  }
+
+  .jc-filters-body {
+    display: none;
+    max-height: none;
+  }
+
+  .jc-filters.expanded .jc-filters-body {
+    display: block;
+  }
+}

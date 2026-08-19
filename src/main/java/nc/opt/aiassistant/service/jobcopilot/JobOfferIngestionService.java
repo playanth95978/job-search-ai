@@ -21,6 +21,7 @@ public class JobOfferIngestionService {
 
     private final JobOfferRepository jobOfferRepository;
     private final ApplicationProperties applicationProperties;
+    private final JobCategoryResolver categoryResolver;
 
     /** Default expiry stamped on ingested offers so the daily purge has an {@code expires_at} to act on. */
     private Instant defaultExpiry(Instant now) {
@@ -71,6 +72,7 @@ public class JobOfferIngestionService {
         try {
             offer.setContentHash(contentJobOfferHash(offer));
             offer.setSearchText(buildSearchText(offer));
+            offer.setCategory(categoryResolver.resolve(offer));
             if (offer.getEmbeddingStatus() != EmbeddingStatus.STUB) {
                 offer.setEmbeddingStatus(EmbeddingStatus.PENDING);
             }
@@ -112,6 +114,9 @@ public class JobOfferIngestionService {
 
             offer.setContentHash(hash);
             offer.setSearchText(buildSearchText(offer));
+            // Re-derived on every ingestion: a re-scraped offer whose title or ROME code changed
+            // changes family too.
+            offer.setCategory(categoryResolver.resolve(offer));
             // Connectors may flag a list result as STUB (teaser only) so the embedding poller
             // skips it until it is enriched on click; otherwise queue it for embedding.
             if (offer.getEmbeddingStatus() != EmbeddingStatus.STUB) {

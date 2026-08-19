@@ -68,6 +68,9 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
 
     List<JobOffer> findByEmbeddingStatus(EmbeddingStatus status, Pageable pageable);
 
+    /** Offers ingested before the category column existed, for {@code JobCategoryBackfillService}. */
+    List<JobOffer> findByCategoryIsNull(Pageable pageable);
+
     /** Number of offers whose embedding is COMPLETED, i.e. actually indexed and searchable by the AI. */
     long countByEmbeddingStatus(EmbeddingStatus status);
 

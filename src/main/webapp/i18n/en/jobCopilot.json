@@ -344,6 +344,62 @@
         "hint": "Companies are proposed from your CV, then verified against the real ATS: only boards that answer are listed.",
         "fetch": "Fetch jobs",
         "empty": "No public board found for your profile. Complete your CV, or paste a URL above."
+      },
+      "filters": {
+        "title": "Filter results",
+        "clear": "Clear all",
+        "empty": "Run a search to see the available filters.",
+        "sort": {
+          "label": "Sort by",
+          "relevance": "Relevance",
+          "date": "Date",
+          "salary": "Salary"
+        },
+        "datePosted": {
+          "label": "Date posted",
+          "any": "Any time",
+          "24h": "24h",
+          "7d": "7 days",
+          "30d": "30 days"
+        },
+        "salary": {
+          "label": "Minimum salary",
+          "any": "Any",
+          "note": "Offers with no advertised salary are hidden when a minimum is set."
+        },
+        "remote": {
+          "label": "Remote",
+          "only": "Remote only"
+        },
+        "location": {
+          "label": "Location"
+        },
+        "company": {
+          "label": "Company"
+        },
+        "contractType": {
+          "label": "Contract type"
+        },
+        "category": {
+          "label": "Category"
+        },
+        "categories": {
+          "tech": "IT / Software",
+          "data": "Data / AI",
+          "design": "Design",
+          "product": "Product",
+          "sales": "Sales",
+          "marketing": "Marketing",
+          "finance": "Finance / Accounting",
+          "hr": "Human resources",
+          "health": "Healthcare",
+          "education": "Education",
+          "construction": "Construction",
+          "logistics": "Logistics / Transport",
+          "hospitality": "Hospitality",
+          "admin": "Administrative",
+          "other": "Other"
+        }
       }
     },
     "dashboard": {

@@ -1,0 +1,153 @@
+<aside class="card jc-filters" [class.expanded]="expanded()">
+  <div class="card-header jc-filters-head">
+    <button type="button" class="jc-filters-toggle" (click)="expanded.set(!expanded())" [attr.aria-expanded]="expanded()">
+      <fa-icon icon="sliders" />
+      <span jhiTranslate="jobCopilot.search.filters.title">Filtrer les résultats</span>
+      <span class="jc-filters-count">{{ visibleCount() }}</span>
+      <fa-icon class="jc-filters-chevron" [icon]="expanded() ? 'chevron-up' : 'chevron-down'" />
+    </button>
+    @if (anyActive()) {
+      <button type="button" class="jc-filters-clear" (click)="clearAll()" jhiTranslate="jobCopilot.search.filters.clear">
+        Tout effacer
+      </button>
+    }
+  </div>
+
+  <div class="card-body jc-filters-body">
+    <!-- Sort by -->
+    <section class="jc-filter-group">
+      <h3 jhiTranslate="jobCopilot.search.filters.sort.label">Trier par</h3>
+      <div class="jc-chips">
+        @for (option of sortOptions; track option) {
+          <button
+            type="button"
+            class="jc-chip"
+            [class.active]="filters().sort === option"
+            (click)="setSort(option)"
+            [jhiTranslate]="'jobCopilot.search.filters.sort.' + option"
+          >
+            {{ option }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- Date posted -->
+    <section class="jc-filter-group">
+      <h3 jhiTranslate="jobCopilot.search.filters.datePosted.label">Date de publication</h3>
+      <div class="jc-chips">
+        @for (option of datePostedOptions; track option) {
+          <button
+            type="button"
+            class="jc-chip"
+            [class.active]="filters().datePosted === option"
+            (click)="setDatePosted(option)"
+            [jhiTranslate]="'jobCopilot.search.filters.datePosted.' + option"
+          >
+            {{ option }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- Salary -->
+    <section class="jc-filter-group">
+      <h3 jhiTranslate="jobCopilot.search.filters.salary.label">Salaire minimum</h3>
+      <div class="jc-chips">
+        @for (step of salarySteps; track step) {
+          <button type="button" class="jc-chip" [class.active]="filters().minSalary === step" (click)="setMinSalary(step)">
+            @if (step === null) {
+              <span jhiTranslate="jobCopilot.search.filters.salary.any">Indifférent</span>
+            } @else {
+              {{ step | number: '1.0-0' }}+
+            }
+          </button>
+        }
+      </div>
+      <p class="jc-filter-note" jhiTranslate="jobCopilot.search.filters.salary.note">
+        Les offres sans salaire annoncé sont masquées quand un minimum est choisi.
+      </p>
+    </section>
+
+    <!-- Remote -->
+    <section class="jc-filter-group">
+      <h3 jhiTranslate="jobCopilot.search.filters.remote.label">Télétravail</h3>
+      <label class="jc-switch">
+        <input type="checkbox" [checked]="filters().remoteOnly" (change)="toggleRemote()" />
+        <span jhiTranslate="jobCopilot.search.filters.remote.only">Télétravail uniquement</span>
+      </label>
+    </section>
+
+    <!-- Location -->
+    @if (locationFacets().length) {
+      <section class="jc-filter-group">
+        <h3 jhiTranslate="jobCopilot.search.filters.location.label">Localisation</h3>
+        <div class="jc-facets">
+          @for (facet of locationFacets(); track facet.value) {
+            <label class="jc-facet">
+              <input type="checkbox" [checked]="isChecked('locations', facet.value)" (change)="toggleFacet('locations', facet.value)" />
+              <span class="jc-facet-value">{{ facet.value }}</span>
+              <span class="jc-facet-count">{{ facet.count }}</span>
+            </label>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Category -->
+    @if (categoryFacets().length) {
+      <section class="jc-filter-group">
+        <h3 jhiTranslate="jobCopilot.search.filters.category.label">Catégorie</h3>
+        <div class="jc-facets">
+          @for (facet of categoryFacets(); track facet.value) {
+            <label class="jc-facet">
+              <input type="checkbox" [checked]="isChecked('categories', facet.value)" (change)="toggleFacet('categories', facet.value)" />
+              <span class="jc-facet-value" [jhiTranslate]="categoryLabelKey(facet)">{{ facet.value }}</span>
+              <span class="jc-facet-count">{{ facet.count }}</span>
+            </label>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Company -->
+    @if (companyFacets().length) {
+      <section class="jc-filter-group">
+        <h3 jhiTranslate="jobCopilot.search.filters.company.label">Entreprise</h3>
+        <div class="jc-facets">
+          @for (facet of companyFacets(); track facet.value) {
+            <label class="jc-facet">
+              <input type="checkbox" [checked]="isChecked('companies', facet.value)" (change)="toggleFacet('companies', facet.value)" />
+              <span class="jc-facet-value">{{ facet.value }}</span>
+              <span class="jc-facet-count">{{ facet.count }}</span>
+            </label>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Contract type -->
+    @if (contractTypeFacets().length) {
+      <section class="jc-filter-group">
+        <h3 jhiTranslate="jobCopilot.search.filters.contractType.label">Type de contrat</h3>
+        <div class="jc-facets">
+          @for (facet of contractTypeFacets(); track facet.value) {
+            <label class="jc-facet">
+              <input
+                type="checkbox"
+                [checked]="isChecked('contractTypes', facet.value)"
+                (change)="toggleFacet('contractTypes', facet.value)"
+              />
+              <span class="jc-facet-value">{{ facet.value }}</span>
+              <span class="jc-facet-count">{{ facet.count }}</span>
+            </label>
+          }
+        </div>
+      </section>
+    }
+
+    @if (!offers().length) {
+      <p class="jc-filter-empty" jhiTranslate="jobCopilot.search.filters.empty">Lancez une recherche pour voir les filtres disponibles.</p>
+    }
+  </div>
+</aside>

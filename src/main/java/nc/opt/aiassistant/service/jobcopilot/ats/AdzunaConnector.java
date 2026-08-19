@@ -73,8 +73,12 @@ public final class AdzunaConnector extends AbstractAtsConnector {
         @JsonProperty("salary_min") Double salaryMin,
         @JsonProperty("salary_max") Double salaryMax,
         @JsonProperty("contract_type") String contractType,
-        @JsonProperty("contract_time") String contractTime
+        @JsonProperty("contract_time") String contractTime,
+        /** Adzuna's own category ("tag" is the stable id, "label" the display name). */
+        AdzunaCategory category
     ) {}
+
+    record AdzunaCategory(String tag, String label) {}
 
     record AdzunaCompany(@JsonProperty("display_name") String displayName) {}
 
@@ -196,6 +200,8 @@ public final class AdzunaConnector extends AbstractAtsConnector {
         offer.setSalaryMax(roundedOrNull(job.salaryMax()));
         offer.setContractType(StringUtils.firstNonBlank(job.contractType(), job.contractTime()));
         offer.setPublishedAt(AtsDates.parse(job.created()));
+        // Not persisted as such: the ingestion resolver maps it to the common category vocabulary.
+        offer.setSourceCategory(job.category() == null ? null : StringUtils.trimToNull(job.category().tag()));
         offer.setRemote(detectRemote(offer.getTitle(), offer.getLocation(), offer.getDescription()));
         return offer;
     }

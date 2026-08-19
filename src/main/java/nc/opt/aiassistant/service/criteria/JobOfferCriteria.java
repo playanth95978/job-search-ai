@@ -97,6 +97,8 @@ public class JobOfferCriteria implements Serializable, Criteria {
 
     private StringFilter experienceLevel;
 
+    private StringFilter category;
+
     private InstantFilter publishedAt;
 
     private InstantFilter createdAt;
@@ -132,6 +134,7 @@ public class JobOfferCriteria implements Serializable, Criteria {
         this.salaryCurrency = other.optionalSalaryCurrency().map(StringFilter::copy).orElse(null);
         this.contractType = other.optionalContractType().map(StringFilter::copy).orElse(null);
         this.experienceLevel = other.optionalExperienceLevel().map(StringFilter::copy).orElse(null);
+        this.category = other.optionalCategory().map(StringFilter::copy).orElse(null);
         this.publishedAt = other.optionalPublishedAt().map(InstantFilter::copy).orElse(null);
         this.createdAt = other.optionalCreatedAt().map(InstantFilter::copy).orElse(null);
         this.indexedAt = other.optionalIndexedAt().map(InstantFilter::copy).orElse(null);
@@ -525,6 +528,25 @@ public class JobOfferCriteria implements Serializable, Criteria {
         this.experienceLevel = experienceLevel;
     }
 
+    public StringFilter getCategory() {
+        return category;
+    }
+
+    public Optional<StringFilter> optionalCategory() {
+        return Optional.ofNullable(category);
+    }
+
+    public StringFilter category() {
+        if (category == null) {
+            setCategory(new StringFilter());
+        }
+        return category;
+    }
+
+    public void setCategory(StringFilter category) {
+        this.category = category;
+    }
+
     public InstantFilter getPublishedAt() {
         return publishedAt;
     }
@@ -669,6 +691,7 @@ public class JobOfferCriteria implements Serializable, Criteria {
             Objects.equals(salaryCurrency, that.salaryCurrency) &&
             Objects.equals(contractType, that.contractType) &&
             Objects.equals(experienceLevel, that.experienceLevel) &&
+            Objects.equals(category, that.category) &&
             Objects.equals(publishedAt, that.publishedAt) &&
             Objects.equals(createdAt, that.createdAt) &&
             Objects.equals(indexedAt, that.indexedAt) &&
@@ -701,6 +724,7 @@ public class JobOfferCriteria implements Serializable, Criteria {
             salaryCurrency,
             contractType,
             experienceLevel,
+            category,
             publishedAt,
             createdAt,
             indexedAt,
@@ -734,6 +758,7 @@ public class JobOfferCriteria implements Serializable, Criteria {
             optionalSalaryCurrency().map(f -> "salaryCurrency=" + f + ", ").orElse("") +
             optionalContractType().map(f -> "contractType=" + f + ", ").orElse("") +
             optionalExperienceLevel().map(f -> "experienceLevel=" + f + ", ").orElse("") +
+            optionalCategory().map(f -> "category=" + f + ", ").orElse("") +
             optionalPublishedAt().map(f -> "publishedAt=" + f + ", ").orElse("") +
             optionalCreatedAt().map(f -> "createdAt=" + f + ", ").orElse("") +
             optionalIndexedAt().map(f -> "indexedAt=" + f + ", ").orElse("") +

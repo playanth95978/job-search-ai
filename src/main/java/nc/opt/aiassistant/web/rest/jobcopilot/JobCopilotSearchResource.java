@@ -41,6 +41,7 @@ public class JobCopilotSearchResource {
     private final JobOfferEnrichmentService jobOfferEnrichmentService;
     private final nc.opt.aiassistant.service.jobcopilot.CandidateProfileEmbeddingService profileEmbeddingService;
     private final JobOfferQueryService jobOfferQueryService;
+    private final nc.opt.aiassistant.service.jobcopilot.ats.JobOfferFacetService jobOfferFacetService;
     private final JobOfferTranslationService jobOfferTranslationService;
     private final JobOfferRepository jobOfferRepository;
 
@@ -60,6 +61,20 @@ public class JobCopilotSearchResource {
         Page<JobOfferDTO> page = jobOfferQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /**
+     * {@code GET /jobs/_facets} : the filter values available under the same criteria as
+     * {@link #searchByCriteria}, with their counts. The client holds a single page of results, so it
+     * cannot count anything itself; these counts are what the filter panel lists.
+     *
+     * @param criteria the filtering criteria bound from request params, identical to {@code /_search}.
+     */
+    @GetMapping("/_facets")
+    public ResponseEntity<nc.opt.aiassistant.service.jobcopilot.dto.OfferFacetsDto> facets(
+        @org.springdoc.core.annotations.ParameterObject JobOfferCriteria criteria
+    ) {
+        return ResponseEntity.ok(jobOfferFacetService.facets(criteria));
     }
 
     @GetMapping("/search")
