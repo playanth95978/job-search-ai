@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TranslateModule } from '@ngx-translate/core';
 import { TranslateDirective } from 'app/shared/language';
 import { RevealOnScrollDirective } from 'app/shared/reveal/reveal-on-scroll.directive';
+import { HttpClient } from '@angular/common/http';
 
 interface LandingItem {
   icon: string;
@@ -46,8 +47,20 @@ export class HomeLanding {
   protected readonly features = signal(FEATURES);
   protected readonly steps = signal(STEPS);
   protected readonly trust = signal(TRUST);
-
+  protected readonly http = inject(HttpClient);
   login(): void {
     this.loginAction.emit();
+  }
+
+  loginWithGoogle(): void {
+    this.http.get<{ url: string }>('/api/google-drive/oauth/login-url').subscribe({
+      next({ url }) {
+        window.location.href = url;
+      },
+      error() {
+        // fallback direct redirect si l'endpoint échoue
+        window.location.href = '/api/google-drive/oauth/login';
+      },
+    });
   }
 }

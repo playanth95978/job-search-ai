@@ -26,9 +26,9 @@ export class TranslationModule {
   private readonly stateStorageService = inject(StateStorageService);
 
   constructor() {
-    this.translateService.setFallbackLang('fr');
+    this.translateService.setFallbackLang('en');
     // if the user has changed the language and navigates away from the application and back to it, then use the previously chosen language
-    const langKey = this.stateStorageService.getLocale() ?? 'fr';
+    const langKey = this.stateStorageService.getLocale() ?? 'en';
     this.translateService.use(langKey);
   }
 }
