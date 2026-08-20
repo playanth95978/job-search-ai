@@ -177,7 +177,13 @@
       "reset": "Restart",
       "send": "Send",
       "answerPlaceholder": "Type your answer...",
-      "tryPanel": "Switch to panel mode (3 recruiters)"
+      "tryPanel": "Switch to panel mode (3 recruiters)",
+      "startVoice": "Voice interview",
+      "voiceRecord": "Answer by voice",
+      "voiceStop": "Finish and send",
+      "voiceCancel": "Cancel",
+      "voiceSending": "Transcribing…",
+      "voiceSpeaking": "The recruiter is speaking…"
     },
     "panel": {
       "title": "Interview Panel",

@@ -55,6 +55,12 @@
                   }
                   <span jhiTranslate="jobCopilot.interview.start">Démarrer l'entretien</span>
                 </button>
+                @if (voiceAvailable()) {
+                  <button (click)="startVoice()" [disabled]="loading()" class="jc-btn jc-btn-secondary" type="button">
+                    <fa-icon icon="microphone"></fa-icon>
+                    <span jhiTranslate="jobCopilot.interview.startVoice">Entretien à la voix</span>
+                  </button>
+                }
               } @else {
                 <button (click)="reset()" class="jc-btn jc-btn-ghost" type="button">
                   <fa-icon icon="rotate"></fa-icon>
@@ -110,6 +116,36 @@
                   <fa-icon icon="paper-plane"></fa-icon>
                   <span jhiTranslate="jobCopilot.interview.send">Envoyer</span>
                 </button>
+                @if (voiceAvailable()) {
+                  <button
+                    (click)="toggleRecording()"
+                    [disabled]="sending()"
+                    [class.recording]="recording()"
+                    class="jc-btn jc-btn-secondary jc-mic"
+                    type="button"
+                    [attr.aria-pressed]="recording()"
+                  >
+                    @if (sending()) {
+                      <fa-icon [animation]="'spin'" icon="circle-notch"></fa-icon>
+                      <span jhiTranslate="jobCopilot.interview.voiceSending">Transcription…</span>
+                    } @else if (recording()) {
+                      <fa-icon icon="stop"></fa-icon>
+                      <span jhiTranslate="jobCopilot.interview.voiceStop">Terminer et envoyer</span>
+                    } @else {
+                      <fa-icon icon="microphone"></fa-icon>
+                      <span jhiTranslate="jobCopilot.interview.voiceRecord">Répondre à la voix</span>
+                    }
+                  </button>
+                  @if (recording()) {
+                    <button (click)="cancelRecording()" class="jc-btn jc-btn-ghost" type="button">
+                      <fa-icon icon="xmark"></fa-icon>
+                      <span jhiTranslate="jobCopilot.interview.voiceCancel">Annuler</span>
+                    </button>
+                  }
+                  @if (speaking()) {
+                    <span class="jc-speaking" jhiTranslate="jobCopilot.interview.voiceSpeaking">Le recruteur parle…</span>
+                  }
+                }
               </div>
             </div>
           }

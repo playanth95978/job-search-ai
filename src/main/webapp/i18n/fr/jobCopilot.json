@@ -177,7 +177,13 @@
       "reset": "Recommencer",
       "send": "Envoyer",
       "answerPlaceholder": "Tapez votre réponse...",
-      "tryPanel": "Passer en mode jury (3 recruteurs)"
+      "tryPanel": "Passer en mode jury (3 recruteurs)",
+      "startVoice": "Entretien à la voix",
+      "voiceRecord": "Répondre à la voix",
+      "voiceStop": "Terminer et envoyer",
+      "voiceCancel": "Annuler",
+      "voiceSending": "Transcription…",
+      "voiceSpeaking": "Le recruteur parle…"
     },
     "panel": {
       "title": "Jury d'entretien",

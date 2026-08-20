@@ -133,6 +133,19 @@ export interface InterviewMessage {
   message: string;
 }
 
+/**
+ * One spoken interview turn. `transcript` is what the recruiter heard — shown to the candidate so a
+ * misheard answer is visible rather than silently derailing the conversation. Everything but the
+ * transcript is null when the recording held no speech.
+ */
+export interface InterviewVoiceTurn {
+  conversationId: string;
+  transcript: string;
+  reply: string | null;
+  audioBase64: string | null;
+  audioFormat: string | null;
+}
+
 /** One turn of the Shadow Interview Panel: which juror spoke and what they said. */
 export interface PanelMessage {
   conversationId: string;

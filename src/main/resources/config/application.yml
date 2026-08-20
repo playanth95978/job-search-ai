@@ -309,6 +309,21 @@ application:
       enabled: true
       # Read timeout for Ollama calls; raise on CPU-only hosts where embeddings are slow.
       timeout-seconds: ${OLLAMA_TIMEOUT_SECONDS:180}
+    voxtral:
+      # Spoken interview (Voxtral speech-to-text + text-to-speech). Off by default: every turn costs a
+      # transcription plus a synthesis call. The Mistral key is NOT repeated here — it is read from
+      # spring.ai.mistralai.api-key so there is a single place to rotate it.
+      enabled: ${VOXTRAL_ENABLED:false}
+      base-url: ${VOXTRAL_BASE_URL:https://api.mistral.ai}
+      transcription-model: ${VOXTRAL_TRANSCRIPTION_MODEL:voxtral-mini-latest}
+      tts-model: ${VOXTRAL_TTS_MODEL:voxtral-mini-tts-2603}
+      # Voice the recruiter speaks with: a Voxtral TTS preset voice (20 ship with the model) or a
+      # cloned profile. Required when enabled is true — there is no implicit default voice.
+      voice: ${VOXTRAL_VOICE:}
+      # mp3 keeps the JSON payload small for a turn-based exchange; pcm only pays off when streaming.
+      response-format: ${VOXTRAL_RESPONSE_FORMAT:mp3}
+      max-upload-bytes: ${VOXTRAL_MAX_UPLOAD_BYTES:10485760}
+      timeout-seconds: ${VOXTRAL_TIMEOUT_SECONDS:120}
     embedding:
       docs:
         model: nomic-embed-text

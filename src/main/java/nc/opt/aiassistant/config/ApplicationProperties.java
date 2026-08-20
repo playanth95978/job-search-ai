@@ -254,6 +254,7 @@ public class ApplicationProperties {
         private final LlamaServer llamaServer = new LlamaServer();
         private final Embedding embedding = new Embedding();
         private final Mistral mistral = new Mistral();
+        private final Voxtral voxtral = new Voxtral();
         private final VectorStore vectorStore = new VectorStore();
 
         @Setter
@@ -263,6 +264,40 @@ public class ApplicationProperties {
             private String model;
             private String baseUrl;
             private String apiKey;
+        }
+
+        @Setter
+        @Getter
+        public static class Voxtral {
+
+            /**
+             * Voice in the interview roleplay is opt-in: every turn costs a transcription plus a speech
+             * synthesis call, so it stays off until someone turns it on deliberately.
+             */
+            private boolean enabled = false;
+
+            private String baseUrl = "https://api.mistral.ai";
+
+            /** Voxtral Mini Transcribe 2 — batch speech-to-text. */
+            private String transcriptionModel = "voxtral-mini-latest";
+
+            /** Voxtral TTS. */
+            private String ttsModel = "voxtral-mini-tts-2603";
+
+            /**
+             * Voice the recruiter speaks with: one of Voxtral TTS's preset voices, or a cloned profile.
+             * Required when enabled — there is no implicit default.
+             */
+            private String voice;
+
+            /** mp3 keeps the payload small for a request/response turn; pcm only pays off when streaming. */
+            private String responseFormat = "mp3";
+
+            /** Ceiling on the uploaded answer, before it ever reaches Mistral. */
+            private int maxUploadBytes = 10 * 1024 * 1024;
+
+            /** Audio can take a while to synthesise; well above the default REST read timeout. */
+            private int timeoutSeconds = 120;
         }
 
         @Setter

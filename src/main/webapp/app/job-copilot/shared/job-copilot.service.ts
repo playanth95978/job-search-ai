@@ -14,6 +14,7 @@ import {
   CvReview,
   AtsSimulation,
   InterviewMessage,
+  InterviewVoiceTurn,
   JobApplication,
   JobOffer,
   MatchResult,
@@ -252,6 +253,27 @@ export class JobCopilotService {
     let params = new HttpParams().set('jobOfferId', jobOfferId);
     if (language) params = params.set('language', language);
     return this.http.post<InterviewMessage>(`${this.baseUrl}/interview/start`, null, { params });
+  }
+
+  /** Whether the backend has the voice models wired, so the UI can hide the mic entirely. */
+  isInterviewVoiceAvailable(): Observable<boolean> {
+    return this.http.get<boolean>(`${this.baseUrl}/interview/voice/available`);
+  }
+
+  startInterviewVoice(jobOfferId: string, language?: string): Observable<InterviewVoiceTurn> {
+    let params = new HttpParams().set('jobOfferId', jobOfferId);
+    if (language) params = params.set('language', language);
+    return this.http.post<InterviewVoiceTurn>(`${this.baseUrl}/interview/voice/start`, null, { params });
+  }
+
+  /** Sends the candidate's recording and gets the recruiter's spoken reply back. */
+  sendInterviewVoiceAnswer(conversationId: string, jobOfferId: string, audio: Blob, language?: string): Observable<InterviewVoiceTurn> {
+    let params = new HttpParams().set('jobOfferId', jobOfferId);
+    if (language) params = params.set('language', language);
+    const form = new FormData();
+    // The filename matters: Voxtral infers the audio container from it.
+    form.append('audio', audio, 'answer.webm');
+    return this.http.post<InterviewVoiceTurn>(`${this.baseUrl}/interview/${conversationId}/voice`, form, { params });
   }
 
   sendInterviewAnswer(conversationId: string, jobOfferId: string, answer: string, language?: string): Observable<InterviewMessage> {
