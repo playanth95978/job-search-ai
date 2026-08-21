@@ -127,6 +127,30 @@
     "translate": {
       "button": "Traduire le CV",
       "ariaLabel": "Choisir la langue de traduction"
+    },
+    "save": {
+      "saving": "Enregistrement…",
+      "persisted": "Enregistré en base",
+      "pending": "{{count}} modification(s) non enregistrée(s)",
+      "pendingHint": "Ces changements ne sont encore que dans ce navigateur.",
+      "pendingTitle": "Pas encore en base :",
+      "failed": "Échec de l'enregistrement",
+      "retry": "Réessayer",
+      "sections": {
+        "title": "Titre",
+        "template": "Modèle",
+        "theme": "Thème",
+        "personal": "Informations personnelles",
+        "summary": "Résumé",
+        "experiences": "Expériences",
+        "education": "Formation",
+        "projects": "Projets",
+        "certifications": "Certifications",
+        "skills": "Compétences",
+        "languages": "Langues",
+        "referees": "Références",
+        "layout": "Mise en page"
+      }
     }
   }
 }

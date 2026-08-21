@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { debounceTime, filter, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -67,6 +67,18 @@ export class CvBuilderComponent {
   /** Becomes true once the server copy has been loaded, gating backend auto-save. */
   private readonly loaded = signal(false);
 
+  /**
+   * State of the DATABASE save, which is what the toolbar reports. The store's own draft indicator only
+   * ever meant "written to localStorage" — showing it as "saved" is what hid failing saves until now.
+   */
+  readonly saveState = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  /** Server message from the last failed save, shown next to the retry button. */
+  readonly saveError = signal<string | null>(null);
+
+  /** Sections the draft holds that the server does not, straight from the store's diff. */
+  readonly pendingChanges = computed(() => this.store.pendingChanges());
+
   constructor() {
     // 1. Load the server copy once (overrides the local draft), then enable auto-save.
     this.api
@@ -76,6 +88,8 @@ export class CvBuilderComponent {
           const stored = this.parseStoredResume(dto);
           if (stored) {
             this.store.load(stored);
+            // The server copy is, by definition, what the server holds: the diff starts empty.
+            this.store.markPersisted(this.store.resume());
             return of(null);
           }
           // No resume saved yet — the common case right after a first CV upload. Seed the builder from
@@ -89,6 +103,7 @@ export class CvBuilderComponent {
         next: profile => {
           // A local draft with real content in it wins: the user's own typing is never clobbered.
           if (profile && isBlankResume(this.store.resume())) {
+            // Only reached when the resume is blank, so there is nothing to preserve here.
             const current = this.store.resume();
             this.store.load({ ...candidateProfileToResume(profile), template: current.template, theme: current.theme });
           }
@@ -98,15 +113,38 @@ export class CvBuilderComponent {
       });
 
     // 2. Debounced backend auto-save: a single RxJS subscription instead of a per-change effect.
+    // Only fires when the draft actually diverges from the server copy, so loading does not echo a save
+    // straight back, and the result is always reported — a silent .subscribe() is how a failing save
+    // ends up looking like a successful one.
     toObservable(this.store.resume)
       .pipe(
-        filter(() => this.loaded()),
+        filter(() => this.loaded() && this.store.hasPendingChanges()),
         debounceTime(1500),
         takeUntilDestroyed(),
       )
-      .subscribe(resume => {
-        this.api.saveResume({ title: resume.title, template: resume.template, data: JSON.stringify(resume) }).subscribe();
-      });
+      .subscribe(resume => this.saveToServer(resume));
+  }
+
+  /** Pushes the draft to the database and records the outcome. */
+  private saveToServer(resume: Resume): void {
+    this.saveState.set('saving');
+    this.api.saveResume({ title: resume.title, template: resume.template, data: JSON.stringify(resume) }).subscribe({
+      next: () => {
+        // Mark the exact resume that was sent, not the current draft: the user may have typed since.
+        this.store.markPersisted(resume);
+        this.saveState.set('saved');
+        this.saveError.set(null);
+      },
+      error: err => {
+        this.saveState.set('error');
+        this.saveError.set(err.error?.message ?? err.message ?? null);
+      },
+    });
+  }
+
+  /** Manual retry after a failed auto-save. */
+  saveNow(): void {
+    this.saveToServer(this.store.resume());
   }
 
   exportJson(): void {
@@ -153,12 +191,28 @@ export class CvBuilderComponent {
   }
 
   /** Prefills the editor from the user's extracted candidate profile, keeping the chosen template/theme. */
+  /**
+   * Prefills the editor from the user's extracted candidate profile, keeping the chosen template/theme
+   * AND the sections the profile cannot know about.
+   *
+   * <p>The candidate profile has no projects and no referees — nothing extracts them from a CV today — so
+   * mapping it over the resume wholesale silently deleted whatever the user had typed there. Those
+   * sections are carried across instead: an import enriches the CV, it does not amputate it.
+   */
   loadProfile(): void {
     this.api.getCandidateProfile().subscribe(dto => {
       if (!dto) return;
       const current = this.store.resume();
       const mapped = candidateProfileToResume(dto);
-      this.store.load({ ...mapped, template: current.template, theme: current.theme });
+      this.store.load({
+        ...mapped,
+        template: current.template,
+        theme: current.theme,
+        projects: current.projects,
+        referees: current.referees,
+        sectionOrder: current.sectionOrder,
+        hiddenSections: current.hiddenSections,
+      });
     });
   }
   /** The stored resume, or null when there is none or it fails to parse (a corrupt copy keeps the draft). */

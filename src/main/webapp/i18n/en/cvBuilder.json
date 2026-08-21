@@ -127,6 +127,30 @@
     "translate": {
       "button": "Translate CV",
       "ariaLabel": "Choose translation language"
+    },
+    "save": {
+      "saving": "Saving…",
+      "persisted": "Saved to the database",
+      "pending": "{{count}} unsaved change(s)",
+      "pendingHint": "These changes only exist in this browser so far.",
+      "pendingTitle": "Not in the database yet:",
+      "failed": "Save failed",
+      "retry": "Retry",
+      "sections": {
+        "title": "Title",
+        "template": "Template",
+        "theme": "Theme",
+        "personal": "Personal details",
+        "summary": "Summary",
+        "experiences": "Experience",
+        "education": "Education",
+        "projects": "Projects",
+        "certifications": "Certifications",
+        "skills": "Skills",
+        "languages": "Languages",
+        "referees": "Referees",
+        "layout": "Layout"
+      }
     }
   }
 }

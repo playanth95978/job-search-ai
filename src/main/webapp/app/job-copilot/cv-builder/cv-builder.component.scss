@@ -46,10 +46,75 @@
   }
 }
 
-.cv-saved {
+/* Save state. Three distinct looks on purpose: "in the database", "not yet", "failed" are three
+   different situations for the user, and one green tick for all of them is what hid failing saves. */
+.cv-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.75rem;
-  color: #10b981;
   white-space: nowrap;
+}
+
+.cv-save-ok {
+  color: #10b981;
+}
+
+.cv-save-pending {
+  color: #b45309;
+}
+
+.cv-save-error {
+  color: #ef4444;
+}
+
+.cv-save-retry {
+  border: 1px solid currentcolor;
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Detail of what the database does not have yet. */
+.cv-pending-panel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: rgb(180 83 9 / 8%);
+  border-bottom: 1px solid var(--bs-border-color);
+  font-size: 0.78rem;
+}
+
+.cv-pending-title {
+  font-weight: 700;
+  color: #b45309;
+}
+
+.cv-pending-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+.cv-pending-count {
+  color: var(--bs-secondary-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-pending-error {
+  color: #ef4444;
+  margin-left: auto;
 }
 
 .cv-toolbar-right {

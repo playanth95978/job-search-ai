@@ -21,6 +21,7 @@ import {
   Language,
   Referee,
 } from './resume.model';
+import { diffResumes } from './resume-diff';
 
 const DRAFT_KEY = 'jsa.cv-builder.draft';
 const HISTORY_LIMIT = 50;
@@ -33,6 +34,8 @@ const HISTORY_DEBOUNCE_MS = 600;
  * - Immutable updates via {@link mutate}, with a debounced history so a burst of keystrokes
  *   collapses into one undo step.
  * - Auto-saves the working draft to localStorage.
+ * - Tracks what the SERVER actually holds ({@link persisted}) separately from the local draft, so the UI
+ *   can tell "saved on this machine" from "saved in the database" instead of conflating the two.
  */
 @Injectable({ providedIn: 'root' })
 export class ResumeStore {
@@ -41,7 +44,20 @@ export class ResumeStore {
 
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
-  readonly savedAt = signal<Date | null>(null);
+
+  /** When the local draft last reached localStorage. Says nothing about the database. */
+  readonly draftSavedAt = signal<Date | null>(null);
+
+  /** The last resume the server confirmed storing; null until a load or a save succeeds. */
+  private readonly _persisted = signal<Resume | null>(null);
+  readonly persisted = this._persisted.asReadonly();
+
+  /** When the server last confirmed a save. */
+  readonly persistedAt = signal<Date | null>(null);
+
+  /** What the draft holds that the database does not — empty means the two agree. */
+  readonly pendingChanges = computed(() => diffResumes(this._resume(), this._persisted()));
+  readonly hasPendingChanges = computed(() => this.pendingChanges().length > 0);
 
   // Convenience selectors used across the editor/preview.
   readonly template = computed(() => this._resume().template);
@@ -288,10 +304,19 @@ export class ResumeStore {
 
   // ---- persistence --------------------------------------------------------
 
+  /**
+   * Records what the server now holds. Called after a successful load or save — never speculatively:
+   * marking a resume persisted before the server confirmed is how "it said saved" turns into data loss.
+   */
+  markPersisted(resume: Resume): void {
+    this._persisted.set(structuredClone(resume));
+    this.persistedAt.set(new Date());
+  }
+
   private persist(resume: Resume): void {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(resume));
-      this.savedAt.set(new Date());
+      this.draftSavedAt.set(new Date());
     } catch {
       // localStorage may be unavailable (private mode / quota) — ignore.
     }

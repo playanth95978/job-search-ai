@@ -10,10 +10,36 @@
         (ngModelChange)="store.setTitle($event)"
         [attr.aria-label]="'cvBuilder.title' | translate"
       />
-      @if (store.savedAt(); as saved) {
-        <span class="cv-saved"
-          ><fa-icon icon="circle-check" /> <span jhiTranslate="cvBuilder.saved">Enregistré</span> {{ saved | date: 'HH:mm:ss' }}</span
-        >
+      <!-- Save state reports the DATABASE, not the local draft: those are different guarantees. -->
+      @switch (saveState()) {
+        @case ('saving') {
+          <span class="cv-save cv-save-pending">
+            <fa-icon icon="circle-notch" [animation]="'spin'" />
+            <span jhiTranslate="cvBuilder.save.saving">Enregistrement…</span>
+          </span>
+        }
+        @case ('error') {
+          <span class="cv-save cv-save-error">
+            <fa-icon icon="circle-exclamation" />
+            <span jhiTranslate="cvBuilder.save.failed">Échec de l'enregistrement</span>
+            <button type="button" class="cv-save-retry" (click)="saveNow()" jhiTranslate="cvBuilder.save.retry">Réessayer</button>
+          </span>
+        }
+        @default {
+          @if (pendingChanges().length) {
+            <span class="cv-save cv-save-pending" [title]="'cvBuilder.save.pendingHint' | translate">
+              <fa-icon icon="circle-exclamation" />
+              <span [jhiTranslate]="'cvBuilder.save.pending'" [translateValues]="{ count: pendingChanges().length }"
+                >Modifications non enregistrées</span
+              >
+            </span>
+          } @else if (store.persistedAt(); as saved) {
+            <span class="cv-save cv-save-ok">
+              <fa-icon icon="circle-check" />
+              <span jhiTranslate="cvBuilder.save.persisted">Enregistré en base</span> {{ saved | date: 'HH:mm:ss' }}
+            </span>
+          }
+        }
       }
     </div>
 
@@ -59,6 +85,24 @@
       </label>
     </div>
   </header>
+
+  <!-- Unsaved-changes detail: which sections the database does not have yet. -->
+  @if (pendingChanges().length) {
+    <div class="cv-pending-panel">
+      <span class="cv-pending-title" jhiTranslate="cvBuilder.save.pendingTitle">Pas encore en base :</span>
+      @for (change of pendingChanges(); track change.section) {
+        <span class="cv-pending-chip">
+          <span [jhiTranslate]="'cvBuilder.save.sections.' + change.section">{{ change.section }}</span>
+          @if (change.localCount !== undefined) {
+            <span class="cv-pending-count">{{ change.serverCount }} → {{ change.localCount }}</span>
+          }
+        </span>
+      }
+      @if (saveError(); as message) {
+        <span class="cv-pending-error">{{ message }}</span>
+      }
+    </div>
+  }
 
   <!-- Customization bar -->
   <div class="cv-custombar">
