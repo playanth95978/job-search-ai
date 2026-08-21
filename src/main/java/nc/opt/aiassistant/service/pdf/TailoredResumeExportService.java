@@ -81,6 +81,9 @@ public class TailoredResumeExportService {
         return new ResumeDocument.Experience(
             e.jobTitle(),
             e.company(),
+            // The AI-tailored structure carries no role location; the field stays empty rather than
+            // being invented, and companyLine() then renders the employer alone.
+            null,
             e.startDate(),
             e.endDate(),
             e.current(),

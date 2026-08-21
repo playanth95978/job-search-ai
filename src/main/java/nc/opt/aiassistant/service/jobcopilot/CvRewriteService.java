@@ -251,6 +251,63 @@ public class CvRewriteService {
     }
 
     /**
+     * Structures an existing CV into the builder's model, as faithfully as possible.
+     *
+     * <p>Distinct from {@link #generateFullResume} on purpose: generation is allowed to improve wording,
+     * which is wrong for an import. Someone who uploads a CV they wrote and polished expects to find
+     * their own sentences in the editor, not a rewrite of them. This prompt only reorganises.
+     *
+     * <p>It exists because the candidate profile is a lossy shape — it has no projects, no summary, no
+     * phone and no links — so seeding the builder from it silently dropped half of a rich CV.
+     */
+    public GeneratedResumeDto extractResume(String source) {
+        String cv = source == null ? "" : source.trim();
+        if (cv.isEmpty()) {
+            return emptyGeneratedResume();
+        }
+
+        String prompt = """
+            You are a CV parser. Reorganise the CV below into the JSON structure at the end. This is an
+            IMPORT, not a rewrite:
+
+            - Keep the author's own wording. Copy sentences and bullet points across verbatim. Do not
+              rephrase, do not "improve", do not add action verbs, do not summarise.
+            - Never invent anything. Leave a field empty ("") or a list empty when the CV does not say.
+            - Capture EVERY section, including projects, which are commonly missed. A block describing a
+              built system, a platform or a side project belongs in "projects", not in "experiences".
+            - Split grouped skill lines ("Backend: Java; Spring Boot") into one entry per skill, dropping
+              the group label. Skill "level" is 3 unless the CV states a level.
+            - Keep dates as written. Set "current": true for an ongoing role and leave its endDate empty.
+            - Keep the CV's original language.
+
+            Return ONLY valid JSON with exactly this shape (no markdown, no comments):
+            {
+              "personal": { "firstName": "", "lastName": "", "title": "", "email": "", "phone": "",
+                            "location": "", "linkedin": "", "github": "", "website": "" },
+              "summary": "",
+              "experiences": [ { "jobTitle": "", "company": "", "startDate": "", "endDate": "",
+                                 "current": false, "description": "", "achievements": [""] } ],
+              "education": [ { "degree": "", "school": "", "startDate": "", "endDate": "", "description": "" } ],
+              "projects": [ { "name": "", "description": "", "url": "", "technologies": [""] } ],
+              "certifications": [ { "name": "", "issuer": "", "date": "" } ],
+              "skills": [ { "name": "", "level": 3 } ],
+              "languages": [ { "name": "", "level": "" } ]
+            }
+
+            ===== CV =====
+            %s
+            """.formatted(cv);
+
+        try {
+            GeneratedResumeDto result = chatClient.prompt().user(prompt).call().entity(GeneratedResumeDto.class);
+            return result == null ? emptyGeneratedResume() : result;
+        } catch (Exception e) {
+            log.error("Failed to extract resume from CV: {}", e.getMessage());
+            return emptyGeneratedResume();
+        }
+    }
+
+    /**
      * Produces an ATS-optimized variant of an existing resume tailored to a specific job offer:
      * reorders skills/experiences by relevance, rewrites bullets with the offer's keywords, drops
      * off-topic content — without inventing any fact. Returns a {@link GeneratedResumeDto}.

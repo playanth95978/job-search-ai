@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { debounceTime, filter, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { catchError, debounceTime, filter, map, switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -76,6 +76,9 @@ export class CvBuilderComponent {
   /** Server message from the last failed save, shown next to the retry button. */
   readonly saveError = signal<string | null>(null);
 
+  /** True while the uploaded CV is being structured — the extraction is an LLM call, so it is not instant. */
+  readonly importing = signal(false);
+
   /** Sections the draft holds that the server does not, straight from the store's diff. */
   readonly pendingChanges = computed(() => this.store.pendingChanges());
 
@@ -93,19 +96,17 @@ export class CvBuilderComponent {
             return of(null);
           }
           // No resume saved yet — the common case right after a first CV upload. Seed the builder from
-          // the profile that was extracted from that CV instead of showing an empty form, which is
-          // otherwise only reachable through the "import profile" button most users never find.
-          return this.api.getCandidateProfile();
+          // that CV instead of showing an empty form, which is otherwise only reachable through the
+          // "import profile" button most users never find.
+          return this.seedFromUploadedCv();
         }),
         takeUntilDestroyed(),
       )
       .subscribe({
-        next: profile => {
+        next: seed => {
           // A local draft with real content in it wins: the user's own typing is never clobbered.
-          if (profile && isBlankResume(this.store.resume())) {
-            // Only reached when the resume is blank, so there is nothing to preserve here.
-            const current = this.store.resume();
-            this.store.load({ ...candidateProfileToResume(profile), template: current.template, theme: current.theme });
+          if (seed && isBlankResume(this.store.resume())) {
+            this.store.load(seed);
           }
           this.loaded.set(true);
         },
@@ -190,16 +191,62 @@ export class CvBuilderComponent {
     });
   }
 
-  /** Prefills the editor from the user's extracted candidate profile, keeping the chosen template/theme. */
   /**
-   * Prefills the editor from the user's extracted candidate profile, keeping the chosen template/theme
-   * AND the sections the profile cannot know about.
+   * Prefills the editor from the CV the user uploaded, keeping the chosen template/theme and layout.
    *
-   * <p>The candidate profile has no projects and no referees — nothing extracts them from a CV today — so
-   * mapping it over the resume wholesale silently deleted whatever the user had typed there. Those
-   * sections are carried across instead: an import enriches the CV, it does not amputate it.
+   * <p>Goes through the full text of the uploaded CV, not the candidate profile: the profile has no
+   * projects, no summary, no phone and no links, so prefilling from it dropped those sections of a rich
+   * CV without a word. The profile mapper stays as the fallback for users whose profile was filled in by
+   * hand and who never uploaded anything — and there, the sections it cannot know about are carried
+   * across rather than wiped.
    */
   loadProfile(): void {
+    this.importing.set(true);
+    this.api.importFromUploadedCv().subscribe({
+      next: extracted => {
+        this.importing.set(false);
+        if (extracted) {
+          const current = this.store.resume();
+          this.store.load(generatedResumeToResume(extracted, current));
+          return;
+        }
+        this.loadFromCandidateProfile();
+      },
+      error: () => {
+        this.importing.set(false);
+        this.loadFromCandidateProfile();
+      },
+    });
+  }
+
+  /**
+   * The resume to prefill with, from the uploaded CV when there is one, from the typed candidate profile
+   * otherwise, and null when the user has neither.
+   *
+   * <p>The uploaded CV comes first because it is the complete document: the candidate profile is a
+   * matching shape with no projects, no summary, no phone and no links, and prefilling from it is what
+   * made half of a rich CV disappear.
+   */
+  private seedFromUploadedCv(): Observable<Resume | null> {
+    const current = this.store.resume();
+    return this.api.importFromUploadedCv().pipe(
+      switchMap(extracted => {
+        if (extracted) {
+          return of(generatedResumeToResume(extracted, current));
+        }
+        return this.api
+          .getCandidateProfile()
+          .pipe(
+            map(profile => (profile ? { ...candidateProfileToResume(profile), template: current.template, theme: current.theme } : null)),
+          );
+      }),
+      // A failed extraction must not leave the builder stuck on a blank form with no explanation.
+      catchError(() => of(null)),
+    );
+  }
+
+  /** Fallback prefill for a profile with no uploaded CV behind it. */
+  private loadFromCandidateProfile(): void {
     this.api.getCandidateProfile().subscribe(dto => {
       if (!dto) return;
       const current = this.store.resume();
@@ -208,6 +255,7 @@ export class CvBuilderComponent {
         ...mapped,
         template: current.template,
         theme: current.theme,
+        // The profile knows nothing of these: carry them across instead of wiping them.
         projects: current.projects,
         referees: current.referees,
         sectionOrder: current.sectionOrder,

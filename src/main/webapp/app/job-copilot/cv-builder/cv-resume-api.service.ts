@@ -129,6 +129,19 @@ export class CvResumeApiService {
   }
 
   /** The user's extracted candidate profile, or null when none exists yet (HTTP 204). */
+  /**
+   * Structures the CV the user uploaded into the builder's model.
+   *
+   * Preferred over {@link getCandidateProfile} for prefilling: the candidate profile has no projects,
+   * no summary, no phone and no links, so seeding from it silently drops those sections. Resolves to
+   * null when the user has never uploaded a CV (204).
+   */
+  importFromUploadedCv(): Observable<GeneratedResume | null> {
+    return this.http
+      .post<GeneratedResume>(`${this.url}/resume/import-from-cv`, {}, { observe: 'response' })
+      .pipe(map(res => (res.status === 204 ? null : res.body)));
+  }
+
   getCandidateProfile(): Observable<CandidateProfileDto | null> {
     return this.http
       .get<CandidateProfileDto>(`${this.url}/resume/candidate-profile`, { observe: 'response' })

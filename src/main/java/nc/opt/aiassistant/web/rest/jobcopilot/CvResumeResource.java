@@ -3,6 +3,7 @@ package nc.opt.aiassistant.web.rest.jobcopilot;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.security.SecurityUtils;
 import nc.opt.aiassistant.service.jobcopilot.CvResumeService;
@@ -118,6 +119,26 @@ public class CvResumeResource {
     @PostMapping("/generate")
     public ResponseEntity<GeneratedResumeDto> generate(@RequestBody GenerateResumeRequestDto request) {
         return ResponseEntity.ok(cvRewriteService.generateFullResume(request));
+    }
+
+    /**
+     * {@code POST /resume/import-from-cv} : structures the CV the user uploaded into the builder's model.
+     *
+     * <p>Reads the full text kept in {@code CandidateProfile.rawMarkdown} rather than the profile's typed
+     * columns, because those hold no projects, no summary, no phone and no links — seeding the builder
+     * from them dropped those sections of a rich CV without saying so.
+     *
+     * @return the structured resume, or 204 when the user has never uploaded a CV.
+     */
+    @PostMapping("/resume/import-from-cv")
+    public ResponseEntity<GeneratedResumeDto> importFromUploadedCv() {
+        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        return candidateProfileRepository
+            .findTopByUserIdOrderByCreatedAtDesc(userId)
+            .map(CandidateProfile::getRawMarkdown)
+            .filter(raw -> !raw.isBlank())
+            .map(raw -> ResponseEntity.ok(cvRewriteService.extractResume(raw)))
+            .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @PostMapping("/translate")

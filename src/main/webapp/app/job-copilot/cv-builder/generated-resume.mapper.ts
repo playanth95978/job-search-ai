@@ -6,6 +6,13 @@ import { GeneratedResume } from './cv-resume-api.service';
  * caller's current template/theme/section layout (passed via {@code current}) untouched, so a
  * generation only replaces content — not the chosen design.
  */
+/** True when the current experience at this position is the same employer the AI just returned. */
+function sameEmployer(currentExperience: Experience | undefined, company: string | undefined): boolean {
+  const a = currentExperience?.company?.trim().toLowerCase();
+  const b = company?.trim().toLowerCase();
+  return !!a && a === b;
+}
+
 export function generatedResumeToResume(dto: GeneratedResume, current: Resume): Resume {
   const p = dto.personal;
   const fullName = `${p?.firstName ?? ''} ${p?.lastName ?? ''}`.trim();
@@ -28,10 +35,14 @@ export function generatedResumeToResume(dto: GeneratedResume, current: Resume): 
     },
     summary: dto.summary ?? '',
     experiences: (dto.experiences ?? []).map(
-      (e): Experience => ({
+      (e, i): Experience => ({
         id: uid(),
         jobTitle: e.jobTitle ?? '',
         company: e.company ?? '',
+        // The AI structure has no role location. On a translation the list is the same one in another
+        // language, so the value is carried over — but only when the employer at that position still
+        // matches, so a regenerated CV can never end up with a city that belongs to another job.
+        location: sameEmployer(current.experiences[i], e.company) ? current.experiences[i].location : '',
         startDate: e.startDate ?? '',
         endDate: e.endDate ?? '',
         current: e.current ?? false,
