@@ -49,7 +49,7 @@
         <h2>Expérience</h2>
         <article class="entry" th:each="e : ${cv.experiences}">
           <div class="row">
-            <span class="x-strong" th:text="${e.company} ? ${e.jobTitle} + ' · ' + ${e.company} : ${e.jobTitle}">Poste · Société</span>
+            <span class="x-strong" th:text="${!#strings.isEmpty(e.companyLine())} ? ${e.jobTitle} + ' · ' + ${e.companyLine()} : ${e.jobTitle}">Poste · Société</span>
             <span class="dates" th:text="${e.dateRange('')}">dates</span>
           </div>
           <p th:if="${e.description}" th:text="${e.description}">…</p>

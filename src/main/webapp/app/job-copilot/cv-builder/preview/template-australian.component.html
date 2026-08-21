@@ -43,8 +43,8 @@
                   <strong>{{ e.jobTitle }}</strong
                   ><span>{{ e.startDate }} — {{ e.current ? 'Present' : e.endDate }}</span>
                 </div>
-                @if (e.company) {
-                  <p class="au-org">{{ e.company }}</p>
+                @if (companyLine(e); as org) {
+                  <p class="au-org">{{ org }}</p>
                 }
                 @if (e.description) {
                   <p>{{ e.description }}</p>

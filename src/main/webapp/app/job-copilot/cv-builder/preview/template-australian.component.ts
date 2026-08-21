@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Resume, SectionKey } from '../resume.model';
+import { Experience, experienceCompanyLine, Resume, SectionKey } from '../resume.model';
 
 /**
  * Australian-style resume: a conservative, ATS-friendly single-column layout. Follows local
@@ -22,8 +22,15 @@ export class CvTemplateAustralianComponent {
     const r = this.resume();
     return r.sectionOrder.filter(s => !r.hiddenSections.includes(s));
   });
+  /** Employer + role location on one line; empty when neither is filled in. */
+  companyLine(e: Experience): string {
+    return experienceCompanyLine(e);
+  }
+
   readonly contactLine = computed(() => {
     const p = this.resume().personal;
-    return [p.email, p.phone, p.location, p.linkedin, p.github, p.website].filter(Boolean).join('  ·  ');
+    // Pipe, not a middle dot: parsers split contact lines on conventional delimiters and "|" is in
+    // every list of them. Matches the PDF and DOCX exports.
+    return [p.email, p.phone, p.location, p.linkedin, p.github, p.website].filter(Boolean).join('  |  ');
   });
 }

@@ -123,6 +123,11 @@
                     [placeholder]="'cvBuilder.fields.company' | translate"
                   />
                 </div>
+                <input
+                  [ngModel]="e.location"
+                  (ngModelChange)="store.patchExperience(e.id, { location: $event })"
+                  [placeholder]="'cvBuilder.fields.roleLocation' | translate"
+                />
                 <div class="cv-grid-2">
                   <input
                     [ngModel]="e.startDate"

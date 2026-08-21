@@ -78,10 +78,15 @@ public record ResumeDocument(
         return join(" ", personal.firstName(), personal.lastName());
     }
 
-    /** Single-line contact string used by the header of every template. */
+    /**
+     * Single-line contact string used by the header of every template.
+     *
+     * <p>Separated by a pipe rather than a middle dot: resume parsers split contact lines on a small set
+     * of conventional delimiters, and "|" is in every one of them. The DOCX export already used it.
+     */
     public String contactLine() {
         return join(
-            "  ·  ",
+            "  |  ",
             personal.email(),
             personal.phone(),
             personal.location(),
@@ -141,6 +146,8 @@ public record ResumeDocument(
     public record Experience(
         String jobTitle,
         String company,
+        /** Where the role was based; absent on resumes saved before the field existed. */
+        String location,
         String startDate,
         String endDate,
         boolean current,
@@ -158,6 +165,11 @@ public record ResumeDocument(
          */
         public String dateRange(String presentLabel) {
             return join(" — ", startDate, current ? presentLabel : endDate);
+        }
+
+        /** {@code "Acme, Sydney NSW"} — one line whether or not either half is filled in. */
+        public String companyLine() {
+            return join(", ", company, location);
         }
     }
 

@@ -49,7 +49,8 @@
       "refCompany": "Entreprise",
       "refEmail": "Email",
       "refPhone": "Téléphone",
-      "refHint": "Laissez vide pour afficher « Available upon request » sur le CV australien."
+      "refHint": "Laissez vide pour afficher « Available upon request » sur le CV australien.",
+      "roleLocation": "Lieu du poste (ex : Sydney, NSW)"
     },
     "actions": {
       "moveUp": "Monter",

@@ -28,14 +28,17 @@
     .row .dates { color: #777777; font-size: 0.8em; }
     .au-org { margin: 0.5mm 0 1mm; font-style: italic; color: #444444; }
 
-    /* Two even columns without CSS grid. Spans, not a `ul`: openhtmltopdf keeps `li` at list-item
+    /* One skill per line: single-column content is what Australian ATS guidance asks for, and the
+       floated 47% columns this used to have bought nothing but vertical compactness. Spans, not a `ul`: openhtmltopdf keeps `li` at list-item
        display and stacks it full width whatever float or inline-block you set on it. The bullet is
        U+2022 because the base-14 fonts only cover WinAnsi — U+25AA, which the on-screen template uses,
        has no glyph and prints as a placeholder box. */
-    .au-skills span { float: left; width: 47%; padding-left: 4mm; font-size: 0.9em; }
+    .au-skills span { display: block; padding-left: 4mm; font-size: 0.9em; }
     .au-skills span:before { content: "\2022"; padding-right: 2mm; color: [(${theme.primary})]; }
 
-    .au-ref { float: left; width: 47%; margin-bottom: 3mm; page-break-inside: avoid; }
+    /* One referee per block: floated side by side, a parser reading by position can pair a phone
+       number with the wrong name, and Australian referees get phoned. */
+    .au-ref { margin-bottom: 3mm; page-break-inside: avoid; }
     .au-ref-contact { font-size: 0.8em; color: #777777; }
     .au-ref-none { color: #555555; font-style: italic; }
   </style>
@@ -75,7 +78,7 @@
             <strong th:text="${e.jobTitle}">Job title</strong>
             <span class="dates" th:text="${e.dateRange('Present')}">dates</span>
           </div>
-          <p class="au-org" th:if="${e.company}" th:text="${e.company}">Company</p>
+          <p class="au-org" th:if="${!#strings.isEmpty(e.companyLine())}" th:text="${e.companyLine()}">Company, City STATE</p>
           <p th:if="${e.description}" th:text="${e.description}">…</p>
           <ul th:if="${!e.achievements.isEmpty()}">
             <li th:each="a : ${e.achievements}" th:text="${a}">…</li>

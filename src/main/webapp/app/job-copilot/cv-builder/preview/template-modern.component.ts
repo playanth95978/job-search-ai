@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Resume, SectionKey } from '../resume.model';
+import { Experience, Resume, SectionKey, experienceCompanyLine } from '../resume.model';
 
 @Component({
   selector: 'jhi-cv-tmpl-modern',
@@ -59,7 +59,7 @@ import { Resume, SectionKey } from '../resume.model';
                           <strong>{{ e.jobTitle }}</strong>
                           <span class="m-dates">{{ e.startDate }} — {{ e.current ? 'Aujourd’hui' : e.endDate }}</span>
                         </div>
-                        <div class="m-company">{{ e.company }}</div>
+                        <div class="m-company">{{ companyLine(e) }}</div>
                         @if (e.description) {
                           <p>{{ e.description }}</p>
                         }
@@ -116,17 +116,11 @@ import { Resume, SectionKey } from '../resume.model';
                   </section>
                 }
               }
-            }
-          }
-        </main>
 
-        <aside class="m-side">
-          @for (s of sections(); track s) {
-            @switch (s) {
               @case ('skills') {
                 @if (r.skills.length) {
                   <section>
-                    <h3>Compétences</h3>
+                    <h2>Compétences</h2>
                     @for (sk of r.skills; track sk.id) {
                       <div class="m-skill">
                         <span>{{ sk.name }}</span>
@@ -139,7 +133,7 @@ import { Resume, SectionKey } from '../resume.model';
               @case ('languages') {
                 @if (r.languages.length) {
                   <section>
-                    <h3>Langues</h3>
+                    <h2>Langues</h2>
                     @for (l of r.languages; track l.id) {
                       <div class="m-lang">
                         <span>{{ l.name }}</span
@@ -152,7 +146,7 @@ import { Resume, SectionKey } from '../resume.model';
               @case ('certifications') {
                 @if (r.certifications.length) {
                   <section>
-                    <h3>Certifications</h3>
+                    <h2>Certifications</h2>
                     @for (c of r.certifications; track c.id) {
                       <div class="m-cert">
                         <strong>{{ c.name }}</strong
@@ -164,7 +158,7 @@ import { Resume, SectionKey } from '../resume.model';
               }
             }
           }
-        </aside>
+        </main>
       </div>
     </div>
   `,
@@ -199,7 +193,7 @@ import { Resume, SectionKey } from '../resume.model';
     }
     .m-body {
       display: grid;
-      grid-template-columns: 1fr 230px;
+      grid-template-columns: 1fr;
       gap: 28px;
       padding: 26px 32px;
     }
@@ -296,6 +290,11 @@ import { Resume, SectionKey } from '../resume.model';
 })
 export class CvTemplateModernComponent {
   readonly resume = input.required<Resume>();
+  /** Employer + role location on one line; empty when neither is filled in. */
+  companyLine(e: Experience): string {
+    return experienceCompanyLine(e);
+  }
+
   readonly sections = computed<SectionKey[]>(() => {
     const r = this.resume();
     return r.sectionOrder.filter(s => !r.hiddenSections.includes(s));

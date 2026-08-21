@@ -1,6 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 
 import {
+  ALL_SECTIONS,
   createEmptyResume,
   Resume,
   ResumeTemplateId,
@@ -344,6 +345,32 @@ function withSkillsAfterSummary(order: SectionKey[]): SectionKey[] {
 }
 
 /**
+ * Keeps the user's chosen order while guaranteeing every section is in it exactly once.
+ *
+ * <p>The templates render by walking `sectionOrder`, so a section missing from a stored order simply
+ * never appears — a silent disappearance, not a reordering. That happens to any resume saved before a
+ * section key existed (`projects` and `certifications` were added after the first release), and to any
+ * hand-edited import. Unknown keys are dropped for the same reason: they would render as nothing.
+ */
+function reconcileSectionOrder(order: SectionKey[] | undefined): SectionKey[] {
+  if (!order?.length) {
+    return [...ALL_SECTIONS];
+  }
+  const seen = new Set<SectionKey>();
+  const kept = order.filter(section => ALL_SECTIONS.includes(section) && !seen.has(section) && seen.add(section));
+  // Sections the stored order never knew about go back to where the default order puts them, rather
+  // than being appended at the end, which is what made "skills" drift to the bottom of the document.
+  for (const section of ALL_SECTIONS) {
+    if (!seen.has(section)) {
+      const defaultIndex = ALL_SECTIONS.indexOf(section);
+      const insertAt = kept.findIndex(s => ALL_SECTIONS.indexOf(s) > defaultIndex);
+      kept.splice(insertAt < 0 ? kept.length : insertAt, 0, section);
+    }
+  }
+  return kept;
+}
+
+/**
  * Guarantees every nested structure exists (theme, personal, lists), so a resume loaded from the
  * server / an old draft / an import can never crash the preview with `undefined` reads.
  */
@@ -364,7 +391,7 @@ function normalizeResume(input: Partial<Resume> | null | undefined): Resume {
     skills: input.skills ?? [],
     languages: input.languages ?? [],
     referees: input.referees ?? [],
-    sectionOrder: input.sectionOrder?.length ? input.sectionOrder : base.sectionOrder,
+    sectionOrder: reconcileSectionOrder(input.sectionOrder),
     hiddenSections: input.hiddenSections ?? [],
     template: input.template ?? base.template,
     title: input.title ?? base.title,

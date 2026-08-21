@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Resume, SectionKey } from '../resume.model';
+import { Experience, Resume, SectionKey, experienceCompanyLine } from '../resume.model';
 
 @Component({
   selector: 'jhi-cv-tmpl-professional',
@@ -35,7 +35,7 @@ import { Resume, SectionKey } from '../resume.model';
                 @for (e of r.experiences; track e.id) {
                   <article class="p-entry">
                     <div class="p-row">
-                      <strong>{{ e.jobTitle }}, {{ e.company }}</strong
+                      <strong>{{ e.jobTitle }}, {{ companyLine(e) }}</strong
                       ><span>{{ e.startDate }} — {{ e.current ? 'Aujourd’hui' : e.endDate }}</span>
                     </div>
                     @if (e.description) {
@@ -193,6 +193,11 @@ import { Resume, SectionKey } from '../resume.model';
 })
 export class CvTemplateProfessionalComponent {
   readonly resume = input.required<Resume>();
+  /** Employer + role location on one line; empty when neither is filled in. */
+  companyLine(e: Experience): string {
+    return experienceCompanyLine(e);
+  }
+
   readonly sections = computed<SectionKey[]>(() => {
     const r = this.resume();
     return r.sectionOrder.filter(s => !r.hiddenSections.includes(s));

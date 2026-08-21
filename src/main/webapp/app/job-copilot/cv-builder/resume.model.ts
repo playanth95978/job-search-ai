@@ -27,6 +27,11 @@ export interface Experience {
   id: string;
   jobTitle: string;
   company: string;
+  /**
+   * Where the role was based ("Sydney, NSW"). Australian recruiters expect it per role, and it is not
+   * derivable from the candidate's current location. Optional: resumes saved before it existed have none.
+   */
+  location?: string;
   startDate: string;
   endDate: string;
   current: boolean;
@@ -184,8 +189,29 @@ export function isBlankResume(resume: Resume): boolean {
   );
 }
 
+/**
+ * {@code "Acme, Sydney NSW"} — the employer and where the role was based, on one line, whichever half is
+ * missing. Mirrors {@code ResumeDocument.Experience#companyLine()} so preview and export agree.
+ */
+export function experienceCompanyLine(e: Experience): string {
+  return [e.company, e.location]
+    .map(part => part?.trim())
+    .filter(Boolean)
+    .join(', ');
+}
+
 export function emptyExperience(): Experience {
-  return { id: uid(), jobTitle: '', company: '', startDate: '', endDate: '', current: false, description: '', achievements: [] };
+  return {
+    id: uid(),
+    jobTitle: '',
+    company: '',
+    location: '',
+    startDate: '',
+    endDate: '',
+    current: false,
+    description: '',
+    achievements: [],
+  };
 }
 
 export function emptyEducation(): Education {

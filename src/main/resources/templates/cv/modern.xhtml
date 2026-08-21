@@ -24,13 +24,10 @@
     .m-title { margin: 2mm 0 0; color: #eef0fb; }
     .m-contact { margin: 3mm 0 0; font-size: 0.8em; color: #eef0fb; }
 
-    /* CSS 2.1 has no grid: the sidebar is a layout table. `-fs-table-paginate` lets a row taller than
-       the page split instead of overflowing. This is the one template that uses a table for layout —
-       the other three stay single-column, which parses more reliably in an ATS. */
-    .m-body { width: 100%; border-collapse: collapse; -fs-table-paginate: paginate; }
-    .m-body td { vertical-align: top; padding: 0; }
-    .m-main { padding-right: 9mm !important; }
-    .m-side { width: 52mm; }
+    /* Single column, no layout table. The sidebar this template used to have was a table/td pair —
+       the one construct every ATS guide warns about — and it also pinned skills, languages and
+       certifications after every other section in the text layer, whatever order the user had chosen. */
+    .m-body { width: 100%; }
 
     h2 {
       color: [(${theme.primary})];
@@ -80,10 +77,8 @@
     <div class="m-contact" th:if="${!#strings.isEmpty(cv.contactLine())}" th:text="${cv.contactLine()}">contact</div>
   </header>
 
-  <table class="m-body">
-    <tr>
-      <td class="m-main">
-        <th:block th:each="s : ${sections}" th:switch="${s}">
+  <div class="m-body">
+    <th:block th:each="s : ${sections}" th:switch="${s}">
 
           <th:block th:case="'summary'">
             <section th:if="${cv.summary}">
@@ -100,7 +95,7 @@
                   <strong th:text="${e.jobTitle}">Poste</strong>
                   <span class="dates m-dates" th:text="${e.dateRange('Aujourd''hui')}">dates</span>
                 </div>
-                <div class="m-company" th:if="${e.company}" th:text="${e.company}">Société</div>
+                <div class="m-company" th:if="${!#strings.isEmpty(e.companyLine())}" th:text="${e.companyLine()}">Société, Ville</div>
                 <p th:if="${e.description}" th:text="${e.description}">…</p>
                 <ul th:if="${!e.achievements.isEmpty()}">
                   <li th:each="a : ${e.achievements}" th:text="${a}">…</li>
@@ -136,15 +131,9 @@
             </section>
           </th:block>
 
-        </th:block>
-      </td>
-
-      <td class="m-side">
-        <th:block th:each="s : ${sections}" th:switch="${s}">
-
           <th:block th:case="'skills'">
             <section th:if="${!cv.skills.isEmpty()}">
-              <h3>Compétences</h3>
+              <h2>Compétences</h2>
               <div class="m-skill" th:each="sk : ${cv.skills}">
                 <span th:text="${sk.name}">compétence</span>
                 <div class="m-bar"><i th:style="'width:' + ${sk.barWidth()} + '%'"></i></div>
@@ -154,7 +143,7 @@
 
           <th:block th:case="'languages'">
             <section th:if="${!cv.languages.isEmpty()}">
-              <h3>Langues</h3>
+              <h2>Langues</h2>
               <div class="m-lang" th:each="l : ${cv.languages}">
                 <em th:text="${l.level}">niveau</em>
                 <span th:text="${l.name}">langue</span>
@@ -164,18 +153,15 @@
 
           <th:block th:case="'certifications'">
             <section th:if="${!cv.certifications.isEmpty()}">
-              <h3>Certifications</h3>
+              <h2>Certifications</h2>
               <div class="m-cert" th:each="c : ${cv.certifications}">
                 <strong th:text="${c.name}">certification</strong>
                 <span th:text="${c.issuedLine()}">émetteur</span>
               </div>
             </section>
           </th:block>
-
-        </th:block>
-      </td>
-    </tr>
-  </table>
+    </th:block>
+  </div>
 
 </body>
 </html>

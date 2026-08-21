@@ -16,7 +16,7 @@ import {
   ShadingType,
   convertInchesToTwip,
 } from 'docx';
-import { Resume } from './resume.model';
+import { Resume, experienceCompanyLine } from './resume.model';
 
 interface DocxSectionLabels {
   summary: string;
@@ -154,8 +154,9 @@ export class CvExportService {
                   ],
                 }),
               );
-              if (exp.company) {
-                children.push(new Paragraph({ text: exp.company, style: 'IntenseQuote' }));
+              const employer = experienceCompanyLine(exp);
+              if (employer) {
+                children.push(new Paragraph({ text: employer, style: 'IntenseQuote' }));
               }
               if (exp.description) {
                 children.push(new Paragraph({ text: exp.description }));
