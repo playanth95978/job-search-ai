@@ -1,0 +1,16 @@
+@if (actions().length > 0) {
+  <div class="chat-actions-bar" role="group" [attr.aria-label]="'chat.actions.label' | translate">
+    @for (action of actions(); track action.label.key + $index) {
+      <button
+        type="button"
+        class="chat-action-chip"
+        [class.chat-action-chip--mutate]="action.type === 'mutate'"
+        [disabled]="disabled()"
+        (click)="actionSelected.emit(action)"
+      >
+        <fa-icon [icon]="iconFor(action)" />
+        <span>{{ action.label.key | translate: action.label.params ?? {} }}</span>
+      </button>
+    }
+  </div>
+}

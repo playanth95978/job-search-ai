@@ -45,6 +45,28 @@
         "moreDetails": "Peux-tu détailler davantage ?",
         "bestOffers": "Quelles sont les meilleures offres pour moi ?"
       }
+    },
+    "action": {
+      "openOffer": "{{ title }}",
+      "viewAllOffers": "Voir les {{ count }} offres",
+      "viewAllMatches": "Voir mes {{ count }} correspondances",
+      "viewApplications": "Mes {{ count }} candidatures",
+      "onlyPermanent": "Uniquement les CDI",
+      "onlyRemote": "Uniquement le télétravail",
+      "widenSearch": "Élargir la recherche",
+      "openPreferences": "Régler mes préférences",
+      "completeProfile": "Compléter mon profil",
+      "importCv": "Importer mon CV",
+      "openCoverLetter": "Ouvrir la lettre",
+      "generateCoverLetter": "Générer une lettre",
+      "apply": "Postuler",
+      "confirm": {
+        "APPLY": "Envoyer votre candidature à cette offre ?",
+        "GENERATE_COVER_LETTER": "Générer une lettre de motivation pour cette offre ?"
+      }
+    },
+    "actions": {
+      "label": "Actions proposées"
     }
   }
 }

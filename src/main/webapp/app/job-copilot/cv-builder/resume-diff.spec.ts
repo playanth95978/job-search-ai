@@ -6,7 +6,8 @@ function withProject() {
   const resume = createEmptyResume();
   return {
     ...resume,
-    projects: [{ id: 'p1', name: 'Job Copilot', description: 'Recherche sémantique', technologies: '', url: '', bullets: [] }],
+    // Aligne sur `Project` : pas de `bullets`, et `technologies` est une liste.
+    projects: [{ id: 'p1', name: 'Job Copilot', description: 'Recherche sémantique', technologies: [], url: '' }],
   } as ReturnType<typeof createEmptyResume>;
 }
 

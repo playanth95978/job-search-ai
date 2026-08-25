@@ -13,6 +13,8 @@ import { ChatContainerWrapperComponent } from './chat-container-wrapper/chat-con
 import { Subject, takeUntil } from 'rxjs';
 import { AccountService } from '../core/auth/account.service';
 import { MessageService, TypeChat } from './message.service';
+import { ChatAction } from './chat-actions/chat-action.model';
+import { ChatActionDispatcherService } from './chat-actions/chat-action-dispatcher.service';
 
 /**
  * ChatGPT-style conversation pane for the tool-enabled Job Copilot agent. The sidebar
@@ -81,8 +83,15 @@ export default class Chat implements OnInit, OnDestroy {
     this.messageService.setFeedback(event.messageId, event.feedback);
   }
 
+  private readonly actionDispatcher = inject(ChatActionDispatcherService);
+
   onSuggestionClick(suggestion: string): void {
     this.messageService.sendSuggestion(suggestion);
+  }
+
+  /** Exécute une action cliquée dans le fil ; la décision appartient au dispatcher. */
+  onChatAction(action: ChatAction): void {
+    this.actionDispatcher.dispatch(action);
   }
 
   login(): void {

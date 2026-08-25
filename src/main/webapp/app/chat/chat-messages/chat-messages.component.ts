@@ -21,13 +21,23 @@ import { ChatMessage } from '../message.service';
 import { FormatMediumDatetimePipe } from '../../shared/date';
 import TranslateDirective from '../../shared/language/translate.directive';
 import { ChatSuggestionsComponent } from '../chat-suggestions/chat-suggestions.component';
+import { ChatActionsComponent } from '../chat-actions/chat-actions.component';
+import { ChatAction } from '../chat-actions/chat-action.model';
 
 @Component({
   selector: 'jhi-chat-messages',
   templateUrl: './chat-messages.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['./chat-messages.component.scss'],
-  imports: [FontAwesomeModule, FormatMediumDatetimePipe, SanitizerComponent, TranslateModule, TranslateDirective, ChatSuggestionsComponent],
+  imports: [
+    FontAwesomeModule,
+    FormatMediumDatetimePipe,
+    SanitizerComponent,
+    TranslateModule,
+    TranslateDirective,
+    ChatSuggestionsComponent,
+    ChatActionsComponent,
+  ],
 })
 export class ChatMessagesComponent implements AfterViewChecked {
   messages = input.required<ChatMessage[]>();
@@ -36,12 +46,32 @@ export class ChatMessagesComponent implements AfterViewChecked {
   isTyping = input<boolean>(false);
   hasRag = input<boolean>(false);
 
-  hasEvents = input<boolean>(false);
+  /**
+   * Messages dont une action a déjà été jouée : leurs boutons sont désactivés.
+   *
+   * Porté ici et non dans `ChatMessage` parce que c'est un état d'affichage, pas une donnée de
+   * conversation — il ne doit ni être persisté ni traverser le réseau.
+   */
+  readonly playedActionMessageIds = signal<ReadonlySet<string>>(new Set());
   formatMessage = input.required<(message: string) => string>();
   /** Puces de suggestion (clés i18n) affichées en fin de fil ; vide = rien à proposer. */
   suggestions = input<string[]>([]);
   feedbackClicked = output<{ messageId: string; feedback: 'up' | 'down' }>();
   suggestionSelected = output<string>();
+  /** Action cliquée dans le fil ; le conteneur décide de ce qu'elle déclenche. */
+  readonly actionSelected = output<ChatAction>();
+
+  /**
+   * Marque le message comme joué, puis remonte l'action.
+   *
+   * Le marquage est fait ici plutôt que dans le conteneur pour que le bouton se fige au clic, sans
+   * attendre l'aller-retour réseau d'une action `mutate` : sinon rien n'empêche un double clic de
+   * partir deux fois.
+   */
+  onActionSelected(messageId: string, action: ChatAction): void {
+    this.playedActionMessageIds.update(played => new Set(played).add(messageId));
+    this.actionSelected.emit(action);
+  }
 
   expandedSources = signal<Record<string, boolean>>({});
 

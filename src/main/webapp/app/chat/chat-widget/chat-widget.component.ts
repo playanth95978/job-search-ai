@@ -8,6 +8,8 @@ import { TranslateDirective } from 'app/shared/language';
 import { MessageService } from '../message.service';
 import { ChatMessagesComponent } from '../chat-messages/chat-messages.component';
 import { ChatInputAreaComponent } from '../chat-input-area/chat-input-area.component';
+import { ChatAction } from '../chat-actions/chat-action.model';
+import { ChatActionDispatcherService } from '../chat-actions/chat-action-dispatcher.service';
 
 /**
  * Floating, always-available chat launcher. A FAB in the bottom-right corner opens a compact panel
@@ -43,8 +45,15 @@ export class ChatWidgetComponent {
     this.open.set(false);
   }
 
+  private readonly actionDispatcher = inject(ChatActionDispatcherService);
+
   onSuggestionClick(suggestion: string): void {
     this.messageService.sendSuggestion(suggestion);
+  }
+
+  /** Exécute une action cliquée dans le fil ; la décision appartient au dispatcher. */
+  onChatAction(action: ChatAction): void {
+    this.actionDispatcher.dispatch(action);
   }
 
   startNewChat(): void {

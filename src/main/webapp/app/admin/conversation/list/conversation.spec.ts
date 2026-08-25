@@ -169,7 +169,8 @@ describe('Conversation Management Component', () => {
       vitest.spyOn(comp, 'load');
 
       // WHEN
-      comp.delete(sampleWithRequiredData);
+      // `delete` prend l'index de la ligne depuis que le composant a change de signature.
+      comp.delete(0);
       deleteModalMock.closed.next('deleted');
 
       // THEN
@@ -182,7 +183,8 @@ describe('Conversation Management Component', () => {
       vitest.spyOn(comp, 'load');
 
       // WHEN
-      comp.delete(sampleWithRequiredData);
+      // `delete` prend l'index de la ligne depuis que le composant a change de signature.
+      comp.delete(0);
       deleteModalMock.closed.next();
 
       // THEN

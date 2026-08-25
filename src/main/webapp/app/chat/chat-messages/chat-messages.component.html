@@ -49,23 +49,15 @@
           </div>
         }
 
-        <!-- Events (Tool Calls, Results) for Jira Agent specifically -->
-        @if (hasEvents() && (msg.events?.length ?? 0) > 0) {
-          <div class="mt-4 flex w-full flex-col items-start space-y-2">
-            <div class="flex items-center gap-2 px-1 mb-1">
-              <div class="flex h-5 w-5 items-center justify-center rounded-lg bg-brand-500 text-[9px] text-white">
-                <fa-icon icon="robot" />
-              </div>
-              <span
-                class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500"
-                jhiTranslate="chat.message.jiraAgent"
-                >Agent Jira</span
-              >
-            </div>
-            <!--            @for (evt of msg.events; track evt.id) {-->
-            <!--              <jhi-jira-action-card [event]="evt" class="block w-full max-w-[90%] animate-slide-up" />-->
-            <!--            }-->
-          </div>
+        <!-- Actions cliquables décidées par le backend : ouvrir une offre, affiner, postuler.
+             Jamais sur un message en cours d'écriture — les boutons apparaîtraient au milieu
+             d'une phrase. -->
+        @if (msg.role === 'assistant' && !msg.isStreaming && (msg.actions?.length ?? 0) > 0) {
+          <jhi-chat-actions
+            [actions]="msg.actions ?? []"
+            [disabled]="playedActionMessageIds().has(msg.id)"
+            (actionSelected)="onActionSelected(msg.id, $event)"
+          />
         }
 
         @if (msg.sources && msg.sources.length > 0) {

@@ -1,0 +1,61 @@
+@keyframes chatActionsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Rendu sous la bulle de l'assistant : pas de bandeau ni de fond, les puces s'alignent sur le
+// message et passent à la ligne quand il le faut. Même parti pris que `chat-suggestions`.
+.chat-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  animation: chatActionsFadeIn 0.3s ease-out;
+}
+
+.chat-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--bs-border-color, #d0d5dd);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--bs-secondary-bg, #f1f3f5);
+  }
+
+  // Le focus visible est conservé : ces puces sont atteignables au clavier, et les masquer
+  // rendrait le fil inutilisable sans souris.
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary, #0d6efd);
+    outline-offset: 2px;
+  }
+
+  // Une fois l'action jouée, la puce reste lisible mais inerte : le fil est un historique, et
+  // rien n'indiquerait à l'utilisateur qu'il vient de postuler deux fois.
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+// Les actions qui modifient quelque chose se distinguent des simples raccourcis.
+.chat-action-chip--mutate {
+  border-color: var(--bs-primary, #0d6efd);
+  color: var(--bs-primary, #0d6efd);
+  font-weight: 600;
+}

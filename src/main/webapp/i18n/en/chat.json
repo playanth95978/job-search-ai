@@ -45,6 +45,28 @@
         "moreDetails": "Can you go into more detail?",
         "bestOffers": "What are the best offers for me?"
       }
+    },
+    "action": {
+      "openOffer": "{{ title }}",
+      "viewAllOffers": "View the {{ count }} offers",
+      "viewAllMatches": "View my {{ count }} matches",
+      "viewApplications": "My {{ count }} applications",
+      "onlyPermanent": "Permanent contracts only",
+      "onlyRemote": "Remote only",
+      "widenSearch": "Widen the search",
+      "openPreferences": "Adjust my preferences",
+      "completeProfile": "Complete my profile",
+      "importCv": "Import my CV",
+      "openCoverLetter": "Open the letter",
+      "generateCoverLetter": "Generate a letter",
+      "apply": "Apply",
+      "confirm": {
+        "APPLY": "Send your application to this offer?",
+        "GENERATE_COVER_LETTER": "Generate a cover letter for this offer?"
+      }
+    },
+    "actions": {
+      "label": "Suggested actions"
     }
   }
 }

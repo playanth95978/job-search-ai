@@ -8,6 +8,7 @@ import hljs from 'highlight.js';
 import { IConversation } from '../admin/conversation/conversation.model';
 import { ConversationService } from '../admin/conversation/service/conversation.service';
 import { ChatHistory } from '../home/chat-history/chat-history';
+import { ChatAction } from './chat-actions/chat-action.model';
 
 export type TypeChat = null | 'CODE' | 'JIRA' | 'CONFLUENCE' | 'PDF';
 
@@ -34,7 +35,11 @@ export interface ChatMessage {
   isStreaming?: boolean;
   sources?: SourceInfo[];
   feedback?: 'up' | 'down' | null;
-  events?: any[];
+  /**
+   * Boutons proposés à la fin du tour, décidés par le backend d'après ce que les outils de l'agent
+   * ont réellement fait. Absent pour une réponse purement conversationnelle.
+   */
+  actions?: ChatAction[];
 }
 
 @Injectable({
@@ -93,6 +98,13 @@ export class MessageService {
   readonly streamingMessage = this._streamingMessage.asReadonly();
   readonly streamingHtml = this._streamingHtml.asReadonly();
   private readonly _pendingSources = signal<SourceInfo[]>([]);
+  /**
+   * Actions du tour en cours, en attente de la fin du flux.
+   *
+   * Séparé de `_pendingSources` parce que les deux n'arrivent pas au même moment : les sources
+   * peuvent tomber en cours de route, les actions ne sont émises qu'après le dernier token.
+   */
+  private readonly _pendingActions = signal<ChatAction[]>([]);
   private readonly _suggestions = signal<string[]>([]);
   readonly suggestions = this._suggestions.asReadonly();
 
@@ -261,6 +273,10 @@ export class MessageService {
           this._pendingSources.set(parseResult.sources);
         }
 
+        // Retenues jusqu'à la fin du flux : les poser tout de suite ferait apparaître les boutons
+        // au milieu d'une phrase en cours d'écriture.
+        this._pendingActions.set(parseResult.actions);
+
         // On alimente la cible ; c'est la boucle rAF qui décide du rythme d'affichage.
         this._targetText.set(this.streamBuffer);
         this.startReveal();
@@ -271,7 +287,7 @@ export class MessageService {
         // sinon la fin du message apparaîtrait d'un bloc.
         this._streamEnded.set(true);
         this.onRevealComplete = () => {
-          this.finalizeAssistantMessage(this.streamBuffer, this._pendingSources());
+          this.finalizeAssistantMessage(this.streamBuffer, this._pendingSources(), this._pendingActions());
           if (this.isNewMessage()) {
             this.createNewConversation(this.currentConversationId()!, prompt);
             // Sans ce reset, chaque message suivant recréait la même conversation :
@@ -285,6 +301,7 @@ export class MessageService {
           this._streamingMessage.set('');
           this._streamingHtml.set('');
           this._pendingSources.set([]);
+          this._pendingActions.set([]);
           this._generatingInProgress.set(false);
         };
         this.startReveal();
@@ -376,7 +393,10 @@ export class MessageService {
 
     // On fige ce qui a été effectivement affiché, pas ce qui a été reçu.
     const partial = this._targetText().slice(0, this._revealedChars());
+    // Aucune action sur un tour interrompu : un bouton tire d'une reponse a moitie ecrite
+    // serait trompeur.
     this.finalizeAssistantMessage(partial, this._pendingSources());
+    this._pendingActions.set([]);
     this.resetReveal();
     this.streamBuffer = '';
     this._streamingMessage.set('');
@@ -386,7 +406,7 @@ export class MessageService {
   }
 
   /** Remplace le placeholder assistant en cours par le message final rendu en HTML. */
-  private finalizeAssistantMessage(text: string, sources: SourceInfo[]): void {
+  private finalizeAssistantMessage(text: string, sources: SourceInfo[], actions: ChatAction[] = []): void {
     const html = marked.parse(text, { async: false });
     this._messages.update(msgs => {
       const copy = [...msgs];
@@ -398,6 +418,9 @@ export class MessageService {
         isStreaming: false,
         role: 'assistant',
         sources: sources.length > 0 ? sources : undefined,
+        // `undefined` et non `[]` : le template teste la longueur, et une liste vide ferait rendre
+        // un conteneur vide qui consommerait l'espacement du fil.
+        actions: actions.length > 0 ? actions : undefined,
       };
       return copy;
     });
@@ -558,12 +581,13 @@ export class MessageService {
     return this.parseSSEWithMeta(fullText).text;
   }
 
-  private parseSSEWithMeta(fullText: string): { text: string; sources: SourceInfo[] } {
-    if (!fullText) return { text: '', sources: [] };
+  private parseSSEWithMeta(fullText: string): { text: string; sources: SourceInfo[]; actions: ChatAction[] } {
+    if (!fullText) return { text: '', sources: [], actions: [] };
 
     const events = fullText.split('\n\n');
     let result = '';
     let sources: SourceInfo[] = [];
+    let actions: ChatAction[] = [];
 
     for (const event of events) {
       if (!event.trim()) continue;
@@ -579,8 +603,17 @@ export class MessageService {
             const json = JSON.parse(payload) as {
               content?: string;
               type?: string;
+              actions?: ChatAction[];
               choices?: { delta?: { content?: string } }[];
             };
+
+            // Les actions voyagent dans leur propre champ, pas encodées en JSON dans `content` :
+            // les deux backends émettent la même trame, et une liste vide est émise malgré tout
+            // pour distinguer « ce tour n'a pas d'action » de « la trame n'est jamais arrivée ».
+            if (json?.type === 'actions') {
+              actions = json.actions ?? [];
+              continue;
+            }
 
             if (json?.type === 'sources' && json?.content) {
               try {
@@ -603,7 +636,7 @@ export class MessageService {
         }
       }
     }
-    return { text: result, sources };
+    return { text: result, sources, actions };
   }
 
   /**

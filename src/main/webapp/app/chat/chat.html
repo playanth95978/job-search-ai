@@ -15,6 +15,7 @@
       [suggestions]="suggestions()"
       (feedbackClicked)="onFeedback($event)"
       (suggestionSelected)="onSuggestionClick($event)"
+      (actionSelected)="onChatAction($event)"
     />
     <jhi-chat-input-area (loginClicked)="login()" (userInputChange)="userInput = $event" />
 
