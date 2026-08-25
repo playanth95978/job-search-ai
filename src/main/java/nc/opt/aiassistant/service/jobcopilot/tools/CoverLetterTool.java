@@ -8,6 +8,7 @@ import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
 import nc.opt.aiassistant.service.jobcopilot.CoverLetterService;
+import nc.opt.aiassistant.service.jobcopilot.dto.ToolOutcome;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -27,11 +28,17 @@ public class CoverLetterTool {
         String userId = ToolSupport.currentUser(toolContext);
         if (userId == null) return "You must be signed in.";
         CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
-        if (profile == null) return "No candidate profile found. Upload a CV first.";
+        if (profile == null) {
+            ToolSupport.record(toolContext, new ToolOutcome.ProfileMissing());
+            return "No candidate profile found. Upload a CV first.";
+        }
 
         JobOffer offer = jobOfferRepository.findById(UUID.fromString(jobOfferId)).orElse(null);
         if (offer == null) return "Job offer not found: " + jobOfferId;
 
-        return coverLetterService.generate(profile, offer);
+        String letter = coverLetterService.generate(profile, offer);
+        // Recorded after generation only: a failed generation has no letter to open.
+        ToolSupport.record(toolContext, new ToolOutcome.CoverLetterGenerated(offer.getId()));
+        return letter;
     }
 }

@@ -10,6 +10,7 @@ import nc.opt.aiassistant.domain.JobApplication;
 import nc.opt.aiassistant.domain.enumeration.ApplicationStatus;
 import nc.opt.aiassistant.service.dto.JobApplicationDTO;
 import nc.opt.aiassistant.service.jobcopilot.ApplicationTrackingService;
+import nc.opt.aiassistant.service.jobcopilot.dto.ToolOutcome;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -27,6 +28,7 @@ public class ApplicationTrackingTool {
         String userId = ToolSupport.currentUser(toolContext);
         if (userId == null) return "You must be signed in.";
         List<JobApplicationDTO> apps = trackingService.getApplications(userId);
+        ToolSupport.record(toolContext, new ToolOutcome.ApplicationsListed(apps.size()));
         if (apps.isEmpty()) return "No applications yet.";
         return apps.stream().map(this::formatApp).collect(Collectors.joining("\n"));
     }

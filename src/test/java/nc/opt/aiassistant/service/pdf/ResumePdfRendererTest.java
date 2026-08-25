@@ -148,6 +148,9 @@ class ResumePdfRendererTest {
                 new ResumeDocument.Experience(
                     i == 0 ? "Staff Engineer" : "Senior Engineer " + i,
                     "Acme Corp",
+                    // `location` ajoute au record apres l'ecriture de ce test : renseigne pour que
+                    // le rendu exerce bien la ligne « entreprise + lieu ».
+                    "Noumea",
                     "Jan 20" + (10 + i),
                     "Dec 20" + (11 + i),
                     i == 0,

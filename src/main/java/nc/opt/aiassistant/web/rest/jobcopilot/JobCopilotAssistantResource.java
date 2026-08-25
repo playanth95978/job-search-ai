@@ -25,8 +25,8 @@ public class JobCopilotAssistantResource {
     @PostMapping("/{conversationId}/message")
     public ResponseEntity<AssistantMessageDto> message(@PathVariable String conversationId, @RequestBody String message) {
         String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
-        String reply = agentService.chat(conversationId, userId, message);
-        return ResponseEntity.ok(new AssistantMessageDto(conversationId, reply));
+        JobCopilotAgentService.Turn turn = agentService.chat(conversationId, userId, message);
+        return ResponseEntity.ok(new AssistantMessageDto(conversationId, turn.reply(), turn.actions()));
     }
 
     /**

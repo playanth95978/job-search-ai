@@ -14,6 +14,7 @@ import nc.opt.aiassistant.service.jobcopilot.JobOfferSearchService;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.MatchTagDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.SkillDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.ToolOutcome;
 import nc.opt.aiassistant.service.jobcopilot.matching.JobMatchingService;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
@@ -51,7 +52,10 @@ public class MatchingTool {
         String userId = ToolSupport.currentUser(toolContext);
         if (userId == null) return "You must be signed in to match jobs.";
         CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
-        if (profile == null) return "No candidate profile found. Upload a CV first.";
+        if (profile == null) {
+            ToolSupport.record(toolContext, new ToolOutcome.ProfileMissing());
+            return "No candidate profile found. Upload a CV first.";
+        }
 
         // Le moteur de recherche existant (vecteur + BM25 + RRF + reranker) fournit les candidats déjà
         // ordonnés par pertinence : JobMatchingService s'appuie sur cet ordre pour la part sémantique
@@ -64,6 +68,9 @@ public class MatchingTool {
 
         List<MatchResultDto> results = matchingService.matchJobs(profile, offers, location);
         int max = limit == null ? 5 : Math.clamp(limit, 1, MAX_RESULTS);
+        // Cited offers come from `offers`, not `results`: scoring reorders but does not change the
+        // set, and `offers` carries the titles the buttons need.
+        ToolSupport.record(toolContext, new ToolOutcome.MatchesFound(ToolSupport.cited(offers, 3), results.size()));
         return results.stream().limit(max).map(this::formatMatch).collect(Collectors.joining("\n\n"));
     }
 

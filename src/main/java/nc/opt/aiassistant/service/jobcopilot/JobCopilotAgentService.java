@@ -2,7 +2,11 @@ package nc.opt.aiassistant.service.jobcopilot;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -10,7 +14,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.service.ai.AiErrors;
 import nc.opt.aiassistant.service.ai.MistralRateLimiter;
+import nc.opt.aiassistant.service.jobcopilot.dto.ChatAction;
+import nc.opt.aiassistant.service.jobcopilot.dto.ChatActionFactory;
 import nc.opt.aiassistant.service.jobcopilot.dto.ChatEvent;
+import nc.opt.aiassistant.service.jobcopilot.dto.ToolOutcome;
 import nc.opt.aiassistant.service.jobcopilot.tools.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -120,28 +127,42 @@ public class JobCopilotAgentService {
             .build();
     }
 
-    /** Runs one turn of the conversation (blocking), letting the model call tools as needed. */
-    public String chat(String conversationId, String userId, String message) {
+    /**
+     * Runs one turn of the conversation (blocking), letting the model call tools as needed.
+     *
+     * <p>Returns the reply text together with the buttons derived from what the tools did: the
+     * caller cannot recover the latter from the text alone.</p>
+     */
+    public Turn chat(String conversationId, String userId, String message) {
+        List<ToolOutcome> outcomes = newCollector();
+        String reply;
         if (!rateLimiter.acquire()) {
             log.info("Job Copilot : quota local atteint, bascule directe sur le modèle de repli");
-            return call(fallbackChatClient, conversationId, userId, message);
-        }
-        try {
-            return call(chatClient, conversationId, userId, message);
-        } catch (RuntimeException e) {
-            if (!AiErrors.isRateLimited(e)) {
-                throw e;
+            reply = call(fallbackChatClient, conversationId, userId, message, outcomes);
+        } else {
+            try {
+                reply = call(chatClient, conversationId, userId, message, outcomes);
+            } catch (RuntimeException e) {
+                if (!AiErrors.isRateLimited(e)) {
+                    throw e;
+                }
+                log.warn("Job Copilot : 429 sur le modèle principal, rejeu sur le modèle de repli");
+                // The retry reuses the same collector: a tool that succeeded before the 429 has
+                // already recorded its outcome, and its button remains legitimate.
+                reply = call(fallbackChatClient, conversationId, userId, message, outcomes);
             }
-            log.warn("Job Copilot : 429 sur le modèle principal, rejeu sur le modèle de repli");
-            return call(fallbackChatClient, conversationId, userId, message);
         }
+        return new Turn(reply, ChatActionFactory.actionsFor(List.copyOf(outcomes)));
     }
 
-    private String call(ChatClient client, String conversationId, String userId, String message) {
+    /** One finished assistant turn: the reply and the buttons offered afterwards. */
+    public record Turn(String reply, List<ChatAction> actions) {}
+
+    private String call(ChatClient client, String conversationId, String userId, String message, List<ToolOutcome> outcomes) {
         return client
             .prompt()
             .user(message)
-            .toolContext(userContext(userId))
+            .toolContext(userContext(userId, outcomes))
             .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
             .call()
             .content();
@@ -159,18 +180,19 @@ public class JobCopilotAgentService {
     public Flux<ChatEvent> stream(String conversationId, String userId, String message) {
         String id = UUID.randomUUID().toString();
         AtomicBoolean emitted = new AtomicBoolean(false);
+        List<ToolOutcome> outcomes = newCollector();
 
         Flux<ChatEvent> body = rateLimiter
             .acquireReactive()
-            .thenMany(tokens(chatClient, conversationId, userId, message, emitted))
+            .thenMany(tokens(chatClient, conversationId, userId, message, emitted, outcomes))
             .onErrorResume(e -> {
                 if (!AiErrors.isRateLimited(e) || emitted.get()) {
                     return Flux.error(e);
                 }
                 log.warn("Job Copilot : 429 sur le modèle principal, rejeu du flux sur le modèle de repli");
-                return tokens(fallbackChatClient, conversationId, userId, message, emitted);
+                return tokens(fallbackChatClient, conversationId, userId, message, emitted, outcomes);
             })
-            .transform(tokenFlux -> toChunk(tokenFlux, id));
+            .transform(tokenFlux -> toChunk(tokenFlux, id, outcomes));
 
         return keepAlive(body, id);
     }
@@ -180,12 +202,19 @@ public class JobCopilotAgentService {
      * buffering — so the 429 fallback can tell "failed before answering" from "failed mid-answer",
      * where replaying would duplicate the text already sent to the client.
      */
-    private Flux<String> tokens(ChatClient client, String conversationId, String userId, String message, AtomicBoolean emitted) {
+    private Flux<String> tokens(
+        ChatClient client,
+        String conversationId,
+        String userId,
+        String message,
+        AtomicBoolean emitted,
+        List<ToolOutcome> outcomes
+    ) {
         return Flux.defer(() ->
             client
                 .prompt()
                 .user(message)
-                .toolContext(userContext(userId))
+                .toolContext(userContext(userId, outcomes))
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .stream()
                 .content()
@@ -193,19 +222,31 @@ public class JobCopilotAgentService {
         );
     }
 
-    /** Wraps a token flux into start/token/end events, batching tokens to limit SSE chatter. */
-    private Flux<ChatEvent> toChunk(Flux<String> tokenFlux, String id) {
+    /**
+     * Wraps a token flux into start/token/actions/end events, batching tokens to limit SSE chatter.
+     *
+     * <p>The actions frame is emitted <b>after the last token and before {@code end}</b>: the front
+     * must have finished painting the text before the buttons appear, otherwise they show up
+     * mid-sentence while the reply is still being written. {@code Flux.defer} is what defers reading
+     * the collector until that point — reading it while building the pipeline would yield an empty
+     * list, since no tool has run yet.</p>
+     *
+     * <p>No actions frame on the error path: a turn that broke mid-answer has nothing to offer, and
+     * a button derived from a half-finished turn would be misleading.</p>
+     */
+    private Flux<ChatEvent> toChunk(Flux<String> tokenFlux, String id, List<ToolOutcome> outcomes) {
         return tokenFlux
             .bufferTimeout(20, Duration.ofMillis(100))
             .map(tokens -> String.join("", tokens))
             .filter(content -> !content.isEmpty())
-            .map(content -> new ChatEvent(id, "token", content))
-            .startWith(new ChatEvent(id, "start", null))
+            .map(content -> ChatEvent.of(id, "token", content))
+            .startWith(ChatEvent.of(id, "start", null))
             .timeout(streamTimeout)
-            .concatWithValues(new ChatEvent(id, "end", null))
+            .concatWith(Flux.defer(() -> Flux.just(ChatEvent.actions(id, ChatActionFactory.actionsFor(List.copyOf(outcomes))))))
+            .concatWithValues(ChatEvent.of(id, "end", null))
             .onErrorResume(e -> {
                 log.warn("Assistant stream failed for conversation {}: {}", id, e.getMessage());
-                return Flux.just(new ChatEvent(id, "error", userMessage(e)), new ChatEvent(id, "end", null));
+                return Flux.just(ChatEvent.of(id, "error", userMessage(e)), ChatEvent.of(id, "end", null));
             });
     }
 
@@ -217,7 +258,7 @@ public class JobCopilotAgentService {
     private Flux<ChatEvent> keepAlive(Flux<ChatEvent> body, String id) {
         Sinks.Empty<Void> done = Sinks.empty();
         Flux<ChatEvent> pings = Flux.interval(KEEP_ALIVE_INTERVAL, KEEP_ALIVE_INTERVAL)
-            .map(i -> new ChatEvent(id, "ping", null))
+            .map(i -> ChatEvent.of(id, "ping", null))
             .takeUntilOther(done.asMono());
         // doFinally (et non doOnComplete) : les pings doivent aussi s'arrêter si le client se déconnecte.
         return body.doFinally(signal -> done.tryEmitEmpty()).mergeWith(pings);
@@ -231,7 +272,23 @@ public class JobCopilotAgentService {
         return "Une erreur est survenue pendant la génération de la réponse. Merci de réessayer.";
     }
 
-    private Map<String, Object> userContext(String userId) {
-        return userId == null || userId.isBlank() ? Map.of() : Map.of("userId", userId);
+    /**
+     * Tool context for one turn: who we act for, and where tools drop what they produced.
+     *
+     * <p>The collector is a synchronized list because tool calls run on reactive threads, possibly
+     * several within the same turn.</p>
+     */
+    private Map<String, Object> userContext(String userId, List<ToolOutcome> outcomes) {
+        Map<String, Object> context = new HashMap<>();
+        if (userId != null && !userId.isBlank()) {
+            context.put("userId", userId);
+        }
+        context.put(ToolOutcome.CONTEXT_KEY, outcomes);
+        return context;
+    }
+
+    /** A fresh, thread-safe collector for one turn. */
+    private static List<ToolOutcome> newCollector() {
+        return Collections.synchronizedList(new ArrayList<>());
     }
 }

@@ -414,6 +414,7 @@
       }
     },
     "dashboard": {
+      "title": "Career Copilot",
       "subtitle": "Your AI-powered career assistant",
       "loading": "Loading your profile...",
       "welcome": {

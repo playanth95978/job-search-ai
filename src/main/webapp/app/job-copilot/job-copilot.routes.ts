@@ -4,12 +4,12 @@ const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
-    title: 'Job Copilot',
+    title: 'jobCopilot.dashboard.title',
   },
   {
     path: 'onboarding',
     loadComponent: () => import('./onboarding/onboarding.component').then(m => m.OnboardingComponent),
-    title: 'Upload CV',
+    title: 'jobCopilot.onboarding.title',
   },
   {
     path: 'profile',
@@ -29,42 +29,42 @@ const routes: Routes = [
   {
     path: 'search',
     loadComponent: () => import('./job-search/job-search.component').then(m => m.JobSearchComponent),
-    title: 'Job Search',
+    title: 'jobCopilot.search.title',
   },
   {
     path: 'applications',
     loadComponent: () => import('./applications/applications.component').then(m => m.ApplicationsComponent),
-    title: 'Applications',
+    title: 'jobCopilot.applications.title',
   },
   {
     path: 'insights',
     loadComponent: () => import('./insights/insights.component').then(m => m.InsightsComponent),
-    title: 'Insights',
+    title: 'jobCopilot.insights.title',
   },
   {
     path: 'radar',
     loadComponent: () => import('./radar/radar.component').then(m => m.RadarComponent),
-    title: 'Opportunity Radar',
+    title: 'jobCopilot.radar.title',
   },
   {
     path: 'settings',
     loadComponent: () => import('./settings/settings.component').then(m => m.SettingsComponent),
-    title: 'Preferences',
+    title: 'jobCopilot.settings.title',
   },
   {
     path: 'career',
     loadComponent: () => import('./career/career-path.component').then(m => m.CareerPathComponent),
-    title: 'Career Simulator',
+    title: 'jobCopilot.career.title',
   },
   {
     path: 'interview',
     loadComponent: () => import('./interview/interview.component').then(m => m.InterviewComponent),
-    title: 'Interview Roleplay',
+    title: 'jobCopilot.interview.title',
   },
   {
     path: 'interview-panel',
     loadComponent: () => import('./interview-panel/interview-panel.component').then(m => m.InterviewPanelComponent),
-    title: 'Interview Panel',
+    title: 'jobCopilot.panel.title',
   },
 ];
 

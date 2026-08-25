@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobSearchService;
+import nc.opt.aiassistant.service.jobcopilot.dto.ToolOutcome;
+import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -17,12 +19,23 @@ public class JobSearchTool {
 
     private final JobSearchService jobSearchService;
 
+    /**
+     * Offers kept in a {@link ToolOutcome}, aligned with {@code ChatActionFactory.MAX_CITED_OFFERS}.
+     * The outcome's total stays the real count — that is what the "View the N offers" label shows.
+     */
+    private static final int CITED_OFFERS = 3;
+
     @Tool(description = "Search job offers across multiple ATS platforms and job boards. Returns matching job listings.")
     public String searchJobs(
         @ToolParam(description = "Keywords to search for (e.g. 'Java Spring Boot')") String keywords,
-        @ToolParam(description = "Location filter (e.g. 'Paris', 'Remote')") String location
+        @ToolParam(description = "Location filter (e.g. 'Paris', 'Remote')") String location,
+        // Declared so Spring AI injects it: the tool needs it only to record its outcome.
+        ToolContext toolContext
     ) {
         List<JobOffer> offers = jobSearchService.searchAll(keywords, location);
+        // Recorded on both branches: an empty search is what makes the front offer "widen the
+        // search" rather than leaving the user on a dead end.
+        ToolSupport.record(toolContext, new ToolOutcome.OffersFound(ToolSupport.cited(offers, CITED_OFFERS), offers.size()));
         if (offers.isEmpty()) return "No job offers found for: " + keywords;
         return offers.stream().limit(20).map(this::formatOffer).collect(Collectors.joining("\n---\n"));
     }

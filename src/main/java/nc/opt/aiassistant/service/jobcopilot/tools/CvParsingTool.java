@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.CandidateProfile;
 import nc.opt.aiassistant.repository.jobcopilot.CandidateProfileRepository;
+import nc.opt.aiassistant.service.jobcopilot.dto.ToolOutcome;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,12 @@ public class CvParsingTool {
         return profileRepository
             .findTopByUserIdOrderByCreatedAtDesc(userId)
             .map(this::formatProfile)
-            .orElse("No CV uploaded yet. Please upload your CV first.");
+            .orElseGet(() -> {
+                // The only outcome worth recording here: a present profile calls for no button, an
+                // absent one calls for "import my CV".
+                ToolSupport.record(toolContext, new ToolOutcome.ProfileMissing());
+                return "No CV uploaded yet. Please upload your CV first.";
+            });
     }
 
     private String formatProfile(CandidateProfile p) {
