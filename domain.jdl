@@ -1,7 +1,31 @@
 /**
- * JHipster JDL model for Job Search AI Assistant
+ * Modèle JDL de Job Search AI Assistant.
+ *
+ * Reconstruit depuis les entités JPA réelles (`src/main/java/nc/opt/aiassistant/domain/`) et le
+ * schéma Postgres, la version précédente de ce fichier ne déclarant plus que cinq des quatorze
+ * entités du domaine.
+ *
+ * Deux écarts assumés, signalés là où ils se produisent :
+ *
+ *  - certaines colonnes n'ont **pas d'équivalent JDL** et ne peuvent donc pas figurer ici. C'est le
+ *    cas des vecteurs pgvector (`job_offer.embedding`, `candidate_profile.embedding`), qui sont posés
+ *    par migration ;
+ *  - deux tables n'existent **que côté Rust** (`chat_message`, `ingestion_run`) : elles ne sont pas
+ *    des entités JHipster et n'ont pas à être générées ici. Elles sont décrites en commentaire en fin
+ *    de fichier pour que le modèle reste lisible d'un seul tenant.
  */
 
+// ---------------------------------------------------------------------------
+// Offres et ingestion
+// ---------------------------------------------------------------------------
+
+/**
+ * Une offre d'emploi ingérée depuis une source externe.
+ *
+ * `searchText` alimente l'index BM25, et la colonne `embedding` (vector(768), hors JDL) l'index
+ * HNSW. Les deux sont posés par migration : voir `add_job_offer_bm25_index` et
+ * `bm25_index_expires_at`.
+ */
 entity JobOffer {
     id UUID,
     title String required,
@@ -10,10 +34,12 @@ entity JobOffer {
     country String,
     remote Boolean,
     description TextBlob,
+    /** Concaténation titre + entreprise + compétences + description, indexée par BM25. */
     searchText TextBlob,
     skills TextBlob,
     metadata TextBlob,
     rawPayload TextBlob,
+    /** Empreinte du contenu, utilisée par l'ingestion pour ignorer une offre inchangée. */
     contentHash String maxlength(64),
     embeddingStatus EmbeddingStatus,
     embeddingModel String,
@@ -28,13 +54,23 @@ entity JobOffer {
     salaryCurrency String,
     contractType String,
     experienceLevel String,
+    category String,
+    /** Vocabulaire métier propre à la source (ex. code ROME chez France Travail). */
+    sourceCategory String,
     publishedAt Instant,
     createdAt Instant required,
     indexedAt Instant,
     updatedAt Instant,
-    expiresAt Instant
+    /** Les offres expirées restent en base — celles liées à une candidature font partie de l'historique. */
+    expiresAt Instant,
+    lastCheckedAt Instant
 }
 
+// ---------------------------------------------------------------------------
+// Candidat
+// ---------------------------------------------------------------------------
+
+/** Profil extrait du CV importé. Une ligne par import, la plus récente faisant foi. */
 entity CandidateProfile {
     id UUID,
     userId String required,
@@ -50,9 +86,63 @@ entity CandidateProfile {
     certifications TextBlob,
     rawMarkdown TextBlob,
     cvFilename String,
+    embeddingModel String,
+    embeddedAt Instant,
     createdAt Instant required,
     updatedAt Instant
 }
+
+/** CV construit dans l'éditeur. Une seule ligne courante par utilisateur, d'où l'unicité. */
+entity CvResume {
+    id UUID required,
+    userId String required unique,
+    title String,
+    template String,
+    /** Contenu du CV sérialisé en JSON. */
+    data TextBlob required,
+    version Integer required,
+    createdAt Instant,
+    updatedAt Instant
+}
+
+/** Version historisée d'un CV, écrite à chaque sauvegarde serveur. */
+entity CvResumeVersion {
+    id UUID required,
+    resumeId UUID required,
+    version Integer required,
+    title String,
+    template String,
+    data TextBlob required,
+    createdAt Instant
+}
+
+/** Préférences de recherche, utilisées pour pondérer le matching. */
+entity UserPreference {
+    id UUID,
+    userId String required unique,
+    remoteOnly Boolean,
+    contractType String,
+    salaryMin Integer,
+    salaryMax Integer,
+    preferredRoles TextBlob,
+    excludedTechnologies TextBlob,
+    preferredLocations TextBlob
+}
+
+/** Réglages de la candidature automatique. */
+entity AutoApplyConfig {
+    id UUID,
+    userId String required unique,
+    mode String,
+    /** Score de matching minimal en dessous duquel aucune candidature n'est envoyée. */
+    minScore Double,
+    maxPerDay Integer,
+    sources TextBlob
+}
+
+// ---------------------------------------------------------------------------
+// Candidatures
+// ---------------------------------------------------------------------------
 
 entity JobApplication {
     id UUID,
@@ -66,6 +156,54 @@ entity JobApplication {
     appliedAt Instant
 }
 
+/** Analyse de positionnement du candidat sur une offre donnée. */
+entity OfferPositioning {
+    id UUID required,
+    userId String required,
+    jobOfferId UUID required,
+    /** Résultat de l'analyse, sérialisé en JSON. */
+    result TextBlob required,
+    createdAt Instant
+}
+
+/** CV réécrit pour une offre précise. */
+entity OfferTailoredResume {
+    id UUID required,
+    userId String required,
+    jobOfferId UUID required,
+    data TextBlob required,
+    title String,
+    createdAt Instant
+}
+
+// ---------------------------------------------------------------------------
+// Radar d'opportunités
+// ---------------------------------------------------------------------------
+
+/** Offre remontée par le radar, avec la raison de sa sélection. */
+entity RadarHit {
+    id UUID,
+    userId String required,
+    /** Explication en langage naturel de la pertinence pour ce candidat. */
+    whyYou TextBlob,
+    createdAt Instant
+}
+
+/**
+ * Curseur du radar par utilisateur.
+ *
+ * `userId` est la clé primaire : il n'y a qu'un curseur par utilisateur, et lui donner un `id`
+ * technique autoriserait des doublons que rien ne saurait départager.
+ */
+entity RadarState {
+    userId String required,
+    lastOfferAt Instant
+}
+
+// ---------------------------------------------------------------------------
+// Conversation
+// ---------------------------------------------------------------------------
+
 entity Conversation {
     id UUID required,
     userId String required,
@@ -73,20 +211,13 @@ entity Conversation {
     createdAt Instant required,
     lastMessageAt Instant,
     summary TextBlob,
-    metadata TextBlob
+    metadata TextBlob,
+    typeChat TypeChat
 }
 
-entity UserPreference {
-    id UUID,
-    userId String required unique,
-    remoteOnly Boolean,
-    contractType String,
-    salaryMin Integer,
-    salaryMax Integer,
-    preferredRoles TextBlob,
-    excludedTechnologies TextBlob,
-    preferredLocations TextBlob
-}
+// ---------------------------------------------------------------------------
+// Énumérations
+// ---------------------------------------------------------------------------
 
 enum ApplicationStatus {
     DRAFT,
@@ -98,17 +229,7 @@ enum ApplicationStatus {
     WITHDRAWN
 }
 
-enum ChunkType {
-    EXPERIENCE,
-    SKILLS,
-    EDUCATION,
-    PROJECT,
-    SUMMARY,
-    CERTIFICATION,
-    LANGUAGE,
-    OTHER
-}
-
+/** Étape de vectorisation d'une offre. Le poller reprend les PENDING et abandonne les FAILED. */
 enum EmbeddingStatus {
     PENDING,
     PROCESSING,
@@ -121,8 +242,13 @@ enum JobSource {
     LEVER,
     ASHBY,
     WORKABLE,
+    RECRUITEE,
+    SMARTRECRUITERS,
     REMOTEOK,
     WEWORKREMOTELY,
+    JOBICY,
+    ADZUNA,
+    CAREERJET,
     FRANCE_TRAVAIL,
     EMPLOI_NC,
     HELLOWORK,
@@ -132,19 +258,60 @@ enum JobSource {
     WELCOME_TO_THE_JUNGLE
 }
 
+/** Type de conversation. Une seule valeur aujourd'hui : le chat général n'en porte pas. */
+enum TypeChat {
+    INTERVIEW
+}
+
+/** Découpage d'un CV pour la vectorisation. Déclaré mais pas encore exploité. */
+enum ChunkType {
+    EXPERIENCE,
+    SKILLS,
+    EDUCATION,
+    PROJECT,
+    SUMMARY,
+    CERTIFICATION,
+    LANGUAGE,
+    OTHER
+}
+
 enum MessageRole {
     USER,
     ASSISTANT,
     SYSTEM
 }
 
+// ---------------------------------------------------------------------------
+// Relations
+// ---------------------------------------------------------------------------
+
 relationship ManyToOne {
     JobApplication{jobOffer} to JobOffer,
-    JobApplication{candidateProfile} to CandidateProfile
+    JobApplication{candidateProfile} to CandidateProfile,
+    /** `required` : un hit de radar sans offre n'a rien à afficher. */
+    RadarHit{jobOffer required} to JobOffer
 }
 
+// ---------------------------------------------------------------------------
 // Options
+// ---------------------------------------------------------------------------
+
 dto * with mapstruct
 service * with serviceClass
 paginate JobOffer with pagination
 filter *
+
+// ---------------------------------------------------------------------------
+// Hors JDL — pour mémoire
+// ---------------------------------------------------------------------------
+//
+// Colonnes sans équivalent JDL, posées par migration :
+//   job_offer.embedding          vector(768), index HNSW cosinus
+//   candidate_profile.embedding  vector(768)
+//
+// Tables propres au backend Rust, hors périmètre JHipster :
+//   chat_message   (id, conversation_id, user_id, sequence, role, content, payload, created_at)
+//                  mémoire de conversation de l'agent rig
+//   ingestion_run  (id, run_id, source, partition_key, status, read_count, written_count,
+//                  skipped_count, error, started_at, finished_at)
+//                  journal des partitions d'ingestion, équivalent du JobRepository de Spring Batch

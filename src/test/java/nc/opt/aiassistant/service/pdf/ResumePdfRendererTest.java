@@ -3,7 +3,11 @@ package nc.opt.aiassistant.service.pdf;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -67,6 +71,44 @@ class ResumePdfRendererTest {
             .contains("Erin Blake");
         assertThat(textOf(renderer.render(resume("modern", 1)))).doesNotContain("Erin Blake");
     }
+
+    @Test
+    public void testInterview() {
+        String interview = "hello hello word";
+        String[] words = interview.split(" ");
+        Map<String, Long> wordCounts = Arrays.stream(words).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        wordCounts.forEach((word, count) -> System.out.println(word + ": " + count));
+
+        System.out.println(wordCounts.entrySet());
+        List<String> wordsList = wordCounts
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue() > 1)
+            .map(Map.Entry::getKey)
+            .toList();
+
+        System.out.println(wordsList);
+        assertThat(words.length).isEqualTo(3);
+        assertThat(wordCounts.get("hello")).isEqualTo(2L);
+        assertThat(wordCounts.get("word")).isEqualTo(1L);
+    }
+
+    @Test
+    public void testAvgSalaryByEmployee() {
+        List<Employee> employees = List.of(
+            new Employee("Anthony", "IT", 120_000),
+            new Employee("John", "IT", 100_000),
+            new Employee("Sarah", "HR", 90_000),
+            new Employee("Emma", "HR", 95_000),
+            new Employee("Mike", "Finance", 110_000),
+            new Employee("David", "Finance", 105_000)
+        );
+
+        double avgSalary = employees.stream().mapToDouble(Employee::salary).average().orElse(0.0);
+        System.out.println(avgSalary);
+    }
+
+    public record Employee(String name, String department, int salary) {}
 
     @Test
     void fallsBackToTheDefaultTemplateWhenTheStoredOneIsUnknown() throws IOException {

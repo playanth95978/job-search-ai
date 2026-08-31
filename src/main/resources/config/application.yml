@@ -297,6 +297,24 @@ jhipster:
 # ===================================================================
 
 # application:
+# ===================================================================
+# Agent Job Copilot : modele de chat interchangeable.
+#
+# `mistral` (defaut) garde le comportement actuel, limiteur de quota et repli compris.
+# `gemini` bascule le seul agent sur Vertex AI — les autres services (lettre de motivation,
+# reecriture de CV) restent sur Mistral, pour que la comparaison porte sur l'agent.
+#
+# Gemini s'authentifie par Application Default Credentials, aucune cle ici :
+#   gcloud auth application-default login
+# ===================================================================
+jobcopilot:
+  chat-model: ${JOBCOPILOT_CHAT_MODEL:mistral}
+  gemini:
+    project-id: ${VERTEX_AI_PROJECT_ID:}
+    location: ${VERTEX_AI_LOCATION:europe-west1}
+    model: ${JOBCOPILOT_GEMINI_MODEL:gemini-2.5-flash}
+    temperature: 0.2
+
 application:
   seo:
     # Public base URL (scheme + host, no trailing slash) used to build absolute URLs in sitemap.xml.

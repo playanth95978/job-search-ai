@@ -26,6 +26,7 @@ import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.mistralai.MistralAiChatModel;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,10 +79,16 @@ public class JobCopilotAgentService {
     private final ChatClient chatClient;
     private final ChatClient fallbackChatClient;
     private final MistralRateLimiter rateLimiter;
+
+    /** Le limiteur et le repli sont propres à Mistral ; ailleurs on appelle le modèle directement. */
+    private final boolean mistralModel;
     private final Duration streamTimeout;
 
     public JobCopilotAgentService(
-        @Qualifier("mistralAiChatModel") ChatModel chatModel,
+        // Modèle interchangeable (Mistral par défaut, Gemini via `jobcopilot.chat-model=gemini`) :
+        // seul l'agent bascule, les autres services restent sur Mistral pour que la comparaison
+        // porte sur le comportement de l'agent et non sur le reste de l'application.
+        @Qualifier("jobCopilotChatModel") ChatModel chatModel,
         @Qualifier("mistralSmallChatOptions") ChatOptions.Builder fallbackOptions,
         ChatMemoryRepository chatMemoryRepository,
         JobAgentToolbox jobAgentToolbox,
@@ -119,12 +126,22 @@ public class JobCopilotAgentService {
 
         // Même agent (mêmes outils, même mémoire), seul le modèle change : utilisé uniquement quand le
         // modèle principal renvoie 429. Les options du client priment sur celles du ChatModel.
-        this.fallbackChatClient = ChatClient.builder(chatModel)
+        ChatClient.Builder fallbackBuilder = ChatClient.builder(chatModel)
             .defaultSystem(SYSTEM_PROMPT)
             .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-            .defaultTools(defaultTools)
-            .defaultOptions(fallbackOptions)
-            .build();
+            .defaultTools(defaultTools);
+
+        // Le quota local et les options de repli ne valent que pour Mistral. Appliquer des
+        // MistralAiChatOptions à un modèle Gemini échouerait à l'exécution, et précisément au pire
+        // moment : quand le quota est atteint et qu'on bascule. Sur un autre fournisseur, l'agent
+        // n'a ni limiteur ni repli — c'est aussi ce qu'on veut mesurer, le modèle seul.
+        this.mistralModel = chatModel instanceof MistralAiChatModel;
+        if (this.mistralModel) {
+            fallbackBuilder.defaultOptions(fallbackOptions);
+        } else {
+            log.info("Job Copilot : modèle non-Mistral, limiteur de quota et repli désactivés");
+        }
+        this.fallbackChatClient = fallbackBuilder.build();
     }
 
     /**
@@ -136,7 +153,7 @@ public class JobCopilotAgentService {
     public Turn chat(String conversationId, String userId, String message) {
         List<ToolOutcome> outcomes = newCollector();
         String reply;
-        if (!rateLimiter.acquire()) {
+        if (this.mistralModel && !rateLimiter.acquire()) {
             log.info("Job Copilot : quota local atteint, bascule directe sur le modèle de repli");
             reply = call(fallbackChatClient, conversationId, userId, message, outcomes);
         } else {
