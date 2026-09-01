@@ -8,7 +8,7 @@
       <div class="jc-profile-empty-icon"><fa-icon icon="cloud-arrow-up" size="3x"></fa-icon></div>
       <h2 jhiTranslate="jobCopilot.profile.noCvTitle">No CV yet</h2>
       <p jhiTranslate="jobCopilot.profile.noCvText">Import your CV and the AI will build your candidate profile automatically.</p>
-      <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/job-copilot/onboarding">
+      <a class="jc-btn jc-btn-primary jc-btn-lg" routerLink="/job-copilot" [queryParams]="{ mode: 'upload' }">
         <fa-icon icon="cloud-arrow-up"></fa-icon> <span jhiTranslate="jobCopilot.profile.uploadCv">Import my CV</span>
       </a>
     </div>
@@ -79,7 +79,7 @@
         <button class="jc-btn jc-btn-primary" (click)="startEdit()">
           <fa-icon icon="pen"></fa-icon> <span jhiTranslate="jobCopilot.profile.edit">Edit Profile</span>
         </button>
-        <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/onboarding" [queryParams]="{ mode: 'upload' }">
+        <a class="jc-btn jc-btn-outline" routerLink="/job-copilot" [queryParams]="{ mode: 'upload' }">
           <fa-icon icon="cloud-arrow-up"></fa-icon> <span jhiTranslate="jobCopilot.profile.replaceCv">Update CV</span>
         </a>
       </div>

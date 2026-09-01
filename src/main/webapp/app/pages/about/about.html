@@ -57,7 +57,11 @@
             <p class="text-secondary small mb-4" jhiTranslate="pages.about.cta.text">
               Importez votre CV et laissez l'IA trouver les offres faites pour vous.
             </p>
-            <a class="btn btn-primary w-100 mb-2" routerLink="/job-copilot/onboarding" jhiTranslate="pages.about.cta.button.upload"
+            <a
+              class="btn btn-primary w-100 mb-2"
+              routerLink="/job-copilot"
+              [queryParams]="{ mode: 'upload' }"
+              jhiTranslate="pages.about.cta.button.upload"
               >Importer mon CV</a
             >
             <a class="btn btn-outline-secondary w-100" routerLink="/contact" jhiTranslate="pages.about.cta.button.contact"

@@ -83,7 +83,11 @@
     <div class="jc-matches-state">
       <fa-icon icon="bullseye" size="2x"></fa-icon>
       <span jhiTranslate="jobCopilot.matches.empty">No matches yet. Import your CV to get ranked offers.</span>
-      <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/onboarding" jhiTranslate="jobCopilot.matches.completeProfile"
+      <a
+        class="jc-btn jc-btn-outline"
+        routerLink="/job-copilot"
+        [queryParams]="{ mode: 'upload' }"
+        jhiTranslate="jobCopilot.matches.completeProfile"
         >Complete my profile</a
       >
     </div>

@@ -6,42 +6,105 @@
     </div>
   </div>
 
-  @if (loading()) {
+  @if (uploading()) {
+    <div class="jc-processing">
+      <div class="jc-processing-animation">
+        <div class="spinner-grow text-primary" role="status"></div>
+      </div>
+      <h3 jhiTranslate="jobCopilot.onboarding.processing.title">AI is analyzing your CV...</h3>
+      <p jhiTranslate="jobCopilot.onboarding.processing.subtitle">Extracting skills, experience, and qualifications</p>
+      <div class="jc-steps">
+        <div class="jc-step active">
+          <fa-icon icon="file-pdf"></fa-icon>
+          <span jhiTranslate="jobCopilot.onboarding.processing.steps.reading">Reading document</span>
+        </div>
+        <div class="jc-step-divider"></div>
+        <div class="jc-step active">
+          <fa-icon icon="robot"></fa-icon>
+          <span jhiTranslate="jobCopilot.onboarding.processing.steps.extraction">AI extraction</span>
+        </div>
+        <div class="jc-step-divider"></div>
+        <div class="jc-step">
+          <fa-icon icon="database"></fa-icon>
+          <span jhiTranslate="jobCopilot.onboarding.processing.steps.indexing">Indexing</span>
+        </div>
+      </div>
+    </div>
+  } @else if (loading()) {
     <div class="jc-loading">
       <div class="spinner-border text-primary" role="status"></div>
       <p jhiTranslate="jobCopilot.dashboard.loading">Loading your profile...</p>
     </div>
   } @else if (!profile()) {
-    <div class="jc-empty-state">
-      <div class="jc-empty-icon">
-        <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
+    @if (showDropzone()) {
+      <div class="jc-empty-dropzone-wrapper">
+        <div class="jc-dropzone-header">
+          <h2 jhiTranslate="jobCopilot.onboarding.title">Upload your CV</h2>
+          <button type="button" class="jc-btn jc-btn-ghost" (click)="toggleDropzone()">
+            <fa-icon icon="xmark"></fa-icon>
+          </button>
+        </div>
+        <jhi-cv-dropzone (fileSelected)="upload($event)" />
       </div>
-      <h2 jhiTranslate="jobCopilot.dashboard.welcome.title">Welcome to Job Copilot</h2>
-      <p jhiTranslate="jobCopilot.dashboard.welcome.subtitle">Upload your CV and let AI find your perfect job match</p>
-      <div class="jc-features">
-        <div class="jc-feature">
-          <fa-icon icon="robot"></fa-icon>
-          <span jhiTranslate="jobCopilot.dashboard.welcome.features.extraction">AI Profile Extraction</span>
+    } @else {
+      <div class="jc-empty-state">
+        <div class="jc-empty-icon">
+          <fa-icon icon="cloud-arrow-up" size="3x"></fa-icon>
         </div>
-        <div class="jc-feature">
-          <fa-icon icon="magnifying-glass"></fa-icon>
-          <span jhiTranslate="jobCopilot.dashboard.welcome.features.search">Smart Job Search</span>
+        <h2 jhiTranslate="jobCopilot.dashboard.welcome.title">Welcome to Job Copilot</h2>
+        <p jhiTranslate="jobCopilot.dashboard.welcome.subtitle">Upload your CV and let AI find your perfect job match</p>
+        <div class="jc-features">
+          <div class="jc-feature">
+            <fa-icon icon="robot"></fa-icon>
+            <span jhiTranslate="jobCopilot.dashboard.welcome.features.extraction">AI Profile Extraction</span>
+          </div>
+          <div class="jc-feature">
+            <fa-icon icon="magnifying-glass"></fa-icon>
+            <span jhiTranslate="jobCopilot.dashboard.welcome.features.search">Smart Job Search</span>
+          </div>
+          <div class="jc-feature">
+            <fa-icon icon="chart-line"></fa-icon>
+            <span jhiTranslate="jobCopilot.dashboard.welcome.features.matching">Semantic Matching</span>
+          </div>
+          <div class="jc-feature">
+            <fa-icon icon="paper-plane"></fa-icon>
+            <span jhiTranslate="jobCopilot.dashboard.welcome.features.tracking">Application Tracking</span>
+          </div>
         </div>
-        <div class="jc-feature">
-          <fa-icon icon="chart-line"></fa-icon>
-          <span jhiTranslate="jobCopilot.dashboard.welcome.features.matching">Semantic Matching</span>
-        </div>
-        <div class="jc-feature">
-          <fa-icon icon="paper-plane"></fa-icon>
-          <span jhiTranslate="jobCopilot.dashboard.welcome.features.tracking">Application Tracking</span>
-        </div>
+        <button type="button" class="jc-btn jc-btn-primary jc-btn-lg" (click)="toggleDropzone()">
+          <fa-icon icon="cloud-arrow-up"></fa-icon> <span jhiTranslate="jobCopilot.dashboard.welcome.action">Upload your CV</span>
+        </button>
       </div>
-      <a routerLink="/job-copilot/onboarding" class="jc-btn jc-btn-primary jc-btn-lg">
-        <fa-icon icon="cloud-arrow-up"></fa-icon> <span jhiTranslate="jobCopilot.dashboard.welcome.action">Upload your CV</span>
-      </a>
-    </div>
+    }
   } @else {
     <div class="jc-content">
+      @if (uploadSuccess()) {
+        <div class="jc-success-banner">
+          <fa-icon icon="circle-check"></fa-icon>
+          <span jhiTranslate="jobCopilot.onboarding.success.title">Profile extracted successfully!</span>
+        </div>
+      }
+
+      @if (showDropzone()) {
+        <div class="jc-dropzone-panel">
+          <div class="jc-dropzone-header">
+            <h3>
+              <fa-icon icon="cloud-arrow-up"></fa-icon>
+              <span jhiTranslate="jobCopilot.dashboard.profile.updateCv">Update CV</span>
+            </h3>
+            <button
+              type="button"
+              class="jc-btn jc-btn-ghost jc-btn-sm"
+              (click)="toggleDropzone()"
+              [title]="'entity.action.cancel' | translate"
+            >
+              <fa-icon icon="xmark"></fa-icon>
+            </button>
+          </div>
+          <jhi-cv-dropzone (fileSelected)="upload($event)" />
+        </div>
+      }
+
       <div class="jc-profile-card">
         <div class="jc-profile-header">
           <div class="jc-avatar">
@@ -64,9 +127,15 @@
               }
             </div>
           </div>
-          <a routerLink="/job-copilot/onboarding" class="jc-btn jc-btn-ghost" [title]="'jobCopilot.dashboard.profile.updateCv' | translate">
-            <fa-icon icon="arrows-rotate"></fa-icon>
-          </a>
+          <button
+            type="button"
+            class="jc-btn jc-btn-ghost"
+            (click)="toggleDropzone()"
+            [class.jc-btn-active]="showDropzone()"
+            [title]="'jobCopilot.dashboard.profile.updateCv' | translate"
+          >
+            <fa-icon [icon]="showDropzone() ? 'xmark' : 'arrows-rotate'"></fa-icon>
+          </button>
         </div>
         @let skills = profile()?.skills;
 
@@ -168,6 +237,13 @@
           <fa-icon icon="arrow-right" class="jc-action-arrow"></fa-icon>
         </a>
       </div>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="jc-error">
+      <fa-icon icon="circle-exclamation"></fa-icon>
+      {{ error() }}
     </div>
   }
 </div>

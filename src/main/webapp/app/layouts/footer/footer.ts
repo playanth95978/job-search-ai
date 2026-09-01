@@ -24,7 +24,7 @@ const FOOTER_SECTIONS: readonly FooterSection[] = [
       { labelKey: 'footer.navigation.home', label: 'Accueil', routerLink: '/' },
       { labelKey: 'footer.navigation.jobs', label: "Offres d'emploi", routerLink: '/search' },
       { labelKey: 'footer.navigation.aiAssistant', label: 'Assistant IA', routerLink: '/chat' },
-      { labelKey: 'footer.navigation.uploadCv', label: 'Importer mon CV', routerLink: '/job-copilot/onboarding' },
+      { labelKey: 'footer.navigation.uploadCv', label: 'Importer mon CV', routerLink: '/job-copilot' },
       { labelKey: 'footer.navigation.dashboard', label: 'Tableau de bord', routerLink: '/job-copilot' },
     ],
   },
@@ -58,7 +58,7 @@ const FOOTER_SECTIONS: readonly FooterSection[] = [
 ];
 
 const AI_SEARCH_LINKS: readonly FooterLink[] = [
-  { labelKey: 'footer.aiSearch.cvAnalysis', label: 'Analyse de CV', routerLink: '/job-copilot/onboarding' },
+  { labelKey: 'footer.aiSearch.cvAnalysis', label: 'Analyse de CV', routerLink: '/job-copilot' },
   { labelKey: 'footer.aiSearch.matching', label: 'Matching CV ↔ Offres', routerLink: '/search' },
   { labelKey: 'footer.aiSearch.coverLetter', label: 'Générateur de lettres de motivation', routerLink: '/job-copilot/cv-builder' },
   { labelKey: 'footer.aiSearch.interviewSimulatorShort', label: "Simulateur d'entretien", routerLink: '/job-copilot/interview' },

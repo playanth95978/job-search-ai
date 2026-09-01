@@ -8,8 +8,8 @@ const routes: Routes = [
   },
   {
     path: 'onboarding',
-    loadComponent: () => import('./onboarding/onboarding.component').then(m => m.OnboardingComponent),
-    title: 'jobCopilot.onboarding.title',
+    redirectTo: '',
+    pathMatch: 'full',
   },
   {
     path: 'profile',

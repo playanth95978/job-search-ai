@@ -113,7 +113,11 @@
           <span jhiTranslate="home.opportunities.empty"
             >Aucune opportunité pour le moment. Complétez votre profil pour de meilleures suggestions.</span
           >
-          <a class="jc-btn jc-btn-outline" routerLink="/job-copilot/onboarding" jhiTranslate="home.opportunities.completeProfile"
+          <a
+            class="jc-btn jc-btn-outline"
+            routerLink="/job-copilot"
+            [queryParams]="{ mode: 'upload' }"
+            jhiTranslate="home.opportunities.completeProfile"
             >Compléter mon profil</a
           >
         </div>
