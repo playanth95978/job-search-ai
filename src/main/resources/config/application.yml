@@ -290,6 +290,14 @@ jhipster:
     # style-src keeps 'unsafe-inline': Angular injects component styles as <style> elements, so
     # removing it breaks the whole layout. object-src/base-uri close two bypasses that
     # default-src does not cover.
+    #
+    # COUPLED TO angular.json: the production build must keep
+    # `optimization.styles.inlineCritical: false`. With it on, Angular rewrites the stylesheet as
+    # `<link media="print" onload="this.media='all'">` — an inline event handler, which this policy
+    # blocks, so the sheet stays media=print and NO global style ever applies (the symptom is a
+    # page rendered with only component styles: half-width navbar, no layout). A hash cannot
+    # whitelist a handler; only 'unsafe-inline'/'unsafe-hashes' would, which defeats the point.
+    # angular.json is strict JSON and cannot carry this comment, hence it living here.
     content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; object-src 'none'; base-uri 'self'"
 
 
