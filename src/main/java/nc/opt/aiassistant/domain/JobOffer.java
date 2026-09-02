@@ -43,7 +43,9 @@ public class JobOffer implements Serializable {
     @Column(name = "remote")
     private Boolean remote;
 
-    @Lob
+    // Pas de @Lob : sur PostgreSQL le pilote creerait un large object et n'ecrirait que son OID
+    // dans la colonne `text`, d'ou des descriptions illisibles et une fuite d'objets orphelins
+    // (chaque reimport laissait une copie morte derriere lui).
     @Column(name = "description")
     private String description;
 

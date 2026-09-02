@@ -43,4 +43,5 @@
   <include file="config/liquibase/changelog/20260811090000_drop_auto_apply_config.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260819160000_add_job_offer_category.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260902100000_fix_job_offer_search_text_lob.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260902110000_fix_job_offer_description_lob.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

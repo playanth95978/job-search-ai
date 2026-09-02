@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!--
+    Même bug que `search_text` (voir 20260902100000) : `@Lob` sur un String faisait créer un large
+    object au pilote PostgreSQL, dont seul l'OID atterrissait dans la colonne `text`. Ici la
+    colonne est réutilisée telle quelle (aucun index dessus), donc ni le DTO ni le front ne bougent.
+
+    L'OID est d'abord recopié dans une colonne dédiée, de type `oid` cette fois : le texte peut
+    alors écraser la colonne `description` sans perdre le pointeur vers le large object, qui reste
+    délié explicitement à la fin.
+  -->
+
+  <changeSet id="20260902110000-1" author="claude">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <columnExists tableName="job_offer" columnName="description_oid"/>
+      </not>
+    </preConditions>
+    <addColumn tableName="job_offer">
+      <column name="description_oid" type="oid"/>
+    </addColumn>
+  </changeSet>
+
+  <!-- Sauvegarde des OID. `description ~ '^[0-9]+$'` isole les lignes encore au format OID : une
+       base déjà migrée, ou une ligne écrite par le nouveau code, contient du texte et est ignorée. -->
+  <changeSet id="20260902110000-2" author="claude" runInTransaction="false">
+    <sql splitStatements="false">
+      DO $$
+      DECLARE n int;
+      BEGIN
+        LOOP
+          UPDATE job_offer
+             SET description_oid = description::oid
+           WHERE id IN (
+                 SELECT id FROM job_offer
+                  WHERE description ~ '^[0-9]+$'
+                    AND description_oid IS NULL
+                  LIMIT 5000
+           );
+          GET DIAGNOSTICS n = ROW_COUNT;
+          EXIT WHEN n = 0;
+          COMMIT;
+        END LOOP;
+      END $$;
+    </sql>
+  </changeSet>
+
+  <!-- Décodage : le texte remplace l'OID dans `description`. -->
+  <changeSet id="20260902110000-3" author="claude" runInTransaction="false">
+    <sql splitStatements="false">
+      DO $$
+      DECLARE n int;
+      BEGIN
+        LOOP
+          UPDATE job_offer
+             SET description = convert_from(lo_get(description_oid), 'UTF8')
+           WHERE id IN (
+                 SELECT id FROM job_offer
+                  WHERE description_oid IS NOT NULL
+                    AND description ~ '^[0-9]+$'
+                  LIMIT 5000
+           );
+          GET DIAGNOSTICS n = ROW_COUNT;
+          EXIT WHEN n = 0;
+          COMMIT;
+        END LOOP;
+      END $$;
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>
