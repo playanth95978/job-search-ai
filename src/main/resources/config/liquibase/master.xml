@@ -44,4 +44,5 @@
   <include file="config/liquibase/changelog/20260819160000_add_job_offer_category.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260902100000_fix_job_offer_search_text_lob.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260902110000_fix_job_offer_description_lob.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260902120000_fix_remaining_lob_columns.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

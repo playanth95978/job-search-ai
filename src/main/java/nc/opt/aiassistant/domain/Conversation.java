@@ -50,11 +50,13 @@ public class Conversation implements Serializable, Persistable<UUID> {
     @Column(name = "last_message_at")
     private Instant lastMessageAt;
 
-    @Lob
+    // Pas de @Lob : sur PostgreSQL le pilote creerait un large object et n'ecrirait que son OID
+    // dans la colonne `text`, invisible a tout SQL exterieur a Hibernate (voir JobOffer).
     @Column(name = "summary")
     private String summary;
 
-    @Lob
+    // Pas de @Lob : sur PostgreSQL le pilote creerait un large object et n'ecrirait que son OID
+    // dans la colonne `text`, invisible a tout SQL exterieur a Hibernate (voir JobOffer).
     @Column(name = "metadata")
     private String metadata;
 

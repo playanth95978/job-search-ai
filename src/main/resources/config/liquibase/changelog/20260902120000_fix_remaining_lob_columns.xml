@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!--
+    Dernier lot du nettoyage `@Lob` (voir 20260902100000 et 20260902110000). Les cinq colonnes
+    ci-dessous sont en `text` mais contenaient des OID de large objects. Volumes faibles (quelques
+    centaines de lignes), pas besoin de traitement par lots comme pour `job_offer`.
+
+    Les OID sont recopiés dans `lob_migration_oids` avant d'être écrasés par le texte décodé : sans
+    cette étape, les large objects deviendraient définitivement orphelins et inaccessibles.
+  -->
+
+  <changeSet id="20260902120000-1" author="claude">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="lob_migration_oids"/>
+      </not>
+    </preConditions>
+    <createTable tableName="lob_migration_oids">
+      <column name="source_table" type="text"><constraints nullable="false"/></column>
+      <column name="source_column" type="text"><constraints nullable="false"/></column>
+      <column name="oid_value" type="oid"><constraints nullable="false"/></column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="20260902120000-2" author="claude">
+    <sql splitStatements="false">
+      DO $$
+      DECLARE
+        cible record;
+        cibles text[][] := ARRAY[
+          ['candidate_profile', 'raw_markdown'],
+          ['conversation',      'summary'],
+          ['conversation',      'metadata'],
+          ['job_application',   'cover_letter'],
+          ['job_application',   'notes']
+        ];
+        i int;
+        t text;
+        c text;
+      BEGIN
+        FOR i IN 1 .. array_length(cibles, 1) LOOP
+          t := cibles[i][1];
+          c := cibles[i][2];
+
+          -- La colonne peut ne pas exister sur une base partiellement migrée.
+          CONTINUE WHEN NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+             WHERE table_name = t AND column_name = c
+          );
+
+          -- `~ '^[0-9]+$'` isole les valeurs encore au format OID ; le texte déjà migré est ignoré,
+          -- ce qui rend le changeSet rejouable.
+          EXECUTE format(
+            'INSERT INTO lob_migration_oids (source_table, source_column, oid_value)
+             SELECT %L, %L, %I::oid FROM %I
+              WHERE %I ~ ''^[0-9]+$''
+                AND %I::oid IN (SELECT oid FROM pg_largeobject_metadata)',
+            t, c, c, t, c, c
+          );
+
+          EXECUTE format(
+            'UPDATE %I SET %I = convert_from(lo_get(%I::oid), ''UTF8'')
+              WHERE %I ~ ''^[0-9]+$''
+                AND %I::oid IN (SELECT oid FROM pg_largeobject_metadata)',
+            t, c, c, c, c
+          );
+
+          RAISE NOTICE 'Migré: %.%', t, c;
+        END LOOP;
+      END $$;
+    </sql>
+  </changeSet>
+
+  <!--
+    Séparé volontairement : le déliage est irréversible. Ce changeSet ne doit être joué qu'après
+    vérification visuelle du contenu des cinq colonnes. `lob_migration_oids` sert de trace en
+    attendant — tant qu'elle existe, les large objects restent récupérables.
+  -->
+  <changeSet id="20260902120000-3" author="claude" context="cleanup-lob">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="lob_migration_oids"/>
+    </preConditions>
+    <sql>
+      SELECT lo_unlink(oid_value) FROM lob_migration_oids
+       WHERE oid_value IN (SELECT oid FROM pg_largeobject_metadata)
+    </sql>
+    <sql>
+      DROP TABLE lob_migration_oids
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

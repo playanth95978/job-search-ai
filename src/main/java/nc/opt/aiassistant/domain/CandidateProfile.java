@@ -66,7 +66,8 @@ public class CandidateProfile implements Serializable {
     @Column(name = "certifications", columnDefinition = "jsonb")
     private String certifications;
 
-    @Lob
+    // Pas de @Lob : sur PostgreSQL le pilote creerait un large object et n'ecrirait que son OID
+    // dans la colonne `text`, invisible a tout SQL exterieur a Hibernate (voir JobOffer).
     @Column(name = "raw_markdown")
     private String rawMarkdown;
 

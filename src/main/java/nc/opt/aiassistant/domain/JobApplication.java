@@ -41,11 +41,13 @@ public class JobApplication implements Serializable {
     @Column(name = "status")
     private ApplicationStatus status;
 
-    @Lob
+    // Pas de @Lob : sur PostgreSQL le pilote creerait un large object et n'ecrirait que son OID
+    // dans la colonne `text`, invisible a tout SQL exterieur a Hibernate (voir JobOffer).
     @Column(name = "cover_letter")
     private String coverLetter;
 
-    @Lob
+    // Pas de @Lob : sur PostgreSQL le pilote creerait un large object et n'ecrirait que son OID
+    // dans la colonne `text`, invisible a tout SQL exterieur a Hibernate (voir JobOffer).
     @Column(name = "notes")
     private String notes;
 
