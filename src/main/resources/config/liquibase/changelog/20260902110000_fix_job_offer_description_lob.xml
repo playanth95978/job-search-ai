@@ -71,5 +71,41 @@
       END $$;
     </sql>
   </changeSet>
+  <!--
+    Nettoyage final, inerte par defaut (`context="cleanup-lob"`, comme dans 20260902120000) : tant
+    que `description_oid` existe, un decodage rate reste rejouable. A declencher seulement apres
+    verification du contenu de `description` sur un deploiement valide.
+  -->
+  <changeSet id="20260902110000-4" author="claude" context="cleanup-lob" runInTransaction="false">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="job_offer" columnName="description_oid"/>
+    </preConditions>
+    <sql splitStatements="false">
+      DO $$
+      DECLARE n int;
+      BEGIN
+        LOOP
+          WITH lot AS (
+            SELECT id, description_oid FROM job_offer
+             WHERE description_oid IS NOT NULL LIMIT 5000
+          ), del AS (
+            SELECT lo_unlink(description_oid) FROM lot
+             WHERE description_oid IN (SELECT oid FROM pg_largeobject_metadata)
+          )
+          UPDATE job_offer SET description_oid = NULL WHERE id IN (SELECT id FROM lot);
+          GET DIAGNOSTICS n = ROW_COUNT;
+          EXIT WHEN n = 0;
+          COMMIT;
+        END LOOP;
+      END $$;
+    </sql>
+  </changeSet>
+
+  <changeSet id="20260902110000-5" author="claude" context="cleanup-lob">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="job_offer" columnName="description_oid"/>
+    </preConditions>
+    <dropColumn tableName="job_offer" columnName="description_oid"/>
+  </changeSet>
 
 </databaseChangeLog>
