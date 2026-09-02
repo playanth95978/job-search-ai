@@ -148,6 +148,29 @@ export class ChatMessagesComponent implements AfterViewChecked {
     this.feedbackClicked.emit({ messageId, feedback });
   }
 
+  /**
+   * Delegated handler for the "Copier" button that {@link MessageService} renders inside code
+   * blocks.
+   *
+   * That button cannot carry its own `(click)`: its markup arrives as an HTML string and is
+   * injected through the sanitizer, so Angular never compiles it. It used to rely on an inline
+   * `onclick`, which DOMPurify strips and the Content-Security-Policy refuses — so the button had
+   * quietly stopped working. Listening on the thread container instead keeps it functional with no
+   * inline script at all; the code to copy is found from the button's own `.code-container`, so no
+   * id has to survive sanitisation.
+   */
+  onThreadClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest('.copy-code-btn');
+    if (!(button instanceof HTMLElement)) {
+      return;
+    }
+    const code = button.closest('.code-container')?.querySelector('code');
+    if (code instanceof HTMLElement) {
+      this.copyTextToClipboard(code.innerText, button);
+    }
+  }
+
   copyTextToClipboard(text: string, button?: HTMLElement): void {
     navigator.clipboard.writeText(text).then(() => {
       if (button) {

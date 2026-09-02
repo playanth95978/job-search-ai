@@ -1,4 +1,4 @@
-<div #scrollContainer class="chat-messages" (scroll)="onScroll()">
+<div #scrollContainer class="chat-messages" (scroll)="onScroll()" (click)="onThreadClick($event)">
   <!-- track $index : le fil est append-only, et les ids ne sont pas uniques (le message
        assistant finalisé reprend l'id de la conversation, déjà porté par le message user). -->
   @for (msg of messages(); track $index) {

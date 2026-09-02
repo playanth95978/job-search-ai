@@ -474,12 +474,14 @@ export class MessageService {
             <div class="d-flex align-items-center gap-2">
               <span class="code-lang-badge">${lang}</span>
             </div>
+            <!-- No inline onclick: this markup is an HTML string injected through the sanitizer, so
+                 Angular never compiles it and a handler attribute would be stripped by DOMPurify
+                 and refused by the CSP alike. ChatMessagesComponent listens for .copy-code-btn
+                 clicks on the thread container instead, and finds the code from .code-container. -->
             <button
-              jhiAppClickLogger
-              id="copy-code-btn"
+              type="button"
               class="btn btn-link btn-sm text-decoration-none copy-code-btn d-flex align-items-center gap-1"
-              onclick="const container = document.getElementById('${uniqueId}'); const code = container.querySelector('code').innerText; navigator.clipboard.writeText(code); const btn = this; const originalHtml = btn.innerHTML; btn.innerHTML = '<fa-icon icon=check></fa-icon> <span>Copié !</span>'; btn.classList.add('text-success'); setTimeout(() => { btn.innerHTML = originalHtml; btn.classList.remove('text-success'); }, 2000);">
-              <fa-icon icon="copy"></fa-icon>
+            >
               <span>Copier</span>
             </button>
           </div>` + formattedCode
