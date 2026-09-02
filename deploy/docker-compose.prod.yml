@@ -127,6 +127,28 @@ services:
       - 'traefik.http.routers.jsa.entrypoints=websecure'
       - 'traefik.http.routers.jsa.tls.certresolver=letsencrypt'
       - 'traefik.http.services.jsa.loadbalancer.server.port=8080'
+      # Edge rate limit on the unauthenticated credential / mail-sending endpoints. These are the
+      # only ones an anonymous caller can abuse at scale: password-reset and register each send an
+      # e-mail per call (so they can be turned into a mail bomb aimed at a third party), and
+      # /api/authenticate has no account lockout. Stopping them here rather than in the app keeps
+      # the flood off the JVM entirely.
+      #
+      # Traefik attaches a middleware to a router, not to a path — hence a second router restricted
+      # to those paths, with a higher priority so it wins over the catch-all `jsa` router. It
+      # reuses the same `jsa` service, so there is no second upstream.
+      #
+      # Keyed by client IP (Traefik's default sourceCriterion), and Traefik is the edge, so it sees
+      # the real address. Deliberately loose enough not to punish a shared/NAT address: this caps
+      # abuse, it is NOT brute-force protection — that needs per-account lockout in the app.
+      - 'traefik.http.middlewares.jsa-authlimit.ratelimit.average=10'
+      - 'traefik.http.middlewares.jsa-authlimit.ratelimit.period=1m'
+      - 'traefik.http.middlewares.jsa-authlimit.ratelimit.burst=20'
+      - 'traefik.http.routers.jsa-auth.rule=Host(`${DOMAIN}`) && (Path(`/api/authenticate`) || Path(`/api/register`) || PathPrefix(`/api/account/reset-password`))'
+      - 'traefik.http.routers.jsa-auth.priority=100'
+      - 'traefik.http.routers.jsa-auth.entrypoints=websecure'
+      - 'traefik.http.routers.jsa-auth.tls.certresolver=letsencrypt'
+      - 'traefik.http.routers.jsa-auth.middlewares=jsa-authlimit'
+      - 'traefik.http.routers.jsa-auth.service=jsa'
 
   # MCP web-search server (aas-ee/open-websearch) : recherche web multi-moteurs, gratuite, sans clé,
   # sans Python. Exposé en HTTP/SSE sur le port 3000, l'app s'y connecte via WEB_SEARCH_MCP_URL.

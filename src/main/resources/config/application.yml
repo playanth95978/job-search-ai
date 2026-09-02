@@ -282,7 +282,15 @@ jhipster:
     license: unlicensed
     license-url:
   security:
-    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+    # script-src carries neither 'unsafe-inline' nor 'unsafe-eval': the bundle is an AOT Angular
+    # build (no runtime template compilation, so no eval), and the two former inline scripts now
+    # live in content/js/. Without those two keywords the policy is a real barrier against XSS —
+    # with them it was decorative. If a script ever has to go back inline, give it a nonce or a
+    # sha256- hash rather than restoring 'unsafe-inline'.
+    # style-src keeps 'unsafe-inline': Angular injects component styles as <style> elements, so
+    # removing it breaks the whole layout. object-src/base-uri close two bypasses that
+    # default-src does not cover.
+    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; object-src 'none'; base-uri 'self'"
 
 
 # jhipster-needle-add-application-yaml-document

@@ -86,6 +86,12 @@ spring:
 server:
   port: 8080
   shutdown: graceful # see https://docs.spring.io/spring-boot/reference/web/graceful-shutdown.html#web.graceful-shutdown
+  # The app never faces the internet directly: Traefik terminates TLS and proxies to :8080. Without
+  # this, every request looks like it comes from the proxy — the scheme reads as http (breaking any
+  # absolute URL the app builds) and the per-caller rate limit collapses anonymous callers onto a
+  # single bucket keyed by the proxy's address. `native` enables Tomcat's RemoteIpValve, which
+  # trusts X-Forwarded-* only from private ranges, i.e. the Docker bridge Traefik reaches us on.
+  forward-headers-strategy: native
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
