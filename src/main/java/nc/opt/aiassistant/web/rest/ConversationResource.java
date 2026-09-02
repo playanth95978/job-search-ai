@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import nc.opt.aiassistant.domain.enumeration.TypeChat;
-import nc.opt.aiassistant.repository.ConversationRepository;
 import nc.opt.aiassistant.service.ConversationService;
 import nc.opt.aiassistant.service.dto.ConversationDTO;
 import nc.opt.aiassistant.web.rest.errors.BadRequestAlertException;
@@ -37,14 +36,12 @@ public class ConversationResource {
 
     private static final String ENTITY_NAME = "conversation";
     private final ConversationService conversationService;
-    private final ConversationRepository conversationRepository;
 
     @Value("${jhipster.clientApp.name:aiassistant}")
     private String applicationName;
 
-    public ConversationResource(ConversationService conversationService, ConversationRepository conversationRepository) {
+    public ConversationResource(ConversationService conversationService) {
         this.conversationService = conversationService;
-        this.conversationRepository = conversationRepository;
     }
 
     /**
@@ -107,7 +104,9 @@ public class ConversationResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!conversationRepository.existsById(id)) {
+        // Propriété, pas seulement existence : `existsById` laissait n'importe quel utilisateur
+        // authentifié écraser la conversation d'un autre en connaissant son UUID.
+        if (!conversationService.verifyConversationBelongToUerLogged(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
@@ -141,7 +140,9 @@ public class ConversationResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
-        if (!conversationRepository.existsById(id)) {
+        // Propriété, pas seulement existence : `existsById` laissait n'importe quel utilisateur
+        // authentifié écraser la conversation d'un autre en connaissant son UUID.
+        if (!conversationService.verifyConversationBelongToUerLogged(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
