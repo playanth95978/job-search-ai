@@ -41,6 +41,48 @@ public class ApplicationProperties {
     private final Ai ai = new Ai();
     private final JobCopilot jobCopilot = new JobCopilot();
     private final Seo seo = new Seo();
+    private final RateLimit rateLimit = new RateLimit();
+
+    /**
+     * Per-caller quota applied by {@link nc.opt.aiassistant.web.filter.UserRateLimitFilter}.
+     *
+     * <p>{@code paths} lists the endpoints worth metering: an LLM turn, an embedding, a rerank, an
+     * outbound scrape or a PDF layout. Cheap CRUD is left alone — metering it would only risk
+     * breaking the UI for no gain. The defaults below are deliberately generous: the goal is to cap
+     * abuse, not to throttle normal use, where opening a screen can fire a handful of calls.</p>
+     */
+    @Setter
+    @Getter
+    public static class RateLimit {
+
+        private boolean enabled = true;
+
+        /** Requests allowed per {@code refillPeriod}, per caller. */
+        private int capacity = 30;
+
+        private java.time.Duration refillPeriod = java.time.Duration.ofMinutes(1);
+
+        private java.util.List<String> paths = java.util.List.of(
+            "/api/cv-builder/**",
+            "/api/job-copilot/assistant/**",
+            "/api/job-copilot/interview/**",
+            "/api/job-copilot/panel/**",
+            "/api/job-copilot/career/**",
+            "/api/job-copilot/cv/**",
+            "/api/job-copilot/insights/**",
+            "/api/job-copilot/opportunities/**",
+            "/api/job-copilot/jobs/search-smart",
+            "/api/job-copilot/jobs/match",
+            "/api/job-copilot/jobs/match-advanced",
+            "/api/job-copilot/jobs/fetch",
+            "/api/job-copilot/jobs/translate",
+            "/api/job-copilot/jobs/boards/suggestions",
+            "/api/job-copilot/jobs/*/enrich",
+            "/api/job-copilot/jobs/*/translate",
+            "/api/job-copilot/jobs/*/positioning/**",
+            "/api/job-copilot/jobs/*/tailored/**"
+        );
+    }
 
     // jhipster-needle-application-properties-property
 

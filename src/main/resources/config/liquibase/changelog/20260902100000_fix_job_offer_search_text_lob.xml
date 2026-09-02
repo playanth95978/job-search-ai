@@ -31,6 +31,11 @@
   <!-- Recopie par lots : un UPDATE unique sur ~360k lignes tiendrait un verrou trop longtemps et
        ferait exploser le WAL. -->
   <changeSet id="20260902100000-2" author="claude" runInTransaction="false">
+    <!-- `search_text` disparait apres le nettoyage final : sans cette precondition, le changeSet
+         echouerait sur une base deja purgee et bloquerait le demarrage. -->
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="job_offer" columnName="search_text"/>
+    </preConditions>
     <sql splitStatements="false">
       DO $$
       DECLARE n int;
