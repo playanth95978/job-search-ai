@@ -13,7 +13,7 @@ import { SeoService } from '../shared/seo.service';
 })
 export default class Contact {
   /** Public support/contact inbox. */
-  protected readonly email = 'anthony.attia1@gmail.com';
+  protected readonly email = 'anthony.attia@aicareerfinder.com';
 
   constructor() {
     inject(SeoService).update({
