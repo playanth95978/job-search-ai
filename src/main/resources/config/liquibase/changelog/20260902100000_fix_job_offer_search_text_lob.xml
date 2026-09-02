@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!--
+    `JobOffer.searchText` portait @Lob : Hibernate écrivait le texte dans un Large Object et ne
+    stockait que son OID dans `search_text`. L'index BM25 indexait donc des nombres et
+    `searchBM25()` ne remontait jamais rien — la recherche hybride dégénérait silencieusement en
+    vectoriel pur (le RRF fusionnait une liste vide).
+
+    On introduit `search_text_plain` (vrai `text`), on y recopie le contenu des Large Objects, et on
+    repointe l'index BM25 dessus. La colonne `search_text` est conservée : elle garde les OID, dont
+    dépendent les Large Objects encore présents dans `pg_largeobject`.
+  -->
+
+  <!-- Les preConditions rendent le changelog idempotent : la prod a deja recu ces changements
+       manuellement, Liquibase doit les marquer comme joues au lieu d'echouer. -->
+  <changeSet id="20260902100000-1" author="claude">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <columnExists tableName="job_offer" columnName="search_text_plain"/>
+      </not>
+    </preConditions>
+    <addColumn tableName="job_offer">
+      <column name="search_text_plain" type="text"/>
+    </addColumn>
+  </changeSet>
+
+  <!-- Recopie par lots : un UPDATE unique sur ~360k lignes tiendrait un verrou trop longtemps et
+       ferait exploser le WAL. -->
+  <changeSet id="20260902100000-2" author="claude" runInTransaction="false">
+    <sql splitStatements="false">
+      DO $$
+      DECLARE n int;
+      BEGIN
+        LOOP
+          UPDATE job_offer
+             SET search_text_plain = convert_from(lo_get(search_text::oid), 'UTF8')
+           WHERE id IN (
+                 SELECT id FROM job_offer
+                  WHERE search_text IS NOT NULL AND search_text_plain IS NULL
+                  LIMIT 5000
+           );
+          GET DIAGNOSTICS n = ROW_COUNT;
+          EXIT WHEN n = 0;
+          COMMIT;
+        END LOOP;
+      END $$;
+    </sql>
+  </changeSet>
+
+  <!-- La prod a deja recu cet index manuellement : on ne le reconstruit pas (plusieurs minutes,
+       BM25 indisponible pendant ce temps, et risque de depasser le healthcheck du conteneur). -->
+  <changeSet id="20260902100000-3" author="claude">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">
+        SELECT count(*) FROM pg_indexes
+         WHERE indexname = 'job_offer_bm25_idx'
+           AND indexdef LIKE '%search_text_plain%'
+      </sqlCheck>
+    </preConditions>
+    <sql>
+      DROP INDEX IF EXISTS job_offer_bm25_idx;
+      CREATE INDEX job_offer_bm25_idx
+        ON job_offer
+        USING bm25 (id, search_text_plain, metadata)
+        WITH (key_field = 'id');
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

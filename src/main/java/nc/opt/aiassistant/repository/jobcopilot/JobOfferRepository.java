@@ -41,7 +41,7 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
     List<JobOffer> searchByKeyword(String keyword);
 
     @Query(
-        value = "SELECT * FROM job_offer WHERE search_text ||| :query AND (expires_at IS NULL OR expires_at > now()) " +
+        value = "SELECT * FROM job_offer WHERE search_text_plain ||| :query AND (expires_at IS NULL OR expires_at > now()) " +
             "ORDER BY paradedb.score(id) DESC LIMIT :limit",
         nativeQuery = true
     )

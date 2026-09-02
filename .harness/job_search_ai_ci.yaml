@@ -1,0 +1,81 @@
+pipeline:
+  name: job-search-ai CI
+  identifier: job_search_ai_ci
+  projectIdentifier: <+input>
+  orgIdentifier: <+input>
+  # Vérifie chaque PR : lint + format + tests front (vitest) + tests back (Maven).
+  # Aucun artefact publié ici — c'est le rôle du pipeline job_search_ai_cd.
+  properties:
+    ci:
+      codebase:
+        connectorRef: <+input> # connector GitHub pointant sur ce repo
+        repoName: job-search-ai
+        build: <+input>
+  stages:
+    - stage:
+        name: Verify
+        identifier: verify
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            paths:
+              - node_modules
+              - ~/.m2/repository
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: npm ci
+                  identifier: npm_ci
+                  spec:
+                    shell: Sh
+                    image: node:22
+                    command: npm ci
+              - parallel:
+                  - step:
+                      type: Run
+                      name: Lint + format
+                      identifier: lint
+                      spec:
+                        shell: Sh
+                        image: node:22
+                        command: |-
+                          npm run lint
+                          npm run prettier:check
+                  - step:
+                      type: Run
+                      name: Tests front
+                      identifier: frontend_test
+                      spec:
+                        shell: Sh
+                        image: node:22
+                        # `npm test` déclenche déjà le lint via pretest : on cible ng test directement.
+                        command: npx ng test --coverage --watch=false
+                        reports:
+                          type: JUnit
+                          spec:
+                            paths:
+                              - target/test-results/**/*.xml
+              - step:
+                  type: Run
+                  name: Tests back
+                  identifier: backend_test
+                  spec:
+                    shell: Sh
+                    image: maven:3.9-eclipse-temurin-21
+                    command: |-
+                      ./mvnw -ntp --batch-mode -Dskip.installnodenpm -Dskip.npm verify
+                    reports:
+                      type: JUnit
+                      spec:
+                        paths:
+                          - target/surefire-reports/*.xml
+                          - target/failsafe-reports/*.xml

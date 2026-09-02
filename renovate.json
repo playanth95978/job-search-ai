@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard", ":semanticCommits", "group:monorepos", "group:recommended"],
+  "timezone": "Pacific/Noumea",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "rebaseWhen": "conflicted",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  },
+  "vulnerabilityAlerts": {
+    "labels": ["dependencies", "security"],
+    "schedule": ["at any time"]
+  },
+  "packageRules": [
+    {
+      "description": "Angular core + CLI + Material bougent ensemble, en versions exactes comme les pose JHipster",
+      "matchPackageNames": ["@angular/**", "@angular-devkit/**", "@angular-builders/**", "@schematics/**", "ng-packagr"],
+      "groupName": "angular",
+      "rangeStrategy": "replace"
+    },
+    {
+      "description": "Spring Boot / Spring Cloud groupés en minor+patch ; les majeures restent isolées",
+      "matchPackageNames": ["org.springframework**", "org.springframework.boot**"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "spring"
+    },
+    {
+      "description": "Socle JHipster : piloté par le générateur, jamais bumpé automatiquement",
+      "matchPackageNames": ["generator-jhipster", "tech.jhipster:jhipster-framework", "tech.jhipster:jhipster-dependencies"],
+      "enabled": false
+    },
+    {
+      "description": "Outillage dev : regroupé et auto-mergé si la CI passe",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "dev tooling",
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Majeures : PR séparée, jamais d'automerge",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "addLabels": ["major"]
+    },
+    {
+      "description": "Node : rester sur les lignes LTS utilisées en CI (22/24)",
+      "matchPackageNames": ["node"],
+      "allowedVersions": "/^(22|24)\\./"
+    },
+    {
+      "description": "Java : rester sur 21, la LTS ciblée par le pom",
+      "matchPackageNames": ["java", "eclipse-temurin", "openjdk"],
+      "allowedVersions": "/^21\\./"
+    }
+  ]
+}

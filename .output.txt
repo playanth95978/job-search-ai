@@ -1,0 +1,431 @@
+Command finished with exit code 1.
+Command output:
+The 'buildTarget' is configured to use '@angular-builders/custom-esbuild:application', which is not supported. The 'unit-test' builder is designed to work with '@angular/build:application' or '@angular/build:ng-packagr'. Unexpected behavior or build failures may occur.
+Automatically searching for and using Vitest configuration file.
+❯ Building...
+✔ Building...
+Initial chunk files                                                    | Names                                                               |  Raw size
+spec-app-job-copilot-cv-builder-cv-builder.js                          | spec-app-job-copilot-cv-builder-cv-builder                          | 439.98 kB | 
+styles.css                                                             | styles                                                              | 295.56 kB | 
+spec-app-job-copilot-dashboard-dashboard.component.js                  | spec-app-job-copilot-dashboard-dashboard.component                  | 221.30 kB | 
+spec-app-job-copilot-job-search-job-search-detail-job-search-detail.js | spec-app-job-copilot-job-search-job-search-detail-job-search-detail |  34.55 kB | 
+chunk-53ZFJSTY.js                                                      | -                                                                   |  11.78 kB | 
+spec-app-job-copilot-job-search-job-search-filtering.js                | spec-app-job-copilot-job-search-job-search-filtering                |  10.19 kB | 
+chunk-I2AXPPOH.js                                                      | -                                                                   |   7.09 kB | 
+spec-app-job-copilot-shared-ats-searchability-ats-searchability.js     | spec-app-job-copilot-shared-ats-searchability-ats-searchability     |   6.10 kB | 
+chunk-77UHXFNQ.js                                                      | -                                                                   |   6.10 kB | 
+chunk-JBWBLPNK.js                                                      | -                                                                   |   5.19 kB | 
+chunk-ETOX452X.js                                                      | -                                                                   |   3.44 kB | 
+chunk-EYLIO6P4.js                                                      | -                                                                   |   3.14 kB | 
+spec-app-job-copilot-cv-builder-resume-diff.js                         | spec-app-job-copilot-cv-builder-resume-diff                         |   2.98 kB | 
+chunk-5DBCUI6J.js                                                      | -                                                                   |   2.68 kB | 
+spec-app-job-copilot-cv-builder-resume-store.js                        | spec-app-job-copilot-cv-builder-resume-store                        |   2.63 kB | 
+init-testbed.js                                                        | init-testbed                                                        |   1.21 kB | 
+vitest-mock-patch.js                                                   | vitest-mock-patch                                                   | 969 bytes | 
+polyfills.js                                                           | polyfills                                                           | 110 bytes | 
+
+                                                                       | Initial total                                                       |   1.05 MB
+
+Application bundle generation complete. [18.776 seconds] - 2026-09-01T21:35:13.586Z
+
+▲ [WARNING] NG8113: AtsSearchabilityComponent is not used within the template of ProfileComponent [plugin angular-compiler]
+
+    src/main/webapp/app/job-copilot/profile/profile.component.ts:28:4:
+      28 │     AtsSearchabilityComponent,
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/admin/docs/docs.scss:1:8:
+      1 │ @import 'bootstrap/scss/functions';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/admin/docs/docs.scss:2:8:
+      2 │ @import 'bootstrap/scss/variables';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/chat/chat.scss:1:8:
+      1 │ @import '../../content/scss/job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/home/home-banniere/home-banniere.scss:1:8:
+      1 │ @import '../../../content/scss/job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/home/home.scss:1:8:
+      1 │ @import '../../content/scss/job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/job-copilot/dashboard/dashboard.component.scss:1:8:
+      1 │ @import '../../../content/scss/job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/job-copilot/interview-panel/interview-panel.component.scss:1:8:
+      1 │ @import '../../../content/scss/job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/job-copilot/job-search/job-results/job-results.component.scss:1:8:
+      1 │ @import '../job-search-ui';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/job-copilot/job-search/job-search-form/job-search-form.component.scss:1:8:
+      1 │ @import '../job-search-ui';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/job-copilot/onboarding/preferences-editor/preferences-editor.component.scss:1:8:
+      1 │ @import '../onboarding-forms';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/job-copilot/onboarding/profile-editor/profile-editor.component.scss:1:8:
+      1 │ @import '../onboarding-forms';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/layouts/job-nav/job-nav.component.scss:1:8:
+      1 │ @import '../../../content/scss/job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/app/layouts/navbar/navbar.scss:1:8:
+      1 │ @import '../../../content/scss/job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/styles.scss:1:8:
+      1 │ @import 'bootstrap-variables';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:3:8:
+      3 │ @import 'src/main/webapp/content/scss/styles.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/styles.scss:2:8:
+      2 │ @import 'bootstrap/scss/functions';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:3:8:
+      3 │ @import 'src/main/webapp/content/scss/styles.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/styles.scss:3:8:
+      3 │ @import 'bootstrap/scss/variables';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:3:8:
+      3 │ @import 'src/main/webapp/content/scss/styles.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/styles.scss:4:8:
+      4 │ @import 'job-theme';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:3:8:
+      3 │ @import 'src/main/webapp/content/scss/styles.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/styles.scss:5:8:
+      5 │ @import 'onboarding';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:3:8:
+      3 │ @import 'src/main/webapp/content/scss/styles.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/styles.scss:38:20:
+      38 │   background-color: mix($dropdown-link-hover-bg, $dropdown-link-ac...
+         ╵                     ^
+
+
+  Global built-in functions are deprecated and will be removed in Dart Sass 3.0.0.
+  Use color.mix instead.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:3:8:
+      3 │ @import 'src/main/webapp/content/scss/styles.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/vendor.scss:8:8:
+      8 │ @import 'bootstrap-variables';
+        ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:2:8:
+      2 │ @import 'src/main/webapp/content/scss/vendor.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] Deprecation [plugin angular-sass]
+
+    src/main/webapp/content/scss/vendor.scss:10:8:
+      10 │ @import 'bootstrap/scss/bootstrap';
+         ╵         ^
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: https://sass-lang.com/d/import
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:2:8:
+      2 │ @import 'src/main/webapp/content/scss/vendor.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] 2 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings. [plugin angular-sass]
+
+    angular:styles/global:styles:3:8:
+      3 │ @import 'src/main/webapp/content/scss/styles.scss';
+        ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  null
+
+
+
+ RUN  v4.1.7 C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis
+
+ ✓ |job-search-ai| src/main/webapp/app/job-copilot/job-search/job-search-filtering.spec.ts (17 tests) 59ms
+ ✓ |job-search-ai| src/main/webapp/app/job-copilot/shared/ats-searchability/ats-searchability.spec.ts (12 tests) 19ms
+ ✓ |job-search-ai| src/main/webapp/app/job-copilot/cv-builder/resume-diff.spec.ts (9 tests) 25ms
+ ✓ |job-search-ai| src/main/webapp/app/job-copilot/cv-builder/resume-store.spec.ts (7 tests) 30ms
+stderr | src/main/webapp/app/job-copilot/job-search/job-search-detail/job-search-detail.spec.ts > JobSearchDetail > should create
+ERROR RuntimeError: NG0950: Input "sel" is required but no value is available yet. Find more at https://v21.angular.dev/errors/NG0950
+    at _JobSearchDetail.inputValueFn [as sel] (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/core.mjs:48:13)
+    at JobSearchDetail_Template (C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/src/main/webapp/app/job-copilot/job-search/job-search-detail/job-search-detail.html:1:1)
+    at executeTemplate (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5086:5)
+    at refreshView (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5760:7)
+    at detectChangesInView (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5900:5)
+    at detectChangesInViewIfAttached (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5883:3)
+    at detectChangesInComponent (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5874:5)
+    at detectChangesInChildComponents (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5922:5)
+    at refreshView (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5802:7)
+    at detectChangesInView (file:///C:/Users/redstone-aat/IdeaProjects/job-search-ai-bis/node_modules/@angular/core/fesm2022/_debug_node-chunk.mjs:5900:5) {
+  code: -950
+}
+
+ ❯ |job-search-ai| src/main/webapp/app/job-copilot/job-search/job-search-detail/job-search-detail.spec.ts (1 test | 1 failed) 234ms
+     × should create 231ms
+ ✓ |job-search-ai| src/main/webapp/app/job-copilot/dashboard/dashboard.component.spec.ts (4 tests) 1006ms
+     ✓ renders dashboard with profile when loaded  773ms
+ ❯ |job-search-ai| src/main/webapp/app/job-copilot/cv-builder/cv-builder.spec.ts (5 tests | 2 failed) 1130ms
+     ✓ renders the builder without throwing  781ms
+     × seeds itself from the uploaded CV when no resume has been saved yet 66ms
+     × never overwrites a local draft that already has content 55ms
+     ✓ prefers the saved resume over the extracted profile 33ms
+     ✓ renders a populated resume without throwing 191ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |job-search-ai| src/main/webapp/app/job-copilot/cv-builder/cv-builder.spec.ts > CvBuilderComponent > seeds itself from the uploaded CV when no resume has been saved yet
+Error: Expected one matching request for criteria "Match URL: api/cv-builder/resume/candidate-profile", found none. Requests received are: POST api/cv-builder/resume/import-from-cv.
+ ❯ HttpClientTestingBackend.expectOne ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/common/http/testing/src/backend.ts:112:12
+ ❯ src/main/webapp/app/job-copilot/cv-builder/cv-builder.spec.ts:47:10
+     45|
+     46|     http.expectOne('api/cv-builder/resume').flush(null, { status: 204,…
+     47|     http.expectOne('api/cv-builder/resume/candidate-profile').flush({
+       |          ^
+     48|       fullName: 'Jane Doe',
+     49|       email: 'jane@example.com',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |job-search-ai| src/main/webapp/app/job-copilot/cv-builder/cv-builder.spec.ts > CvBuilderComponent > never overwrites a local draft that already has content
+Error: Expected one matching request for criteria "Match URL: api/cv-builder/resume/candidate-profile", found none. Requests received are: POST api/cv-builder/resume/import-from-cv.
+ ❯ HttpClientTestingBackend.expectOne ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/common/http/testing/src/backend.ts:112:12
+ ❯ src/main/webapp/app/job-copilot/cv-builder/cv-builder.spec.ts:69:10
+     67|
+     68|     http.expectOne('api/cv-builder/resume').flush(null, { status: 204,…
+     69|     http.expectOne('api/cv-builder/resume/candidate-profile').flush({ …
+       |          ^
+     70|
+     71|     expect(store.resume().personal.firstName).toBe('Jane');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |job-search-ai| src/main/webapp/app/job-copilot/job-search/job-search-detail/job-search-detail.spec.ts > JobSearchDetail > should create
+
+Error: NG0950: Input "sel" is required but no value is available yet. Find more at https://v21.angular.dev/errors/NG0950
+ ❯ _JobSearchDetail.inputValueFn [as sel] ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/authoring/input/input_signal.ts:137:12
+ ❯ JobSearchDetail_Template src/main/webapp/app/job-copilot/job-search/job-search-detail/job-search-detail.html:1:1
+ ❯ templateFn ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/shared.ts:108:4
+ ❯ executeTemplate ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/change_detection.ts:232:6
+ ❯ refreshView ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/change_detection.ts:497:4
+ Test Files  2 failed | 5 passed (7)
+ ❯ detectChangesInView ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/change_detection.ts:445:2
+      Tests  3 failed | 52 passed (55)
+ ❯ detectChangesInViewIfAttached ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/change_detection.ts:430:4
+ ❯ detectChangesInComponent ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/change_detection.ts:526:4
+   Start at  07:35:14
+ ❯ detectChangesInChildComponents ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/change_detection.ts:297:6
+   Duration  6.16s (transform 3.55s, setup 5.34s, import 6.53s, tests 2.50s, environment 14.02s)
+ ❯ refreshView ../darwin_arm64-fastbuild-ST-fdfa778d11ba/bin/packages/core/src/render3/instructions/change_detection.ts:497:4
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+SonarQube report written to C:\Users\redstone-aat\IdeaProjects\job-search-ai-bis\target\test-results\TESTS-results-sonar-vitest.xml

@@ -50,8 +50,10 @@ public class JobOffer implements Serializable {
     /**
      * Texte optimisé pour BM25 + embeddings
      */
-    @Lob
-    @Column(name = "search_text")
+    // Pas de @Lob : Hibernate le traduirait en Large Object PostgreSQL et n'écrirait qu'un OID dans
+    // la colonne, ce qui rendait l'index BM25 inopérant. La colonne historique `search_text` reste en
+    // base (elle contient les anciens OID) mais n'est plus mappée.
+    @Column(name = "search_text_plain")
     private String searchText;
 
     /**

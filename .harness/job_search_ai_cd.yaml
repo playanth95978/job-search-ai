@@ -1,0 +1,128 @@
+pipeline:
+  name: job-search-ai CD
+  identifier: job_search_ai_cd
+  projectIdentifier: <+input>
+  orgIdentifier: <+input>
+  # Équivalent Harness de .github/workflows/deploy.yml :
+  # build prod (Jib -> GHCR) puis redéploiement du conteneur sur le VPS via SSH.
+  properties:
+    ci:
+      codebase:
+        connectorRef: <+input> # connector GitHub pointant sur ce repo
+        repoName: job-search-ai
+        build: <+input>
+  variables:
+    - name: ghcr_owner
+      type: String
+      description: Propriétaire GitHub du package GHCR (ex. redstone-aat)
+      value: <+input>
+    - name: image
+      type: String
+      description: Image GHCR publiée puis déployée
+      value: ghcr.io/<+pipeline.variables.ghcr_owner>/job-search-ai
+  stages:
+    - stage:
+        name: Build & Deploy
+        identifier: build_deploy
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            paths:
+              - node_modules
+              - ~/.m2/repository
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Build prod + Jib push
+                  identifier: jib_push
+                  spec:
+                    shell: Sh
+                    image: maven:3.9-eclipse-temurin-21
+                    # Le profil prod déclenche le build Angular via frontend-maven-plugin.
+                    # Jib pousse sans démon Docker : pas de step Build & Push Docker nécessaire.
+                    envVariables:
+                      GHCR_USER: <+secrets.getValue("ghcr_user")>
+                      GHCR_TOKEN: <+secrets.getValue("ghcr_token")>
+                    command: |-
+                      ./mvnw -Pprod clean package jib:build \
+                        -Djib.to.image=<+pipeline.variables.image> \
+                        -Djib.to.auth.username="$GHCR_USER" \
+                        -Djib.to.auth.password="$GHCR_TOKEN" \
+                        -DskipTests \
+                        --no-transfer-progress
+              - step:
+                  type: Run
+                  name: Deploy via SSH
+                  identifier: deploy_ssh
+                  spec:
+                    shell: Sh
+                    image: alpine:3.20
+                    envVariables:
+                      IMAGE: <+pipeline.variables.image>
+                      GHCR_USER: <+secrets.getValue("ghcr_user")>
+                      GHCR_TOKEN: <+secrets.getValue("ghcr_token")>
+                      VPS_HOST: <+secrets.getValue("vps_host")>
+                      VPS_USER: <+secrets.getValue("vps_user")>
+                      VPS_SSH_KEY: <+secrets.getValue("vps_ssh_key")>
+                      SPRING_PROFILES_ACTIVE: prod
+                      SPRING_DATASOURCE_URL: <+secrets.getValue("spring_datasource_url")>
+                      SPRING_DATASOURCE_USERNAME: <+secrets.getValue("spring_datasource_username")>
+                      SPRING_DATASOURCE_PASSWORD: <+secrets.getValue("spring_datasource_password")>
+                      JWT_BASE64_SECRET: <+secrets.getValue("jwt_base64_secret")>
+                      GOOGLE_CLIENT_ID: <+secrets.getValue("google_client_id")>
+                      GOOGLE_CLIENT_SECRET: <+secrets.getValue("google_client_secret")>
+                      GOOGLE_REDIRECT_URI: <+secrets.getValue("google_redirect_uri")>
+                      OLLAMA_BASE_URL: <+secrets.getValue("ollama_base_url")>
+                      OLLAMA_MODEL: <+secrets.getValue("ollama_model")>
+                      OLLAMA_TOKEN: <+secrets.getValue("ollama_token")>
+                      FRANCE_TRAVAIL_CLIENT_ID: <+secrets.getValue("france_travail_client_id")>
+                      FRANCE_TRAVAIL_CLIENT_SECRET: <+secrets.getValue("france_travail_client_secret")>
+                      ADZUNA_APP_ID: <+secrets.getValue("adzuna_app_id")>
+                      ADZUNA_APP_KEY: <+secrets.getValue("adzuna_app_key")>
+                      SPRING_MAIL_HOST: <+secrets.getValue("spring_mail_host")>
+                      SPRING_MAIL_PORT: <+secrets.getValue("spring_mail_port")>
+                      SPRING_MAIL_USERNAME: <+secrets.getValue("spring_mail_username")>
+                      SPRING_MAIL_PASSWORD: <+secrets.getValue("spring_mail_password")>
+                      JHIPSTER_MAIL_FROM: no-reply@aicarreerfinder.com
+                      JHIPSTER_MAIL_BASE_URL: https://aicarreerfinder.com
+                    command: |-
+                      set -e
+                      apk add --no-cache openssh-client >/dev/null
+
+                      KEY=$(mktemp)
+                      printf '%s\n' "$VPS_SSH_KEY" > "$KEY"
+                      chmod 600 "$KEY"
+                      trap 'rm -f "$KEY"' EXIT
+
+                      # Le script distant vit dans le repo (deploy/vps-deploy.sh) : il est
+                      # envoyé sur stdin, les valeurs passent par l'environnement.
+                      ssh -o StrictHostKeyChecking=accept-new -i "$KEY" "$VPS_USER@$VPS_HOST" \
+                        IMAGE="$IMAGE" \
+                        GHCR_USER="$GHCR_USER" GHCR_TOKEN="$GHCR_TOKEN" \
+                        SPRING_PROFILES_ACTIVE="$SPRING_PROFILES_ACTIVE" \
+                        SPRING_DATASOURCE_URL="$SPRING_DATASOURCE_URL" \
+                        SPRING_DATASOURCE_USERNAME="$SPRING_DATASOURCE_USERNAME" \
+                        SPRING_DATASOURCE_PASSWORD="$SPRING_DATASOURCE_PASSWORD" \
+                        JWT_BASE64_SECRET="$JWT_BASE64_SECRET" \
+                        GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
+                        GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \
+                        GOOGLE_REDIRECT_URI="$GOOGLE_REDIRECT_URI" \
+                        OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+                        OLLAMA_MODEL="$OLLAMA_MODEL" \
+                        OLLAMA_TOKEN="$OLLAMA_TOKEN" \
+                        FRANCE_TRAVAIL_CLIENT_ID="$FRANCE_TRAVAIL_CLIENT_ID" \
+                        FRANCE_TRAVAIL_CLIENT_SECRET="$FRANCE_TRAVAIL_CLIENT_SECRET" \
+                        ADZUNA_APP_ID="$ADZUNA_APP_ID" ADZUNA_APP_KEY="$ADZUNA_APP_KEY" \
+                        SPRING_MAIL_HOST="$SPRING_MAIL_HOST" SPRING_MAIL_PORT="$SPRING_MAIL_PORT" \
+                        SPRING_MAIL_USERNAME="$SPRING_MAIL_USERNAME" SPRING_MAIL_PASSWORD="$SPRING_MAIL_PASSWORD" \
+                        JHIPSTER_MAIL_FROM="$JHIPSTER_MAIL_FROM" JHIPSTER_MAIL_BASE_URL="$JHIPSTER_MAIL_BASE_URL" \
+                        'sh -s' < deploy/vps-deploy.sh
