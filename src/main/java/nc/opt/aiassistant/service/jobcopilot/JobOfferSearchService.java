@@ -64,15 +64,30 @@ public class JobOfferSearchService {
      * @return the {@code topK} most semantically similar offers (empty if the query is blank)
      */
     public List<JobOffer> searchSemantic(String query, int topK) {
+        return searchSemantic(query, null, topK);
+    }
+
+    /**
+     * Same as {@link #searchSemantic(String, int)} restricted to a location.
+     *
+     * @param location optional city/region/country, matched against the offer's own columns; {@code null} or blank
+     *                 disables the filter. Never concatenate it into {@code query}: see {@link #searchHybrid}.
+     */
+    public List<JobOffer> searchSemantic(String query, String location, int topK) {
         if (query == null || query.isBlank()) {
             return List.of();
         }
         log.info("Performing semantic (cosine) search for: '{}' (topK: {})", query.substring(0, Math.min(query.length(), 100)), topK);
         float[] queryEmbedding = jobOfferEmbeddingModel.embed(query);
         log.info("Query embedded ({} dims), querying vector index…", queryEmbedding.length);
-        List<JobOffer> results = jobOfferRepository.searchVector(Vector.of(queryEmbedding), topK);
+        List<JobOffer> results = jobOfferRepository.searchVector(Vector.of(queryEmbedding), blankToNull(location), topK);
         log.info("searchVector returned {} offers", results.size());
         return results;
+    }
+
+    /** Spring Data binds a blank string as a value, not as "no filter" — normalise it once, here. */
+    private static String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 
     /**
@@ -80,12 +95,27 @@ public class JobOfferSearchService {
      * High-performance implementation using parallel execution and virtual threads.
      */
     public List<JobOffer> searchHybrid(String query, int limit) {
-        log.info("Performing high-performance hybrid search for: '{}' (limit: {})", query, limit);
+        return searchHybrid(query, null, limit);
+    }
+
+    /**
+     * Hybrid search restricted to a location.
+     *
+     * <p>The location is applied as a filter on both arms rather than appended to {@code query}.
+     * Appended, it becomes one term among many for BM25 and is outweighed by the frequent ones: on
+     * "developpeur java spring boot brisbane" the ten best lexical scores were all French offers,
+     * none of them in Brisbane. Filtering instead makes both arms rank the same, correct subset.
+     *
+     * @param location optional city/region/country; {@code null} or blank disables the filter.
+     */
+    public List<JobOffer> searchHybrid(String query, String location, int limit) {
+        log.info("Performing high-performance hybrid search for: '{}' (location: {}, limit: {})", query, location, limit);
         float[] queryEmbedding = jobOfferEmbeddingModel.embed(query);
+        String locationFilter = blankToNull(location);
 
         // 1. Parallel execution of Vector and BM25 searches
         List<Document> vectorDocs = jobOfferRepository
-            .searchVector(Vector.of(queryEmbedding), limit * 3)
+            .searchVector(Vector.of(queryEmbedding), locationFilter, limit * 3)
             .stream()
             .map(this::toDocument)
             .filter(java.util.Objects::nonNull)
@@ -94,7 +124,7 @@ public class JobOfferSearchService {
         List<Document> bm25Docs;
         try {
             bm25Docs = jobOfferRepository
-                .searchBM25(query, limit * 3)
+                .searchBM25(query, locationFilter, limit * 3)
                 .stream()
                 .map(this::toDocument)
                 .filter(java.util.Objects::nonNull)

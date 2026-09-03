@@ -98,7 +98,7 @@ public class JobCopilotSearchResource {
      * the mass-ingested offers, so it is instant and understands meaning, not just keywords.
      *
      * @param query    the natural-language query.
-     * @param location optional location, appended to the query to bias ranking.
+     * @param location optional location, applied as a filter on both retrieval arms.
      * @param source   optional {@link nc.opt.aiassistant.domain.enumeration.JobSource} name to restrict results.
      * @param limit    maximum number of offers to return.
      */
@@ -109,8 +109,9 @@ public class JobCopilotSearchResource {
         @RequestParam(required = false) String source,
         @RequestParam(defaultValue = "30") int limit
     ) {
-        String enriched = (location != null && !location.isBlank()) ? query + " " + location : query;
-        List<JobOffer> offers = jobSearchService.searchHybrid(enriched, Math.max(1, limit));
+        // La localisation part en filtre, pas dans le texte de la requete : concatenee, elle se noie
+        // parmi les mots frequents et le bras BM25 remonte le bon metier au mauvais endroit.
+        List<JobOffer> offers = jobSearchService.searchHybrid(query, location, Math.max(1, limit));
         if (source != null && !source.isBlank()) {
             offers = offers
                 .stream()

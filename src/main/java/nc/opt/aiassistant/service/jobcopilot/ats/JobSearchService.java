@@ -140,7 +140,12 @@ public class JobSearchService {
      * Hybrid search using Vector + BM25 + Reranking.
      */
     public List<JobOffer> searchHybrid(String query, int limit) {
-        return jobOfferSearchService.searchHybrid(query, limit);
+        return jobOfferSearchService.searchHybrid(query, null, limit);
+    }
+
+    /** Hybrid search restricted to a location — the location filters both arms, it is not part of the query text. */
+    public List<JobOffer> searchHybrid(String query, String location, int limit) {
+        return jobOfferSearchService.searchHybrid(query, location, limit);
     }
 
     /**

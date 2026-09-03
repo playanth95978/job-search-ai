@@ -40,19 +40,29 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
     )
     List<JobOffer> searchByKeyword(String keyword);
 
+    // La localisation est un filtre, pas un terme de pertinence : concatenee a la requete elle se
+    // dilue parmi les mots frequents ("developpeur", "java"...) et BM25 classe alors des offres du
+    // bon metier au mauvais endroit. Mesure a l'appui : sur "developpeur java spring boot brisbane",
+    // les dix meilleurs scores lexicaux etaient tous des offres francaises.
+    // `:location IS NULL` neutralise le predicat plutot que de dupliquer la requete.
     @Query(
         value = "SELECT * FROM job_offer WHERE search_text_plain ||| :query AND (expires_at IS NULL OR expires_at > now()) " +
+            "AND (cast(:location as text) IS NULL OR location ILIKE concat('%', cast(:location as text), '%') " +
+            "     OR country ILIKE concat('%', cast(:location as text), '%')) " +
             "ORDER BY paradedb.score(id) DESC LIMIT :limit",
         nativeQuery = true
     )
-    List<JobOffer> searchBM25(String query, int limit);
+    List<JobOffer> searchBM25(@Param("query") String query, @Param("location") String location, @Param("limit") int limit);
 
+    /** Meme filtre de localisation que {@link #searchBM25} : les deux bras doivent classer le meme sous-ensemble. */
     @Query(
         value = "SELECT * FROM job_offer WHERE embedding IS NOT NULL AND (expires_at IS NULL OR expires_at > now()) " +
+            "AND (cast(:location as text) IS NULL OR location ILIKE concat('%', cast(:location as text), '%') " +
+            "     OR country ILIKE concat('%', cast(:location as text), '%')) " +
             "ORDER BY embedding <=> cast(:embedding as vector) LIMIT :limit",
         nativeQuery = true
     )
-    List<JobOffer> searchVector(@Param("embedding") Vector embedding, @Param("limit") int limit);
+    List<JobOffer> searchVector(@Param("embedding") Vector embedding, @Param("location") String location, @Param("limit") int limit);
 
     /** Nearest offers to an embedding among those ingested after {@code since} — the Opportunity Radar's candidate set. */
     @Query(
