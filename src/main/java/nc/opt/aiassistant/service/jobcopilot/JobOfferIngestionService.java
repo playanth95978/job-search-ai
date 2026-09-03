@@ -87,27 +87,44 @@ public class JobOfferIngestionService {
         }
     }
 
+    /**
+     * Locates the already-stored version of {@code offer}, or {@code null} for a genuinely new one.
+     *
+     * <p>A connector that exposes a stable {@code sourceId} is matched on it, so an offer whose text
+     * changed is updated rather than duplicated. Connectors without one fall back to the content
+     * hash: less precise (a reworded listing looks new) but it stops the same listing from piling up.
+     */
+    private JobOffer findExisting(JobOffer offer, String hash) {
+        if (offer.getSourceId() != null && offer.getSource() != null) {
+            List<JobOffer> bySource = jobOfferRepository.findBySourceIdAndSource(offer.getSourceId(), offer.getSource());
+            if (!bySource.isEmpty()) {
+                return bySource.getFirst();
+            }
+            return null;
+        }
+        return jobOfferRepository.findFirstByContentHash(hash).orElse(null);
+    }
+
     public JobOffer prepareForIngestion(JobOffer offer) {
         try {
             String hash = contentJobOfferHash(offer);
 
-            // Check for duplicate by hash or source/sourceId
-            if (offer.getSourceId() != null && offer.getSource() != null) {
-                List<JobOffer> existing = jobOfferRepository.findBySourceIdAndSource(offer.getSourceId(), offer.getSource());
-                if (!existing.isEmpty()) {
-                    JobOffer existingOffer = existing.getFirst();
-                    if (hash.equals(existingOffer.getContentHash())) {
-                        log.debug("Offer {}/{} already exists and is unchanged", offer.getSource(), offer.getSourceId());
-                        return null; // Skip unchanged
-                    }
-                    // Don't let a re-scraped teaser (STUB) overwrite an already enriched/indexed offer.
-                    if (offer.getEmbeddingStatus() == EmbeddingStatus.STUB && existingOffer.getEmbeddingStatus() != EmbeddingStatus.STUB) {
-                        log.debug("Keeping enriched offer {}/{} over incoming stub", offer.getSource(), offer.getSourceId());
-                        return null;
-                    }
-                    // Update existing offer if changed
-                    offer.setId(existingOffer.getId());
+            // Deux strategies de dedup, dans cet ordre : l'identifiant source quand le connecteur en
+            // fournit un (il survit a une reformulation de l'annonce), sinon le hash de contenu.
+            // Sans ce repli, toute offre sans sourceId etait reinseree a chaque scrape.
+            JobOffer existingOffer = findExisting(offer, hash);
+            if (existingOffer != null) {
+                if (hash.equals(existingOffer.getContentHash())) {
+                    log.debug("Offer {}/{} already exists and is unchanged", offer.getSource(), offer.getSourceId());
+                    return null; // Skip unchanged
                 }
+                // Don't let a re-scraped teaser (STUB) overwrite an already enriched/indexed offer.
+                if (offer.getEmbeddingStatus() == EmbeddingStatus.STUB && existingOffer.getEmbeddingStatus() != EmbeddingStatus.STUB) {
+                    log.debug("Keeping enriched offer {}/{} over incoming stub", offer.getSource(), offer.getSourceId());
+                    return null;
+                }
+                // Update existing offer if changed
+                offer.setId(existingOffer.getId());
             }
 
             log.debug("Preparing offer for ingestion: {} - {}", offer.getCompany(), offer.getTitle());

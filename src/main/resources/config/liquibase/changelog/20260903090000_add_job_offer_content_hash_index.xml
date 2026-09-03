@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!--
+    La deduplication ne s'appliquait qu'aux offres portant un `source_id` ; celles des connecteurs
+    sans identifiant stable etaient reinserees a chaque scrape (jusqu'a douze copies d'une meme
+    annonce). Le repli sur `content_hash` a besoin d'un index : sans lui, chaque offre ingeree
+    declenche un balayage complet de la table.
+
+    Index simple et non unique a dessein : les doublons deja presents feraient echouer la creation
+    d'un index unique, et leur purge est une operation distincte, a mener en connaissance de cause.
+  -->
+
+  <changeSet id="20260903090000-1" author="claude">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_job_offer_content_hash"/>
+      </not>
+    </preConditions>
+    <createIndex tableName="job_offer" indexName="idx_job_offer_content_hash">
+      <column name="content_hash"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

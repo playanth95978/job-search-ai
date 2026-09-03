@@ -1,10 +1,6 @@
 package nc.opt.aiassistant.batch;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -69,14 +65,36 @@ public class JobOfferBatchWriter implements ItemWriter<JobOffer> {
                   // a sourceId should be unique per source; keep the first if not
                   .collect(Collectors.toMap(JobOffer::getSourceId, Function.identity(), (a, b) -> a));
 
+        // Repli sur le hash de contenu pour les connecteurs sans identifiant stable : sans lui, une
+        // offre au sourceId nul etait reinseree a chaque passage, jusqu'a douze copies de la meme
+        // annonce dans le corpus.
+        Set<String> hashes = incoming
+            .stream()
+            .filter(o -> o.getSourceId() == null)
+            .map(JobOffer::getContentHash)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        Map<String, JobOffer> existingByHash = hashes.isEmpty()
+            ? Map.of()
+            : jobOfferRepository
+                  .findByContentHashIn(hashes)
+                  .stream()
+                  .collect(Collectors.toMap(JobOffer::getContentHash, Function.identity(), (a, b) -> a));
+
         Set<String> seenInChunk = new HashSet<>();
+        Set<String> seenHashes = new HashSet<>();
         for (JobOffer offer : incoming) {
             String sourceId = offer.getSourceId();
             // guard against duplicate sourceIds within the same chunk
             if (sourceId != null && !seenInChunk.add(sourceId)) {
                 continue;
             }
-            JobOffer existing = sourceId == null ? null : existingBySourceId.get(sourceId);
+            // meme garde pour les offres sans sourceId, sur leur hash
+            if (sourceId == null && offer.getContentHash() != null && !seenHashes.add(offer.getContentHash())) {
+                continue;
+            }
+            JobOffer existing = sourceId != null ? existingBySourceId.get(sourceId) : existingByHash.get(offer.getContentHash());
             if (existing != null) {
                 if (offer.getContentHash() != null && offer.getContentHash().equals(existing.getContentHash())) {
                     continue; // unchanged

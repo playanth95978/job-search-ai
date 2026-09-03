@@ -3,6 +3,7 @@ package nc.opt.aiassistant.repository.jobcopilot;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.domain.enumeration.EmbeddingStatus;
@@ -23,6 +24,16 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID>, JpaSp
 
     @Query("SELECT j FROM JobOffer j WHERE j.sourceId = :sourceId AND j.source = :source")
     List<JobOffer> findBySourceIdAndSource(String sourceId, JobSource source);
+
+    /**
+     * Dedup fallback for connectors that expose no stable identifier: without it an offer with a null
+     * {@code sourceId} was re-inserted at every scrape, which is how the same listing ended up twelve
+     * times in the corpus under a single content hash.
+     */
+    Optional<JobOffer> findFirstByContentHash(String contentHash);
+
+    /** Batch counterpart of {@link #findFirstByContentHash}, for {@code JobOfferBatchWriter}. */
+    List<JobOffer> findByContentHashIn(Collection<String> contentHashes);
 
     /**
      * Batch dedup lookup: loads every existing offer of a given source whose sourceId is in the chunk,
