@@ -26,9 +26,17 @@ class AiErrorsTest {
         assertThat(AiErrors.isRateLimited(new RuntimeException("wrapped", new RuntimeException("outer", root)))).isTrue();
     }
 
+    /**
+     * Le throttle local n'est pas un 429 du fournisseur. Il l'était pour ce classifieur tant que
+     * l'acquisition se faisait hors du modèle, dans l'agent, qui s'en servait pour dégrader vers le
+     * petit modèle. Maintenant que {@link ThrottledChatModel} tient le seau en amont, un rejeu sur
+     * le repli repasserait par le même seau : il attendrait `max-wait` une seconde fois pour échouer
+     * à l'identique. Le message porte pourtant « rate limit », d'où ce test de non-régression.
+     */
     @Test
-    void detectsLocalThrottleRejection() {
-        assertThat(AiErrors.isRateLimited(new MistralRateLimiter.RateLimitedException())).isTrue();
+    void ignoresLocalThrottleRejection() {
+        assertThat(AiErrors.isRateLimited(new MistralRateLimiter.RateLimitedException())).isFalse();
+        assertThat(AiErrors.isRateLimited(new RuntimeException("wrapped", new MistralRateLimiter.RateLimitedException()))).isFalse();
     }
 
     @Test

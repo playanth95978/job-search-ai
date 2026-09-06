@@ -16,6 +16,13 @@ public final class AiErrors {
      */
     public static boolean isRateLimited(Throwable error) {
         for (Throwable t = error; t != null; t = t.getCause() == t ? null : t.getCause()) {
+            // Notre propre throttle n'est pas un 429 du fournisseur : son message contient pourtant
+            // « rate limit », et le repli textuel plus bas le prendrait pour tel. Rejouer la requête
+            // sur le modèle de repli ne servirait à rien — c'est le même seau de jetons, et le rejeu
+            // attendrait une seconde fois `max-wait` avant d'échouer pareil.
+            if (t instanceof MistralRateLimiter.RateLimitedException) {
+                return false;
+            }
             if (
                 t instanceof WebClientResponseException.TooManyRequests ||
                 (t instanceof HttpStatusCodeException e && e.getStatusCode().value() == 429)

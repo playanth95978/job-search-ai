@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.service.ai.AiErrors;
-import nc.opt.aiassistant.service.ai.MistralRateLimiter;
+import nc.opt.aiassistant.service.ai.ThrottledChatModel;
 import nc.opt.aiassistant.service.jobcopilot.dto.ChatAction;
 import nc.opt.aiassistant.service.jobcopilot.dto.ChatActionFactory;
 import nc.opt.aiassistant.service.jobcopilot.dto.ChatEvent;
@@ -41,7 +41,8 @@ import reactor.core.publisher.Sinks;
  * generation, geolocation) and JDBC-backed chat memory keyed by conversation id. Tools resolve the
  * current user server-side via SecurityUtils, so the LLM never sees or supplies a user id.
  *
- * <p>Calls are throttled by {@link MistralRateLimiter} and, when the provider still answers 429
+ * <p>Calls are throttled upstream by {@link nc.opt.aiassistant.service.ai.ThrottledChatModel}, which
+ * wraps the Mistral model itself. When the provider still answers 429
  * (free-tier quota), the turn is replayed on the smaller/cheaper Mistral model rather than failing.
  */
 @Slf4j
@@ -78,7 +79,6 @@ public class JobCopilotAgentService {
 
     private final ChatClient chatClient;
     private final ChatClient fallbackChatClient;
-    private final MistralRateLimiter rateLimiter;
 
     /** Le limiteur et le repli sont propres à Mistral ; ailleurs on appelle le modèle directement. */
     private final boolean mistralModel;
@@ -93,10 +93,8 @@ public class JobCopilotAgentService {
         ChatMemoryRepository chatMemoryRepository,
         JobAgentToolbox jobAgentToolbox,
         ObjectProvider<ToolCallbackProvider> mcpToolCallbackProviders,
-        MistralRateLimiter rateLimiter,
         @Value("${spring.ai.mistral.stream-timeout:180s}") Duration streamTimeout
     ) {
-        this.rateLimiter = rateLimiter;
         this.streamTimeout = streamTimeout;
         ChatMemory chatMemory = MessageWindowChatMemory.builder().chatMemoryRepository(chatMemoryRepository).maxMessages(20).build();
 
@@ -135,7 +133,10 @@ public class JobCopilotAgentService {
         // MistralAiChatOptions à un modèle Gemini échouerait à l'exécution, et précisément au pire
         // moment : quand le quota est atteint et qu'on bascule. Sur un autre fournisseur, l'agent
         // n'a ni limiteur ni repli — c'est aussi ce qu'on veut mesurer, le modèle seul.
-        this.mistralModel = chatModel instanceof MistralAiChatModel;
+        // Le modèle Mistral arrive emballé dans ThrottledChatModel : tester le bean tel quel
+        // répondrait « pas Mistral » et désactiverait silencieusement le repli sur 429.
+        ChatModel underlying = chatModel instanceof ThrottledChatModel throttled ? throttled.delegate() : chatModel;
+        this.mistralModel = underlying instanceof MistralAiChatModel;
         if (this.mistralModel) {
             fallbackBuilder.defaultOptions(fallbackOptions);
         } else {
@@ -153,21 +154,19 @@ public class JobCopilotAgentService {
     public Turn chat(String conversationId, String userId, String message) {
         List<ToolOutcome> outcomes = newCollector();
         String reply;
-        if (this.mistralModel && !rateLimiter.acquire()) {
-            log.info("Job Copilot : quota local atteint, bascule directe sur le modèle de repli");
-            reply = call(fallbackChatClient, conversationId, userId, message, outcomes);
-        } else {
-            try {
-                reply = call(chatClient, conversationId, userId, message, outcomes);
-            } catch (RuntimeException e) {
-                if (!AiErrors.isRateLimited(e)) {
-                    throw e;
-                }
-                log.warn("Job Copilot : 429 sur le modèle principal, rejeu sur le modèle de repli");
-                // The retry reuses the same collector: a tool that succeeded before the 429 has
-                // already recorded its outcome, and its button remains legitimate.
-                reply = call(fallbackChatClient, conversationId, userId, message, outcomes);
+        // Le débit vers Mistral est tenu par ThrottledChatModel, en amont du modèle lui-même : rien à
+        // acquérir ici, sous peine de dépenser deux jetons par tour. Ne reste que le repli sur 429
+        // *du fournisseur*, que le limiteur local ne peut pas prévenir (quota du compte, pas débit).
+        try {
+            reply = call(chatClient, conversationId, userId, message, outcomes);
+        } catch (RuntimeException e) {
+            if (!this.mistralModel || !AiErrors.isRateLimited(e)) {
+                throw e;
             }
+            log.warn("Job Copilot : 429 sur le modèle principal, rejeu sur le modèle de repli");
+            // The retry reuses the same collector: a tool that succeeded before the 429 has
+            // already recorded its outcome, and its button remains legitimate.
+            reply = call(fallbackChatClient, conversationId, userId, message, outcomes);
         }
         return new Turn(reply, ChatActionFactory.actionsFor(List.copyOf(outcomes)));
     }
@@ -199,11 +198,11 @@ public class JobCopilotAgentService {
         AtomicBoolean emitted = new AtomicBoolean(false);
         List<ToolOutcome> outcomes = newCollector();
 
-        Flux<ChatEvent> body = rateLimiter
-            .acquireReactive()
-            .thenMany(tokens(chatClient, conversationId, userId, message, emitted, outcomes))
+        // Le flux est déjà étranglé par ThrottledChatModel, à la souscription et sans bloquer de
+        // thread : on part directement sur les jetons.
+        Flux<ChatEvent> body = tokens(chatClient, conversationId, userId, message, emitted, outcomes)
             .onErrorResume(e -> {
-                if (!AiErrors.isRateLimited(e) || emitted.get()) {
+                if (!this.mistralModel || !AiErrors.isRateLimited(e) || emitted.get()) {
                     return Flux.error(e);
                 }
                 log.warn("Job Copilot : 429 sur le modèle principal, rejeu du flux sur le modèle de repli");
