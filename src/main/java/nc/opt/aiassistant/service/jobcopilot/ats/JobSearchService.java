@@ -148,6 +148,11 @@ public class JobSearchService {
         return jobOfferSearchService.searchHybrid(query, location, limit);
     }
 
+    /** Recherche hybride dont le reranking est facultatif — voir {@code JobOfferSearchService}. */
+    public List<JobOffer> searchHybrid(String query, String location, int limit, boolean rerank) {
+        return jobOfferSearchService.searchHybrid(query, location, limit, rerank);
+    }
+
     /**
      * Simple semantic search (cosine distance) returning the {@code topK} most similar offers.
      */

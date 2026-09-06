@@ -99,22 +99,11 @@
         </span>
       </p>
     }
+    <!-- Deux actions, et deux seulement : chercher chez les sources, ou laisser l'IA classer le
+         corpus selon le profil. Les quatre boutons précédents exposaient un choix de moteur
+         (« Smart Search », « Match My Profile », « Match Advanced ») qui n'appartient pas à
+         l'utilisateur — le backend décide désormais du reranker selon la requête. -->
     <div class="jc-search-actions">
-      <button
-        class="jc-btn jc-btn-primary"
-        (click)="onSmartSearch()"
-        [disabled]="smartSearching()"
-        [ngbTooltip]="'jobCopilot.search.help.smartSearch' | translate"
-        container="body"
-      >
-        @if (smartSearching()) {
-          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
-          <span jhiTranslate="jobCopilot.search.actions.smartSearching">Smart search...</span>
-        } @else {
-          <fa-icon icon="wand-magic-sparkles"></fa-icon>
-          <span jhiTranslate="jobCopilot.search.actions.smartSearch">Smart Search</span>
-        }
-      </button>
       <button
         class="jc-btn jc-btn-secondary"
         (click)="onSearch()"
@@ -130,10 +119,10 @@
         }
       </button>
       <button
-        class="jc-btn jc-btn-secondary"
-        (click)="onMatchAll()"
+        class="jc-btn jc-btn-primary"
+        (click)="onMatchSmart()"
         [disabled]="matching()"
-        [ngbTooltip]="'jobCopilot.search.help.matchProfile' | translate"
+        [ngbTooltip]="'jobCopilot.search.help.matchSmart' | translate"
         container="body"
       >
         @if (matching()) {
@@ -141,21 +130,7 @@
           <span jhiTranslate="jobCopilot.search.actions.matching">Matching...</span>
         } @else {
           <fa-icon icon="wand-magic-sparkles"></fa-icon>
-          <span jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</span>
-        }
-      </button>
-      <button
-        class="jc-btn jc-btn-accent"
-        (click)="onMatchAdvanced()"
-        [disabled]="matchingAdvanced()"
-        [ngbTooltip]="'jobCopilot.search.help.matchAdvanced' | translate"
-        container="body"
-      >
-        @if (matchingAdvanced()) {
-          <fa-icon icon="circle-notch" [animation]="'spin'"></fa-icon>
-          <span jhiTranslate="jobCopilot.search.actions.advanced">Advanced...</span>
-        } @else {
-          <fa-icon icon="chart-line"></fa-icon> <span jhiTranslate="jobCopilot.search.actions.matchAdvanced">Match Advanced</span>
+          <span jhiTranslate="jobCopilot.search.actions.matchSmart">Match My Profile</span>
         }
       </button>
       <button
@@ -174,13 +149,6 @@
     @if (helpOpen()) {
       <div id="jc-search-help" class="jc-help-panel">
         <p class="jc-help-line">
-          <fa-icon icon="wand-magic-sparkles"></fa-icon>
-          <span
-            ><strong jhiTranslate="jobCopilot.search.actions.smartSearch">Smart Search</strong> —
-            <span jhiTranslate="jobCopilot.search.help.smartSearch"></span
-          ></span>
-        </p>
-        <p class="jc-help-line">
           <fa-icon icon="search"></fa-icon>
           <span
             ><strong jhiTranslate="jobCopilot.search.actions.search">Search</strong> —
@@ -190,15 +158,8 @@
         <p class="jc-help-line">
           <fa-icon icon="wand-magic-sparkles"></fa-icon>
           <span
-            ><strong jhiTranslate="jobCopilot.search.actions.matchProfile">Match My Profile</strong> —
-            <span jhiTranslate="jobCopilot.search.help.matchProfile"></span
-          ></span>
-        </p>
-        <p class="jc-help-line">
-          <fa-icon icon="chart-line"></fa-icon>
-          <span
-            ><strong jhiTranslate="jobCopilot.search.actions.matchAdvanced">Match Advanced</strong> —
-            <span jhiTranslate="jobCopilot.search.help.matchAdvanced"></span
+            ><strong jhiTranslate="jobCopilot.search.actions.matchSmart">Match My Profile</strong> —
+            <span jhiTranslate="jobCopilot.search.help.matchSmart"></span
           ></span>
         </p>
       </div>

@@ -313,16 +313,12 @@
         "translatedBy": "Traduction automatique"
       },
       "actions": {
-        "smartSearch": "Recherche intelligente",
-        "smartSearching": "Analyse sémantique...",
         "searching": "Recherche en cours...",
         "search": "Rechercher",
         "matching": "Matching en cours...",
-        "matchProfile": "Matcher mon profil",
-        "advanced": "Avancé...",
-        "matchAdvanced": "Match Avancé",
         "fetching": "Récupération...",
-        "fetchJobs": "Récupérer les offres"
+        "fetchJobs": "Récupérer les offres",
+        "matchSmart": "Trouver pour mon profil"
       },
       "results": {
         "matchTitle": "Résultats du Match",
@@ -338,11 +334,9 @@
       },
       "help": {
         "search": "Interroge les sites d'emploi en direct (France Travail, Emploi.nc…) et remonte ce qui contient vos mots-clés. Sans IA : rapide et à jour, mais il faut employer les bons mots.",
-        "smartSearch": "L'IA cherche par le sens, pas seulement par les mots : « développeur » trouve aussi « ingénieur logiciel ». Elle puise dans les offres déjà collectées, puis reclasse les plus pertinentes en tête.",
-        "matchProfile": "Part de votre CV plutôt que d'une requête : l'IA cherche les offres qui ressemblent à votre profil et leur donne une note de correspondance. Nécessite un CV importé.",
-        "matchAdvanced": "Comme « Correspondances », en plus poussé : l'IA croise le sens et les mots-clés, puis relit chaque offre pour affiner le classement. Plus précis, un peu plus lent.",
         "fetchJobs": "Colle l'adresse de la page carrières d'une entreprise (Greenhouse, Lever…) pour importer ses offres. Sans IA : récupération directe.",
-        "toggle": "Afficher l'aide sur les boutons de recherche"
+        "toggle": "Afficher l'aide sur les boutons de recherche",
+        "matchSmart": "Classe les offres déjà collectées selon votre CV et leur donne une note de correspondance. Tapez des mots-clés pour orienter la recherche, ou laissez le champ vide pour partir du seul profil. Sur une demande à plusieurs contraintes, l'IA relit chaque offre pour affiner le classement. Nécessite un CV importé."
       },
       "boards": {
         "suggest": "Suggérer des boards selon mon profil",

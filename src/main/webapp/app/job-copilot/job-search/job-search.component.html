@@ -8,17 +8,13 @@
 
   <jhi-job-search-form
     [searching]="searching()"
-    [smartSearching]="smartSearching()"
     [matching]="matching()"
-    [matchingAdvanced]="matchingAdvanced()"
     [fetching]="fetching()"
     [suggestingBoards]="suggestingBoards()"
     [boardSuggestions]="boardSuggestions()"
     [boardsSuggested]="boardsSuggested()"
     (search)="onSearch($event)"
-    (smartSearch)="onSmartSearch($event)"
-    (matchAll)="onMatchAll($event)"
-    (matchAdvanced)="onMatchAdvanced($event)"
+    (matchSmart)="onMatchSmart($event)"
     (fetchUrl)="onFetch($event)"
     (suggestBoards)="onSuggestBoards()"
   />

@@ -313,16 +313,12 @@
         "translatedBy": "Machine translation"
       },
       "actions": {
-        "smartSearch": "Smart Search",
-        "smartSearching": "Semantic analysis...",
         "searching": "Searching...",
         "search": "Search",
         "matching": "Matching...",
-        "matchProfile": "Match My Profile",
-        "advanced": "Advanced...",
-        "matchAdvanced": "Match Advanced",
         "fetching": "Fetching...",
-        "fetchJobs": "Fetch Jobs"
+        "fetchJobs": "Fetch Jobs",
+        "matchSmart": "Find for my profile"
       },
       "results": {
         "matchTitle": "Match Results",
@@ -338,11 +334,9 @@
       },
       "help": {
         "search": "Queries job boards live (France Travail, Emploi.nc…) and returns what matches your keywords. No AI: fast and up to date, but you need the right words.",
-        "smartSearch": "AI searches by meaning, not just words: “developer” also finds “software engineer”. It draws on already-collected offers, then moves the most relevant ones to the top.",
-        "matchProfile": "Starts from your CV instead of a query: AI finds offers that look like your profile and gives each a match score. Requires an uploaded CV.",
-        "matchAdvanced": "Like “Matches”, but deeper: AI combines meaning and keywords, then re-reads each offer to refine the ranking. More accurate, a little slower.",
         "fetchJobs": "Paste a company careers page URL (Greenhouse, Lever…) to import its openings. No AI: direct retrieval.",
-        "toggle": "Show help about the search buttons"
+        "toggle": "Show help about the search buttons",
+        "matchSmart": "Ranks already-collected offers against your CV and gives each a match score. Type keywords to steer the search, or leave the field empty to start from the profile alone. On a request with several constraints, the AI re-reads each offer to refine the ranking. Requires an uploaded CV."
       },
       "boards": {
         "suggest": "Suggest boards from my profile",

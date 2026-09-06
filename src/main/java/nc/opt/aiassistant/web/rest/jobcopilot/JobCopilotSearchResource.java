@@ -13,6 +13,7 @@ import nc.opt.aiassistant.service.criteria.JobOfferCriteria;
 import nc.opt.aiassistant.service.dto.JobOfferDTO;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferEnrichmentService;
 import nc.opt.aiassistant.service.jobcopilot.JobOfferTranslationService;
+import nc.opt.aiassistant.service.jobcopilot.QueryComplexity;
 import nc.opt.aiassistant.service.jobcopilot.ats.AtsBoardSuggestionService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobOfferQueryService;
 import nc.opt.aiassistant.service.jobcopilot.ats.JobSearchService;
@@ -175,6 +176,46 @@ public class JobCopilotSearchResource {
         // Optional search-box location biases the location score toward where the user is looking.
         List<MatchResultDto> results = matchingService.matchJobs(profile, offers, location);
         return ResponseEntity.ok(results);
+    }
+
+    /**
+     * {@code GET /jobs/match-smart} : la recherche IA du candidat, en un seul appel.
+     *
+     * <p>Remplace le choix que l'utilisateur devait faire entre « Match My Profile » et « Match
+     * Advanced » : deux boutons pour deux moteurs, alors que rien dans l'interface ne disait lequel
+     * convenait à quoi. {@link QueryComplexity} tranche à sa place — le reranker ONNX n'est payé que
+     * lorsque la requête porte assez de contraintes pour qu'il change le classement.
+     *
+     * <p>Les mots de l'utilisateur priment sur le profil quand il en saisit : c'est ce qu'il cherche
+     * <em>maintenant</em>. Sans eux, le profil devient la requête, et l'écran se comporte comme
+     * l'ancien « match ». Le scoring, lui, part toujours du profil : c'est ce qui distingue cet
+     * écran d'une recherche plein texte.
+     *
+     * @param query    ce que l'utilisateur a tapé ; vide pour partir du seul profil.
+     * @param location filtre optionnel, appliqué en filtre et jamais concaténé à la requête.
+     */
+    @GetMapping("/match-smart")
+    public ResponseEntity<List<MatchResultDto>> matchSmart(
+        @RequestParam(required = false) String query,
+        @RequestParam(required = false) String location,
+        @RequestParam(name = "topK", defaultValue = "30") int topK
+    ) {
+        String userId = SecurityUtils.getCurrentUserLogin().orElseThrow();
+        CandidateProfile profile = profileRepository.findTopByUserIdOrderByCreatedAtDesc(userId).orElse(null);
+        if (profile == null) {
+            throw new BadRequestAlertException("Entity not found", "ENTITY_NAME", "profileNotfound");
+        }
+
+        boolean hasUserWords = query != null && !query.isBlank();
+        String retrievalQuery = hasUserWords ? query.trim() : profileEmbeddingService.buildProfileText(profile);
+
+        // La complexité se juge sur ce que l'utilisateur a écrit. Un texte de profil est long par
+        // construction : le mesurer reviendrait à toujours reranker, ce qui annulerait l'arbitrage.
+        boolean rerank = hasUserWords && QueryComplexity.needsReranking(query);
+        log.debug("match-smart: rerank={} (query='{}')", rerank, query);
+
+        List<JobOffer> offers = jobSearchService.searchHybrid(retrievalQuery, location, Math.max(1, topK), rerank);
+        return ResponseEntity.ok(matchingService.matchJobs(profile, offers, location));
     }
 
     @GetMapping("/match-advanced")

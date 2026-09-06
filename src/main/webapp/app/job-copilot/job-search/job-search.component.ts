@@ -53,9 +53,7 @@ export class JobSearchComponent {
   readonly selectedLoading = signal(false);
 
   readonly searching = signal(false);
-  readonly smartSearching = signal(false);
   readonly matching = signal(false);
-  readonly matchingAdvanced = signal(false);
   readonly fetching = signal(false);
   readonly suggestingBoards = signal(false);
   readonly translating = signal(false);
@@ -130,23 +128,27 @@ export class JobSearchComponent {
     });
   }
 
-  /** Semantic search over the ingested corpus (hybrid vector + BM25 + RRF + reranking). */
-  onSmartSearch(c: JobSearchCriteria): void {
-    if (!c.keywords) {
-      this.onSearch(c);
-      return;
-    }
-    this.smartSearching.set(true);
-    this.matchResults.set([]);
+  /**
+   * Recherche IA : le corpus déjà ingéré, scoré contre le profil du candidat.
+   *
+   * <p>Un seul bouton là où l'écran en offrait trois (« Smart Search », « Match My Profile »,
+   * « Match Advanced »). Rien dans l'interface ne disait lequel convenait à quoi, et le choix
+   * portait sur le moteur, pas sur l'intention : ce n'est pas une décision d'utilisateur. Le
+   * backend arbitre désormais seul, en fonction de la complexité de la requête.
+   */
+  onMatchSmart(c: JobSearchCriteria): void {
+    if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
+    this.matching.set(true);
+    this.offers.set([]);
     this.error.set(null);
-    this.service.searchSmart(c.keywords, c.location, c.source).subscribe({
-      next: o => {
-        this.offers.set(o);
-        this.smartSearching.set(false);
+    this.service.matchSmart(c.keywords, c.location, JobSearchComponent.MATCH_TOP_K).subscribe({
+      next: r => {
+        this.matchResults.set(r);
+        this.matching.set(false);
       },
       error: err => {
-        this.error.set(err.error?.message || 'Search failed');
-        this.smartSearching.set(false);
+        this.error.set(err.error?.message || 'Matching failed');
+        this.matching.set(false);
       },
     });
   }
@@ -184,34 +186,6 @@ export class JobSearchComponent {
         this.error.set(err.error?.message ?? 'Board suggestion failed');
         this.suggestingBoards.set(false);
       },
-    });
-  }
-
-  onMatchAll(c: JobSearchCriteria): void {
-    if (!this.requireAuth('jobCopilot.authPrompt.feature.matchProfile')) return;
-    this.matching.set(true);
-    this.error.set(null);
-    this.service.matchJobs(JobSearchComponent.MATCH_TOP_K, c.location).subscribe({
-      next: r => {
-        this.matchResults.set(r);
-        this.matching.set(false);
-      },
-      error: err => {
-        this.error.set(err.error?.message || 'Matching failed');
-        this.matching.set(false);
-      },
-    });
-  }
-
-  onMatchAdvanced(c: JobSearchCriteria): void {
-    if (!this.requireAuth('jobCopilot.authPrompt.feature.matchAdvanced')) return;
-    this.matchingAdvanced.set(true);
-    this.service.matchAdvanced(c.location).subscribe({
-      next: r => {
-        this.matchResults.set(r);
-        this.matchingAdvanced.set(false);
-      },
-      error: () => this.matchingAdvanced.set(false),
     });
   }
 

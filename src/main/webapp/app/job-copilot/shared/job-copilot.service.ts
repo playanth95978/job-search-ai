@@ -181,6 +181,20 @@ export class JobCopilotService {
     return this.http.get<MatchResult[]>(`${this.baseUrl}/jobs/match`, { params });
   }
 
+  /**
+   * Recherche IA de l'écran de recherche : les offres du corpus, scorées contre le profil.
+   *
+   * Un seul appel là où l'interface proposait « Match My Profile » et « Match Advanced » : le
+   * backend choisit lui-même de passer ou non par le reranker ONNX, selon la complexité de
+   * `query`. Les mots de l'utilisateur priment sur le profil ; sans eux, le profil fait la requête.
+   */
+  matchSmart(query?: string, location?: string, topK = 30): Observable<MatchResult[]> {
+    let params = new HttpParams().set('topK', topK);
+    if (query) params = params.set('query', query);
+    if (location) params = params.set('location', location);
+    return this.http.get<MatchResult[]>(`${this.baseUrl}/jobs/match-smart`, { params });
+  }
+
   matchAdvanced(location?: string): Observable<MatchResult[]> {
     let params = new HttpParams();
     if (location) params = params.set('location', location);

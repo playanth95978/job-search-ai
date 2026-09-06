@@ -32,9 +32,7 @@ export class JobSearchFormComponent {
 
   // Loading flags (drive spinners / disabled state).
   readonly searching = input(false);
-  readonly smartSearching = input(false);
   readonly matching = input(false);
-  readonly matchingAdvanced = input(false);
   readonly fetching = input(false);
   readonly suggestingBoards = input(false);
   /** Boards résolus pour le profil ; vide tant que l'utilisateur n'a pas lancé la suggestion. */
@@ -43,9 +41,12 @@ export class JobSearchFormComponent {
   readonly boardsSuggested = input(false);
 
   readonly search = output<JobSearchCriteria>();
-  readonly smartSearch = output<JobSearchCriteria>();
-  readonly matchAll = output<JobSearchCriteria>();
-  readonly matchAdvanced = output<JobSearchCriteria>();
+  /**
+   * Recherche IA du corpus, scorée sur le profil. Un seul événement là où il y en avait trois : le
+   * choix du moteur — vecteur seul, hybride, hybride + reranker — se décidait dans l'interface,
+   * alors qu'il dépend de la requête et non de l'utilisateur. Le backend arbitre maintenant.
+   */
+  readonly matchSmart = output<JobSearchCriteria>();
   readonly fetchUrl = output<string>();
   /** Demande de suggestion de boards à partir du profil candidat. */
   readonly suggestBoards = output();
@@ -108,16 +109,8 @@ export class JobSearchFormComponent {
     this.search.emit(this.criteria());
   }
 
-  onSmartSearch(): void {
-    this.smartSearch.emit(this.criteria());
-  }
-
-  onMatchAll(): void {
-    this.matchAll.emit(this.criteria());
-  }
-
-  onMatchAdvanced(): void {
-    this.matchAdvanced.emit(this.criteria());
+  onMatchSmart(): void {
+    this.matchSmart.emit(this.criteria());
   }
 
   onFetch(): void {

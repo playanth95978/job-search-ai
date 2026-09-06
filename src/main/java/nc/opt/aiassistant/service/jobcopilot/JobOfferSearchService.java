@@ -109,7 +109,27 @@ public class JobOfferSearchService {
      * @param location optional city/region/country; {@code null} or blank disables the filter.
      */
     public List<JobOffer> searchHybrid(String query, String location, int limit) {
-        log.info("Performing high-performance hybrid search for: '{}' (location: {}, limit: {})", query, location, limit);
+        return searchHybrid(query, location, limit, true);
+    }
+
+    /**
+     * Recherche hybride dont l'étape de reranking est facultative.
+     *
+     * <p>Le reranker est le seul composant coûteux de la chaîne — un cross-encoder ONNX passe chaque
+     * candidat avec la requête. Sur une requête d'un ou deux mots, il réordonne sans rien apprendre
+     * de plus que la fusion. {@link QueryComplexity} décide, et les appelants historiques gardent le
+     * comportement d'origine via la surcharge à trois arguments.
+     *
+     * @param rerank {@code false} pour rendre directement la fusion RRF, tronquée à {@code limit}.
+     */
+    public List<JobOffer> searchHybrid(String query, String location, int limit, boolean rerank) {
+        log.info(
+            "Performing high-performance hybrid search for: '{}' (location: {}, limit: {}, rerank: {})",
+            query,
+            location,
+            limit,
+            rerank
+        );
         float[] queryEmbedding = jobOfferEmbeddingModel.embed(query);
         String locationFilter = blankToNull(location);
 
@@ -141,11 +161,14 @@ public class JobOfferSearchService {
         // 2. Fusion RRF (Reciprocal Rank Fusion)
         List<Document> fusedDocs = rrfService.rrf(List.of(vectorDocs, bm25Docs), limit * 2);
 
-        // 3. Reranking for high precision matching (Semantic Reranker)
-        List<Document> rerankedDocs = rerankerService.rerank(query, fusedDocs, limit, rerankMaxLength);
+        // 3. Reranking for high precision matching (Semantic Reranker) — skipped when the query is
+        // simple enough that the fusion order is already the answer.
+        List<Document> rankedDocs = rerank
+            ? rerankerService.rerank(query, fusedDocs, limit, rerankMaxLength)
+            : fusedDocs.stream().limit(limit).toList();
 
-        // 4. Retrieve full entities while maintaining reranked order
-        List<UUID> orderedIds = rerankedDocs
+        // 4. Retrieve full entities while maintaining ranked order
+        List<UUID> orderedIds = rankedDocs
             .stream()
             .map(d -> UUID.fromString(d.getId()))
             .toList();
