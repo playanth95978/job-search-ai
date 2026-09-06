@@ -3,6 +3,7 @@ package nc.opt.aiassistant.service.jobcopilot.tools;
 import java.util.List;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.security.SecurityUtils;
+import nc.opt.aiassistant.service.jobcopilot.dto.MatchResultDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.ToolOutcome;
 import org.springframework.ai.chat.model.ToolContext;
 
@@ -42,6 +43,23 @@ final class ToolSupport {
             .stream()
             .limit(limit)
             .map(offer -> new ToolOutcome.CitedOffer(offer.getId(), offer.getTitle()))
+            .toList();
+    }
+
+    /**
+     * Cites the top {@code limit} <b>scored</b> matches, in the order the answer presents them.
+     *
+     * <p>Distinct from {@link #cited(List, int)} on purpose: citing the retrieval pool instead would
+     * name the three offers the search engine happened to rank first, while the user reads the three
+     * the matcher scored highest. The two orders rarely agree — re-ranking on skills, location and
+     * salary is the whole point of the matcher — so the buttons would open offers absent from the
+     * answer above them.
+     */
+    static List<ToolOutcome.CitedOffer> citedMatches(List<MatchResultDto> matches, int limit) {
+        return matches
+            .stream()
+            .limit(limit)
+            .map(match -> new ToolOutcome.CitedOffer(match.jobOffer().id(), match.jobOffer().title()))
             .toList();
     }
 

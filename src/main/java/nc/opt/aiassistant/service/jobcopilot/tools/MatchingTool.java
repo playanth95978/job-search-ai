@@ -68,9 +68,10 @@ public class MatchingTool {
 
         List<MatchResultDto> results = matchingService.matchJobs(profile, offers, location);
         int max = limit == null ? 5 : Math.clamp(limit, 1, MAX_RESULTS);
-        // Cited offers come from `offers`, not `results`: scoring reorders but does not change the
-        // set, and `offers` carries the titles the buttons need.
-        ToolSupport.record(toolContext, new ToolOutcome.MatchesFound(ToolSupport.cited(offers, 3), results.size()));
+        // Cités depuis `results`, et non depuis `offers` : le scoring réordonne, et ce sont les
+        // meilleurs *scores* que la réponse affiche. Citer le vivier de recherche proposait en
+        // boutons trois offres qui, le plus souvent, ne figuraient pas dans le texte au-dessus.
+        ToolSupport.record(toolContext, new ToolOutcome.MatchesFound(ToolSupport.citedMatches(results, 3), results.size()));
         return results.stream().limit(max).map(this::formatMatch).collect(Collectors.joining("\n\n"));
     }
 
