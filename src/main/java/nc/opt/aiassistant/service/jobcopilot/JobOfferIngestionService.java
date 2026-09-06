@@ -114,6 +114,14 @@ public class JobOfferIngestionService {
             // Sans ce repli, toute offre sans sourceId etait reinseree a chaque scrape.
             JobOffer existingOffer = findExisting(offer, hash);
             if (existingOffer != null) {
+                // L'identifiant est recopié AVANT les sorties anticipées, et pas seulement sur la
+                // branche « mise à jour ». L'objet vient d'un connecteur : il est transitoire, et
+                // l'appelant le garde en main après l'ingestion. `JobSearchService.searchAll` rend
+                // ainsi la liste scrapée, que `JobSearchTool` cite pour construire les boutons du
+                // chat. Sans cette ligne, toute offre déjà connue — le cas courant — repartait avec
+                // un id null, et le bouton pointait vers `/job-copilot/search?offerId=null`.
+                offer.setId(existingOffer.getId());
+
                 if (hash.equals(existingOffer.getContentHash())) {
                     log.debug("Offer {}/{} already exists and is unchanged", offer.getSource(), offer.getSourceId());
                     return null; // Skip unchanged
@@ -123,8 +131,6 @@ public class JobOfferIngestionService {
                     log.debug("Keeping enriched offer {}/{} over incoming stub", offer.getSource(), offer.getSourceId());
                     return null;
                 }
-                // Update existing offer if changed
-                offer.setId(existingOffer.getId());
             }
 
             log.debug("Preparing offer for ingestion: {} - {}", offer.getCompany(), offer.getTitle());
