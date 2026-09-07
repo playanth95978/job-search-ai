@@ -1,6 +1,7 @@
 package nc.opt.aiassistant.service.jobcopilot.cv;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -14,6 +15,7 @@ import nc.opt.aiassistant.service.jobcopilot.OfferCacheInvalidationService;
 import nc.opt.aiassistant.service.jobcopilot.dto.AtsSimulationDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.AtsWarningDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.ExtractedProfileDto;
 import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
 import nc.opt.aiassistant.service.pdf.MistralOCRProcessService;
 import nc.opt.aiassistant.service.pdf.VectorPDFService;
@@ -26,6 +28,7 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 
 @ExtendWith(MockitoExtension.class)
@@ -120,8 +123,10 @@ class CvIngestionServiceTest {
             }
             """;
 
+        when(mockMessage.getText()).thenReturn(mockLlmJson);
         when(mockGeneration.getOutput()).thenReturn(mockMessage);
         when(mockResponse.getResult()).thenReturn(mockGeneration);
+        when(chatModel.getOptions()).thenReturn(ChatOptions.builder().build());
         when(chatModel.call(any(Prompt.class))).thenReturn(mockResponse);
 
         // WHEN
@@ -160,6 +165,65 @@ class CvIngestionServiceTest {
         assertThat(result.warnings()).hasSize(1);
         assertThat(result.warnings().get(0).level()).isEqualTo("CRITICAL");
         assertThat(result.recommendations()).hasSize(1);
+    }
+
+    @Test
+    void shouldRejectAnEmptyProfileInsteadOfSavingIt() {
+        // GIVEN a model that answers with a well-formed but empty profile
+        stubChatResponse("{\"fullName\": null, \"skills\": [], \"experiences\": []}");
+
+        // WHEN / THEN the upload fails loudly rather than persisting a profile with nothing in it
+        assertThatThrownBy(() -> cvIngestionService.extractProfile("Some CV text"))
+            .isInstanceOf(CvExtractionException.class)
+            .hasMessageContaining("No profile could be extracted");
+
+        verifyNoInteractions(profileRepository);
+    }
+
+    @Test
+    void shouldExtractProfileFromCv() {
+        // GIVEN
+        stubChatResponse(
+            """
+            {
+              "fullName": "John Doe",
+              "email": "john.doe@example.com",
+              "location": "Noumea",
+              "yearsOfExperience": 5,
+              "skills": [{"id": "java", "name": "Java", "level": 5}],
+              "experiences": [{"id": "acme-dev", "jobTitle": "Developer", "company": "Acme", "startDate": "2020-01", "endDate": null, "current": true, "description": "Backend", "achievements": []}],
+              "preferredRoles": ["Backend Engineer"],
+              "languages": [],
+              "education": [],
+              "certifications": []
+            }
+            """
+        );
+
+        // WHEN
+        ExtractedProfileDto profile = cvIngestionService.extractProfile("Some CV text");
+
+        // THEN
+        assertThat(profile.fullName()).isEqualTo("John Doe");
+        assertThat(profile.skills())
+            .singleElement()
+            .satisfies(skill -> assertThat(skill.name()).isEqualTo("Java"));
+        assertThat(profile.experiences())
+            .singleElement()
+            .satisfies(xp -> assertThat(xp.company()).isEqualTo("Acme"));
+    }
+
+    /** Wires the ChatModel mock so a ChatClient call returns {@code json} as the assistant reply. */
+    private void stubChatResponse(String json) {
+        AssistantMessage message = mock(AssistantMessage.class);
+        Generation generation = mock(Generation.class);
+        ChatResponse response = mock(ChatResponse.class);
+
+        when(message.getText()).thenReturn(json);
+        when(generation.getOutput()).thenReturn(message);
+        when(response.getResult()).thenReturn(generation);
+        when(chatModel.getOptions()).thenReturn(ChatOptions.builder().build());
+        when(chatModel.call(any(Prompt.class))).thenReturn(response);
     }
 
     @Test

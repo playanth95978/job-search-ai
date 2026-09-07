@@ -2,6 +2,7 @@ package nc.opt.aiassistant.service.jobcopilot.cv;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -16,6 +17,7 @@ import nc.opt.aiassistant.service.jobcopilot.dto.AtsSimulationDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.AtsWarningDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CandidateProfileDto;
 import nc.opt.aiassistant.service.jobcopilot.dto.CvReviewDto;
+import nc.opt.aiassistant.service.jobcopilot.dto.ExtractedProfileDto;
 import nc.opt.aiassistant.service.mapper.CandidateProfileMapper;
 import nc.opt.aiassistant.service.pdf.MistralOCRProcessService;
 import nc.opt.aiassistant.service.pdf.VectorPDFService;
@@ -73,7 +75,7 @@ public class CvIngestionService {
         String markdown = extractMarkdown(file);
         List<Document> chunks = chunkMarkdown(markdown);
         indexChunks(chunks, userId, filename);
-        CandidateProfileDto extracted = extractProfile(markdown);
+        ExtractedProfileDto extracted = extractProfile(markdown);
 
         return saveProfile(extracted, markdown, filename, userId);
     }
@@ -138,9 +140,13 @@ public class CvIngestionService {
         }
 
         // Serialize structured profile to JSON so the LLM can compare what was extracted.
+        // rawMarkdown is dropped: it is already sent verbatim as the RAW TEXT block, and leaving it in
+        // would duplicate the whole CV inside the "structured" block the model is asked to compare against.
         String structuredJson;
         try {
-            structuredJson = objectMapper.writeValueAsString(candidateProfileMapper.toDto(profile));
+            ObjectNode structured = objectMapper.valueToTree(candidateProfileMapper.toDto(profile));
+            structured.remove("rawMarkdown");
+            structuredJson = objectMapper.writeValueAsString(structured);
         } catch (Exception e) {
             log.error("Failed to serialize candidate profile for ATS simulation: {}", e.getMessage());
             structuredJson = "{}";
@@ -244,53 +250,43 @@ public class CvIngestionService {
         log.info("Indexed {} CV chunks for user={}", chunks.size(), userId);
     }
 
-    CandidateProfileDto extractProfile(String markdown) {
+    /**
+     * Turns the raw CV text into a structured profile. Uses Spring AI's {@code entity(...)} (schema-guided
+     * output + deserialization) rather than a hand-written JSON contract, as everywhere else in the app.
+     *
+     * @throws CvExtractionException when the model fails or returns nothing usable — better a failed upload
+     *     than a profile silently saved empty.
+     */
+    ExtractedProfileDto extractProfile(String markdown) {
         String prompt =
             """
-            Extract the candidate profile from this CV in JSON format.
-            Return ONLY valid JSON matching this structure:
-            {
-              "fullName": "string",
-              "email": "string or null",
-              "location": "string or null",
-              "yearsOfExperience": number or null,
-              "skills": [{"id":"string (slug)","name":"string","level":number (1-5)}],
-              "experiences": [{"id":"string (slug)","jobTitle":"string","company":"string","startDate":"string","endDate":"string or null","current":boolean,"description":"string","achievements":["string"]}],
-              "preferredRoles": ["string"],
-              "languages": [{"id":"string (slug)","name":"string","level":"string"}],
-              "education": [{"id":"string (slug)","degree":"string","school":"string","startDate":"string","endDate":"string or null","description":"string"}],
-              "certifications": [{"id":"string (slug)","name":"string","issuer":"string","date":"string"}]
-            }
+            Extract the candidate profile from this CV.
+            Use the exact wording of the CV; never invent skills, employers or dates that are not written in it.
+            Rules for the fields:
+            - every "id" is a lowercase slug derived from the item name (e.g. "spring-boot");
+            - a skill "level" is an integer from 1 (basic) to 5 (expert), inferred from how the CV presents it;
+            - dates stay as written in the CV (e.g. "2025-04"); "endDate" is null and "current" is true for the ongoing role;
+            - use null for anything the CV does not state, and an empty list for a section it does not have.
 
             CV content:
             """ + markdown;
 
-        String json = chatClient.prompt().user(prompt).call().content();
-        json = cleanJsonResponse(json);
-
+        ExtractedProfileDto extracted;
         try {
-            return objectMapper.readValue(json, CandidateProfileDto.class);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to parse profile extraction: {}. JSON was: {}", e.getMessage(), json);
-            return new CandidateProfileDto(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                null,
-                null,
-                null,
+            extracted = chatClient.prompt().user(prompt).call().entity(ExtractedProfileDto.class);
+        } catch (RuntimeException e) {
+            log.error("CV profile extraction failed: {}", e.getMessage());
+            throw new CvExtractionException("The AI could not read this CV. Please try again in a moment.", e);
+        }
+
+        if (extracted == null || extracted.isEmpty()) {
+            log.error("CV profile extraction returned an empty profile ({} characters of CV text)", markdown.length());
+            throw new CvExtractionException(
+                "No profile could be extracted from this CV. Check that the file contains selectable text, then try again.",
                 null
             );
         }
+        return extracted;
     }
 
     private String cleanJsonResponse(String raw) {
@@ -302,8 +298,8 @@ public class CvIngestionService {
         return raw.strip();
     }
 
-    CandidateProfile saveProfile(CandidateProfileDto dto, String markdown, String filename, String userId) {
-        CandidateProfile profile = candidateProfileMapper.toEntity(dto);
+    CandidateProfile saveProfile(ExtractedProfileDto extracted, String markdown, String filename, String userId) {
+        CandidateProfile profile = candidateProfileMapper.toEntity(toProfileDto(extracted));
         profile.setUserId(userId);
         profile.setRawMarkdown(markdown);
         profile.setCvFilename(filename);
@@ -316,5 +312,31 @@ public class CvIngestionService {
         // Recompute the profile embedding off-thread (powers autopsy percentile + opportunity radar).
         profileEmbeddingService.embedAsync(saved.getId());
         return saved;
+    }
+
+    /** Widens the extraction result into the persisted profile shape, tolerating null lists from the model. */
+    private CandidateProfileDto toProfileDto(ExtractedProfileDto e) {
+        return new CandidateProfileDto(
+            null,
+            null,
+            e.fullName(),
+            e.email(),
+            e.location(),
+            e.yearsOfExperience(),
+            orEmpty(e.skills()),
+            orEmpty(e.experiences()),
+            orEmpty(e.preferredRoles()),
+            orEmpty(e.languages()),
+            orEmpty(e.education()),
+            orEmpty(e.certifications()),
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    private static <T> List<T> orEmpty(List<T> list) {
+        return list == null ? List.of() : list;
     }
 }
