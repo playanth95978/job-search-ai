@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!--
+    Journal des recherches, pour rendre le classement apprenable.
+
+    Aujourd'hui `searchHybrid` calcule un rang vectoriel et un rang BM25 par offre, les ecrase dans
+    la formule fixe du RRF, puis les jette. Une ligne d'entrainement de Learning to Rank a besoin
+    exactement de ces features accompagnees d'un signal de pertinence : sans ce journal, aucun
+    modele ne peut apprendre la ponderation propre a ce corpus.
+
+    `simulated` separe les clics generes par simulation des clics reels : les melanger dans un meme
+    entrainement apprendrait au modele a imiter le juge LLM plutot que les utilisateurs.
+  -->
+
+  <changeSet id="20260909090000-1" author="claude">
+    <createTable tableName="search_event">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <!-- Nullable : /search-smart est accessible sans authentification. -->
+      <column name="user_id" type="varchar(255)"/>
+      <column name="query" type="varchar(1000)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="location" type="varchar(255)"/>
+      <column name="mode" type="varchar(20)"/>
+      <column name="origin" type="varchar(40)"/>
+      <column name="result_count" type="int"/>
+      <column name="created_at" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex tableName="search_event" indexName="idx_search_event_created_at">
+      <column name="created_at"/>
+    </createIndex>
+    <createIndex tableName="search_event" indexName="idx_search_event_user_id">
+      <column name="user_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="20260909090000-2" author="claude">
+    <createTable tableName="search_impression">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="search_event_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <column name="job_offer_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <!-- Rang affiche : porte le biais de position, qu'un modele doit pouvoir corriger. -->
+      <column name="rank" type="int">
+        <constraints nullable="false"/>
+      </column>
+      <!-- Null = absente de ce bras. C'est une information, pas une valeur manquante. -->
+      <column name="vector_rank" type="int"/>
+      <column name="bm25_rank" type="int"/>
+      <column name="vector_score" type="double"/>
+      <column name="bm25_score" type="double"/>
+      <column name="fused_score" type="double"/>
+      <column name="clicked_at" type="timestamp"/>
+      <column name="applied" type="boolean" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="simulated" type="boolean" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="search_impression"
+      baseColumnNames="search_event_id"
+      constraintName="fk_search_impression_event"
+      referencedTableName="search_event"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="search_impression"
+      baseColumnNames="job_offer_id"
+      constraintName="fk_search_impression_offer"
+      referencedTableName="job_offer"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addUniqueConstraint
+      tableName="search_impression"
+      columnNames="search_event_id, job_offer_id"
+      constraintName="uq_search_impression_event_offer"/>
+
+    <!-- Requete d'extraction du jeu d'entrainement : toutes les impressions d'un evenement, triees. -->
+    <createIndex tableName="search_impression" indexName="idx_search_impression_event_rank">
+      <column name="search_event_id"/>
+      <column name="rank"/>
+    </createIndex>
+    <!-- Sert la recherche de l'impression a marquer cliquee (findLatestForOffer). -->
+    <createIndex tableName="search_impression" indexName="idx_search_impression_offer_created">
+      <column name="job_offer_id"/>
+      <column name="created_at"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

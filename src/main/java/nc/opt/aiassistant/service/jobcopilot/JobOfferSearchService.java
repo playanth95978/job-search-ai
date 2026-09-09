@@ -3,6 +3,7 @@ package nc.opt.aiassistant.service.jobcopilot;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import nc.opt.aiassistant.domain.JobOffer;
 import nc.opt.aiassistant.repository.jobcopilot.JobOfferRepository;
@@ -40,18 +41,21 @@ public class JobOfferSearchService {
 
     private final ReciprocalRankFusionService rrfService;
     private final RerankerService rerankerService;
+    private final SearchEventLogService searchEventLogService;
 
     public JobOfferSearchService(
         JobOfferRepository jobOfferRepository,
         EmbeddingModel jobOfferEmbeddingModel,
         ReciprocalRankFusionService rrfService,
         RerankerService rerankerService,
+        SearchEventLogService searchEventLogService,
         @Value("${reranker.job-offer-max-length:128}") int rerankMaxLength
     ) {
         this.jobOfferRepository = jobOfferRepository;
         this.jobOfferEmbeddingModel = jobOfferEmbeddingModel;
         this.rrfService = rrfService;
         this.rerankerService = rerankerService;
+        this.searchEventLogService = searchEventLogService;
         this.rerankMaxLength = rerankMaxLength;
     }
 
@@ -182,7 +186,46 @@ public class JobOfferSearchService {
             .stream()
             .collect(Collectors.toMap(JobOffer::getId, o -> o));
 
-        return orderedIds.stream().map(offerMap::get).filter(Objects::nonNull).toList();
+        List<JobOffer> results = orderedIds.stream().map(offerMap::get).filter(Objects::nonNull).toList();
+
+        // Journalise apres coup, avec les rangs par bras que la fusion vient d'ecraser : c'est la
+        // seule occasion de les capturer, et le classement final ne les porte plus.
+        searchEventLogService.record(
+            query,
+            locationFilter,
+            rerank ? "hybrid+rerank" : "hybrid",
+            "search-hybrid",
+            null,
+            orderedIds,
+            armFeatures(vectorDocs, bm25Docs)
+        );
+
+        return results;
+    }
+
+    /**
+     * Rang et score de chaque offre dans chaque bras, avant fusion.
+     *
+     * <p>Le score n'est pas disponible ici : {@link #toDocument} ne le transporte pas. Les rangs
+     * suffisent a un modele de classement — c'est sur eux que le RRF travaille deja — et les
+     * remonter demanderait de modifier la signature des requetes du repository.
+     */
+    private static Map<UUID, SearchEventLogService.Features> armFeatures(List<Document> vectorDocs, List<Document> bm25Docs) {
+        Map<UUID, Integer> vectorRanks = ranksOf(vectorDocs);
+        Map<UUID, Integer> bm25Ranks = ranksOf(bm25Docs);
+        Map<UUID, SearchEventLogService.Features> features = new HashMap<>();
+        Stream.concat(vectorRanks.keySet().stream(), bm25Ranks.keySet().stream())
+            .distinct()
+            .forEach(id -> features.put(id, new SearchEventLogService.Features(vectorRanks.get(id), bm25Ranks.get(id), null, null, null)));
+        return features;
+    }
+
+    private static Map<UUID, Integer> ranksOf(List<Document> docs) {
+        Map<UUID, Integer> ranks = new HashMap<>();
+        for (int i = 0; i < docs.size(); i++) {
+            ranks.put(UUID.fromString(docs.get(i).getId()), i + 1);
+        }
+        return ranks;
     }
 
     private Document toDocument(JobOffer offer) {

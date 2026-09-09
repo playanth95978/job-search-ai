@@ -46,4 +46,5 @@
   <include file="config/liquibase/changelog/20260902110000_fix_job_offer_description_lob.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260902120000_fix_remaining_lob_columns.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260903090000_add_job_offer_content_hash_index.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260909090000_add_search_event_tables.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

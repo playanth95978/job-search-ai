@@ -45,6 +45,7 @@ public class JobCopilotSearchResource {
     private final nc.opt.aiassistant.service.jobcopilot.ats.JobOfferFacetService jobOfferFacetService;
     private final JobOfferTranslationService jobOfferTranslationService;
     private final JobOfferRepository jobOfferRepository;
+    private final nc.opt.aiassistant.service.jobcopilot.SearchEventLogService searchEventLogService;
 
     /**
      * {@code GET  /jobs/_search} : query persisted job offers using JHipster criteria filters
@@ -129,7 +130,28 @@ public class JobCopilotSearchResource {
      */
     @PostMapping("/{id}/enrich")
     public ResponseEntity<JobOffer> enrich(@PathVariable UUID id) {
+        // Ouvrir une offre est le signal de pertinence le plus abondant : on le capte ici plutot que
+        // de demander un appel supplementaire au front, puisque cet endpoint est deja appele au clic.
+        searchEventLogService.recordClick(id, currentUserOrNull());
         return ResponseEntity.ok(jobOfferEnrichmentService.enrich(id));
+    }
+
+    /**
+     * {@code POST /jobs/{id}/click} : enregistre l'ouverture d'une offre deja enrichie.
+     *
+     * <p>Complete {@code /enrich}, qui n'est appele que pour les offres encore a l'etat de teaser :
+     * sans cet endpoint le journal ne verrait que les clics sur les offres incompletes, un biais qui
+     * fausserait l'entrainement.
+     */
+    @PostMapping("/{id}/click")
+    public ResponseEntity<Void> click(@PathVariable UUID id) {
+        searchEventLogService.recordClick(id, currentUserOrNull());
+        return ResponseEntity.noContent().build();
+    }
+
+    /** Null pour une recherche anonyme : /search-smart est ouvert, le journal doit l'accepter. */
+    private String currentUserOrNull() {
+        return SecurityUtils.getCurrentUserLogin().orElse(null);
     }
 
     @PostMapping("/{id}/translate")

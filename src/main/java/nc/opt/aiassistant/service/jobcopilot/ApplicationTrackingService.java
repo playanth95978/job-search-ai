@@ -24,6 +24,7 @@ public class ApplicationTrackingService {
 
     private final JobApplicationRepository applicationRepository;
     private final JobApplicationMapper jobApplicationMapper;
+    private final SearchEventLogService searchEventLogService;
 
     @Transactional
     public JobApplication createApplication(
@@ -40,7 +41,13 @@ public class ApplicationTrackingService {
         app.setCoverLetter(coverLetter);
         app.setMatchScore(matchScore);
         app.setStatus(ApplicationStatus.DRAFT);
-        return applicationRepository.save(app);
+        JobApplication saved = applicationRepository.save(app);
+        // Signal de pertinence le plus fort dont on dispose : bien plus fiable qu'un clic, qui peut
+        // n'etre que de la curiosite. Sur l'impression la plus recente ayant montre cette offre.
+        if (offer != null && offer.getId() != null) {
+            searchEventLogService.recordApplication(offer.getId(), userId);
+        }
+        return saved;
     }
 
     @Transactional
